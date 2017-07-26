@@ -10,28 +10,28 @@ npm i --save @creditkarma/thrift-ts-core
 ## Server API
 
 ```typescript
-import { createServer, httpServer } from '@creditkarma/thrift-ts-core'
+import { createServer, http } from '@creditkarma/thrift-ts-core'
 
 const handler = {
   get: (request: RecommendationsRequest) => {
     // Your service implementation
   }
 };
-createServer('recommendation-system')
-    .network(httpServer, { port: 8080 })
-    .services('/', RecommendationSystemService, handler)
-    .start()
+const server = createServer('recommendation-system')
+                // `http` will expose a `.server` interface for servers
+                .network(http, { port: 8080 })
+                .services('/', RecommendationSystemService, handler)
 
-console.log(`Server listening on port ${port}`);
-
+// WIP
+server.start((port) => console.log(`Server listening on port ${port}`);)
 ```
 
 ## Client API
 
 ```typescript
-import { createClient, httpClient } from '@creditkarma/thrift-ts-core'
+import { createClient, http } from '@creditkarma/thrift-ts-core'
 
 const client = createClient('thrift-benchmark-proxy', EchoReportService)
-                .network(httpClient, { host: 'localhost', port: 8080 })
-                .connect()
+                // `http` will also expose a `.client` interface for clients
+                .network(http, { host: 'localhost', port: 8080 })
 ```
