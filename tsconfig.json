@@ -4,12 +4,13 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "declaration": true,
+    // "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "allowSyntheticDefaultImports": true,
     "pretty": true,
     "removeComments": true,
+    "allowJs": true,
     "types": [
       "@types/node",
       "@types/mocha"
