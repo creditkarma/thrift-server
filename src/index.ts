@@ -1,6 +1,6 @@
 import TBufferedTransport = require('thrift/lib/nodejs/lib/thrift/buffered_transport')
-import TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
+import TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol')
 
 function handleBody(processor, buffer) {
   const transportWithData = new TBufferedTransport()
@@ -14,13 +14,11 @@ function handleBody(processor, buffer) {
     try {
       processor.process(input, output)
       transportWithData.commitPosition()
-      resolve()
     } catch (err) {
       if (err instanceof InputBufferUnderrunError) {
         transportWithData.rollbackPosition()
-      } else {
-        reject(err)
       }
+      reject(err)
     }
   })
 }
