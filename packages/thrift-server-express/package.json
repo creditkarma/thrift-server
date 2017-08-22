@@ -14,7 +14,7 @@
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab  --coverage --sourcemaps ./dist/test",
-    "lint": "tslint -e './src/**/*.ts'"
+    "lint": "tslint './src/**/*.ts'"
   },
   "keywords": [
     "Thrift",
