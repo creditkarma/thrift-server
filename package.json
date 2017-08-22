@@ -23,10 +23,13 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/chai": "^3.4.34",
+    "@types/express": "^4.0.36",
     "@types/mocha": "^2.2.32",
     "@types/node": "^7.0.22",
     "@types/rimraf": "0.0.28",
+    "body-parser": "^1.17.2",
     "chai": "^3.5.0",
+    "express": "^4.15.3",
     "istanbul": "1.1.0-alpha.1",
     "mocha": "^2.5.3",
     "remap-istanbul": "^0.5.1",
@@ -35,6 +38,7 @@
     "tslint": "^5.3.2"
   },
   "dependencies": {
+    "thrift": "^0.10.0",
     "typescript": "^2.4.2"
   },
   "typings": "dist/index.d.ts",
