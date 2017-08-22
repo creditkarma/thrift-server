@@ -17,6 +17,6 @@ const PORT = 3000
 const app = express()
 
 // TODO: shouldn't need to pass .Processor
-app.use('/', bodyParser.raw(), thriftExpress(Calculator.Processor, handlers))
+app.use('/', bodyParser.raw(), thriftExpress(Calculator.Processor, handlers, { protocol: 'json' }))
 
 app.listen(PORT)

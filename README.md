@@ -23,7 +23,7 @@ const server = createServer('recommendation-system')
                 .services('/', RecommendationSystemService, handler)
 
 // WIP
-server.start((port) => console.log(`Server listening on port ${port}`);)
+server.start().then((port) => console.log(`Server listening on port ${port}`))
 ```
 
 ## Client API
