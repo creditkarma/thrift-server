@@ -39,7 +39,8 @@
   },
   "dependencies": {
     "thrift": "^0.10.0",
-    "typescript": "^2.4.2"
+    "typescript": "^2.4.2",
+    "thrift-server-core": "*"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
