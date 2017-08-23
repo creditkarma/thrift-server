@@ -53,7 +53,7 @@ export function isProtocolSupported(protocol: string): boolean {
 }
 
 // TODO: What should this Promise be typed as?
-export function handleBody(processor, buffer, Transport, Protocol): Promise<any> {
+export function process(processor, buffer, Transport, Protocol): Promise<any> {
   const transportWithData = new Transport()
   transportWithData.inBuf = buffer
   transportWithData.writeCursor = buffer.length
