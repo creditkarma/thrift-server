@@ -26,8 +26,6 @@ export function getTransport(transport: string = 'buffered') {
   return transports[transport]
 }
 
-// TODO: Is this the correct default? - npm thrift uses Binary here
-// TODO: Can we infer the protocol?
 export function getProtocol(protocol: string = 'binary') {
   return protocols[protocol]
 }
