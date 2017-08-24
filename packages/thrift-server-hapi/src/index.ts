@@ -74,12 +74,12 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
 
         const transport = pluginOptions.transport
         if (transport && !supportsTransport(transport)) {
-            throw new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`)
+            next(new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`))
         }
 
         const protocol = pluginOptions.protocol
         if (protocol && !supportsProtocol(protocol)) {
-            throw new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`)
+            next(new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`))
         }
 
         let Transport
@@ -96,16 +96,6 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
             Protocol = protocols.binary
         }
 
-        server.ext('onPreHandler', function(request, reply) {
-            try {
-                const method = readThriftMethod(request.payload, Transport, Protocol)
-                request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
-                return reply.continue()
-            } catch (err) {
-                return reply(err)
-            }
-        })
-
         server.handler('thrift', function(route, options: IHandlerOptions) {
             const service = options.service
             if (!service) {
@@ -113,12 +103,11 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
             }
 
             return async function(request, reply) {
-                try {
-                    const result = await handleBody(service, request.payload, Transport, Protocol, request)
-                    return reply(result)
-                } catch (err) {
-                    return reply(err)
-                }
+                const method = readThriftMethod(request.payload, Transport, Protocol)
+                request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
+
+                const result = handleBody(service, request.payload, Transport, Protocol, request)
+                return reply(result)
             }
         })
 
@@ -127,6 +116,5 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
 }
 
 ThriftPlugin.register.attributes = {
-    name: 'thriftPlugin',
-    version: '1.0.0',
+    pkg: require('../package.json')
 }
