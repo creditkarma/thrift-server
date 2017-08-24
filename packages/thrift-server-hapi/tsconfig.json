@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "target": "es2015",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "pretty": true,
+    "removeComments": true,
+    "rootDir": "./src"
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
