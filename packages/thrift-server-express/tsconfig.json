@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    // "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "allowSyntheticDefaultImports": true,
+    "pretty": true,
+    "removeComments": true,
+    "allowJs": true,
+    "types": [
+      "@types/node",
+      "@types/code"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

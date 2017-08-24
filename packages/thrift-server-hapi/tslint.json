@@ -1,0 +1,29 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules"
+  ],
+  "rules": {
+    "member-access": false,
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "only-arrow-functions": false,
+    "object-curly-spacing": true,
+    "ordered-imports": false,
+    "no-any": false,
+    "no-console": false,
+    "no-unused-expression": false,
+    "semicolon": [
+      true,
+      "never"
+    ],
+    "quotemark": [
+      true,
+      "single",
+      "avoid-escape"
+    ],
+    "max-line-length": [
+      false
+    ]
+  }
+}

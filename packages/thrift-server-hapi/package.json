@@ -1,0 +1,32 @@
+{
+  "name": "thrift-server-hapi",
+  "version": "1.0.0",
+  "description": "A Hapi server plugin for the Apache Thrift protocol",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run clean && npm run lint && tsc",
+    "clean": "rm -rf ./dist",
+    "watch": "npm run build -- --watch",
+    "start": "npm run build && node dist/server.js",
+    "pretest": "npm run build",
+    "test": "npm run test:only --",
+    "test:watch": "watch 'npm run test:only' ./dist",
+    "test:only": "lab -l -S ./dist/test",
+    "lint": "tslint --fix './src/**/*.ts'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "thrift": "^0.10.0"
+  },
+  "peerDependencies": {
+    "hapi": "^16.1.1"
+  },
+  "devDependencies": {
+    "@types/hapi": "^16.1.8",
+    "tslint": "^5.6.0",
+    "tslint-eslint-rules": "^4.1.1",
+    "typescript": "^2.4.2",
+    "watch": "^1.0.2"
+  }
+}
