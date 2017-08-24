@@ -103,9 +103,13 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
             }
 
             return async function(request, reply) {
-                const method = readThriftMethod(request.payload, Transport, Protocol)
-                request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
-
+                try {
+                    const method = readThriftMethod(request.payload, Transport, Protocol)
+                    request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
+                } catch (err) {
+                    return reply(err)
+                }
+                
                 const result = handleBody(service, request.payload, Transport, Protocol, request)
                 return reply(result)
             }
