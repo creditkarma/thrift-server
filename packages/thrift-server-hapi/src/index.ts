@@ -102,7 +102,7 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
                 throw new Error('No service implementation specified.')
             }
 
-            return async function(request, reply) {
+            return function(request, reply) {
                 try {
                     const method = readThriftMethod(request.payload, Transport, Protocol)
                     request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
