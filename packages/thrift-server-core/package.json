@@ -1,5 +1,5 @@
 {
-  "name": "thrift-server-express",
+  "name": "thrift-server-core",
   "version": "0.0.1",
   "description": "Thrift core library in TypeScript",
   "main": "./dist/index.js",
@@ -38,8 +38,8 @@
     "tslint-eslint-rules": "^4.1.1"
   },
   "dependencies": {
-    "typescript": "^2.4.2",
-    "thrift-server-core": "*"
+    "thrift": "^0.10.0",
+    "typescript": "^2.4.2"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
