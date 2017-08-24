@@ -109,7 +109,7 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
                 } catch (err) {
                     return reply(err)
                 }
-                
+
                 const result = handleBody(service, request.payload, Transport, Protocol, request)
                 return reply(result)
             }
