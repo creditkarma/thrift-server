@@ -44,6 +44,9 @@ export class BufferedTransport {
     }
   }
 
+  // TODO: Should the `read*` methods return a promise since they can fail with an Underrun error?
+  // Currently they throw, which can't be documented with typescript types
+  // These methods aren't currently async in buffered/framed transports but others might be in the future
   public read(size: number): Buffer {
     this.ensureAvailable(size)
     const buf = Buffer.alloc(size)
