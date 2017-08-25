@@ -24,7 +24,7 @@ export class BufferedTransport {
   public commitPosition(): void {
     const unreadSize = this.writeCursor - this.readCursor
     const bufSize = (unreadSize * 2 > this.defaultReadBufferSize) ? unreadSize * 2 : this.defaultReadBufferSize
-    const buf = new Buffer(bufSize)
+    const buf = Buffer.alloc(bufSize)
     if (unreadSize > 0) {
       // TODO: Does this actually need to be copied? If not, it could be sliced
       this.inBuf.copy(buf, 0, this.readCursor, this.writeCursor)
@@ -46,7 +46,7 @@ export class BufferedTransport {
 
   public read(size: number): Buffer {
     this.ensureAvailable(size)
-    const buf = new Buffer(size)
+    const buf = Buffer.alloc(size)
     // TODO: Does this actually need to be copied? If not, it could be sliced
     this.inBuf.copy(buf, 0, this.readCursor, this.readCursor + size)
     this.readCursor += size
@@ -85,7 +85,7 @@ export class BufferedTransport {
   // TODO: Should we de-support string?
   public write(buf: Buffer | string): void {
     if (typeof buf === 'string') {
-      buf = new Buffer(buf, 'utf8')
+      buf = Buffer.from(buf, 'utf8')
     }
     this.outBuffers.push(buf)
     this.outSize += buf.length
@@ -104,7 +104,7 @@ export class BufferedTransport {
       return
     }
 
-    const msg = new Buffer(this.outSize)
+    const msg = Buffer.alloc(this.outSize)
     let pos = 0
     this.outBuffers.forEach((buf) => {
       // TODO: Do these actually need to be copied? If not, it could be joined by Buffer.concat
