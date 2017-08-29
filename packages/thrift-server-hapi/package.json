@@ -28,5 +28,6 @@
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "^2.4.2",
     "watch": "^1.0.2"
-  }
+  },
+  "types": "dist/index.d.ts"
 }
