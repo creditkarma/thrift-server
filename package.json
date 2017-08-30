@@ -1,5 +1,5 @@
 {
-  "name": "thrift-server",
+  "name": "@creditkarma/thrift-server",
   "version": "0.0.0",
   "description": "Thrift core library in TypeScript",
   "main": "./dist/index.js",
