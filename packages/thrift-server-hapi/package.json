@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-hapi",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A Hapi server plugin for the Apache Thrift protocol",
   "main": "dist/index.js",
   "scripts": {
