@@ -7,7 +7,7 @@ export class BufferedTransport {
   private writeCursor: number = 0 // for input buffer
   private inBuf: Buffer
   private defaultReadBufferSize: number = 1024
-  private outBuffers: Buffer[] = []
+  private outBuffers: Array<Buffer> = []
   private outSize: number = 0
 
   constructor() {
@@ -38,51 +38,62 @@ export class BufferedTransport {
     this.readCursor = 0
   }
 
-  public ensureAvailable(size: number): void {
-    if (this.readCursor + size > this.writeCursor) {
-      throw new InputBufferUnderrunError()
-    }
+  public read(size: number): Promise<Buffer> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(size)
+
+      const buf = Buffer.alloc(size)
+      // TODO: Does this actually need to be copied? If not, it could be sliced
+      this.inBuf.copy(buf, 0, this.readCursor, this.readCursor + size)
+      this.readCursor += size
+      resolve(buf)
+    })
   }
 
-  // TODO: Should the `read*` methods return a promise since they can fail with an Underrun error?
-  // Currently they throw, which can't be documented with typescript types
-  // These methods aren't currently async in buffered/framed transports but others might be in the future
-  public read(size: number): Buffer {
-    this.ensureAvailable(size)
-    const buf = Buffer.alloc(size)
-    // TODO: Does this actually need to be copied? If not, it could be sliced
-    this.inBuf.copy(buf, 0, this.readCursor, this.readCursor + size)
-    this.readCursor += size
-    return buf
-  }
+  public readByte(): Promise<number> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(1)
 
-  public readByte(): number {
-    this.ensureAvailable(1)
-    return binary.readByte(this.inBuf[this.readCursor++])
+      const byte = binary.readByte(this.inBuf[this.readCursor])
+      this.readCursor += 1
+      resolve(byte)
+    })
   }
-  public readI16(): number {
-    this.ensureAvailable(2)
-    const i16 = binary.readI16(this.inBuf, this.readCursor)
-    this.readCursor += 2
-    return i16
+  public readI16(): Promise<number> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(2)
+
+      const i16 = binary.readI16(this.inBuf, this.readCursor)
+      this.readCursor += 2
+      resolve(i16)
+    })
   }
-  public readI32(): number {
-    this.ensureAvailable(4)
-    const i32 = binary.readI32(this.inBuf, this.readCursor)
-    this.readCursor += 4
-    return i32
+  public readI32(): Promise<number> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(4)
+
+      const i32 = binary.readI32(this.inBuf, this.readCursor)
+      this.readCursor += 4
+      resolve(i32)
+    })
   }
-  public readDouble(): number {
-    this.ensureAvailable(8)
-    const d = binary.readDouble(this.inBuf, this.readCursor)
-    this.readCursor += 8
-    return d
+  public readDouble(): Promise<number> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(8)
+
+      const d = binary.readDouble(this.inBuf, this.readCursor)
+      this.readCursor += 8
+      resolve(d)
+    })
   }
-  public readString(size: number): string {
-    this.ensureAvailable(size)
-    const str = this.inBuf.toString('utf8', this.readCursor, this.readCursor + size)
-    this.readCursor += size
-    return str
+  public readString(size: number): Promise<string> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(size)
+
+      const str = this.inBuf.toString('utf8', this.readCursor, this.readCursor + size)
+      this.readCursor += size
+      resolve(str)
+    })
   }
 
   // TODO: Should we de-support string?
@@ -142,4 +153,11 @@ export class BufferedTransport {
   public open() {}
   // tslint:disable-next-line:no-empty
   public close() {}
+
+  // By making this private and only using it inside promise constructors, it should be fine to throw
+  private ensureAvailable(size: number): void {
+    if (this.readCursor + size > this.writeCursor) {
+      throw new InputBufferUnderrunError()
+    }
+  }
 }
