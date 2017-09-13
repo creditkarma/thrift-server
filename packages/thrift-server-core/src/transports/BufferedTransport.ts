@@ -12,8 +12,13 @@ export default class BufferedTransport implements ITransport {
   private outBuffers: Buffer[] = []
   private outSize: number = 0
 
-  constructor() {
+  constructor(input: Buffer | undefined) {
     this.inBuf = Buffer.alloc(this.defaultReadBufferSize)
+
+    if (Buffer.isBuffer(input)) {
+      input.copy(this.inBuf, this.writeCursor, 0)
+    }
+    this.writeCursor += this.inBuf.length
     // this.onFlush = callback;
   }
 
