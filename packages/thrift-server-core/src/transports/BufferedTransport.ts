@@ -1,13 +1,15 @@
 import { Buffer } from 'buffer'
-import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift//input_buffer_underrun_error')
 import binary = require('thrift/lib/nodejs/lib/thrift/binary')
+import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
-export class BufferedTransport {
+import { ITransport } from './Transport'
+
+export default class BufferedTransport implements ITransport {
   private readCursor: number = 0
   private writeCursor: number = 0 // for input buffer
   private inBuf: Buffer
   private defaultReadBufferSize: number = 1024
-  private outBuffers: Array<Buffer> = []
+  private outBuffers: Buffer[] = []
   private outSize: number = 0
 
   constructor() {
