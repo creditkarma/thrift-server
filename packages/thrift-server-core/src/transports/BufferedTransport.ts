@@ -66,6 +66,17 @@ export default class BufferedTransport implements ITransport {
       resolve(byte)
     })
   }
+  // TODO: Is this better to duplicate from readByte to not couple the methods?
+  public readBool(): Promise<boolean> {
+    return new Promise((resolve) => {
+      this.ensureAvailable(1)
+
+      const byte = binary.readByte(this.inBuf[this.readCursor])
+      this.readCursor += 1
+      const bool = (byte === 0) ? false : true
+      resolve(bool)
+    })
+  }
   public readI16(): Promise<number> {
     return new Promise((resolve) => {
       this.ensureAvailable(2)

@@ -4,6 +4,7 @@ export interface ITransport {
 
   read(size: number): Promise<Buffer>
   readByte(): Promise<number>
+  readBool(): Promise<boolean>
   readI16(): Promise<number>
   readI32(): Promise<number>
   readDouble(): Promise<number>
