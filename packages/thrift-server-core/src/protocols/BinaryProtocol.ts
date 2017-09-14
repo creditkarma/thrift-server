@@ -1,4 +1,6 @@
 import Thrift = require('thrift/lib/nodejs/lib/thrift/thrift')
+// TODO: Implement this ourselves
+const Type = Thrift.Type
 
 import { ITransport } from '../transports/Transport'
 
@@ -7,7 +9,8 @@ export interface IProtocol {
   flush(): void
 
   // TODO: no seqid?
-  writeMessageBegin(name, type, seqid): void
+  // TODO: Ensure these arguments have proper typings
+  writeMessageBegin(name: string, type: number, seqid: number): void
   writeMessageEnd(): void
 
   // TODO: not implemented
@@ -15,18 +18,22 @@ export interface IProtocol {
   writeStructEnd(): void
 
   // TODO: no seqid?
-  writeFieldBegin(name, type, id): void
+  // TODO: Ensure these arguments have proper typings
+  writeFieldBegin(name: string, type: number, id: number): void
   // TODO: not implemented
   writeFieldEnd(): void
   writeFieldStop(): void
 
-  writeMapBegin(ktype, vtype, size): void
+  // TODO: Ensure these arguments have proper typings
+  writeMapBegin(ktype: number, vtype: number, size: number): void
   writeMapEnd(): void
 
-  writeListBegin(etype, size): void
+  // TODO: Ensure these arguments have proper typings
+  writeListBegin(etype: number, size: number): void
   writeListEnd(): void
 
-  writeSetBegin(etype, size): void
+  // TODO: Ensure these arguments have proper typings
+  writeSetBegin(etype: number, size: number): void
   writeSetEnd(): void
 
   writeBool(value: boolean): void
@@ -36,8 +43,9 @@ export interface IProtocol {
   writeI64(value: number): void
   writeDouble(value: number): void
   // TODO: avoid this abstraction
-  writeStringOrBinary(name, encoding, arg): void
+  // writeStringOrBinary(name, encoding, arg): void
   writeString(value: string): void
+  // TODO: Should this be pushed into the Transport?
   writeBinary(value: Buffer): void
 
   // TODO: concrete return type
@@ -82,6 +90,7 @@ export interface IProtocol {
   readI32(): Promise<number>
   readI64(): Promise<number>
   readDouble(): Promise<number>
+  // TODO: Should this be pushed into the Transport?
   readBinary(): Promise<Buffer>
   readString(): Promise<string>
 
@@ -100,75 +109,85 @@ export class BinaryProtocol implements IProtocol {
   }
 
   public flush(): void {
-    throw new Error('Method not implemented.')
+    this.transport.flush()
   }
 
-  public writeMessageBegin(name: any, type: any, seqid: any): void {
-    throw new Error('Method not implemented.')
+  /* Write */
+  public writeMessageBegin(name: string, type: number, seqid: number): void {
+    // TODO: This isn't handling strictWrite. Is it needed?
+    this.writeString(name)
+    this.writeByte(type)
+    this.writeI32(seqid)
+    // TODO: Ensure we don't need seqId stuff
   }
   public writeMessageEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: Ensure we don't need seqId stuff
   }
   public writeStructBegin(name: any): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
   public writeStructEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
-  public writeFieldBegin(name: any, type: any, id: any): void {
-    throw new Error('Method not implemented.')
+  public writeFieldBegin(name: string, type: number, id: number): void {
+    // TODO: Why is name passed if not used?
+    this.writeByte(type)
+    this.writeI16(id)
   }
   public writeFieldEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
   public writeFieldStop(): void {
-    throw new Error('Method not implemented.')
+    this.writeByte(Type.STOP)
   }
-  public writeMapBegin(ktype: any, vtype: any, size: any): void {
-    throw new Error('Method not implemented.')
+  public writeMapBegin(ktype: number, vtype: number, size: number): void {
+    this.writeByte(ktype)
+    this.writeByte(vtype)
+    this.writeI32(size)
   }
   public writeMapEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
-  public writeListBegin(etype: any, size: any): void {
-    throw new Error('Method not implemented.')
+  public writeListBegin(etype: number, size: number): void {
+    this.writeByte(etype)
+    this.writeI32(size)
   }
   public writeListEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
-  public writeSetBegin(etype: any, size: any): void {
-    throw new Error('Method not implemented.')
+  public writeSetBegin(etype: number, size: number): void {
+    this.writeByte(etype)
+    this.writeI32(size)
   }
   public writeSetEnd(): void {
-    throw new Error('Method not implemented.')
+    // TODO: This isn't implemented in thrift core
   }
   public writeBool(value: boolean): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeBool(value)
   }
   public writeByte(value: number): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeByte(value)
   }
   public writeI16(value: number): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeI16(value)
   }
   public writeI32(value: number): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeI32(value)
   }
   public writeI64(value: number): void {
     throw new Error('Method not implemented.')
   }
   public writeDouble(value: number): void {
-    throw new Error('Method not implemented.')
-  }
-  public writeStringOrBinary(name: any, encoding: any, arg: any): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeDouble(value)
   }
   public writeString(value: string): void {
-    throw new Error('Method not implemented.')
+    return this.transport.writeString(value)
   }
   public writeBinary(value: Buffer): void {
     throw new Error('Method not implemented.')
   }
+
+  /* Read */
   public readMessageBegin(): Promise<any> {
     throw new Error('Method not implemented.')
   }
@@ -206,12 +225,7 @@ export class BinaryProtocol implements IProtocol {
     throw new Error('Method not implemented.')
   }
   public readBool(): Promise<boolean> {
-    // TODO: Is this better as Promise.resolve and tag the readBool method as async?
-    return new Promise(async (resolve) => {
-      const byte = await this.transport.readByte()
-      const bool = (byte === 0) ? false : true
-      resolve(bool)
-    })
+    return this.transport.readBool()
   }
   public readByte(): Promise<number> {
     return this.transport.readByte()
