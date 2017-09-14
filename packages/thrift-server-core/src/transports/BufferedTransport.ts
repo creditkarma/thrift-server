@@ -122,6 +122,37 @@ export default class BufferedTransport implements ITransport {
     this.outBuffers.push(buf)
     this.outSize += buf.length
   }
+  public writeByte(value: number): void {
+    // TODO: Is this correct? Yay buffers
+    const buf = Buffer.alloc(1)
+    buf.writeUInt8(value, 0)
+    this.write(buf)
+  }
+  // TODO: Is this better to duplicate from writeByte to not couple the methods?
+  public writeBool(value: boolean): void {
+    const byte = value ? 1 : 0
+    const buf = Buffer.alloc(1)
+    buf.writeUInt8(byte, 0)
+    this.write(buf)
+  }
+  public writeI16(value: number): void {
+    this.write(binary.writeI16(Buffer.alloc(2), value))
+    // const buf = Buffer.alloc(2)
+    // // TODO: LE or BE? If I'm reading "binary" properly, looks like BE
+    // buf.writeInt16BE(value, 0)
+    // this.write(buf)
+  }
+  public writeI32(value: number): void {
+    this.write(binary.writeI32(Buffer.alloc(4), value))
+  }
+  public writeDouble(value: number): void {
+    this.write(binary.writeDouble(Buffer.alloc(8), value))
+  }
+  public writeString(value: string): void {
+    const buf = Buffer.from(value, 'utf8')
+    this.writeI32(buf.length)
+    this.write(buf)
+  }
 
   // TODO: Maybe this should return a promise
   public flush(): void {

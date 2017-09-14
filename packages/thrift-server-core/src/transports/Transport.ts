@@ -11,6 +11,12 @@ export interface ITransport {
   readString(size: number): Promise<string>
 
   write(buf: Buffer | string): void
+  writeByte(value: number): void
+  writeBool(value: boolean): void
+  writeI16(value: number): void
+  writeI32(value: number): void
+  writeDouble(value: number): void
+  writeString(value: string): void
 
   flush(): void
 
