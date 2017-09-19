@@ -1,105 +1,10 @@
+import binary = require('thrift/lib/nodejs/lib/thrift/binary')
 import Thrift = require('thrift/lib/nodejs/lib/thrift/thrift')
 // TODO: Implement this ourselves
 const Type = Thrift.Type
 
 import { ITransport } from '../transports/Transport'
-
-export interface IProtocol {
-  // TODO: Just proxies to transport flush
-  flush(): void
-
-  // TODO: no seqid?
-  // TODO: Ensure these arguments have proper typings
-  writeMessageBegin(name: string, type: number, seqid: number): void
-  writeMessageEnd(): void
-
-  // TODO: not implemented
-  writeStructBegin(name): void
-  writeStructEnd(): void
-
-  // TODO: no seqid?
-  // TODO: Ensure these arguments have proper typings
-  writeFieldBegin(name: string, type: number, id: number): void
-  // TODO: not implemented
-  writeFieldEnd(): void
-  writeFieldStop(): void
-
-  // TODO: Ensure these arguments have proper typings
-  writeMapBegin(ktype: number, vtype: number, size: number): void
-  writeMapEnd(): void
-
-  // TODO: Ensure these arguments have proper typings
-  writeListBegin(etype: number, size: number): void
-  writeListEnd(): void
-
-  // TODO: Ensure these arguments have proper typings
-  writeSetBegin(etype: number, size: number): void
-  writeSetEnd(): void
-
-  writeBool(value: boolean): void
-  writeByte(value: number): void
-  writeI16(value: number): void
-  writeI32(value: number): void
-  writeI64(value: number): void
-  writeDouble(value: number): void
-  // TODO: avoid this abstraction
-  // writeStringOrBinary(name, encoding, arg): void
-  writeString(value: string): void
-  // TODO: Should this be pushed into the Transport?
-  writeBinary(value: Buffer): void
-
-  // TODO: concrete return type
-  readMessageBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readMessageEnd(): void
-
-  // TODO: concrete return type
-  readStructBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readStructEnd(): void
-
-  // TODO: concrete return type
-  readFieldBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readFieldEnd(): void
-
-  // TODO: concrete return type
-  readMapBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readMapEnd(): void
-
-  // TODO: concrete return type
-  readListBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readListEnd(): void
-
-  // TODO: concrete return type
-  readSetBegin(): Promise<any>
-  // TODO: not implemented
-  // Should these return promises?
-  readSetEnd(): void
-
-  readBool(): Promise<boolean>
-  readByte(): Promise<number>
-  readI16(): Promise<number>
-  readI32(): Promise<number>
-  readI64(): Promise<number>
-  readDouble(): Promise<number>
-  // TODO: Should this be pushed into the Transport?
-  readBinary(): Promise<Buffer>
-  readString(): Promise<string>
-
-  // TODO: is this needed?
-  getTransport(): ITransport
-
-  // TODO: type this argument
-  skip(type): void
-}
+import { IProtocol } from './Protocol'
 
 export class BinaryProtocol implements IProtocol {
   private transport: ITransport
@@ -108,6 +13,7 @@ export class BinaryProtocol implements IProtocol {
     this.transport = transport
   }
 
+  // TODO: Might not need to be on Protocol
   public flush(): void {
     this.transport.flush()
   }
@@ -163,25 +69,38 @@ export class BinaryProtocol implements IProtocol {
     // TODO: This isn't implemented in thrift core
   }
   public writeBool(value: boolean): void {
-    return this.transport.writeBool(value)
+    const byte = value ? 1 : 0
+    const buf = Buffer.alloc(1)
+    buf.writeUInt8(byte, 0)
+    this.transport.write(buf)
   }
   public writeByte(value: number): void {
-    return this.transport.writeByte(value)
+    // TODO: Is this correct? Yay buffers
+    const buf = Buffer.alloc(1)
+    buf.writeUInt8(value, 0)
+    this.transport.write(buf)
   }
   public writeI16(value: number): void {
-    return this.transport.writeI16(value)
+    this.transport.write(binary.writeI16(Buffer.alloc(2), value))
+    // const buf = Buffer.alloc(2)
+    // // TODO: LE or BE? If I'm reading "binary" properly, looks like BE
+    // buf.writeInt16BE(value, 0)
+    // this.write(buf)
   }
   public writeI32(value: number): void {
-    return this.transport.writeI32(value)
+    this.transport.write(binary.writeI32(Buffer.alloc(4), value))
   }
   public writeI64(value: number): void {
     throw new Error('Method not implemented.')
   }
   public writeDouble(value: number): void {
-    return this.transport.writeDouble(value)
+    this.transport.write(binary.writeDouble(Buffer.alloc(8), value))
   }
   public writeString(value: string): void {
-    return this.transport.writeString(value)
+    const buf = Buffer.from(value, 'utf8')
+    // TODO: Decouple?
+    this.writeI32(buf.length)
+    this.transport.write(buf)
   }
   public writeBinary(value: Buffer): void {
     throw new Error('Method not implemented.')
@@ -224,54 +143,67 @@ export class BinaryProtocol implements IProtocol {
   public readSetEnd(): void {
     throw new Error('Method not implemented.')
   }
-  public readBool(): Promise<boolean> {
-    return this.transport.readBool()
+  // TODO: Is this better to duplicate from readByte to not couple the methods?
+  public async readBool(): Promise<boolean> {
+    const chunk: Buffer = await this.transport.read(1)
+    const byte: number = binary.readByte(chunk)
+    const bool: boolean = (byte === 0) ? false : true
+    return bool
   }
-  public readByte(): Promise<number> {
-    return this.transport.readByte()
+  public async readByte(): Promise<number> {
+    const chunk: Buffer = await this.transport.read(1)
+    const byte: number = binary.readByte(chunk)
+    return byte
   }
-  public readI16(): Promise<number> {
-    return this.transport.readI16()
+  public async readI16(): Promise<number> {
+    const chunk: Buffer = await this.transport.read(2)
+    const i16: number = binary.readI16(chunk)
+    return i16
   }
-  public readI32(): Promise<number> {
-    return this.transport.readI32()
+  public async readI32(): Promise<number> {
+    const chunk: Buffer = await this.transport.read(4)
+    const i32: number = binary.readI32(chunk)
+    return i32
   }
-  public readI64(): Promise<number> {
-    // TODO: Why doesn't the transport define this?
+  public async readI64(): Promise<number> {
+    // TODO: Implement
     throw new Error('Method not implemented.')
   }
-  public readDouble(): Promise<number> {
-    return this.transport.readDouble()
+  public async readDouble(): Promise<number> {
+    const chunk: Buffer = await this.transport.read(8)
+    const dub: number = binary.readDouble(chunk)
+    return dub
   }
-  public readBinary(): Promise<Buffer> {
-    return new Promise(async (resolve) => {
-      const size = await this.transport.readI32()
-      // TODO: Can this be incorporated into the transport.readBuffer method?
-      if (size === 0) {
-        return resolve(Buffer.alloc(0))
-      }
+  public async readBinary(): Promise<Buffer> {
+    // TODO: Is this fine to be coupled?
+    const size: number = await this.readI32()
+    if (size === 0) {
+      return Buffer.alloc(0)
+    }
 
-      // TODO: Is this just guarding an underrun?
-      if (size < 0) {
-        throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
-      }
-      resolve(this.transport.read(size))
-    })
+    // TODO: Is this just guarding an underrun?
+    if (size < 0) {
+      // TODO: Throw vs Reject
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
+    }
+    const chunk: Buffer = await this.transport.read(size)
+    return chunk
   }
-  public readString(): Promise<string> {
-    return new Promise(async (resolve) => {
-      const size = await this.transport.readI32()
-      // TODO: Can this be incorporated into the transport.readString method?
-      if (size === 0) {
-        return resolve('')
-      }
+  public async readString(): Promise<string> {
+    // TODO: Is this fine to be coupled?
+    const size: number = await this.readI32()
+    if (size === 0) {
+      return ''
+    }
 
-      // TODO: Is this just guarding an underrun?
-      if (size < 0) {
-        throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.NEGATIVE_SIZE, 'Negative string size')
-      }
-      resolve(this.transport.readString(size))
-    })
+    // TODO: Is this just guarding an underrun?
+    if (size < 0) {
+      // TODO: Throw vs Reject
+      throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.NEGATIVE_SIZE, 'Negative string size')
+    }
+    const chunk: Buffer = await this.transport.read(size)
+    const str: string = chunk.toString('utf8')
+    return str
   }
   // TODO: Where is this used? Maybe we can get rid of it
   public getTransport(): ITransport {

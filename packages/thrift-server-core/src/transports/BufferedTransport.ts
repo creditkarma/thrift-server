@@ -57,101 +57,9 @@ export default class BufferedTransport implements ITransport {
     })
   }
 
-  public readByte(): Promise<number> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(1)
-
-      const byte = binary.readByte(this.inBuf[this.readCursor])
-      this.readCursor += 1
-      resolve(byte)
-    })
-  }
-  // TODO: Is this better to duplicate from readByte to not couple the methods?
-  public readBool(): Promise<boolean> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(1)
-
-      const byte = binary.readByte(this.inBuf[this.readCursor])
-      this.readCursor += 1
-      const bool = (byte === 0) ? false : true
-      resolve(bool)
-    })
-  }
-  public readI16(): Promise<number> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(2)
-
-      const i16 = binary.readI16(this.inBuf, this.readCursor)
-      this.readCursor += 2
-      resolve(i16)
-    })
-  }
-  public readI32(): Promise<number> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(4)
-
-      const i32 = binary.readI32(this.inBuf, this.readCursor)
-      this.readCursor += 4
-      resolve(i32)
-    })
-  }
-  public readDouble(): Promise<number> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(8)
-
-      const d = binary.readDouble(this.inBuf, this.readCursor)
-      this.readCursor += 8
-      resolve(d)
-    })
-  }
-  public readString(size: number): Promise<string> {
-    return new Promise((resolve) => {
-      this.ensureAvailable(size)
-
-      const str = this.inBuf.toString('utf8', this.readCursor, this.readCursor + size)
-      this.readCursor += size
-      resolve(str)
-    })
-  }
-
-  // TODO: Should we de-support string?
-  public write(buf: Buffer | string): void {
-    if (typeof buf === 'string') {
-      buf = Buffer.from(buf, 'utf8')
-    }
+  public write(buf: Buffer): void {
     this.outBuffers.push(buf)
     this.outSize += buf.length
-  }
-  public writeByte(value: number): void {
-    // TODO: Is this correct? Yay buffers
-    const buf = Buffer.alloc(1)
-    buf.writeUInt8(value, 0)
-    this.write(buf)
-  }
-  // TODO: Is this better to duplicate from writeByte to not couple the methods?
-  public writeBool(value: boolean): void {
-    const byte = value ? 1 : 0
-    const buf = Buffer.alloc(1)
-    buf.writeUInt8(byte, 0)
-    this.write(buf)
-  }
-  public writeI16(value: number): void {
-    this.write(binary.writeI16(Buffer.alloc(2), value))
-    // const buf = Buffer.alloc(2)
-    // // TODO: LE or BE? If I'm reading "binary" properly, looks like BE
-    // buf.writeInt16BE(value, 0)
-    // this.write(buf)
-  }
-  public writeI32(value: number): void {
-    this.write(binary.writeI32(Buffer.alloc(4), value))
-  }
-  public writeDouble(value: number): void {
-    this.write(binary.writeDouble(Buffer.alloc(8), value))
-  }
-  public writeString(value: string): void {
-    const buf = Buffer.from(value, 'utf8')
-    this.writeI32(buf.length)
-    this.write(buf)
   }
 
   // TODO: Maybe this should return a promise
@@ -184,17 +92,20 @@ export default class BufferedTransport implements ITransport {
     this.outSize = 0
   }
 
+  // TODO: Might not be needed
   public consume(bytesConsumed: number): void {
     this.readCursor += bytesConsumed
   }
 
   // TODO: This seems to only be used for json_protocol
+  // TODO: Might not be needed
   public borrow(): { buf: Buffer; readIndex: number; writeIndex: number; } {
     const obj = {buf: this.inBuf, readIndex: this.readCursor, writeIndex: this.writeCursor}
     return obj
   }
 
   // TODO: They don't implement these
+  // TODO: This is probably not needed
   public isOpen(): boolean {
     return true
   }
