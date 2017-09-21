@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer'
-import binary = require('thrift/lib/nodejs/lib/thrift/binary')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
 import { ITransport } from './Transport'
