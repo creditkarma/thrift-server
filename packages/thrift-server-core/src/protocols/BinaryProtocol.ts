@@ -6,8 +6,17 @@ const Type = Thrift.Type
 import { ITransport } from '../transports/Transport'
 import { IProtocol } from './Protocol'
 
-export class BinaryProtocol implements IProtocol {
+// JavaScript supports only numeric doubles, therefore even hex values are always signed.
+// The largest integer value which can be represented in JavaScript is +/-2^53.
+// Bitwise operations convert numbers to 32 bit integers but perform sign extension
+// upon assigning values back to variables.
+const VERSION_MASK = -65536   // 0xffff0000
+const VERSION_1 = -2147418112 // 0x80010000
+const TYPE_MASK = 0x000000ff
+
+export default class BinaryProtocol implements IProtocol {
   private transport: ITransport
+  private strictRead: boolean = false
 
   constructor(transport: ITransport) {
     this.transport = transport
@@ -107,41 +116,78 @@ export class BinaryProtocol implements IProtocol {
   }
 
   /* Read */
-  public readMessageBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readMessageBegin(): Promise<any> {
+    const sz = await this.readI32()
+    let type
+    let name
+    let seqid
+
+    if (sz < 0) {
+      // tslint:disable-next-line:no-bitwise
+      const version = sz & VERSION_MASK
+      if (version !== VERSION_1) {
+        console.log('BAD: ' + version)
+        throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.BAD_VERSION,
+          'Bad version in readMessageBegin: ' + sz)
+      }
+      // tslint:disable-next-line:no-bitwise
+      type = sz & TYPE_MASK
+      name = await this.readString()
+      seqid = await this.readI32()
+    } else {
+      if (this.strictRead) {
+        throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.BAD_VERSION, 'No protocol version header')
+      }
+      name = await this.transport.read(sz)
+      type = await this.readByte()
+      seqid = await this.readI32()
+    }
+    return {fname: name, mtype: type, rseqid: seqid}
   }
-  public readMessageEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readMessageEnd(): Promise<void> {
+    // No implementation
   }
-  public readStructBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readStructBegin(): Promise<any> {
+    return { fname: '' }
   }
-  public readStructEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readStructEnd(): Promise<void> {
+    // No implementation
   }
-  public readFieldBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readFieldBegin(): Promise<any> {
+    const type = await this.readByte()
+    if (type === Type.STOP) {
+      return {fname: null, ftype: type, fid: 0}
+    }
+    const id = await this.readI16()
+    return {fname: null, ftype: type, fid: id}
   }
-  public readFieldEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readFieldEnd(): Promise<void> {
+    // No implementation
   }
-  public readMapBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readMapBegin(): Promise<any> {
+    const ktype = await this.readByte()
+    const vtype = await this.readByte()
+    const size = await this.readI32()
+    return {ktype, vtype, size}
   }
-  public readMapEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readMapEnd(): Promise<void> {
+    // No implementation
   }
-  public readListBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readListBegin(): Promise<any> {
+    const etype = await this.readByte()
+    const size = await this.readI32()
+    return {etype, size}
   }
-  public readListEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readListEnd(): Promise<void> {
+    // No implementation
   }
-  public readSetBegin(): Promise<any> {
-    throw new Error('Method not implemented.')
+  public async readSetBegin(): Promise<any> {
+    const etype = await this.readByte()
+    const size = await this.readI32()
+    return {etype, size}
   }
-  public readSetEnd(): void {
-    throw new Error('Method not implemented.')
+  public async readSetEnd(): Promise<void> {
+    // No implementation
   }
   // TODO: Is this better to duplicate from readByte to not couple the methods?
   public async readBool(): Promise<boolean> {
@@ -152,7 +198,8 @@ export class BinaryProtocol implements IProtocol {
   }
   public async readByte(): Promise<number> {
     const chunk: Buffer = await this.transport.read(1)
-    const byte: number = binary.readByte(chunk)
+    // TODO: binary.readByte should accept a Buffer
+    const byte: number = binary.readByte(chunk[0])
     return byte
   }
   public async readI16(): Promise<number> {
@@ -209,7 +256,67 @@ export class BinaryProtocol implements IProtocol {
   public getTransport(): ITransport {
     return this.transport
   }
-  public skip(type: any): void {
-    throw new Error('Method not implemented.')
+  public async skip(type: any): Promise<void> {
+    switch (type) {
+      case Type.STOP:
+        return
+      case Type.BOOL:
+        await this.readBool()
+        return
+      case Type.BYTE:
+        await this.readByte()
+        return
+      case Type.I16:
+        await this.readI16()
+        return
+      case Type.I32:
+        await this.readI32()
+        return
+      case Type.I64:
+        await this.readI64()
+        return
+      case Type.DOUBLE:
+        await this.readDouble()
+        return
+      case Type.STRING:
+        await this.readString()
+        return
+      case Type.STRUCT:
+        await this.readStructBegin()
+        while (true) {
+          const r = await this.readFieldBegin()
+          if (r.ftype === Type.STOP) {
+            break
+          }
+          await this.skip(r.ftype)
+          await this.readFieldEnd()
+        }
+        await this.readStructEnd()
+        return
+      case Type.MAP:
+        const mapBegin = await this.readMapBegin()
+        for (let i = 0; i < mapBegin.size; ++i) {
+          await this.skip(mapBegin.ktype)
+          await this.skip(mapBegin.vtype)
+        }
+        await this.readMapEnd()
+        return
+      case Type.SET:
+        const setBegin = await this.readSetBegin()
+        for (let i2 = 0; i2 < setBegin.size; ++i2) {
+          await this.skip(setBegin.etype)
+        }
+        await this.readSetEnd()
+        return
+      case Type.LIST:
+        const listBegin = await this.readListBegin()
+        for (let i3 = 0; i3 < listBegin.size; ++i3) {
+          await this.skip(listBegin.etype)
+        }
+        await this.readListEnd()
+        return
+      default:
+        throw new  Error('Invalid type: ' + type)
+    }
   }
 }

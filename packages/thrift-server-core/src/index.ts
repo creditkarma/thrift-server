@@ -1,20 +1,24 @@
-import TBufferedTransport = require('thrift/lib/nodejs/lib/thrift/buffered_transport')
 import TFramedTransport = require('thrift/lib/nodejs/lib/thrift/framed_transport')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
+// New implementation
+import BufferedTransport from './transports/BufferedTransport'
 
-import TBinaryProtocol = require('thrift/lib/nodejs/lib/thrift/binary_protocol')
 import TCompactProtocol = require('thrift/lib/nodejs/lib/thrift/compact_protocol')
 import TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol')
+// New implementation
+import BinaryProtocol from './protocols/BinaryProtocol'
 
 const transports = {
-  buffered: TBufferedTransport,
+  buffered: BufferedTransport,
+  // Still old impl
   framed: TFramedTransport,
 }
 // TODO: Is there a better way to make nice error messages in plugins without exporting this?
 export const supportedTransports = Object.keys(transports)
 
 const protocols = {
-  binary: TBinaryProtocol,
+  binary: BinaryProtocol,
+  // Still old impl
   compact: TCompactProtocol,
   json: TJSONProtocol,
 }
@@ -51,17 +55,15 @@ export function isProtocolSupported(protocol: string): boolean {
 }
 
 // TODO: What should this Promise be typed as?
-export function process(processor, buffer, Transport, Protocol): Promise<any> {
-  const transportWithData = new Transport()
-  transportWithData.inBuf = buffer
-  transportWithData.writeCursor = buffer.length
+export function process(processor, stream, Transport, Protocol): Promise<any> {
+  const transportWithData = new Transport(stream)
   const input = new Protocol(transportWithData)
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const output = new Protocol(new Transport(undefined, resolve))
 
     try {
-      processor.process(input, output)
+      await processor.process(input, output)
       transportWithData.commitPosition()
     } catch (err) {
       if (err instanceof InputBufferUnderrunError) {

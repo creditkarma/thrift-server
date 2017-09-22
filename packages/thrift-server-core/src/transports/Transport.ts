@@ -10,9 +10,5 @@ export interface ITransport {
   flush(): void
 
   // TODO: Below methods might not be needed
-  consume(bytesConsumed: number): void
-  borrow(): { buf: Buffer; readIndex: number; writeIndex: number; }
-  commitPosition(): void
-  rollbackPosition(): void
   isOpen(): boolean
 }
