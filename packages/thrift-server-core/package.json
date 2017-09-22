@@ -38,6 +38,7 @@
     "tslint-eslint-rules": "^4.1.1"
   },
   "dependencies": {
+    "frame-stream": "^1.1.1",
     "promised-read": "^1.0.1",
     "q": "1.0.x",
     "thrift": "^0.10.0",

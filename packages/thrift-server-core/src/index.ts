@@ -1,7 +1,8 @@
-import TFramedTransport = require('thrift/lib/nodejs/lib/thrift/framed_transport')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
+
 // New implementation
 import BufferedTransport from './transports/BufferedTransport'
+import FramedTransport from './transports/FramedTransport'
 
 import TCompactProtocol = require('thrift/lib/nodejs/lib/thrift/compact_protocol')
 import TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol')
@@ -10,8 +11,7 @@ import BinaryProtocol from './protocols/BinaryProtocol'
 
 const transports = {
   buffered: BufferedTransport,
-  // Still old impl
-  framed: TFramedTransport,
+  framed: FramedTransport,
 }
 // TODO: Is there a better way to make nice error messages in plugins without exporting this?
 export const supportedTransports = Object.keys(transports)
@@ -64,10 +64,9 @@ export function process(processor, stream, Transport, Protocol): Promise<any> {
 
     try {
       await processor.process(input, output)
-      transportWithData.commitPosition()
     } catch (err) {
       if (err instanceof InputBufferUnderrunError) {
-        transportWithData.rollbackPosition()
+        // TODO: How does this differ?
       }
       reject(err)
     }

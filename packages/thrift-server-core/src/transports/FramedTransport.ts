@@ -1,54 +1,77 @@
 import binary = require('thrift/lib/nodejs/lib/thrift/binary')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
+// TODO: Replace with custom/better implementations
+import { decode as decodeFrame } from 'frame-stream'
+import { read as streamRead } from 'promised-read'
+
 import { ITransport } from './Transport'
 
 const HEADER_SIZE = 4
 
 export default class FramedTransport implements ITransport {
-  private inBuf: Buffer
-  private readCursor: number
+  private stream: NodeJS.ReadWriteStream
+  private outBuffers: Buffer[] = []
+  private outSize: number = 0
+  private onFlush
 
-  constructor(input: Buffer | undefined) {
-    this.inBuf = input
+  constructor(input: NodeJS.ReadWriteStream, callback) {
+    const frameOpts = {
+      getLength: (header) => binary.readI32(header, 0),
+      lengthSize: HEADER_SIZE,
+    }
+    if (input) {
+      this.stream = input.pipe(decodeFrame())
+    }
+    this.onFlush = callback
   }
 
-  public read(size: number): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-      this.ensureAvailable(HEADER_SIZE)
-      // TODO: Does this actually need to be copied? If not, it could be sliced
-      const header = this.inBuf.slice(0, HEADER_SIZE) // 4 is frame header size
-      this.readCursor += HEADER_SIZE
+  public async read(size: number): Promise<Buffer> {
+    const chunk = await streamRead(this.stream, size)
 
-      const frameSize = binary.readI32(header, 0)
+    // Stream done, no more data
+    if (chunk === null) {
+      return
+    }
 
-      this.ensureAvailable(size)
-      const chunk = this.inBuf.slice(this.readCursor, this.readCursor + size)
-      this.readCursor += size
-      resolve(chunk)
+    if (chunk.length < size || chunk.length > size) {
+      throw new Error(`Wrong size. Expected: ${size} but got ${chunk.length}`)
+    }
+
+    return chunk
+  }
+
+  public write(buf: Buffer): void {
+    this.outBuffers.push(buf)
+    this.outSize += buf.length
+  }
+
+  public flush(): void {
+    // TODO: This doesn't seem used
+    // If the seqid of the callback is available pass it to the onFlush
+    // Then remove the current seqid
+    // const seqid = this._seqid
+    // this._seqid = null
+
+    const out = Buffer.alloc(this.outSize)
+    let pos = 0
+    this.outBuffers.forEach((buf) => {
+      // TODO: Do these actually need to be copied? If not, it could be joined by Buffer.concat
+      buf.copy(out, pos, 0)
+      pos += buf.length
     })
+
+    if (this.onFlush) {
+      // TODO: optimize this better, allocate one buffer instead of both:
+      const msg = Buffer.alloc(out.length + 4)
+      binary.writeI32(msg, out.length)
+      out.copy(msg, 4, 0, out.length)
+      this.onFlush(msg)
+    }
+
+    this.outBuffers = []
+    this.outSize = 0
   }
-
-  // tslint:disable-next-line:no-empty
-  public write() {
-
-  }
-
-  // tslint:disable-next-line:no-empty
-  public flush() {
-
-  }
-
-  // tslint:disable-next-line:no-empty
-  public consume() {}
-  // tslint:disable-next-line:no-empty
-  public borrow(): { buf: Buffer; readIndex: number; writeIndex: number; } {
-    return { buf: Buffer.alloc(0), readIndex: 0, writeIndex: 0 }
-  }
-  // tslint:disable-next-line:no-empty
-  public commitPosition() {}
-  // tslint:disable-next-line:no-empty
-  public rollbackPosition() {}
 
   public isOpen(): boolean {
     return true
@@ -59,10 +82,4 @@ export default class FramedTransport implements ITransport {
 
   // tslint:disable-next-line:no-empty
   public close() {}
-
-  private ensureAvailable(size) {
-    if (this.readCursor + size > this.inBuf.length) {
-      throw new InputBufferUnderrunError()
-    }
-  }
 }

@@ -33,7 +33,7 @@ export default class BufferedTransport implements ITransport {
     }
 
     if (chunk.length < size || chunk.length > size) {
-      throw new Error(`Wrong size. Expected: ${size} but got ${chunk}`)
+      throw new Error(`Wrong size. Expected: ${size} but got ${chunk.length}`)
     }
 
     return chunk
@@ -66,7 +66,6 @@ export default class BufferedTransport implements ITransport {
     })
 
     if (this.onFlush) {
-      // Passing seqid through this call to get it to the connection
       this.onFlush(msg)
     }
 
