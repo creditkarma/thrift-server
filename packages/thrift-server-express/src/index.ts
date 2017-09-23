@@ -46,7 +46,7 @@ export function thriftExpress(Service, handlers, options: IOptions = {} as any) 
 
     try {
       const result = await process(service, stream, Transport, Protocol)
-      res.status(200).end(result)
+      res.status(200).end()
     } catch (err) {
       next(err)
     }

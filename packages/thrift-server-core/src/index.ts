@@ -55,20 +55,17 @@ export function isProtocolSupported(protocol: string): boolean {
 }
 
 // TODO: What should this Promise be typed as?
-export function process(processor, stream, Transport, Protocol): Promise<any> {
-  const transportWithData = new Transport(stream)
-  const input = new Protocol(transportWithData)
+// TODO: More importantly, what should be returned? status code or something?
+export async function process(processor, stream, Transport, Protocol): Promise<void> {
+  const transport = new Transport(stream)
+  const protocol = new Protocol(transport)
 
-  return new Promise(async (resolve, reject) => {
-    const output = new Protocol(new Transport(undefined, resolve))
-
-    try {
-      await processor.process(input, output)
-    } catch (err) {
-      if (err instanceof InputBufferUnderrunError) {
-        // TODO: How does this differ?
-      }
-      reject(err)
+  try {
+    await processor.process(protocol)
+  } catch (err) {
+    if (err instanceof InputBufferUnderrunError) {
+      // TODO: How does this differ?
     }
-  })
+    throw err
+  }
 }

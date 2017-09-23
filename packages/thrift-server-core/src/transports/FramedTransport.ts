@@ -5,29 +5,31 @@ import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_bu
 import { decode as decodeFrame } from 'frame-stream'
 import { read as streamRead } from 'promised-read'
 
+import from = require('from2')
+
 import { ITransport } from './Transport'
 
 const HEADER_SIZE = 4
 
+const frameOpts = {
+  getLength: (header) => binary.readI32(header, 0),
+  lengthSize: HEADER_SIZE,
+}
+
 export default class FramedTransport implements ITransport {
   private stream: NodeJS.ReadWriteStream
+  private reader: NodeJS.ReadWriteStream
   private outBuffers: Buffer[] = []
   private outSize: number = 0
-  private onFlush
 
-  constructor(input: NodeJS.ReadWriteStream, callback) {
-    const frameOpts = {
-      getLength: (header) => binary.readI32(header, 0),
-      lengthSize: HEADER_SIZE,
-    }
-    if (input) {
-      this.stream = input.pipe(decodeFrame())
-    }
-    this.onFlush = callback
+  constructor(input: NodeJS.ReadWriteStream) {
+    this.stream = input
+    // TODO: A better impl would allow us to combine decode/encode frame in the same pipeline
+    this.reader = input.pipe(decodeFrame(frameOpts))
   }
 
   public async read(size: number): Promise<Buffer> {
-    const chunk = await streamRead(this.stream, size)
+    const chunk = await streamRead(this.reader, size)
 
     // Stream done, no more data
     if (chunk === null) {
@@ -47,27 +49,12 @@ export default class FramedTransport implements ITransport {
   }
 
   public flush(): void {
-    // TODO: This doesn't seem used
-    // If the seqid of the callback is available pass it to the onFlush
-    // Then remove the current seqid
-    // const seqid = this._seqid
-    // this._seqid = null
+    // TODO: A better frame-stream impl would avoid having to calculate our own header
+    const header = Buffer.alloc(4)
+    binary.writeI32(header, this.outSize)
+    const msg = [header].concat(this.outBuffers)
 
-    const out = Buffer.alloc(this.outSize)
-    let pos = 0
-    this.outBuffers.forEach((buf) => {
-      // TODO: Do these actually need to be copied? If not, it could be joined by Buffer.concat
-      buf.copy(out, pos, 0)
-      pos += buf.length
-    })
-
-    if (this.onFlush) {
-      // TODO: optimize this better, allocate one buffer instead of both:
-      const msg = Buffer.alloc(out.length + 4)
-      binary.writeI32(msg, out.length)
-      out.copy(msg, 4, 0, out.length)
-      this.onFlush(msg)
-    }
+    from(msg).pipe(this.stream)
 
     this.outBuffers = []
     this.outSize = 0
