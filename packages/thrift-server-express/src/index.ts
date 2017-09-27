@@ -9,6 +9,8 @@ import {
   supportedTransports,
 } from 'thrift-server-core'
 
+import duplexify = require('duplexify')
+
 // TODO: Can these be typed to specific strings?
 export interface IOptions {
   transport?: string
@@ -40,9 +42,11 @@ export function thriftExpress(Service, handlers, options: IOptions = {} as any) 
       return res.status(403).send('Method must be POST')
     }
 
+    const stream = duplexify(res, req)
+
     try {
-      const result = await process(service, req.body, Transport, Protocol)
-      res.status(200).end(result)
+      const result = await process(service, stream, Transport, Protocol)
+      res.status(200).end()
     } catch (err) {
       next(err)
     }

@@ -1,20 +1,24 @@
-import TBufferedTransport = require('thrift/lib/nodejs/lib/thrift/buffered_transport')
-import TFramedTransport = require('thrift/lib/nodejs/lib/thrift/framed_transport')
 import InputBufferUnderrunError = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
-import TBinaryProtocol = require('thrift/lib/nodejs/lib/thrift/binary_protocol')
+// New implementation
+import BufferedTransport from './transports/BufferedTransport'
+import FramedTransport from './transports/FramedTransport'
+
 import TCompactProtocol = require('thrift/lib/nodejs/lib/thrift/compact_protocol')
 import TJSONProtocol = require('thrift/lib/nodejs/lib/thrift/json_protocol')
+// New implementation
+import BinaryProtocol from './protocols/BinaryProtocol'
 
 const transports = {
-  buffered: TBufferedTransport,
-  framed: TFramedTransport,
+  buffered: BufferedTransport,
+  framed: FramedTransport,
 }
 // TODO: Is there a better way to make nice error messages in plugins without exporting this?
 export const supportedTransports = Object.keys(transports)
 
 const protocols = {
-  binary: TBinaryProtocol,
+  binary: BinaryProtocol,
+  // Still old impl
   compact: TCompactProtocol,
   json: TJSONProtocol,
 }
@@ -51,23 +55,17 @@ export function isProtocolSupported(protocol: string): boolean {
 }
 
 // TODO: What should this Promise be typed as?
-export function process(processor, buffer, Transport, Protocol): Promise<any> {
-  const transportWithData = new Transport()
-  transportWithData.inBuf = buffer
-  transportWithData.writeCursor = buffer.length
-  const input = new Protocol(transportWithData)
+// TODO: More importantly, what should be returned? status code or something?
+export async function process(processor, stream, Transport, Protocol): Promise<void> {
+  const transport = new Transport(stream)
+  const protocol = new Protocol(transport)
 
-  return new Promise((resolve, reject) => {
-    const output = new Protocol(new Transport(undefined, resolve))
-
-    try {
-      processor.process(input, output)
-      transportWithData.commitPosition()
-    } catch (err) {
-      if (err instanceof InputBufferUnderrunError) {
-        transportWithData.rollbackPosition()
-      }
-      reject(err)
+  try {
+    await processor.process(protocol)
+  } catch (err) {
+    if (err instanceof InputBufferUnderrunError) {
+      // TODO: How does this differ?
     }
-  })
+    throw err
+  }
 }

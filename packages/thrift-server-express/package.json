@@ -38,8 +38,9 @@
     "tslint-eslint-rules": "^4.1.1"
   },
   "dependencies": {
-    "typescript": "^2.4.2",
-    "thrift-server-core": "*"
+    "duplexify": "^3.5.1",
+    "thrift-server-core": "*",
+    "typescript": "^2.4.2"
   },
   "typings": "dist/index.d.ts",
   "typescript": {
