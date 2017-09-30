@@ -1,6 +1,15 @@
 import * as Hapi from 'hapi'
-import * as Thrift from 'thrift'
-import * as InputBufferUnderrunError from 'thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error'
+import {
+  TBinaryProtocol,
+  TBufferedTransport,
+  TCompactProtocol,
+  TFramedTransport,
+  TJSONProtocol,
+  TProtocol,
+  TProtocolConstructor,
+  TTransportConstructor,
+} from 'thrift'
+const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
 export interface IHandlerOptions {
   service: object
@@ -15,16 +24,24 @@ export interface IThriftContext {
     method: string
 }
 
-const transports = {
-  buffered: Thrift.TBufferedTransport,
-  framed: Thrift.TFramedTransport,
+interface ITransportMap {
+  [name: string]: TTransportConstructor
+}
+
+const transports: ITransportMap = {
+  buffered: TBufferedTransport,
+  framed: TFramedTransport,
 }
 const supportedTransports = Object.keys(transports)
 
-const protocols = {
-  binary: Thrift.TBinaryProtocol,
-  compact: Thrift.TCompactProtocol,
-  json: Thrift.TJSONProtocol,
+interface IProtocolMap {
+  [name: string]: TProtocolConstructor
+}
+
+const protocols: IProtocolMap = {
+  binary: TBinaryProtocol,
+  compact: TCompactProtocol,
+  json: TJSONProtocol,
 }
 const supportedProtocols = Object.keys(protocols)
 
@@ -36,10 +53,15 @@ function supportsProtocol(protocol: string): boolean {
   return supportedProtocols.indexOf(protocol) !== -1
 }
 
-function handleBody(processor, buffer, Transport, Protocol, context) {
-  const transportWithData = new Transport()
-  transportWithData.inBuf = buffer
-  transportWithData.writeCursor = buffer.length
+function handleBody(
+  processor: any,
+  buffer: Buffer,
+  Transport: TTransportConstructor,
+  Protocol: TProtocolConstructor,
+  context: any): Promise<any> {
+  const transportWithData = new Transport(undefined, () => null);
+  (transportWithData as any).inBuf = buffer;
+  (transportWithData as any).writeCursor = buffer.length
   const input = new Protocol(transportWithData)
 
   return new Promise((resolve, reject) => {
@@ -57,11 +79,11 @@ function handleBody(processor, buffer, Transport, Protocol, context) {
   })
 }
 
-function readThriftMethod(buffer, Transport, Protocol) {
-    const transportWithData = new Transport()
-    transportWithData.inBuf = buffer
-    transportWithData.writeCursor = buffer.length
-    const input: Thrift.TProtocol = new Protocol(transportWithData)
+function readThriftMethod(buffer: Buffer, Transport: TTransportConstructor, Protocol: TProtocolConstructor) {
+    const transportWithData = new Transport(undefined, () => null);
+    (transportWithData as any).inBuf = buffer;
+    (transportWithData as any).writeCursor = buffer.length
+    const input: TProtocol = new Protocol(transportWithData)
 
     const begin = input.readMessageBegin()
 
@@ -82,27 +104,27 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
             next(new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`))
         }
 
-        let Transport
+        let Transport: TTransportConstructor
         if (transport) {
             Transport = transports[transport]
         } else {
             Transport = transports.buffered
         }
 
-        let Protocol
+        let Protocol: TProtocolConstructor
         if (protocol) {
             Protocol = protocols[protocol]
         } else {
             Protocol = protocols.binary
         }
 
-        server.handler('thrift', function(route, options: IHandlerOptions) {
+        server.handler('thrift', (route, options: IHandlerOptions) => {
             const service = options.service
             if (!service) {
                 throw new Error('No service implementation specified.')
             }
 
-            return function(request, reply) {
+            return (request, reply) => {
                 try {
                     const method = readThriftMethod(request.payload, Transport, Protocol)
                     request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })

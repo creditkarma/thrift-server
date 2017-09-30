@@ -7,6 +7,7 @@
     "build": "lerna exec -- npm run build",
     "clean": "rimraf **/node_modules **/dist **/coverage",
     "lint": "lerna exec -- npm run lint",
+    "updated": "lerna updated",
     "postinstall": "lerna bootstrap",
     "prebootstrap": "npm install",
     "test": "lerna exec -- npm run test",

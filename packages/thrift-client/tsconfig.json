@@ -7,21 +7,24 @@
     "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
+    "noEmitOnError": true,
+    "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": true,
     "pretty": true,
     "removeComments": true,
     "types": [
       "@types/node",
-      "@types/code",
+      "@types/express",
+      "@types/request",
       "@types/thrift"
     ]
   },
   "exclude": [
     "node_modules",
-    "dist"
+    "example"
   ]
 }

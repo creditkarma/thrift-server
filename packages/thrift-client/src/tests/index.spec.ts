@@ -1,15 +1,21 @@
-import * as childProcess from 'child_process'
-import { expect } from 'code'
-import * as Lab from 'lab'
 import {
-  createHttpClient,
-  createHttpConnection,
+  createClient,
+  fromAxios,
   HttpConnection,
-} from 'thrift'
+} from '../main'
+
+import {
+  AxiosInstance,
+  default as axios,
+} from 'axios'
 
 import {
   SERVER_CONFIG,
 } from './config'
+
+import * as childProcess from 'child_process'
+import { expect } from 'code'
+import * as Lab from 'lab'
 
 import {
   Calculator,
@@ -22,21 +28,17 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('Thrift Server Express', () => {
+describe('Thrift Server Hapi', () => {
   let server: any
-  let connection: HttpConnection
+  let connection: HttpConnection<Calculator.Client>
   let client: Calculator.Client
 
   before((done: any) => {
     server = childProcess.fork('./dist/tests/server.js')
     server.on('message', (msg: any) => console.log(msg))
-    connection = createHttpConnection(SERVER_CONFIG.hostName, SERVER_CONFIG.port, {
-      path: '/thrift',
-      headers: {
-        'Content-Type': 'application/octet-stream',
-      },
-    })
-    client = createHttpClient(Calculator.Client, connection)
+    const requestClient: AxiosInstance = axios.create()
+    connection = fromAxios(requestClient, SERVER_CONFIG)
+    client = createClient(Calculator.Client, connection)
 
     setTimeout(done, 1000)
   })
@@ -47,16 +49,6 @@ describe('Thrift Server Express', () => {
         expect(response).to.equal(12)
         done()
       })
-  })
-
-  it('should handle requests not pointed to thrift service', (done: any) => {
-    childProcess.exec(
-      `curl http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`,
-      (err, stout, sterr) => {
-        expect(stout).to.equal('PASS')
-        done()
-      },
-    )
   })
 
   after((done: any) => {

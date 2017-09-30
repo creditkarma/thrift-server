@@ -1,10 +1,8 @@
-'use strict'
-
+import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
-import { ThriftPlugin } from '../main/'
 
 import {
-    SharedStruct,
+  SharedStruct,
 } from './generated/shared/shared'
 
 import {

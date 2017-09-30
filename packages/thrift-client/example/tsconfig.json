@@ -3,25 +3,27 @@
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
+    "rootDir": "../",
+    "baseUrl": "../",
+    "noEmitOnError": true,
+    "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
     "pretty": true,
     "removeComments": true,
+    "paths": {
+      "thrift": [
+        "./node_modules/@creditkarma/thrift-typescript/typings/thrift.d.ts"
+      ]
+    },
     "types": [
       "@types/node",
-      "@types/code",
-      "@types/thrift"
+      "@types/express",
+      "@types/request"
     ]
   },
   "exclude": [
-    "node_modules",
-    "dist"
+    "node_modules"
   ]
 }
