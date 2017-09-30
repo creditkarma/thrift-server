@@ -14,8 +14,8 @@
     "test:only": "lab -l -S ./dist/test",
     "lint": "tslint --fix './src/**/*.ts'"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Credit Karma",
+  "license": "Apache-2.0",
   "dependencies": {
     "thrift": "^0.10.0"
   },

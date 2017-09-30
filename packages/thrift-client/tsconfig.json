@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "declaration": true,
+    "rootDir": ".",
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "noEmitOnError": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": true,
+    "pretty": true,
+    "removeComments": true,
+    "paths": {
+      "thrift": [
+        "./typings/thrift"
+      ],
+      "popsicle": [
+        "./node_modules/popsicle/dist/common.d.ts"
+      ]
+    },
+    "types": [
+      "@types/node",
+      "@types/express",
+      "@types/request"
+    ]
+  },
+  "files": [
+    "./index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
