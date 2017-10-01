@@ -18,7 +18,7 @@
     "removeComments": true,
     "paths": {
       "thrift": [
-        "./typings/thrift"
+        "./node_modules/@creditkarma/thrift-typescript/typings/thrift.d.ts"
       ]
     },
     "types": [
