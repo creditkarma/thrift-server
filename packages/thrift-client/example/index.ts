@@ -3,12 +3,12 @@ import { generate } from '@creditkarma/thrift-typescript'
 
 process.chdir(__dirname)
 
-// generate({
-//   rootDir: '.',
-//   outDir: 'codegen',
-//   sourceDir: 'thrift',
-//   files: [ './tutorial.thrift' ]
-// })
+generate({
+  rootDir: '.',
+  outDir: 'codegen',
+  sourceDir: 'thrift',
+  files: [ './tutorial.thrift' ]
+})
 
 const clientProc = fork('./client.ts')
 const serverProc = fork('./server.ts')

@@ -834,12 +834,7 @@ export namespace Calculator {
             const result = new ZipResult();
             result.read(input);
             input.readMessageEnd();
-            if (result.success != null) {
-                return callback(undefined, result.success);
-            }
-            else {
-                return callback(new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, "zip failed: unknown result"));
-            }
+            return callback(undefined);
         }
     }
     export interface IHandler<Context> {

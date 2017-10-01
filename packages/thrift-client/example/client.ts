@@ -27,25 +27,29 @@ const app = express();
 
 // Create thrift client
 // Using Request
-// const requestClient: RequestClientApi = request.defaults({});
-// const thriftClient: Calculator.Client = createClient(Calculator.Client, createRequestConnection(requestClient, config));
+const requestClient: RequestClientApi = request.defaults({});
+const thriftClient: Calculator.Client = createClient(Calculator.Client, createConnection(requestClient, config));
 
 // Using Axios
-const requestClient: AxiosInstance = axios.create();
-const thriftClient: Calculator.Client = createClient(Calculator.Client, createAxiosConnection(requestClient, config))
+// const requestClient: AxiosInstance = axios.create();
+// const thriftClient: Calculator.Client = createClient(Calculator.Client, createAxiosConnection(requestClient, config))
 
 app.get('/ping', (req, res) => {
   thriftClient.ping().then(() => {
+    console.log('ping');
     res.send('success')
   }, (err: any) => {
+    console.log('ping: err: ', err);
     res.status(500).send(err);
   })
 });
 
 app.get('/add', (req, res) => {
   thriftClient.add(3, 4).then((val: number) => {
-    res.send('success')
+    console.log('add: ', val);
+    res.send(`result: ${val}`)
   }, (err: any) => {
+    console.log('add: err: ', err);
     res.status(500).send(err);
   })
 });

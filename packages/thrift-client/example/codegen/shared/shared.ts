@@ -242,12 +242,12 @@ export namespace SharedService {
             const result = new GetStructResult();
             result.read(input);
             input.readMessageEnd();
-            if (true) {
-                if (result.success != null) {
-                    return callback(undefined, result.success);
-                }
+            if (result.success != null) {
+                return callback(undefined, result.success);
             }
-            return callback(new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, "getStruct failed: unknown result"));
+            else {
+                return callback(new Thrift.TApplicationException(Thrift.TApplicationExceptionType.UNKNOWN, "getStruct failed: unknown result"));
+            }
         }
     }
     export interface IHandler<Context> {

@@ -50,6 +50,7 @@ export class RequestConnection implements HttpConnection {
   constructor(requestApi: RequestClientApi, options: HttpConnectionOptions) {
     this._request = requestApi.defaults({
       url: `http://${options.hostName}:${options.port}`,
+      encoding: null,
       headers: {
         'Connection': 'keep-alive',
       }
@@ -66,31 +67,12 @@ export class RequestConnection implements HttpConnection {
             'Content-length': dataToWrite.length
           },
           body: dataToWrite
-        })
-        .on('data', (chunk: Buffer | string): void => {
-          if (typeof chunk === 'string') {
-            responseData.push(new Buffer(chunk));
-          } else if (Object.prototype.toString.call(chunk) === '[object Uint8Array]') {
-            responseData.push(new Buffer(chunk));
+        }, (err: any, response: request.RequestResponse, body: any) => {
+          if (err !== null) {
+            reject(err);
           } else {
-            responseData.push(chunk);
+            resolve(response.body);
           }
-
-          combinedBufferLength += chunk.length;
-        })
-        .on('end', (end: any): void => {
-          const buf: Buffer = new Buffer(combinedBufferLength);
-          const len: number = responseData.length;
-          let pos: number = 0;
-          for (let i = 0; i < len; i++) {
-            responseData[i].copy(buf, pos);
-            pos += responseData[i].length;
-          }
-
-          resolve(buf);
-        })
-        .on('error', (err: any): void => {
-          reject(err);
         })
     })
   }
