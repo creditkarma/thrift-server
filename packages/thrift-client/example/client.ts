@@ -8,12 +8,15 @@ import {
   createAxiosConnection,
 } from '../src/'
 
+import * as path from 'path'
 import * as request from 'request'
 import { default as axios, AxiosInstance }from 'axios'
 import * as express from 'express'
 
 import {
-  Calculator
+  Work,
+  Operation,
+  Calculator,
 } from './codegen/tutorial/tutorial'
 
 const config = {
@@ -33,22 +36,42 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, createCo
 // const requestClient: AxiosInstance = axios.create();
 // const thriftClient: Calculator.Client = createClient(Calculator.Client, createAxiosConnection(requestClient, config))
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './index.html'));
+});
+
 app.get('/ping', (req, res) => {
   thriftClient.ping().then(() => {
-    console.log('ping');
     res.send('success')
   }, (err: any) => {
-    console.log('ping: err: ', err);
     res.status(500).send(err);
   })
 });
 
-app.get('/add', (req, res) => {
-  thriftClient.add(3, 4).then((val: number) => {
-    console.log('add: ', val);
+function symbolToOperation(sym: string): Operation {
+  switch (sym) {
+    case 'add':
+      return Operation.ADD;
+    case 'subtract':
+      return Operation.SUBTRACT;
+    case 'multiply':
+      return Operation.MULTIPLY;
+    case 'divide':
+      return Operation.DIVIDE;
+    default:
+      throw new Error(`Unrecognized operation: ${sym}`);
+  }
+}
+
+app.get('/calculate', (req, res) => {
+  const work: Work = new Work({
+    num1: req.query.left,
+    num2: req.query.right,
+    op: symbolToOperation(req.query.op)
+  })
+  thriftClient.calculate(1, work).then((val: number) => {
     res.send(`result: ${val}`)
   }, (err: any) => {
-    console.log('add: err: ', err);
     res.status(500).send(err);
   })
 });

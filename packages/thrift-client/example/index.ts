@@ -19,23 +19,7 @@ function exit(code: number) {
   process.exitCode = code
 }
 
-setTimeout(() => {
-  exec('curl http://localhost:8044/ping', function(err, stout, sterr) {
-    console.log('stdout: ', stout)
-    if (err != null) {
-      console.error('Error running Thrift service: ', err)
-      exit(1)
-    }
-
-    if (stout === 'success') {
-      exec('curl http://localhost:8044/add', function(err, stout, sterr) {
-        console.log('stdout: ', stout)
-        console.log('Successfully able to run Thrift service')
-        exit(0)
-      });
-    } else {
-      console.error(`Unexpected response from Thrift service: ${stout}`)
-      exit(1)
-    }
-  })
-}, 5000)
+process.on('SIGINT', () => {
+  console.log("Caught interrupt signal");
+  exit(0);
+});

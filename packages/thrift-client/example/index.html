@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+
+    html {
+      background: #fff;
+    }
+
+    body {
+      padding: 10px;
+    }
+
+    .input-display {
+      width: 300px;
+      padding: 5px 10px;
+      border: 1px solid #999;
+      font-size: 1.5em;
+    }
+
+    .button-container {
+      width: 300px;
+    }
+
+    .input-button {
+      display: inline-block;
+      -webkit-appearance: none;
+      border: 1px solid #999;
+      color: #222;
+      font-size: 1.2em;
+      padding: 5px;
+      background: #fff;
+      margin: 5px 5px 0 0;
+      cursor: pointer;
+    }
+
+    .input-button:hover {
+      background: #222;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="calculator">
+    <div id="input-display" class="input-display">0</div>
+    <div id="button-container" class="button-container">
+      <button class="input-button" data-value="0">0</button>
+      <button class="input-button" data-value="1">1</button>
+      <button class="input-button" data-value="2">2</button>
+      <button class="input-button" data-value="3">3</button>
+      <button class="input-button" data-value="4">4</button>
+      <button class="input-button" data-value="5">5</button>
+      <button class="input-button" data-value="6">6</button>
+      <button class="input-button" data-value="7">7</button>
+      <button class="input-button" data-value="8">8</button>
+      <button class="input-button" data-value="9">9</button>
+      <button class="input-button" data-value="add">+</button>
+      <button class="input-button" data-value="subtract">-</button>
+      <button class="input-button" data-value="multiply">*</button>
+      <button class="input-button" data-value="divide">/</button>
+      <button class="input-button" data-value="clear">Clear</button>
+      <button class="input-button" data-value="enter">Enter</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const inputDisplay = document.getElementById('input-display');
+      const calculation = {
+        hasResult: false,
+        isProcessing: false,
+        left: 0,
+        right: null,
+        op: null
+      }
+
+      function clear() {
+        calculation.left = 0;
+        calculation.right = null;
+        calculation.op = null;
+        inputDisplay.innerHTML = '0';
+      }
+
+      function toSymbol(op) {
+        switch (op) {
+          case 'subtract':
+            return '-';
+          case 'multiply':
+            return '*';
+          case 'add':
+            return '+';
+          case 'divide':
+            return '/';
+        }
+      }
+
+      function draw() {
+        let displayValue = `${calculation.left}`
+        if (calculation.op !== null) {
+          displayValue += ` ${toSymbol(calculation.op)}`;
+        }
+
+        if (calculation.right !== null) {
+          displayValue += ` ${calculation.right}`;
+        }
+
+        inputDisplay.innerHTML = displayValue;
+      }
+
+      function toQuery() {
+        return `left=${calculation.left}&op=${calculation.op}&right=${calculation.right}`
+      }
+
+      document.addEventListener('click', (evt) => {
+        const dataValue = evt.target.getAttribute('data-value');
+
+        switch (dataValue) {
+          case 'enter':
+            fetch(`/calculate?${toQuery()}`).then((response) => {
+              return response.text();
+            }).then((val) => {
+              clear();
+              inputDisplay.innerHTML = val;
+            }, (err) => {
+              clear();
+              inputDisplay.innerHTML = 'Error';
+            })
+            break;
+
+          case 'clear':
+            clear();
+            break;
+
+          case 'subtract':
+          case 'add':
+          case 'multiply':
+          case 'divide':
+            calculation.op = dataValue;
+            break;
+
+          default:
+            if (dataValue === null) {
+              return;
+            }
+
+            if (calculation.op === null) {
+              if (calculation.left === 0) {
+                calculation.left = dataValue;
+              } else {
+                calculation.left += dataValue;
+              }
+            } else if (calculation.right === null) {
+              calculation.right = dataValue;
+            } else {
+              calculation.right += dataValue;
+            }
+        }
+
+        draw();
+      })
+    })();
+  </script>
+</body>
+</html>
