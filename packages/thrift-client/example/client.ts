@@ -4,10 +4,9 @@ import {
 
 import {
   RequestClientApi,
-  HttpConnection,
   createConnection,
   createAxiosConnection,
-} from '../src/connection'
+} from '../src/'
 
 import * as request from 'request'
 import { default as axios, AxiosInstance }from 'axios'

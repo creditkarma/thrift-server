@@ -1,84 +1,81 @@
 import {
-  TTransport,
-  TProtocol,
   TBinaryProtocol,
   TBufferedTransport,
-  TMessage,
   Thrift,
+  TMessage,
+  TProtocol,
+  TTransport,
 } from 'thrift'
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
 import {
-  HttpConnection
-} from './connection'
+  IHttpConnection,
+} from './connections'
 
-const noop = (): void => {}
+const noop = (): null => null
 
 export function createClient<TClient>(
   ServiceClient: { new (output: TTransport, pClass: { new (trans: TTransport): TProtocol }): TClient; },
-  connection: HttpConnection
+  connection: IHttpConnection,
 ): TClient {
   const transport: TTransport = new TBufferedTransport(undefined, (data: Buffer, seqid: number): void => {
-    const clientCallback = (<any>client)._reqs[seqid];
+    const clientCallback = (client as any)._reqs[seqid]
     connection.write(data, seqid).then((returnValue: Buffer) => {
-      const reader: TTransport = new TBufferedTransport(undefined, noop);
-      const proto: TProtocol = new TBinaryProtocol(reader);
-      let isAtEnd: boolean = false;
+      const reader: TTransport = new TBufferedTransport(undefined, noop)
+      const proto: TProtocol = new TBinaryProtocol(reader)
 
-      if ((<any>reader).writeCursor + returnValue.length > (<any>reader).inBuf.length) {
-        const buf: Buffer = new Buffer((<any>reader).writeCursor + data.length);
-        (<any>reader).inBuf.copy(buf, 0, 0, (<any>reader).writeCursor);
-        (<any>reader).inBuf = buf;
+      if ((reader as any).writeCursor + returnValue.length > (reader as any).inBuf.length) {
+        const buf: Buffer = new Buffer((reader as any).writeCursor + data.length);
+        (reader as any).inBuf.copy(buf, 0, 0, (reader as any).writeCursor);
+        (reader as any).inBuf = buf
       }
-      returnValue.copy((<any>reader).inBuf, (<any>reader).writeCursor, 0);
-      (<any>reader).writeCursor += returnValue.length;
+      returnValue.copy((reader as any).inBuf, (reader as any).writeCursor, 0);
+      (reader as any).writeCursor += returnValue.length
 
       try {
-        while (!isAtEnd) {
-          const header: TMessage = proto.readMessageBegin();
-          const dummy_seqid: number = (header.rseqid * -1);
+        while (true) {
+          const header: TMessage = proto.readMessageBegin()
+          const dummyId: number = (header.rseqid * -1);
 
-          (<any>client)._reqs[dummy_seqid] = (err: any, success: any) => {
-            reader.commitPosition();
-            delete (<any>client)._reqs[header.rseqid];
+          (client as any)._reqs[dummyId] = (err: any, success: any) => {
+            reader.commitPosition()
+            delete (client as any)._reqs[header.rseqid]
             if (clientCallback) {
               process.nextTick(() => {
-                clientCallback(err, success);
-              });
+                clientCallback(err, success)
+              })
             }
-          };
+          }
 
-          if ((<any>client)['recv_' + header.fname]) {
-            (<any>client)['recv_' + header.fname](proto, header.mtype, dummy_seqid);
+          if ((client as any)['recv_' + header.fname]) {
+            (client as any)['recv_' + header.fname](proto, header.mtype, dummyId)
           } else {
-            delete (<any>client)._reqs[dummy_seqid];
+            delete (client as any)._reqs[dummyId]
             process.nextTick(() => {
               clientCallback(new Thrift.TApplicationException(
                 Thrift.TApplicationExceptionType.WRONG_METHOD_NAME,
-                "Received a response to an unknown RPC function"
-              ), undefined);
-            });
+                'Received a response to an unknown RPC function',
+              ), undefined)
+            })
           }
         }
-      }
-      catch (err) {
+      } catch (err) {
         if (err instanceof InputBufferUnderrunError) {
-          reader.rollbackPosition();
+          reader.rollbackPosition()
         } else {
-          isAtEnd = true;
           process.nextTick(() => {
-            clientCallback(err, undefined);
-          });
+            clientCallback(err, undefined)
+          })
         }
       }
     }, (err: any) => {
       process.nextTick(() => {
-        clientCallback(err, undefined);
-      });
-    });
-  });
+        clientCallback(err, undefined)
+      })
+    })
+  })
   const client: TClient = new ServiceClient(transport, TBinaryProtocol)
 
-  return client;
+  return client
 }
