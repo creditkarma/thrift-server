@@ -3,17 +3,13 @@
     "target": "es6",
     "module": "commonjs",
     "moduleResolution": "node",
-    "sourceMap": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "baseUrl": "./",
+    "rootDir": "../",
+    "baseUrl": "../",
     "noEmitOnError": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": true,
     "pretty": true,
     "removeComments": true,
     "paths": {
@@ -27,9 +23,6 @@
       "@types/request"
     ]
   },
-  "files": [
-    "./src/index.ts"
-  ],
   "exclude": [
     "node_modules"
   ]

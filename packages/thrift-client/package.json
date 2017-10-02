@@ -1,8 +1,9 @@
 {
-  "name": "thrift-client",
-  "version": "1.0.0",
+  "name": "@creditkarma/thrift-client",
+  "version": "0.0.1",
   "description": "Thrift client library for NodeJS written in TypeScript.",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "directories": {
     "example": "example"
   },
@@ -10,7 +11,7 @@
     "build": "npm run clean && npm run lint && tsc",
     "clean": "rm -rf ./dist",
     "lint": "tslint --fix ./src/**/*.ts",
-    "start": "ts-node ./example/index.ts",
+    "start": "ts-node --project ./example ./example/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Credit Karma",
