@@ -10,7 +10,7 @@ $ npm install
 $ npm start
 ```
 
-This will start a web server on localhost:8080.
+This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
 
 The sample app can switch between using a Request client or an Axios client by commenting these lines in example/client.ts
 

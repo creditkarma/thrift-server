@@ -16,7 +16,7 @@ export class AxiosConnection implements IHttpConnection {
     this.request.defaults.baseURL = `http://${options.hostName}:${options.port}`
   }
 
-  public write(dataToWrite: Buffer, seqid: number): Promise<Buffer> {
+  public write(dataToWrite: Buffer): Promise<Buffer> {
     return this.request.post('/', dataToWrite).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
     })

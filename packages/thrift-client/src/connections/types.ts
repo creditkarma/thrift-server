@@ -4,5 +4,5 @@ export interface IHttpConnectionOptions {
 }
 
 export interface IHttpConnection {
-  write(dataToWrite: Buffer, seqid: number): Promise<Buffer>
+  write(dataToWrite: Buffer): Promise<Buffer>
 }

@@ -21,7 +21,7 @@ export function createClient<TClient>(
 ): TClient {
   const transport: TTransport = new TBufferedTransport(undefined, (data: Buffer, seqid: number): void => {
     const clientCallback = (client as any)._reqs[seqid]
-    connection.write(data, seqid).then((returnValue: Buffer) => {
+    connection.write(data).then((returnValue: Buffer) => {
       const reader: TTransport = new TBufferedTransport(undefined, noop)
       const proto: TProtocol = new TBinaryProtocol(reader)
 

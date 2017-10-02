@@ -21,7 +21,7 @@ export class RequestConnection implements IHttpConnection {
     })
   }
 
-  public write(dataToWrite: Buffer, seqid: number): Promise<Buffer> {
+  public write(dataToWrite: Buffer): Promise<Buffer> {
     const combinedBufferLength: number = 0
     const responseData: Buffer[] = []
     return new Promise((resolve, reject) => {
