@@ -1,11 +1,9 @@
 import {
-  createClient,
-} from '../src/client'
-
-import {
   RequestClientApi,
+  createClient,
   createConnection,
   createAxiosConnection,
+  IHttpConnection,
 } from '../src/'
 
 import * as path from 'path'
@@ -30,7 +28,8 @@ const app = express();
 // Create thrift client
 // Using Request
 const requestClient: RequestClientApi = request.defaults({});
-const thriftClient: Calculator.Client = createClient(Calculator.Client, createConnection(requestClient, config));
+const connection: IHttpConnection = createConnection(requestClient, config)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection);
 
 // Using Axios
 // const requestClient: AxiosInstance = axios.create();

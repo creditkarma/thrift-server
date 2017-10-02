@@ -1,6 +1,8 @@
 import {
   TBinaryProtocol,
   TBufferedTransport,
+  TTransportConstructor,
+  TProtocolConstructor,
   Thrift,
   TMessage,
   TProtocol,
@@ -19,12 +21,13 @@ export function createClient<TClient>(
   ServiceClient: { new (output: TTransport, pClass: { new (trans: TTransport): TProtocol }): TClient; },
   connection: IHttpConnection,
 ): TClient {
-  const transport: TTransport = new TBufferedTransport(undefined, (data: Buffer, seqid: number): void => {
+  const transport: TTransport = new connection.transport(undefined, (data: Buffer, seqid: number): void => {
     const clientCallback = (client as any)._reqs[seqid]
     connection.write(data).then((returnValue: Buffer) => {
-      const reader: TTransport = new TBufferedTransport(undefined, noop)
-      const proto: TProtocol = new TBinaryProtocol(reader)
+      const reader: TTransport = new connection.transport(undefined, noop)
+      const proto: TProtocol = new connection.protocol(reader)
 
+      // We need to ensure that we have enough room to write the incooming data
       if ((reader as any).writeCursor + returnValue.length > (reader as any).inBuf.length) {
         const buf: Buffer = new Buffer((reader as any).writeCursor + data.length);
         (reader as any).inBuf.copy(buf, 0, 0, (reader as any).writeCursor);
@@ -55,7 +58,7 @@ export function createClient<TClient>(
             process.nextTick(() => {
               clientCallback(new Thrift.TApplicationException(
                 Thrift.TApplicationExceptionType.WRONG_METHOD_NAME,
-                'Received a response to an unknown RPC function',
+                `Received a response to an unknown RPC function: ${header.fname}`,
               ), undefined)
             })
           }
@@ -75,7 +78,7 @@ export function createClient<TClient>(
       })
     })
   })
-  const client: TClient = new ServiceClient(transport, TBinaryProtocol)
+  const client: TClient = new ServiceClient(transport, connection.protocol)
 
   return client
 }

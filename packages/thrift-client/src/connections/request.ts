@@ -1,3 +1,10 @@
+import {
+  TTransportConstructor,
+  TProtocolConstructor,
+  TBinaryProtocol,
+  TBufferedTransport,
+} from 'thrift'
+
 import * as request from 'request'
 
 import {
@@ -9,6 +16,8 @@ export type RequestClientApi =
   request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl>
 
 export class RequestConnection implements IHttpConnection {
+  transport: TTransportConstructor
+  protocol: TProtocolConstructor
   private request: RequestClientApi
   constructor(requestApi: RequestClientApi, options: IHttpConnectionOptions) {
     this.request = requestApi.defaults({
@@ -19,6 +28,8 @@ export class RequestConnection implements IHttpConnection {
       },
       url: `http://${options.hostName}:${options.port}`,
     })
+    this.transport = options.transport || TBufferedTransport
+    this.protocol = options.protocol || TBinaryProtocol
   }
 
   public write(dataToWrite: Buffer): Promise<Buffer> {
