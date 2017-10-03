@@ -18,6 +18,10 @@
   ],
   "author": "Credit Karma",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/creditkarma/thrift-server"
+  },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
