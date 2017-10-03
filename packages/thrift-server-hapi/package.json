@@ -20,6 +20,10 @@
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
+  },
   "dependencies": {
     "thrift": "^0.10.0"
   },
