@@ -11,7 +11,7 @@ import { Operation, Calculator, Work } from './codegen/tutorial/tutorial'
 import { SharedStruct } from './codegen/shared/shared'
 
 const server: Hapi.Server = new Hapi.Server();
-server.connection({ port: 8045, host: 'localhost' });
+server.connection({ port: 3000, host: 'localhost' });
 
 server.register(ThriftPlugin, (err: any) => {
   if (err) {
@@ -19,7 +19,7 @@ server.register(ThriftPlugin, (err: any) => {
   }
 });
 
-const impl = new Calculator.Processor({
+const impl = new Calculator.Processor<string>({
     ping(): void {},
     add(a: number, b: number): number {
       return a + b;

@@ -3,7 +3,7 @@ import {
   createClient,
   createConnection,
   createAxiosConnection,
-  IHttpConnection,
+  HttpConnection,
 } from '../src/'
 
 import * as path from 'path'
@@ -19,7 +19,7 @@ import {
 
 const config = {
   hostName: 'localhost',
-  port: 8045
+  port: 3000
 }
 
 // Get express instance
@@ -27,25 +27,14 @@ const app = express();
 
 // Create thrift client
 // Using Request
-const requestClient: RequestClientApi = request.defaults({});
-const connection: IHttpConnection = createConnection(requestClient, config)
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection);
+// const requestClient: RequestClientApi = request.defaults({});
+// const connection: HttpConnection<Calculator.Client> = createConnection(requestClient, config)
+// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection);
 
 // Using Axios
-// const requestClient: AxiosInstance = axios.create();
-// const thriftClient: Calculator.Client = createClient(Calculator.Client, createAxiosConnection(requestClient, config))
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, './index.html'));
-});
-
-app.get('/ping', (req, res) => {
-  thriftClient.ping().then(() => {
-    res.send('success')
-  }, (err: any) => {
-    res.status(500).send(err);
-  })
-});
+const requestClient: AxiosInstance = axios.create();
+const connection: HttpConnection<Calculator.Client> = createAxiosConnection(requestClient, config)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 function symbolToOperation(sym: string): Operation {
   switch (sym) {
@@ -62,7 +51,19 @@ function symbolToOperation(sym: string): Operation {
   }
 }
 
-app.get('/calculate', (req, res) => {
+app.get('/', (req: express.Request, res: express.Response): void => {
+  res.sendFile(path.join(__dirname, './index.html'));
+});
+
+app.get('/ping', (req: express.Request, res: express.Response): void => {
+  thriftClient.ping().then(() => {
+    res.send('success')
+  }, (err: any) => {
+    res.status(500).send(err);
+  })
+});
+
+app.get('/calculate', (req: express.Request, res: express.Response): void => {
   const work: Work = new Work({
     num1: req.query.left,
     num2: req.query.right,

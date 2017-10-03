@@ -1,30 +1,20 @@
 import {
-  TTransportConstructor,
-  TProtocolConstructor,
-  TBinaryProtocol,
-  TBufferedTransport,
-} from 'thrift'
-
-import {
   AxiosInstance,
   AxiosResponse,
 } from 'axios'
 
 import {
-  IHttpConnection,
+  HttpConnection,
   IHttpConnectionOptions,
-} from './types'
+} from './connection'
 
-export class AxiosConnection implements IHttpConnection {
-  transport: TTransportConstructor
-  protocol: TProtocolConstructor
+export class AxiosConnection<TClient> extends HttpConnection<TClient> {
   private request: AxiosInstance
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
+    super(options)
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
-    this.request.defaults.baseURL = `http://${options.hostName}:${options.port}`
-    this.transport = options.transport || TBufferedTransport
-    this.protocol = options.protocol || TBinaryProtocol
+    this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
   }
 
   public write(dataToWrite: Buffer): Promise<Buffer> {
@@ -34,6 +24,8 @@ export class AxiosConnection implements IHttpConnection {
   }
 }
 
-export function createAxiosConnection(requestApi: AxiosInstance, options: IHttpConnectionOptions): IHttpConnection {
-  return new AxiosConnection(requestApi, options)
+export function createAxiosConnection<TClient>(
+  requestApi: AxiosInstance,
+  options: IHttpConnectionOptions): HttpConnection<TClient> {
+  return new AxiosConnection<TClient>(requestApi, options)
 }

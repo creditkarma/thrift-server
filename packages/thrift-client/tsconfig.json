@@ -7,24 +7,20 @@
     "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
-    "baseUrl": "./",
     "noEmitOnError": true,
     "strictNullChecks": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
+    "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": true,
     "pretty": true,
     "removeComments": true,
-    "paths": {
-      "thrift": [
-        "./node_modules/@creditkarma/thrift-typescript/typings/thrift.d.ts"
-      ]
-    },
     "types": [
       "@types/node",
       "@types/express",
-      "@types/request"
+      "@types/request",
+      "@types/thrift"
     ]
   },
   "files": [

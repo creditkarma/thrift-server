@@ -1,40 +1,28 @@
-import {
-  TTransportConstructor,
-  TProtocolConstructor,
-  TBinaryProtocol,
-  TBufferedTransport,
-} from 'thrift'
-
 import * as request from 'request'
 
 import {
-  IHttpConnection,
+  HttpConnection,
   IHttpConnectionOptions,
-} from './types'
+} from './connection'
 
 export type RequestClientApi =
   request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl>
 
-export class RequestConnection implements IHttpConnection {
-  transport: TTransportConstructor
-  protocol: TProtocolConstructor
+export class RequestConnection<TClient> extends HttpConnection<TClient> {
   private request: RequestClientApi
   constructor(requestApi: RequestClientApi, options: IHttpConnectionOptions) {
+    super(options)
     this.request = requestApi.defaults({
       // Encoding needs to be explicitly set to null or the response body will be a string
       encoding: null,
       headers: {
         Connection: 'keep-alive',
       },
-      url: `http://${options.hostName}:${options.port}`,
+      url: `http://${this.hostName}:${this.port}`,
     })
-    this.transport = options.transport || TBufferedTransport
-    this.protocol = options.protocol || TBinaryProtocol
   }
 
   public write(dataToWrite: Buffer): Promise<Buffer> {
-    const combinedBufferLength: number = 0
-    const responseData: Buffer[] = []
     return new Promise((resolve, reject) => {
       this.request
         .post({
@@ -53,6 +41,8 @@ export class RequestConnection implements IHttpConnection {
   }
 }
 
-export function createConnection(requestApi: RequestClientApi, options: IHttpConnectionOptions): IHttpConnection {
-  return new RequestConnection(requestApi, options)
+export function createConnection<TClient>(
+  requestApi: RequestClientApi,
+  options: IHttpConnectionOptions): HttpConnection<TClient> {
+  return new RequestConnection<TClient>(requestApi, options)
 }

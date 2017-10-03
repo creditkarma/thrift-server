@@ -4,6 +4,9 @@
   "description": "Thrift client library for NodeJS written in TypeScript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "directories": {
     "example": "example"
   },
@@ -17,6 +20,7 @@
   "author": "Credit Karma",
   "license": "Apache-2.0",
   "dependencies": {
+    "@types/thrift": "^0.10.1",
     "thrift": "^0.10.0"
   },
   "devDependencies": {
