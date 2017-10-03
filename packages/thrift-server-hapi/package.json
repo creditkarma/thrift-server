@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "A Hapi server plugin for the Apache Thrift protocol",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "npm run clean && npm run lint && tsc",
     "clean": "rm -rf ./dist",
@@ -14,8 +18,8 @@
     "test:only": "lab -l -S ./dist/test",
     "lint": "tslint --fix './src/**/*.ts'"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Credit Karma",
+  "license": "Apache-2.0",
   "dependencies": {
     "thrift": "^0.10.0"
   },
@@ -28,6 +32,5 @@
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "^2.4.2",
     "watch": "^1.0.2"
-  },
-  "types": "dist/index.d.ts"
+  }
 }

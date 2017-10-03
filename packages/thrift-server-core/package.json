@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "Thrift core library in TypeScript",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "./dist"
+  ],
   "scripts": {
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
@@ -40,9 +44,5 @@
   "dependencies": {
     "thrift": "^0.10.0",
     "typescript": "^2.4.2"
-  },
-  "typings": "dist/index.d.ts",
-  "typescript": {
-    "definition": "dist/index.d.ts"
   }
 }
