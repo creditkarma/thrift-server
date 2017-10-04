@@ -39,12 +39,14 @@ export abstract class HttpConnection<TClient> {
   protected port: number
   protected hostName: string
   private client: TClient
+
   constructor(options: IHttpConnectionOptions) {
     this.port = options.port
     this.hostName = options.hostName
     this.Transport = options.Transport || TBufferedTransport
     this.Protocol = options.Protocol || TBinaryProtocol
   }
+
   public abstract write(dataToWrite: Buffer): Promise<Buffer>
 
   public setClient(client: TClient): void {

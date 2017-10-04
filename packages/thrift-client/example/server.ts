@@ -43,18 +43,18 @@ const impl = new Calculator.Processor<string>({
 })
 
 server.route({
-    method: 'POST',
-    path: '/',
-    handler: {
-        thrift: {
-            service: impl,
-        },
+  method: 'POST',
+  path: '/',
+  handler: {
+    thrift: {
+      service: impl,
     },
-    config: {
-        payload: {
-            parse: false,
-        },
+  },
+  config: {
+    payload: {
+      parse: false,
     },
+  },
 });
 
 server.start((err: any) => {

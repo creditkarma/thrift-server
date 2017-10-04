@@ -10,6 +10,7 @@ import {
 
 export class AxiosConnection<TClient> extends HttpConnection<TClient> {
   private request: AxiosInstance
+
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
     super(options)
     this.request = requestApi
@@ -22,10 +23,4 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient> {
       return Buffer.from(value.data)
     })
   }
-}
-
-export function createAxiosConnection<TClient>(
-  requestApi: AxiosInstance,
-  options: IHttpConnectionOptions): HttpConnection<TClient> {
-  return new AxiosConnection<TClient>(requestApi, options)
 }

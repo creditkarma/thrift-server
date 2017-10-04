@@ -1,8 +1,8 @@
 import {
-  RequestClientApi,
+  RequestInstance,
   createClient,
-  createConnection,
-  createAxiosConnection,
+  fromAxios,
+  fromRequest,
   HttpConnection,
 } from '../src/'
 
@@ -23,45 +23,45 @@ const config = {
 }
 
 // Get express instance
-const app = express();
+const app = express()
 
 // Create thrift client
 // Using Request
-// const requestClient: RequestClientApi = request.defaults({});
-// const connection: HttpConnection<Calculator.Client> = createConnection(requestClient, config)
-// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection);
+const requestClient: RequestInstance = request.defaults({})
+const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, config)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // Using Axios
-const requestClient: AxiosInstance = axios.create();
-const connection: HttpConnection<Calculator.Client> = createAxiosConnection(requestClient, config)
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+// const requestClient: AxiosInstance = axios.create()
+// const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
+// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 function symbolToOperation(sym: string): Operation {
   switch (sym) {
     case 'add':
-      return Operation.ADD;
+      return Operation.ADD
     case 'subtract':
-      return Operation.SUBTRACT;
+      return Operation.SUBTRACT
     case 'multiply':
-      return Operation.MULTIPLY;
+      return Operation.MULTIPLY
     case 'divide':
-      return Operation.DIVIDE;
+      return Operation.DIVIDE
     default:
-      throw new Error(`Unrecognized operation: ${sym}`);
+      throw new Error(`Unrecognized operation: ${sym}`)
   }
 }
 
 app.get('/', (req: express.Request, res: express.Response): void => {
-  res.sendFile(path.join(__dirname, './index.html'));
-});
+  res.sendFile(path.join(__dirname, './index.html'))
+})
 
 app.get('/ping', (req: express.Request, res: express.Response): void => {
   thriftClient.ping().then(() => {
     res.send('success')
   }, (err: any) => {
-    res.status(500).send(err);
+    res.status(500).send(err)
   })
-});
+})
 
 app.get('/calculate', (req: express.Request, res: express.Response): void => {
   const work: Work = new Work({
@@ -72,13 +72,13 @@ app.get('/calculate', (req: express.Request, res: express.Response): void => {
   thriftClient.calculate(1, work).then((val: number) => {
     res.send(`result: ${val}`)
   }, (err: any) => {
-    res.status(500).send(err);
+    res.status(500).send(err)
   })
-});
+})
 
 const server = app.listen(8080, () => {
-  var host = server.address().address;
-  var port = server.address().port;
+  var host = server.address().address
+  var port = server.address().port
 
-  console.log('Web server listening at http://%s:%s', host, port);
-});
+  console.log('Web server listening at http://%s:%s', host, port)
+})
