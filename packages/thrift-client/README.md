@@ -17,12 +17,14 @@ The sample app can switch between using a Request client or an Axios client by c
 ```
 // Create thrift client
 // Using Request
-const requestClient: RequestClientApi = request.defaults({});
-const thriftClient: MyService.Client = createClient(MyService.Client, createConnection(requestClient, config));
+const requestClient: RequestInstance = request.defaults({})
+const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, config)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // Using Axios
-// const requestClient: AxiosInstance = axios.create();
-// const thriftClient: MyService.Client = createClient(MyService.Client, createAxiosConnection(requestClient, config))
+// const requestClient: AxiosInstance = axios.create()
+// const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
+// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 ```
 
 ## Usage
@@ -38,12 +40,23 @@ $ npm install --save @creditkarma/thrift-client
 $ npm install --save axios
 ```
 
+Given the following service definition we will build a sample client.
+
+```c
+service Calculator {
+  i32 add(1: i32 left, 2: i32 right)
+  i32 subtract(1: i32 left, 2: i32 right)
+}
+```
+
+Would be used in a TypeScript service client as such:
+
 ```typescript
 import { createClient, fromAxios, HttpConnection } from '@creditkaram/thrift-client'
 import { TBinaryProtocol, TBufferedTransport } from 'thrift'
 import { default as axios, AxiosInstance }from 'axios'
 import * as express from 'express'
-import { MyService } from './codegen/my_service'
+import { Calculator } from './codegen/calculator'
 
 const app = express()
 
@@ -57,21 +70,32 @@ const clientConfig = {
 
 // Create thrift client
 const requestClient: AxiosInstance = axios.create()
-const connection: HttpConnection<MyService.Client> = fromAxios(requestClient, clientConfig)
-const thriftClient: MyService.Client = createClient(MyService.Client, connection)
+const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, clientConfig)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
-app.get('/ping', (req: express.Request, res: express.Response): void => {
-  thriftClient.ping().then(() => {
-    res.send('success')
+// This receives a query like "http://localhost:8080/add?left=5&right=3"
+app.get('/add', (req: express.Request, res: express.Response): void => {
+  // Client methods return a Promise of the expected result
+  thriftClient.add(req.query.left, req.query.right).then((result: number) => {
+    res.send(result)
   }, (err: any) => {
     res.status(500).send(err)
   })
 })
 
 const server = app.listen(8080, () => {
-  var host = server.address().address
-  var port = server.address().port
+  const host = server.address().address
+  const port = server.address().port
 
   console.log('Web server listening at http://%s:%s', host, port)
 })
 ```
+
+## Contributing
+
+For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
+External contributors must sign Contributor License Agreement (CLA)
+
+## License
+
+This project is licensed under [Apache License Version 2.0](./LICENSE)
