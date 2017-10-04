@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "noEmitOnError": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "allowSyntheticDefaultImports": true,
+    "allowUnreachableCode": true,
+    "pretty": true,
+    "removeComments": true,
+    "types": [
+      "@types/node",
+      "@types/express",
+      "@types/request",
+      "@types/thrift"
+    ]
+  },
+  "files": [
+    "./src/index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

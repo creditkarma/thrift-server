@@ -1,4 +1,4 @@
-# thrift-ts-core
+# Thrift Server
 Thrift core library in TypeScript
 
 ### Installation
