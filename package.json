@@ -21,10 +21,8 @@
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
-    "@types/lab": "^11.1.0",
     "@types/node": "^8.0.23",
     "code": "^4.1.0",
-    "lab": "^14.2.0",
     "lerna": "^2.1.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.6.0",

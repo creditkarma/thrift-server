@@ -120,5 +120,5 @@ export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
 }
 
 ThriftPlugin.register.attributes = {
-    pkg: require('../package.json'),
+    pkg: require('../../package.json'),
 }
