@@ -2,8 +2,8 @@
   "name": "@creditkarma/thrift-server-express",
   "version": "0.0.1",
   "description": "Thrift core library in TypeScript",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/main/index.js",
+  "types": "./dist/main/index.d.ts",
   "files": [
     "./dist"
   ],
@@ -11,14 +11,14 @@
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rm -rf ./dist",
-    "prepublish": "npm run compile",
+    "prepublish": "npm run build; rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
     "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab  --coverage --sourcemaps ./dist/test",
-    "lint": "tslint './src/**/*.ts'"
+    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
+    "lint": "tslint --fix './src/**/*.ts'"
   },
   "keywords": [
     "Thrift",
@@ -36,17 +36,19 @@
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.23",
     "@types/rimraf": "0.0.28",
-    "code": "^4.1.0",
-    "lab": "^14.2.0",
+    "@types/thrift": "^0.10.1",
     "body-parser": "^1.17.2",
+    "code": "^4.1.0",
     "express": "^4.15.3",
+    "lab": "^14.2.0",
     "lerna": "^2.0.0",
     "rimraf": "^2.5.4",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1"
   },
   "dependencies": {
-    "typescript": "^2.4.2",
-    "thrift-server-core": "*"
+    "@creditkarma/thrift-server-core": "^0.0.1",
+    "thrift": "^0.10.0",
+    "typescript": "^2.5.3"
   }
 }

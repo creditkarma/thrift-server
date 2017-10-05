@@ -1,8 +1,8 @@
 import {
   TBinaryProtocol,
   TBufferedTransport,
-  TFramedTransport,
   TCompactProtocol,
+  TFramedTransport,
   TJSONProtocol,
 } from 'thrift'
 

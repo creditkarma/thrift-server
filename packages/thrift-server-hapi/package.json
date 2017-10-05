@@ -2,20 +2,23 @@
   "name": "@creditkarma/thrift-server-hapi",
   "version": "0.0.1",
   "description": "A Hapi server plugin for the Apache Thrift protocol",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "files": [
-    "dist"
+    "./dist"
   ],
   "scripts": {
+    "prepublish": "npm run build; rimraf ./dist/tests",
+    "prebuild": "npm run test:codegen",
     "build": "npm run clean && npm run lint && tsc",
     "clean": "rm -rf ./dist",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
     "pretest": "npm run build",
     "test": "npm run test:only --",
+    "test:codegen": "rimraf ./src/tests/generated; thrift-typescript --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab -l -S ./dist/test",
+    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'"
   },
   "author": "Credit Karma",
@@ -28,10 +31,16 @@
     "thrift": "^0.10.0"
   },
   "peerDependencies": {
-    "hapi": "^16.1.1"
+    "hapi": "^16.1.2"
   },
   "devDependencies": {
+    "@creditkarma/thrift-typescript": "0.0.8",
     "@types/hapi": "^16.1.8",
+    "@types/lab": "^11.1.0",
+    "@types/thrift": "^0.10.1",
+    "hapi": "^16.6.2",
+    "lab": "^14.3.1",
+    "rimraf": "^2.6.2",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "^2.4.2",

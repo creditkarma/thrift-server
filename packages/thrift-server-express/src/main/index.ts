@@ -7,7 +7,7 @@ import {
   process,
   supportedProtocols,
   supportedTransports,
-} from 'thrift-server-core'
+} from '@creditkarma/thrift-server-core'
 
 // TODO: Can these be typed to specific strings?
 export interface IOptions {

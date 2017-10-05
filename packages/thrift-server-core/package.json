@@ -2,8 +2,8 @@
   "name": "@creditkarma/thrift-server-core",
   "version": "0.0.1",
   "description": "Thrift core library in TypeScript",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/main/index.js",
+  "types": "./dist/main/index.d.ts",
   "files": [
     "./dist"
   ],
@@ -11,14 +11,14 @@
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rm -rf ./dist",
-    "prepublish": "npm run compile",
+    "prepublish": "npm run build; rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
     "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab  --coverage --sourcemaps ./dist/test",
-    "lint": "tslint './src/**/*.ts'"
+    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
+    "lint": "tslint --fix './src/**/*.ts'"
   },
   "keywords": [
     "Thrift",
