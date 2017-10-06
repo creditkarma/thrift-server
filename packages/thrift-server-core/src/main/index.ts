@@ -4,6 +4,9 @@ import {
   TCompactProtocol,
   TFramedTransport,
   TJSONProtocol,
+  TProcessorConstructor,
+  TProtocolConstructor,
+  TTransportConstructor,
 } from 'thrift'
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
@@ -24,21 +27,23 @@ const protocols = {
 export const supportedProtocols = Object.keys(protocols)
 
 // TODO: Can we infer the transport?
-export function getTransport(transport: string = 'buffered') {
+export function getTransport(transport: string = 'buffered'): TTransportConstructor {
   return transports[transport]
 }
 
-export function getProtocol(protocol: string = 'binary') {
+export function getProtocol(protocol: string = 'binary'): TProtocolConstructor {
   return protocols[protocol]
 }
 
 // TODO: How should Services/handlers be typed?
-export function getService(Service, handlers) {
-  if (Service.Processor) {
-    return new Service.Processor(handlers)
+export function getService<TProcessor, THandler>(
+  Service: TProcessorConstructor<TProcessor, THandler>,
+  handlers: THandler) {
+  if ((Service as any).Processor) {
+    return new (Service as any).Processor(handlers)
   } else {
     // TODO: This assumes that the Processor was passed
-    return new Service(handlers)
+    return new (Service as any)(handlers)
   }
 }
 

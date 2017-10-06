@@ -10,7 +10,7 @@
   "scripts": {
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
-    "clean": "rm -rf ./dist",
+    "clean": "rimraf ./dist",
     "prepublish": "npm run build; rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
@@ -36,6 +36,7 @@
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.23",
     "@types/rimraf": "0.0.28",
+    "@types/thrift": "0.10.1",
     "code": "^4.1.0",
     "lab": "^14.2.0",
     "body-parser": "^1.17.2",
@@ -47,6 +48,6 @@
   },
   "dependencies": {
     "thrift": "^0.10.0",
-    "typescript": "^2.4.2"
+    "typescript": "^2.5.3"
   }
 }
