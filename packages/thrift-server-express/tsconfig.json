@@ -4,16 +4,22 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    // "declaration": true,
+    "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "strictNullChecks": true,
     "allowSyntheticDefaultImports": true,
     "pretty": true,
     "removeComments": true,
-    "allowJs": true,
     "types": [
       "@types/node",
-      "@types/code"
+      "@types/code",
+      "@types/express",
+      "@types/thrift",
+      "@types/body-parser"
     ]
   },
   "exclude": [

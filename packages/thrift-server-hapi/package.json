@@ -25,7 +25,7 @@
     "hapi": "^16.1.2"
   },
   "devDependencies": {
-    "@creditkarma/thrift-typescript": "0.0.6",
+    "@creditkarma/thrift-typescript": "^0.0.7",
     "@types/hapi": "^16.1.8",
     "@types/lab": "^11.1.0",
     "@types/thrift": "^0.10.1",
