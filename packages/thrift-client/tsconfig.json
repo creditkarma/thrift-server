@@ -15,16 +15,11 @@
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": true,
     "pretty": true,
-    "removeComments": true,
-    "types": [
-      "@types/node",
-      "@types/express",
-      "@types/request",
-      "@types/thrift"
-    ]
+    "removeComments": true
   },
   "exclude": [
     "node_modules",
+    "dist",
     "example"
   ]
 }

@@ -10,6 +10,7 @@
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap",
     "prebootstrap": "npm install",
+    "pretest": "lerna exec -- npm run build",
     "test": "lerna exec -- npm run test",
     "test-integration": "lerna run -- test-integration"
   },

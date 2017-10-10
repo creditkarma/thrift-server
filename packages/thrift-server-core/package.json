@@ -30,6 +30,10 @@
     "type": "git",
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
+  "dependencies": {
+    "thrift": "^0.10.0",
+    "typescript": "^2.5.3"
+  },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
@@ -45,9 +49,5 @@
     "rimraf": "^2.5.4",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1"
-  },
-  "dependencies": {
-    "thrift": "^0.10.0",
-    "typescript": "^2.5.3"
   }
 }

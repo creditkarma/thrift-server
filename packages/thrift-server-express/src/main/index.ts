@@ -27,7 +27,7 @@ export interface IOptions {
 export function thriftExpress<TProcessor, THandler>(
   Service: TProcessorConstructor<TProcessor, THandler>,
   handlers: THandler,
-  options: IOptions = {} as any) {
+  options: IOptions = {}): express.RequestHandler {
 
   const transport = options.transport
   if (transport && !isTransportSupported(transport)) {
@@ -46,10 +46,13 @@ export function thriftExpress<TProcessor, THandler>(
   // TODO: Should this be constructed once per plugin or once per request?
   const service: TProcessor = getService(Service, handlers)
 
-  async function handler(req: express.Request, res: express.Response, next: express.NextFunction) {
+  async function handler(
+    request: express.Request,
+    response: express.Response,
+    next: express.NextFunction): Promise<void> {
     try {
-      const result = await process(service, req.body, Transport, Protocol)
-      res.status(200).end(result)
+      const result = await process(service, request.body, Transport, Protocol, request)
+      response.status(200).end(result)
     } catch (err) {
       next(err)
     }
