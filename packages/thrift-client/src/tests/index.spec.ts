@@ -28,7 +28,7 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('Thrift Server Hapi', () => {
+describe('Thrift Client', () => {
   let server: any
   let connection: HttpConnection<Calculator.Client>
   let client: Calculator.Client

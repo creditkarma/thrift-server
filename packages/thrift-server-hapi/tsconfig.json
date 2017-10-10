@@ -13,7 +13,6 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": true,
     "pretty": true,
     "removeComments": true
   },
