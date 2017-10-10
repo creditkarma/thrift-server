@@ -11,19 +11,27 @@ import {
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
-const transports = {
+interface ITransportMap {
+  [name: string]: TTransportConstructor
+}
+
+const transports: ITransportMap = {
   buffered: TBufferedTransport,
   framed: TFramedTransport,
 }
-// TODO: Is there a better way to make nice error messages in plugins without exporting this?
+
 export const supportedTransports = Object.keys(transports)
 
-const protocols = {
+interface IProtocolMap {
+  [name: string]: TProtocolConstructor
+}
+
+const protocols: IProtocolMap = {
   binary: TBinaryProtocol,
   compact: TCompactProtocol,
   json: TJSONProtocol,
 }
-// TODO: Is there a better way to make nice error messages in plugins without exporting this?
+
 export const supportedProtocols = Object.keys(protocols)
 
 // TODO: Can we infer the transport?
@@ -33,6 +41,14 @@ export function getTransport(transport: string = 'buffered'): TTransportConstruc
 
 export function getProtocol(protocol: string = 'binary'): TProtocolConstructor {
   return protocols[protocol]
+}
+
+export function supportsTransport(transport: string): boolean {
+  return supportedTransports.indexOf(transport) !== -1
+}
+
+export function supportsProtocol(protocol: string): boolean {
+  return supportedProtocols.indexOf(protocol) !== -1
 }
 
 // TODO: How should Services/handlers be typed?
@@ -57,18 +73,22 @@ export function isProtocolSupported(protocol: string): boolean {
   return supportedProtocols.indexOf(protocol) !== -1
 }
 
-// TODO: What should this Promise be typed as?
-export function process(processor, buffer, Transport, Protocol): Promise<any> {
-  const transportWithData = new Transport()
-  transportWithData.inBuf = buffer
-  transportWithData.writeCursor = buffer.length
+export function process<Context>(
+  processor: any,
+  buffer: Buffer,
+  Transport: TTransportConstructor,
+  Protocol: TProtocolConstructor,
+  context?: Context): Promise<any> {
+  const transportWithData = new Transport(undefined, () => null);
+  (transportWithData as any).inBuf = buffer;
+  (transportWithData as any).writeCursor = buffer.length
   const input = new Protocol(transportWithData)
 
   return new Promise((resolve, reject) => {
     const output = new Protocol(new Transport(undefined, resolve))
 
     try {
-      processor.process(input, output)
+      processor.process(input, output, context)
       transportWithData.commitPosition()
     } catch (err) {
       if (err instanceof InputBufferUnderrunError) {

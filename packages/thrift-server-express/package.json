@@ -31,6 +31,11 @@
     "type": "git",
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express"
   },
+  "dependencies": {
+    "@creditkarma/thrift-server-core": "0.0.*",
+    "thrift": "^0.10.0",
+    "typescript": "^2.5.3"
+  },
   "devDependencies": {
     "@creditkarma/thrift-typescript": "^0.0.7",
     "@types/body-parser": "^1.16.5",
@@ -49,10 +54,5 @@
     "rimraf": "^2.5.4",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1"
-  },
-  "dependencies": {
-    "@creditkarma/thrift-server-core": "^0.0.1",
-    "thrift": "^0.10.0",
-    "typescript": "^2.5.3"
   }
 }
