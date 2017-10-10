@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "lerna exec -- npm run build",
-    "clean": "rimraf **/node_modules **/dist **/coverage",
+    "clean": "rimraf **/node_modules **/dist **/coverage **/generated",
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap",
@@ -34,7 +34,7 @@
     "rimraf": "^2.6.1",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1",
-    "typescript": "^2.4.2",
+    "typescript": "^2.5.3",
     "watch": "^1.0.2"
   }
 }
