@@ -5,11 +5,27 @@ import {
   TFramedTransport,
   TJSONProtocol,
   TProcessorConstructor,
+  TProtocol,
   TProtocolConstructor,
   TTransportConstructor,
 } from 'thrift'
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
+
+export interface IThirftProcessor<Context> {
+  process(input: TProtocol, output: TProtocol, context?: Context): void
+}
+
+export type ProtocolType =
+  'binary' | 'compact' | 'json'
+
+export type TransportType =
+  'buffered' | 'framed'
+
+export interface IPluginOptions {
+  transport?: TransportType
+  protocol?: ProtocolType
+}
 
 interface ITransportMap {
   [name: string]: TTransportConstructor
@@ -20,7 +36,7 @@ const transports: ITransportMap = {
   framed: TFramedTransport,
 }
 
-export const supportedTransports = Object.keys(transports)
+export const supportedTransports: string[] = Object.keys(transports)
 
 interface IProtocolMap {
   [name: string]: TProtocolConstructor
@@ -32,49 +48,44 @@ const protocols: IProtocolMap = {
   json: TJSONProtocol,
 }
 
-export const supportedProtocols = Object.keys(protocols)
+export const supportedProtocols: string[] = Object.keys(protocols)
 
-// TODO: Can we infer the transport?
-export function getTransport(transport: string = 'buffered'): TTransportConstructor {
+export function getTransport(transport: TransportType = 'buffered'): TTransportConstructor {
+  if (!isTransportSupported(transport)) {
+    throw new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`)
+  }
+
   return transports[transport]
 }
 
-export function getProtocol(protocol: string = 'binary'): TProtocolConstructor {
+export function getProtocol(protocol: ProtocolType = 'binary'): TProtocolConstructor {
+  if (protocol && !isProtocolSupported(protocol)) {
+    throw new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`)
+  }
+
   return protocols[protocol]
 }
 
-export function supportsTransport(transport: string): boolean {
-  return supportedTransports.indexOf(transport) !== -1
-}
-
-export function supportsProtocol(protocol: string): boolean {
-  return supportedProtocols.indexOf(protocol) !== -1
-}
-
-// TODO: How should Services/handlers be typed?
 export function getService<TProcessor, THandler>(
   Service: TProcessorConstructor<TProcessor, THandler>,
-  handlers: THandler) {
+  handlers: THandler): TProcessor {
   if ((Service as any).Processor) {
     return new (Service as any).Processor(handlers)
   } else {
-    // TODO: This assumes that the Processor was passed
     return new (Service as any)(handlers)
   }
 }
 
-export function isTransportSupported(transport: string): boolean {
-  // TODO: TypeScript still doesn't support .contains method
+export function isTransportSupported(transport: TransportType): boolean {
   return supportedTransports.indexOf(transport) !== -1
 }
 
-export function isProtocolSupported(protocol: string): boolean {
-  // TODO: TypeScript still doesn't support .contains method
+export function isProtocolSupported(protocol: ProtocolType): boolean {
   return supportedProtocols.indexOf(protocol) !== -1
 }
 
 export function process<Context>(
-  processor: any,
+  processor: IThirftProcessor<Context>,
   buffer: Buffer,
   Transport: TTransportConstructor,
   Protocol: TProtocolConstructor,
@@ -82,6 +93,7 @@ export function process<Context>(
   const transportWithData = new Transport(undefined, () => null);
   (transportWithData as any).inBuf = buffer;
   (transportWithData as any).writeCursor = buffer.length
+
   const input = new Protocol(transportWithData)
 
   return new Promise((resolve, reject) => {

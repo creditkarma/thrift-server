@@ -2,11 +2,9 @@ import {
   getProtocol,
   getService,
   getTransport,
-  isProtocolSupported,
-  isTransportSupported,
+  IPluginOptions,
+  IThirftProcessor,
   process,
-  supportedProtocols,
-  supportedTransports,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -17,33 +15,13 @@ import {
 
 import * as express from 'express'
 
-// TODO: Can these be typed to specific strings?
-export interface IOptions {
-  transport?: string
-  protocol?: string
-}
-
-// TODO: Is there a cleaner way to type + default options?
-export function thriftExpress<TProcessor, THandler>(
+export function thriftExpress<TProcessor extends IThirftProcessor<express.Request>, THandler>(
   Service: TProcessorConstructor<TProcessor, THandler>,
   handlers: THandler,
-  options: IOptions = {}): express.RequestHandler {
+  options: IPluginOptions = {}): express.RequestHandler {
 
-  const transport = options.transport
-  if (transport && !isTransportSupported(transport)) {
-    throw new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`)
-  }
-  // TODO: Is this okay to look up once per plugin?
-  const Transport: TTransportConstructor = getTransport(transport)
-
-  const protocol = options.protocol
-  if (protocol && !isProtocolSupported(protocol)) {
-    throw new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`)
-  }
-  // TODO: Is this okay to look up once per plugin?
-  const Protocol: TProtocolConstructor = getProtocol(protocol)
-
-  // TODO: Should this be constructed once per plugin or once per request?
+  const Transport: TTransportConstructor = getTransport(options.transport)
+  const Protocol: TProtocolConstructor = getProtocol(options.protocol)
   const service: TProcessor = getService(Service, handlers)
 
   async function handler(
