@@ -114,6 +114,31 @@ type ProtocolType =
   'binary' | 'compact' | 'json'
 ```
 
+## Creating Custom Connections
+
+While Thrift Client includes support for Axios and Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
+
+As an example look at the AxiosConnection:
+
+```typescript
+export class AxiosConnection<TClient> extends HttpConnection<TClient> {
+  private request: AxiosInstance
+
+  constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
+    super(options)
+    this.request = requestApi
+    this.request.defaults.responseType = 'arraybuffer'
+    this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
+  }
+
+  public write(dataToWrite: Buffer): Promise<Buffer> {
+    return this.request.post('/', dataToWrite).then((value: AxiosResponse) => {
+      return Buffer.from(value.data)
+    })
+  }
+}
+```
+
 ## Contributing
 
 For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
