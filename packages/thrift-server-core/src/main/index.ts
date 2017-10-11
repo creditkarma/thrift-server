@@ -12,7 +12,7 @@ import {
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
-export interface IThirftProcessor<Context> {
+export interface IThriftProcessor<Context> {
   process(input: TProtocol, output: TProtocol, context?: Context): void
 }
 
@@ -85,7 +85,7 @@ export function isProtocolSupported(protocol: ProtocolType): boolean {
 }
 
 export function process<Context>(
-  processor: IThirftProcessor<Context>,
+  processor: IThriftProcessor<Context>,
   buffer: Buffer,
   Transport: TTransportConstructor,
   Protocol: TProtocolConstructor,
