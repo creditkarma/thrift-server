@@ -1,17 +1,15 @@
-import {
-  createWebServer,
-  TBinaryProtocol,
-  TBufferedTransport,
-} from 'thrift'
-
 import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import Hapi = require('hapi');
 
 import { Operation, Calculator, Work } from './generated/tutorial/tutorial'
 import { SharedStruct } from './generated/shared/shared'
 
+import {
+  SERVER_CONFIG
+} from './config'
+
 const server: Hapi.Server = new Hapi.Server();
-server.connection({ port: 8045, host: 'localhost' });
+server.connection(SERVER_CONFIG);
 
 server.register(ThriftPlugin, (err: any) => {
   if (err) {

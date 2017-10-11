@@ -1,14 +1,14 @@
 import {
   RequestInstance,
   createClient,
-  fromAxios,
+  // fromAxios,
   fromRequest,
   HttpConnection,
-} from '../src/'
+} from '../src/main/'
 
 import * as path from 'path'
 import * as request from 'request'
-import { default as axios, AxiosInstance }from 'axios'
+// import { default as axios, AxiosInstance }from 'axios'
 import * as express from 'express'
 
 import {
@@ -17,10 +17,10 @@ import {
   Calculator,
 } from './generated/tutorial/tutorial'
 
-const config = {
-  hostName: 'localhost',
-  port: 3000
-}
+import {
+  SERVER_CONFIG,
+  CLIENT_CONFIG
+} from './config'
 
 // Get express instance
 const app = express()
@@ -28,7 +28,10 @@ const app = express()
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, config)
+const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, {
+  hostName: SERVER_CONFIG.host,
+  port: SERVER_CONFIG.port
+})
 const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // Using Axios
@@ -76,9 +79,6 @@ app.get('/calculate', (req: express.Request, res: express.Response): void => {
   })
 })
 
-const server = app.listen(8080, () => {
-  var host = server.address().address
-  var port = server.address().port
-
-  console.log('Web server listening at http://%s:%s', host, port)
+app.listen(CLIENT_CONFIG.port, () => {
+  console.log(`Web server listening at http://${CLIENT_CONFIG.host}:${CLIENT_CONFIG.port}`)
 })

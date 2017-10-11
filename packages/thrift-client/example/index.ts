@@ -1,4 +1,4 @@
-import { fork, exec } from 'child_process'
+import { fork } from 'child_process'
 import { generate } from '@creditkarma/thrift-typescript'
 
 process.chdir(__dirname)
