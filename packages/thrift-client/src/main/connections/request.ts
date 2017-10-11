@@ -22,7 +22,7 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
       headers: {
         Connection: 'keep-alive',
       },
-      url: `http://${this.hostName}:${this.port}`,
+      url: `http://${this.hostName}:${this.port}${this.path}`,
     })
   }
 

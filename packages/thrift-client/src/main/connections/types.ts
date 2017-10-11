@@ -6,6 +6,7 @@ import {
 export interface IHttpConnectionOptions {
   hostName: string
   port: number
+  path?: string
   transport?: TransportType
   protocol?: ProtocolType
 }

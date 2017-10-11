@@ -22,7 +22,7 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient> {
   }
 
   public write(dataToWrite: Buffer): Promise<Buffer> {
-    return this.request.post('/', dataToWrite).then((value: AxiosResponse) => {
+    return this.request.post(this.path, dataToWrite).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
     })
   }
