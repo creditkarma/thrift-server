@@ -1,35 +1,31 @@
 import * as Hapi from 'hapi'
 
 import {
-  getProtocol,
-  getTransport,
-  process,
-  supportedProtocols,
-  supportedTransports,
-  supportsProtocol,
-  supportsTransport,
+    getProtocol,
+    getTransport,
+    IPluginOptions,
+    IThirftProcessor,
+    process,
 } from '@creditkarma/thrift-server-core'
 
 import {
-  TProtocol,
-  TProtocolConstructor,
-  TTransportConstructor,
+    TProtocol,
+    TProtocolConstructor,
+    TTransportConstructor,
 } from 'thrift'
 
-export interface IHandlerOptions {
-  service: object
-}
-
-export interface IPluginOptions {
-    transport?: string
-    protocol?: string
+export interface IHandlerOptions<TProcessor> {
+    service: TProcessor
 }
 
 export interface IThriftContext {
     method: string
 }
 
-function readThriftMethod(buffer: Buffer, Transport: TTransportConstructor, Protocol: TProtocolConstructor) {
+export type ThriftHapiPlugin =
+    Hapi.PluginRegistrationObject<IPluginOptions>
+
+function readThriftMethod(buffer: Buffer, Transport: TTransportConstructor, Protocol: TProtocolConstructor): string {
     const transportWithData = new Transport(undefined, () => null);
     (transportWithData as any).inBuf = buffer;
     (transportWithData as any).writeCursor = buffer.length
@@ -40,46 +36,40 @@ function readThriftMethod(buffer: Buffer, Transport: TTransportConstructor, Prot
     return begin.fname
 }
 
-export const ThriftPlugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
+export function createPlugin<TProcessor extends IThirftProcessor<Hapi.Request>>(): ThriftHapiPlugin {
+    const plugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
+        register(server: Hapi.Server, pluginOptions: IPluginOptions, next) {
+            const Transport: TTransportConstructor = getTransport(pluginOptions.transport)
+            const Protocol: TProtocolConstructor = getProtocol(pluginOptions.protocol)
 
-    register(server, pluginOptions, next) {
-
-        const transport: string | undefined = pluginOptions.transport
-        if (transport && !supportsTransport(transport)) {
-            next(new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`))
-        }
-
-        const protocol: string | undefined = pluginOptions.protocol
-        if (protocol && !supportsProtocol(protocol)) {
-            next(new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`))
-        }
-
-        const Transport: TTransportConstructor = getTransport(transport)
-        const Protocol: TProtocolConstructor = getProtocol(protocol)
-
-        server.handler('thrift', (route, options: IHandlerOptions) => {
-            const service = options.service
-            if (!service) {
-                throw new Error('No service implementation specified.')
-            }
-
-            return (request, reply) => {
-                try {
-                    const method = readThriftMethod(request.payload, Transport, Protocol)
-                    request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
-                } catch (err) {
-                    return reply(err)
+            server.handler('thrift', (route, options: IHandlerOptions<TProcessor>) => {
+                const service = options.service
+                if (!service) {
+                    throw new Error('No service implementation specified.')
                 }
 
-                const result = process(service, request.payload, Transport, Protocol, request)
-                return reply(result)
-            }
-        })
+                return (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
+                    try {
+                        const method: string = readThriftMethod(request.payload, Transport, Protocol)
+                        request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
+                    } catch (err) {
+                        return reply(err)
+                    }
 
-        next()
-    },
+                    const result = process(service, request.payload, Transport, Protocol, request)
+                    return reply(result)
+                }
+            })
+
+            next()
+        },
+    };
+
+    (plugin.register as any).attributes = {
+        pkg: require('../../package.json'),
+    }
+
+    return plugin
 }
 
-ThriftPlugin.register.attributes = {
-    pkg: require('../../package.json'),
-}
+export const ThriftPlugin: ThriftHapiPlugin = createPlugin<any>()
