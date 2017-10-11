@@ -3,7 +3,7 @@ import {
   getService,
   getTransport,
   IPluginOptions,
-  IThirftProcessor,
+  IThriftProcessor,
   process,
 } from '@creditkarma/thrift-server-core'
 
@@ -15,7 +15,7 @@ import {
 
 import * as express from 'express'
 
-export function thriftExpress<TProcessor extends IThirftProcessor<express.Request>, THandler>(
+export function thriftExpress<TProcessor extends IThriftProcessor<express.Request>, THandler>(
   Service: TProcessorConstructor<TProcessor, THandler>,
   handlers: THandler,
   options: IPluginOptions = {}): express.RequestHandler {

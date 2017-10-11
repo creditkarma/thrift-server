@@ -4,7 +4,7 @@ import {
     getProtocol,
     getTransport,
     IPluginOptions,
-    IThirftProcessor,
+    IThriftProcessor,
     process,
 } from '@creditkarma/thrift-server-core'
 
@@ -36,7 +36,7 @@ function readThriftMethod(buffer: Buffer, Transport: TTransportConstructor, Prot
     return begin.fname
 }
 
-export function createPlugin<TProcessor extends IThirftProcessor<Hapi.Request>>(): ThriftHapiPlugin {
+export function createPlugin<TProcessor extends IThriftProcessor<Hapi.Request>>(): ThriftHapiPlugin {
     const plugin: Hapi.PluginRegistrationObject<IPluginOptions> = {
         register(server: Hapi.Server, pluginOptions: IPluginOptions, next) {
             const Transport: TTransportConstructor = getTransport(pluginOptions.transport)
