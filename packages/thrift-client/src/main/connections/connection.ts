@@ -33,16 +33,26 @@ function createReader(Transport: TTransportConstructor, data: Buffer): TTranspor
   return reader
 }
 
+function readPath(path: string = '/'): string {
+  if (path.startsWith('/')) {
+    return path
+  } else {
+    return `/${path}`
+  }
+}
+
 export abstract class HttpConnection<TClient> {
   public Transport: TTransportConstructor
   public Protocol: TProtocolConstructor
   protected port: number
   protected hostName: string
+  protected path: string
   private client: TClient
 
   constructor(options: IHttpConnectionOptions) {
     this.port = options.port
     this.hostName = options.hostName
+    this.path = readPath(options.path)
     this.Transport = getTransport(options.transport)
     this.Protocol = getProtocol(options.protocol)
   }

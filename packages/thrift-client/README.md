@@ -65,10 +65,11 @@ import { Calculator } from './codegen/calculator'
 
 const app = express()
 
-// 'transport' and 'protocol' are optional and will default to these values
+// 'transport', 'protocol' and 'path' are optional and will default to these values
 const clientConfig: IHttpConnectionOptions = {
   hostName: 'localhost',
   port: 3000,
+  path: '/',
   transport: 'buffered',
   protocol: 'binary',
 }
@@ -132,7 +133,7 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient> {
   }
 
   public write(dataToWrite: Buffer): Promise<Buffer> {
-    return this.request.post('/', dataToWrite).then((value: AxiosResponse) => {
+    return this.request.post(this.path, dataToWrite).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
     })
   }
