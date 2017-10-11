@@ -2,8 +2,11 @@ import * as request from 'request'
 
 import {
   HttpConnection,
-  IHttpConnectionOptions,
 } from './connection'
+
+import {
+  IHttpConnectionOptions,
+} from './types'
 
 export type RequestInstance =
   request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl>

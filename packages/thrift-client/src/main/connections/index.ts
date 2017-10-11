@@ -6,7 +6,6 @@ import { AxiosInstance } from 'axios'
 
 import {
   HttpConnection,
-  IHttpConnectionOptions,
 } from './connection'
 
 import {
@@ -17,6 +16,10 @@ import {
   RequestConnection,
   RequestInstance,
 } from './request'
+
+import {
+  IHttpConnectionOptions,
+} from './types'
 
 export function fromAxios<TClient>(
   requestApi: AxiosInstance,

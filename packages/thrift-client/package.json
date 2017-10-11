@@ -31,6 +31,7 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client"
   },
   "dependencies": {
+    "@creditkarma/thrift-server-core": "0.0.*",
     "@types/thrift": "^0.10.1",
     "thrift": "^0.10.0"
   },
