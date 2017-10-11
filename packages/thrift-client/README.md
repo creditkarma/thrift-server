@@ -52,20 +52,30 @@ service Calculator {
 Would be used in a TypeScript service client as such:
 
 ```typescript
-import { createClient, fromAxios, HttpConnection } from '@creditkaram/thrift-client'
-import { TBinaryProtocol, TBufferedTransport } from 'thrift'
+import {
+  createClient,
+  fromAxios,
+  HttpConnection,
+  IHttpConnectionOptions,
+} from '@creditkaram/thrift-client'
+
 import { default as axios, AxiosInstance }from 'axios'
 import * as express from 'express'
 import { Calculator } from './codegen/calculator'
 
 const app = express()
 
-// Transport and Protocol are optional and will default to these values
-const clientConfig = {
+// 'transport' and 'protocol' are optional and will default to these values
+const clientConfig: IHttpConnectionOptions = {
   hostName: 'localhost',
   port: 3000,
-  Transport: TBufferedTransport,
-  Protocol: TBinaryProtocol,
+  transport: 'buffered',
+  protocol: 'binary',
+}
+
+const serverConfig = {
+  hostName: 'localhost',
+  port: 8080,
 }
 
 // Create thrift client
@@ -83,12 +93,25 @@ app.get('/add', (req: express.Request, res: express.Response): void => {
   })
 })
 
-const server = app.listen(8080, () => {
-  const host = server.address().address
-  const port = server.address().port
-
-  console.log('Web server listening at http://%s:%s', host, port)
+app.listen(serverConfig.port, () => {
+  console.log(`Web server listening at http://${serverConfig.hostName}:${serverConfig.port}`)
 })
+```
+
+### Options
+
+The possible transport types are:
+
+```typescript
+type TransportType =
+  'buffered' | 'framed'
+```
+
+The possible protocol types are:
+
+```typescript
+type ProtocolType =
+  'binary' | 'compact' | 'json'
 ```
 
 ## Contributing

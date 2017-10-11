@@ -1,6 +1,4 @@
 import {
-  TBinaryProtocol,
-  TBufferedTransport,
   Thrift,
   TMessage,
   TProtocol,
@@ -8,6 +6,15 @@ import {
   TTransport,
   TTransportConstructor,
 } from 'thrift'
+
+import {
+  getProtocol,
+  getTransport,
+} from '@creditkarma/thrift-server-core'
+
+import {
+  IHttpConnectionOptions,
+} from './types'
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
@@ -26,13 +33,6 @@ function createReader(Transport: TTransportConstructor, data: Buffer): TTranspor
   return reader
 }
 
-export interface IHttpConnectionOptions {
-  hostName: string
-  port: number
-  Transport?: TTransportConstructor
-  Protocol?: TProtocolConstructor
-}
-
 export abstract class HttpConnection<TClient> {
   public Transport: TTransportConstructor
   public Protocol: TProtocolConstructor
@@ -43,8 +43,8 @@ export abstract class HttpConnection<TClient> {
   constructor(options: IHttpConnectionOptions) {
     this.port = options.port
     this.hostName = options.hostName
-    this.Transport = options.Transport || TBufferedTransport
-    this.Protocol = options.Protocol || TBinaryProtocol
+    this.Transport = getTransport(options.transport)
+    this.Protocol = getProtocol(options.protocol)
   }
 
   public abstract write(dataToWrite: Buffer): Promise<Buffer>

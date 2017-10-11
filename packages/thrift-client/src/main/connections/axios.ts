@@ -5,8 +5,11 @@ import {
 
 import {
   HttpConnection,
-  IHttpConnectionOptions,
 } from './connection'
+
+import {
+  IHttpConnectionOptions,
+} from './types'
 
 export class AxiosConnection<TClient> extends HttpConnection<TClient> {
   private request: AxiosInstance

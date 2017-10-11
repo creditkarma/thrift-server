@@ -1,17 +1,17 @@
 import {
-  TProtocolConstructor,
-  TTransportConstructor,
-} from 'thrift'
+  ProtocolType,
+  TransportType,
+} from '@creditkarma/thrift-server-core'
 
 export interface IHttpConnectionOptions {
   hostName: string
   port: number
-  transport?: TTransportConstructor
-  protocol?: TProtocolConstructor
+  transport?: TransportType
+  protocol?: ProtocolType
 }
 
 export interface IHttpConnection {
-  transport: TTransportConstructor
-  protocol: TProtocolConstructor
+  transport: TransportType
+  protocol: ProtocolType
   write(dataToWrite: Buffer): Promise<Buffer>
 }
