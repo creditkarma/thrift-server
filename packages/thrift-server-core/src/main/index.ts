@@ -1,35 +1,28 @@
 import {
+  Int64,
   TBinaryProtocol,
   TBufferedTransport,
   TCompactProtocol,
   TFramedTransport,
   TJSONProtocol,
   TProcessorConstructor,
-  TProtocol,
   TProtocolConstructor,
   TTransportConstructor,
 } from 'thrift'
 
 const InputBufferUnderrunError: any = require('thrift/lib/nodejs/lib/thrift/input_buffer_underrun_error')
 
-export interface IThriftProcessor<Context> {
-  process(input: TProtocol, output: TProtocol, context?: Context): void
-}
+import {
+  IProtocolMap,
+  IThriftProcessor,
+  ITransportMap,
+  ProtocolType,
+  TransportType,
+} from './types'
 
-export type ProtocolType =
-  'binary' | 'compact' | 'json'
+export { Int64 as Int64 }
 
-export type TransportType =
-  'buffered' | 'framed'
-
-export interface IPluginOptions {
-  transport?: TransportType
-  protocol?: ProtocolType
-}
-
-interface ITransportMap {
-  [name: string]: TTransportConstructor
-}
+export * from './types'
 
 const transports: ITransportMap = {
   buffered: TBufferedTransport,
@@ -37,10 +30,6 @@ const transports: ITransportMap = {
 }
 
 export const supportedTransports: string[] = Object.keys(transports)
-
-interface IProtocolMap {
-  [name: string]: TProtocolConstructor
-}
 
 const protocols: IProtocolMap = {
   binary: TBinaryProtocol,

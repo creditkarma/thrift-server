@@ -42,7 +42,7 @@ export function createPlugin<TProcessor extends IThriftProcessor<Hapi.Request>>(
             const Transport: TTransportConstructor = getTransport(pluginOptions.transport)
             const Protocol: TProtocolConstructor = getProtocol(pluginOptions.protocol)
 
-            server.handler('thrift', (route, options: IHandlerOptions<TProcessor>) => {
+            server.handler('thrift', (route: Hapi.RoutePublicInterface, options: IHandlerOptions<TProcessor>) => {
                 const service = options.service
                 if (!service) {
                     throw new Error('No service implementation specified.')
