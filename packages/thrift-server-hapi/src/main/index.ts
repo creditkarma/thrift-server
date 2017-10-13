@@ -3,9 +3,10 @@ import * as Hapi from 'hapi'
 import {
     getProtocol,
     getTransport,
-    IPluginOptions,
     IThriftProcessor,
     process,
+    ProtocolType,
+    TransportType,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -16,6 +17,11 @@ import {
 
 export interface IHandlerOptions<TProcessor> {
     service: TProcessor
+}
+
+export interface IPluginOptions {
+  transport?: TransportType
+  protocol?: ProtocolType
 }
 
 export interface IThriftContext {
