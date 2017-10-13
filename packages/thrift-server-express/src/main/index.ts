@@ -2,9 +2,10 @@ import {
   getProtocol,
   getService,
   getTransport,
-  IPluginOptions,
   IThriftProcessor,
   process,
+  ProtocolType,
+  TransportType,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -14,6 +15,11 @@ import {
 } from 'thrift'
 
 import * as express from 'express'
+
+export interface IPluginOptions {
+  transport?: TransportType
+  protocol?: ProtocolType
+}
 
 export function thriftExpress<TProcessor extends IThriftProcessor<express.Request>, THandler>(
   Service: TProcessorConstructor<TProcessor, THandler>,

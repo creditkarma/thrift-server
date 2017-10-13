@@ -10,11 +10,6 @@ export type ProtocolType =
 export type TransportType =
   'buffered' | 'framed'
 
-export interface IPluginOptions {
-  transport?: TransportType
-  protocol?: ProtocolType
-}
-
 export interface ITransportMap {
   [name: string]: TTransportConstructor
 }
