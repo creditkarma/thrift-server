@@ -47,6 +47,8 @@ jobs:
   publish:
     <<: *defaults
     steps:
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
           at: ./
