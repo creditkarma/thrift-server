@@ -44,6 +44,19 @@ jobs:
           name: npm-test
           command: npm test
 
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ./
+      - run:
+          name: npm-token
+          command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
+      - run:
+          name: publish-npm
+          command: npm run release
+
 workflows:
   version: 2
   build_test:
@@ -58,3 +71,11 @@ workflows:
             filters:
               tags:
                 only: /.*/
+        - publish:
+            requires:
+              - test
+            filters:
+              tags:
+                only: /(v)?[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore: /.*/
