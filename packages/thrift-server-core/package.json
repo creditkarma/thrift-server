@@ -14,7 +14,6 @@
     "prepublish": "npm run build && rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
-    "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",

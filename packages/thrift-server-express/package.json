@@ -8,14 +8,13 @@
     "./dist"
   ],
   "scripts": {
+    "prepublish": "npm run build && rimraf ./dist/tests",
     "prebuild": "npm run test:codegen",
     "build": "npm run clean && npm run lint && npm run compile",
     "clean": "rimraf ./dist",
     "compile": "tsc",
-    "prepublish": "npm run build && rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
-    "start": "npm run build && node dist/server.js",
-    "pretest": "npm run build",
+    "start": "npm run build && node dist/main/server.js",
     "test": "npm run test:only --",
     "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",

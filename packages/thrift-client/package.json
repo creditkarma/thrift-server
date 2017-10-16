@@ -18,7 +18,6 @@
     "clean": "rm -rf ./dist",
     "watch": "npm run build -- --watch",
     "start": "ts-node --project ./example ./example/index.ts",
-    "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
