@@ -25,6 +25,7 @@ jobs:
             - dist
             - LICENSE
             - package.json
+            - lerna.json
             - README.md
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
