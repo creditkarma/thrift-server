@@ -13,7 +13,7 @@
     "pretest": "lerna exec -- npm run build",
     "test": "lerna exec -- npm run test",
     "test-integration": "lerna run -- test-integration",
-    "release:patch": "lerna publish --cd-version patch --skip-npm && npm run release:push",
+    "release:patch": "lerna publish --cd-version patch --skip-npm",
     "release:minor": "lerna publish --cd-version minor --skip-npm && npm run release:push",
     "release:major": "lerna publish --cd-version major --skip-npm && npm run release:push",
     "release:push": "git push --follow-tags",
