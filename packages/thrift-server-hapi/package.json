@@ -19,7 +19,7 @@
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'",
-    "release": "ls -a . && npm publish --access public"
+    "release": "ls -a ./dist && npm publish . --access public"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
