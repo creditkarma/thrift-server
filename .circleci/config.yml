@@ -5,6 +5,37 @@ defaults: &defaults
 
 version: 2
 jobs:
+  build:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run:
+          name: build
+          command: npm run build
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory
+          root: ./
+          # Must be relative path from root
+          paths:
+            - packages/thrift-server-core/dist
+            - packages/thrift-server-core/LICENSE
+            - packages/thrift-server-core/package.json
+            - packages/thrift-server-core/README.md
+            - packages/thrift-server-hapi/dist
+            - packages/thrift-server-hapi/LICENSE
+            - packages/thrift-server-hapi/package.json
+            - packages/thrift-server-hapi/README.md
+            - packages/thrift-server-express/dist
+            - packages/thrift-server-express/LICENSE
+            - packages/thrift-server-express/package.json
+            - packages/thrift-server-express/README.md
+            - packages/thrift-client/dist
+            - packages/thrift-client/LICENSE
+            - packages/thrift-client/package.json
+            - packages/thrift-client/README.md
+
   test:
     <<: *defaults
     steps:
@@ -22,15 +53,12 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ./
       - run:
           name: npm-token
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
-      - run:
-          name: install-npm
-          command: npm install
-      - run:
-          name: npm-build
-          command: npm run build
       - run:
           name: publish-npm
           command: |
@@ -50,6 +78,7 @@ workflows:
         - publish:
             requires:
               - test
+              - build
             filters:
               tags:
                 only: /(v)?[0-9]+(\.[0-9]+)*/

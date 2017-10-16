@@ -11,7 +11,7 @@
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rimraf ./dist",
-    "watch": "npm run build -- --watch",
+    "watch": "npm run compile -- --watch",
     "start": "npm run build && node dist/server.js",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
