@@ -29,6 +29,9 @@ jobs:
           name: install-npm
           command: npm install
       - run:
+          name: npm-build
+          command: npm run build
+      - run:
           name: publish-npm
           command: npm run release:publish
 
