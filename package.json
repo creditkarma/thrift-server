@@ -13,11 +13,11 @@
     "pretest": "lerna exec -- npm run build",
     "test": "lerna exec -- npm run test",
     "test-integration": "lerna run -- test-integration",
-    "release:patch": "npm version patch && npm run release:push",
-    "release:minor": "npm version minor && npm run release:push",
-    "release:major": "npm version major && npm run release:push",
+    "release:patch": "lerna publish --cd-version patch --skip-npm && npm run release:push",
+    "release:minor": "lerna publish --cd-version minor --skip-npm && npm run release:push",
+    "release:major": "lerna publish --cd-version major --skip-npm && npm run release:push",
     "release:push": "git push --follow-tags",
-    "release:publish": "lerna publish"
+    "release:publish": "lerna publish --skip-git"
   },
   "keywords": [
     "Thrift",

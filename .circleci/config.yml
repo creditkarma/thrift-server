@@ -9,8 +9,6 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - run:
           name: install-npm
           command: npm install
@@ -18,7 +16,6 @@ jobs:
           name: build
           command: npm run build
       - persist_to_workspace:
-          # Must be an absolute path, or relative path from working_directory
           root: ./
           # Must be relative path from root
           paths:
@@ -35,10 +32,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - attach_workspace:
-          # Must be absolute path or relative path from working_directory
           at: ./
       - run:
           name: install-npm
@@ -51,10 +45,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - attach_workspace:
-          # Must be absolute path or relative path from working_directory
           at: ./
       - run:
           name: npm-token
