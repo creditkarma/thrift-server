@@ -5,10 +5,9 @@
   "main": "./dist/main/index.js",
   "types": "./dist/main/index.d.ts",
   "files": [
-    "./dist"
+    "./dist/main"
   ],
   "scripts": {
-    "prepublish": "rimraf ./dist/tests",
     "prebuild": "npm run test:codegen",
     "build": "npm run clean && npm run lint && npm run compile",
     "clean": "rimraf ./dist",

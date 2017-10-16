@@ -1,7 +1,7 @@
 {
   "name": "@creditkarma/thrift-server",
   "description": "Thrift core library in TypeScript",
-  "main": "./dist/index.js",
+  "private": true,
   "scripts": {
     "build": "lerna exec -- npm run build",
     "clean": "rimraf **/node_modules **/dist **/coverage **/generated",
