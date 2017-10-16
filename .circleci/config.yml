@@ -22,7 +22,10 @@ jobs:
           root: ./
           # Must be relative path from root
           paths:
-            - dist
+            - packages/thrift-client/dist
+            - packages/thrift-server-core/dist
+            - packages/thrift-server-express/dist
+            - packages/thrift-server-hapi/dist
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -34,6 +37,9 @@ jobs:
       - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: ./
       - run:
           name: install-npm
           command: npm install
