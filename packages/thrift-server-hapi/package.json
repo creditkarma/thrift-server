@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-hapi",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "A Hapi server plugin for the Apache Thrift protocol",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -27,7 +27,7 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
   },
   "dependencies": {
-    "@creditkarma/thrift-server-core": "^0.0.24",
+    "@creditkarma/thrift-server-core": "^0.0.25",
     "thrift": "^0.10.0"
   },
   "peerDependencies": {
