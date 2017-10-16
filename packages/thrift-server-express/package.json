@@ -8,7 +8,6 @@
     "./dist"
   ],
   "scripts": {
-    "prepublish": "rimraf ./dist/tests",
     "prebuild": "npm run test:codegen",
     "build": "npm run clean && npm run lint && npm run compile",
     "clean": "rimraf ./dist",
@@ -20,7 +19,7 @@
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'",
-    "release": "ls . && npm publish --access public"
+    "release": "ls -a . && npm publish --access public"
   },
   "keywords": [
     "Thrift",
@@ -36,6 +35,9 @@
     "@creditkarma/thrift-server-core": "^0.0.18",
     "thrift": "^0.10.0",
     "typescript": "^2.5.3"
+  },
+  "peerDependencies": {
+    "express": "^4.15.3"
   },
   "devDependencies": {
     "@creditkarma/thrift-typescript": "^0.0.7",

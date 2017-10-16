@@ -11,14 +11,13 @@
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rimraf ./dist",
-    "prepublish": "rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'",
-    "release": "ls . && npm publish --access public"
+    "release": "ls -a . && npm publish --access public"
   },
   "keywords": [
     "Thrift",

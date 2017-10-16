@@ -11,7 +11,6 @@
     "example": "example"
   },
   "scripts": {
-    "prepublish": "rimraf ./dist/tests",
     "prebuild": "npm run test:codegen",
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
@@ -23,7 +22,7 @@
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'",
-    "release": "ls . && npm publish --access public"
+    "release": "ls -a . && npm publish --access public"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
@@ -33,7 +32,6 @@
   },
   "dependencies": {
     "@creditkarma/thrift-server-core": "^0.0.18",
-    "@types/thrift": "^0.10.1",
     "thrift": "^0.10.0"
   },
   "devDependencies": {
@@ -46,6 +44,7 @@
     "@types/node-int64": "^0.4.29",
     "@types/q": "^1.0.5",
     "@types/request": "^2.0.3",
+    "@types/thrift": "^0.10.1",
     "axios": "^0.16.2",
     "code": "^4.1.0",
     "express": "^4.16.0",
