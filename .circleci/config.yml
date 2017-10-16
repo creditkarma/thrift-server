@@ -33,29 +33,16 @@ jobs:
           root: ./
           # Must be relative path from root
           paths:
-            - packages/thrift-server-core/dist
-            - packages/thrift-server-core/LICENSE
-            - packages/thrift-server-core/package.json
-            - packages/thrift-server-core/README.md
-            - packages/thrift-server-hapi/dist
-            - packages/thrift-server-hapi/LICENSE
-            - packages/thrift-server-hapi/package.json
-            - packages/thrift-server-hapi/README.md
-            - packages/thrift-server-express/dist
-            - packages/thrift-server-express/LICENSE
-            - packages/thrift-server-express/package.json
-            - packages/thrift-server-express/README.md
-            - packages/thrift-client/dist
-            - packages/thrift-client/LICENSE
-            - packages/thrift-client/package.json
-            - packages/thrift-client/README.md
+            - packages/thrift-server-core
+            - packages/thrift-server-hapi
+            - packages/thrift-server-express
+            - packages/thrift-client
 
   publish:
     <<: *defaults
     steps:
       - checkout
       - attach_workspace:
-          # Must be absolute path or relative path from working_directory
           at: ./
       - run:
           name: npm-token
@@ -76,6 +63,12 @@ workflows:
             filters:
               tags:
                 only: /.*/
+        - build:
+            filters:
+              tags:
+                only: /(v)?[0-9]+(\.[0-9]+)*/
+              branches:
+                ignore: /.*/
         - publish:
             requires:
               - test
