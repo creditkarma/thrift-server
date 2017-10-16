@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-client",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Thrift client library for NodeJS written in TypeScript.",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
