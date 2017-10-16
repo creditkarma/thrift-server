@@ -8,6 +8,7 @@
     "./dist/main"
   ],
   "scripts": {
+    "prepublish": "npm run build",
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rimraf ./dist",

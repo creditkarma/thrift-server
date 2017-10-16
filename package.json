@@ -3,20 +3,19 @@
   "description": "Thrift core library in TypeScript",
   "private": true,
   "scripts": {
-    "build": "lerna run build",
+    "build": "lerna exec -- npm run build",
     "clean": "rimraf **/node_modules **/dist **/coverage **/generated",
-    "lint": "lerna run lint",
+    "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap",
     "prebootstrap": "npm install",
-    "pretest": "lerna run build",
-    "test": "lerna run test",
-    "release:force": "lerna publish --cd-version patch --skip-npm --yes --force-publish=* && npm run release:push",
+    "pretest": "lerna exec -- npm run build",
+    "test": "lerna exec -- npm run test",
     "release:patch": "lerna publish --cd-version patch --skip-npm --yes && npm run release:push",
     "release:minor": "lerna publish --cd-version minor --skip-npm --yes && npm run release:push",
     "release:major": "lerna publish --cd-version major --skip-npm --yes && npm run release:push",
     "release:push": "git push --follow-tags",
-    "release:publish": "lerna run release:publish"
+    "release:publish": "lerna exec 'npm publish --access public'"
   },
   "keywords": [
     "Thrift",

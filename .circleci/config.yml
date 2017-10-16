@@ -18,42 +18,22 @@ jobs:
           name: npm-test
           command: npm test
 
-  build:
-    <<: *defaults
-    steps:
-      - checkout
-      - run:
-          name: install-npm
-          command: npm install
-      - run:
-          name: npm-build
-          command: npm run build
-      - persist_to_workspace:
-          # Must be an absolute path, or relative path from working_directory
-          root: ./
-          # Must be relative path from root
-          paths:
-            - packages/thrift-server-core
-            - packages/thrift-server-hapi
-            - packages/thrift-server-express
-            - packages/thrift-client
-
   publish:
     <<: *defaults
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
       - run:
           name: npm-token
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
+          name: npm-install
+          command: npm install
+      - run:
+          name: npm-build
+          command: npm run build
+      - run:
           name: publish-npm
-          command: |
-            npm publish ./packages/thrift-server-core --access public
-            npm publish ./packages/thrift-server-hapi --access public
-            npm publish ./packages/thrift-server-express --access public
-            npm publish ./packages/thrift-client --access public
+          command: npm run release:publish
 
 workflows:
   version: 2
@@ -63,16 +43,9 @@ workflows:
             filters:
               tags:
                 only: /.*/
-        - build:
-            filters:
-              tags:
-                only: /(v)?[0-9]+(\.[0-9]+)*/
-              branches:
-                ignore: /.*/
         - publish:
             requires:
               - test
-              - build
             filters:
               tags:
                 only: /(v)?[0-9]+(\.[0-9]+)*/
