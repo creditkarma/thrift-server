@@ -5,14 +5,28 @@ defaults: &defaults
 
 version: 2
 jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: install-npm
+          command: npm install
+      - run:
+          name: npm-test
+          command: npm test
+
   build:
     <<: *defaults
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package.json" }}
       - run:
-          name: build
+          name: install-npm
+          command: npm install
+      - run:
+          name: npm-build
           command: npm run build
       - persist_to_workspace:
           # Must be an absolute path, or relative path from working_directory
@@ -35,19 +49,6 @@ jobs:
             - packages/thrift-client/LICENSE
             - packages/thrift-client/package.json
             - packages/thrift-client/README.md
-
-  test:
-    <<: *defaults
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./
-      - run:
-          name: install-npm
-          command: npm install
-      - run:
-          name: npm-test
-          command: npm test
 
   publish:
     <<: *defaults
