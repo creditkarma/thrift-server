@@ -1,6 +1,6 @@
 {
   "lerna": "2.4.0",
-  "version": "0.0.25",
+  "version": "0.0.26",
   "loglevel": "verbose",
   "packages": [
     "packages/*"
