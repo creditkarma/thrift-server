@@ -15,7 +15,7 @@
     "release:minor": "lerna publish --cd-version minor --skip-npm --yes && npm run release:push",
     "release:major": "lerna publish --cd-version major --skip-npm --yes && npm run release:push",
     "release:push": "git push --follow-tags",
-    "release:publish": "lerna exec 'npm publish --access public'"
+    "release:publish": "lerna run publish -- --access public"
   },
   "keywords": [
     "Thrift",
