@@ -33,7 +33,11 @@ jobs:
           command: npm run build
       - run:
           name: publish-npm
-          command: npm run release:publish
+          command: |
+            npm publish ./packages/thrift-server-core --access public
+            npm publish ./packages/thrift-server-hapi --access public
+            npm publish ./packages/thrift-server-express --access public
+            npm publish ./packages/thrift-client --access public
 
 workflows:
   version: 2
