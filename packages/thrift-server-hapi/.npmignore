@@ -1,5 +1,4 @@
 *
 !dist/**/*
-dist/tests/**
 !package.json
 !README.md

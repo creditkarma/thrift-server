@@ -11,7 +11,7 @@
     "build": "npm run clean && npm run lint && npm run compile",
     "compile": "tsc",
     "clean": "rimraf ./dist",
-    "prepublish": "npm run build; rimraf ./dist/tests",
+    "prepublish": "npm run build && rimraf ./dist/tests",
     "watch": "npm run build -- --watch",
     "start": "npm run build && node dist/server.js",
     "pretest": "npm run build",
