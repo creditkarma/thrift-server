@@ -23,10 +23,6 @@ jobs:
           # Must be relative path from root
           paths:
             - dist
-            - LICENSE
-            - package.json
-            - lerna.json
-            - README.md
       - save_cache:
           key: dependency-cache-{{ checksum "package.json" }}
           paths:
@@ -48,6 +44,7 @@ jobs:
   publish:
     <<: *defaults
     steps:
+      - checkout
       - restore_cache:
           key: dependency-cache-{{ checksum "package.json" }}
       - attach_workspace:
