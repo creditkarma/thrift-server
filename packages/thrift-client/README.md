@@ -14,7 +14,7 @@ This will start a web server on localhost:8080. The sample app has a UI you can 
 
 The sample app can switch between using a Request client or an Axios client by commenting these lines in example/client.ts
 
-```
+```typescript
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
@@ -22,9 +22,9 @@ const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient,
 const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // Using Axios
-// const requestClient: AxiosInstance = axios.create()
-// const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
-// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const requestClient: AxiosInstance = axios.create()
+const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
+const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 ```
 
 ## Usage
