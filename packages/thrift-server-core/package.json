@@ -18,7 +18,7 @@
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'",
-    "release": "npm publish --access public"
+    "release": "ls . && npm publish --access public"
   },
   "keywords": [
     "Thrift",
