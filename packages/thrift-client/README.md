@@ -104,15 +104,13 @@ app.listen(serverConfig.port, () => {
 The possible transport types are:
 
 ```typescript
-type TransportType =
-  'buffered' | 'framed'
+type TransportType = 'buffered' | 'framed'
 ```
 
 The possible protocol types are:
 
 ```typescript
-type ProtocolType =
-  'binary' | 'compact' | 'json'
+type ProtocolType = 'binary' | 'compact' | 'json'
 ```
 
 ## Creating Custom Connections
