@@ -12,7 +12,7 @@ jobs:
       - attach_workspace:
           at: ./
       - run:
-          name: install-npm
+          name: npm-install
           command: npm install
       - run:
           name: npm-test
@@ -29,7 +29,7 @@ jobs:
           name: npm-install
           command: npm install
       - run:
-          name: publish-npm
+          name: npm-publish
           command: npm run release:publish
 
 workflows:

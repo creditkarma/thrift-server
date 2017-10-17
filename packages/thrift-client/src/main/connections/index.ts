@@ -1,6 +1,7 @@
 export * from './connection'
 export * from './axios'
 export * from './request'
+export * from './types'
 
 import { AxiosInstance } from 'axios'
 

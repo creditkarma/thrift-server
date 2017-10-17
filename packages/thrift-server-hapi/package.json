@@ -28,18 +28,19 @@
   },
   "dependencies": {
     "@creditkarma/thrift-server-core": "^0.0.31",
-    "thrift": "^0.10.0"
-  },
-  "peerDependencies": {
+    "@types/node": "^8.0.31",
+    "@types/hapi": "^16.1.8",
+    "@types/node-int64": "^0.4.29",
+    "@types/q": "^1.0.5",
+    "@types/thrift": "^0.10.3",
+    "thrift": "^0.10.0",
     "hapi": "^16.1.2"
   },
+  "peerDependencies": {},
   "devDependencies": {
     "@creditkarma/thrift-typescript": "^0.0.8",
     "@types/code": "^4.0.3",
-    "@types/hapi": "^16.1.8",
     "@types/lab": "^11.1.0",
-    "@types/node": "^8.0.31",
-    "@types/thrift": "^0.10.3",
     "code": "^4.1.0",
     "hapi": "^16.6.2",
     "lab": "^14.3.1",
