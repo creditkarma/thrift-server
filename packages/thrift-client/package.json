@@ -11,11 +11,11 @@
     "example": "example"
   },
   "scripts": {
+    "prepublish": "npm run build",
     "prebuild": "npm run test:codegen",
-    "build": "npm run clean && npm run lint && npm run compile",
-    "compile": "tsc",
+    "build": "npm run clean && npm run lint && tsc",
     "clean": "rimraf ./dist",
-    "watch": "npm run compile -- --watch",
+    "watch": "tsc --watch",
     "start": "ts-node --project ./example ./example/index.ts",
     "test": "npm run test:only --",
     "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",

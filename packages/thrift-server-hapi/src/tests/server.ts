@@ -4,7 +4,7 @@ import * as Hapi from 'hapi'
 import { ThriftPlugin } from '../main/'
 
 import {
-    SharedStruct,
+  SharedStruct,
 } from './generated/shared/shared'
 
 import {
@@ -17,7 +17,7 @@ import {
   Work,
 } from './generated/calculator/calculator'
 
-const server = new Hapi.Server({ debug: { request: [ 'error' ] } })
+const server = new Hapi.Server({ debug: { request: ['error'] } })
 
 server.connection({ port: SERVER_CONFIG.port })
 
