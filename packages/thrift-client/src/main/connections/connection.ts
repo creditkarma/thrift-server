@@ -24,7 +24,7 @@ function createReader(Transport: TTransportConstructor, data: Buffer): TTranspor
   const reader: TTransport = new Transport(undefined, noop)
   // We need to ensure that we have enough room to write the incooming data
   if (data.length > (reader as any).inBuf.length) {
-    const buf: Buffer = new Buffer(length);
+    const buf: Buffer = new Buffer(data.length);
     (reader as any).inBuf.copy(buf, 0, 0, (reader as any).writeCursor);
     (reader as any).inBuf = buf
   }
