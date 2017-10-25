@@ -32,7 +32,7 @@
     "@types/node": "^8.0.31",
     "@types/node-int64": "^0.4.29",
     "@types/q": "^1.0.5",
-    "@types/thrift": "0.10.3",
+    "@types/thrift": "0.10.4",
     "thrift": "^0.10.0",
     "typescript": "^2.5.3"
   },

@@ -34,7 +34,7 @@
     "@types/node-int64": "^0.4.29",
     "@types/q": "^1.0.5",
     "@types/request": "^2.0.3",
-    "@types/thrift": "^0.10.3",
+    "@types/thrift": "^0.10.4",
     "axios": "^0.16.2",
     "request": "^2.83.0",
     "thrift": "^0.10.0"
