@@ -20,7 +20,9 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
       // Encoding needs to be explicitly set to null or the response body will be a string
       encoding: null,
       headers: {
-        Connection: 'keep-alive',
+        'host': this.hostName,
+        'connection': 'keep-alive',
+        'content-type': 'application/octet-stream',
       },
       url: `http://${this.hostName}:${this.port}${this.path}`,
     })
@@ -32,11 +34,13 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
         .post({
           body: dataToWrite,
           headers: {
-            'Content-length': dataToWrite.length,
+            'content-length': dataToWrite.length,
           },
         }, (err: any, response: request.RequestResponse, body: Buffer) => {
           if (err !== null) {
             reject(err)
+          } else if (response.statusCode !== 200) {
+            reject(new Error(body.toString()))
           } else {
             resolve(body)
           }

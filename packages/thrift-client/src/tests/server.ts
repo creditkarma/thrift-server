@@ -99,6 +99,22 @@ server.route({
   },
 })
 
+server.route({
+  method: 'POST',
+  path: '/return500',
+  handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+    reply('NOPE').code(500)
+  },
+})
+
+server.route({
+  method: 'POST',
+  path: '/return400',
+  handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+    reply('NOPE').code(400)
+  },
+})
+
 /**
  * Finally, we're ready to start the server.
  */
