@@ -35,7 +35,7 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
         }, (err: any, response: request.RequestResponse, body: Buffer) => {
           if (err !== null) {
             reject(err)
-          } else if (response.statusCode !== 200) {
+          } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
             reject(new Error(body.toString()))
           } else {
             resolve(body)
