@@ -19,11 +19,6 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
     this.request = requestApi.defaults({
       // Encoding needs to be explicitly set to null or the response body will be a string
       encoding: null,
-      headers: {
-        'host': this.hostName,
-        'connection': 'keep-alive',
-        'content-type': 'application/octet-stream',
-      },
       url: `http://${this.hostName}:${this.port}${this.path}`,
     })
   }
@@ -35,6 +30,7 @@ export class RequestConnection<TClient> extends HttpConnection<TClient> {
           body: dataToWrite,
           headers: {
             'content-length': dataToWrite.length,
+            'content-type': 'application/octet-stream',
           },
         }, (err: any, response: request.RequestResponse, body: Buffer) => {
           if (err !== null) {
