@@ -43,7 +43,7 @@
     "typescript": "^2.5.3"
   },
   "devDependencies": {
-    "@creditkarma/thrift-typescript": "^0.0.13",
+    "@creditkarma/thrift-typescript": "^0.0.15",
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
     "@types/lab": "^11.1.0",
