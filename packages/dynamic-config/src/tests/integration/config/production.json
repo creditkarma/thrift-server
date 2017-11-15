@@ -1,0 +1,11 @@
+{
+  "project": {
+    "health": {
+      "response": "PASS"
+    }
+  },
+  "database": {
+    "username": "foo",
+    "password": "bar"
+  }
+}

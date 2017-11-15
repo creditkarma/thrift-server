@@ -1,0 +1,8 @@
+{
+  "project": {
+    "health": {
+      "control": "/control",
+      "response": "PASS"
+    }
+  }
+}

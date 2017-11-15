@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "A client for communicating with Hashicorp Vault written in TypeScript",
   "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "files": [
     "dist/main"
   ],
@@ -15,8 +16,8 @@
     "clean": "rimraf dist/",
     "lint": "tslint --fix src/**/*.ts",
     "build": "npm run clean && npm run lint && tsc",
-    "docker": "docker-compose up vault &",
-    "docker:kill": "docker-compose kill vault",
+    "docker": "docker-compose up --force-recreate vault &",
+    "docker:kill": "docker-compose kill",
     "pretest": "npm run build && npm run docker",
     "posttest": "npm run docker:kill",
     "test": "wait-on --timeout 10000 http://localhost:8201 && npm run lint && npm run test:unit && npm run test:integration",

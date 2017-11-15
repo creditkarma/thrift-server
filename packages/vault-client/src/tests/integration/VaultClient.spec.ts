@@ -34,7 +34,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an number to hvault', (done) => {
@@ -43,7 +43,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an boolean to hvault', (done) => {
@@ -52,7 +52,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an object to hvault', (done) => {
@@ -61,7 +61,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -73,7 +73,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a number from hvault', (done) => {
@@ -83,7 +83,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a boolean from hvault', (done) => {
@@ -93,7 +93,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read an object from hvault', (done) => {
@@ -103,7 +103,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 

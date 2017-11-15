@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "A client for Hashicorp Consul written in TypeScript",
   "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
   "files": [
     "dist/main"
   ],
@@ -14,8 +15,8 @@
   "scripts": {
     "clean": "rimraf dist/",
     "lint": "tslint --fix './src/**/*.ts'",
-    "docker": "docker-compose up consul &",
-    "docker:kill": "docker-compose kill consul",
+    "docker": "docker-compose up --force-recreate consul &",
+    "docker:kill": "docker-compose kill",
     "build": "npm run clean && npm run lint && tsc",
     "pretest": "npm run build && npm run docker",
     "posttest": "npm run docker:kill && rimraf consuldata/*",

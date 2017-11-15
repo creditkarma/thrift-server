@@ -21,7 +21,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write a number to consul', (done) => {
@@ -31,7 +31,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write a boolean to consul', (done) => {
@@ -41,7 +41,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an object to consul', (done) => {
@@ -51,7 +51,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -63,7 +63,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a number from consul', (done) => {
@@ -73,7 +73,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a boolean from consul', (done) => {
@@ -83,7 +83,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read an object from consul', (done) => {
@@ -93,7 +93,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should return null for a missing key', (done) => {
@@ -103,7 +103,7 @@ describe('KvStore', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 })
