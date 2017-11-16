@@ -1,0 +1,38 @@
+{
+  "name": "@creditkarma/vault-client",
+  "version": "0.0.0",
+  "description": "A client for communicating with Hashicorp Vault",
+  "main": "index.js",
+  "files": [
+    "dist/main"
+  ],
+  "scripts": {
+    "clean": "rimraf dist/",
+    "lint": "tslint --fix src/**/*.ts",
+    "build": "npm run clean && npm run lint && tsc",
+    "docker": "docker run --cap-add=IPC_LOCK --rm --name vault-client -p 8200:8200 -p 8201:8201 mannimal/vault-cci:latest",
+    "pretest": "npm run build",
+    "test": "npm run lint && npm run test:unit && npm run test:integration",
+    "test:unit": "NODE_ENV=test mocha --full-trace dist/tests/unit/**/*.spec.js",
+    "test:integration": "NODE_ENV=test mocha --full-trace --timeout 15000 dist/tests/integration/**/*.spec.js"
+  },
+  "author": "Credit Karma",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/chai": "^4.0.5",
+    "@types/debug": "0.0.30",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.51",
+    "@types/request-promise-native": "^1.0.10",
+    "chai": "^4.1.2",
+    "mocha": "^4.0.1",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1"
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5"
+  }
+}
