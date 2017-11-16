@@ -4,26 +4,31 @@ defaults: &defaults
     - image: circleci/node:6.10.3
 
 version: 2
+executorType: machine
 jobs:
   test:
     <<: *defaults
     steps:
       - checkout
-      - attach_workspace:
-          at: ./
+      - run:
+          name: Run Vault Server
+          background: true
+          command: docker run --cap-add=IPC_LOCK --rm --name vault-client -p 8200:8200 -p 8201:8201 mannimal/vault-cci:latest
       - run:
           name: Install NPM Dependencies
           command: npm install
       - run:
           name: Run Test Suite
-          command: npm test
+          command: |
+            export VAULT_CLIENT_TOKEN=`curl localhost:8201/client-token`
+            npm test
 
   publish:
     <<: *defaults
     steps:
       - checkout
       - run:
-          name: npm-token
+          name: Create .npmrc
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
           name: Install NPM Dependencies
