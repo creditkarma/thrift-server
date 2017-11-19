@@ -8,17 +8,17 @@
     "dist/main"
   ],
   "scripts": {
-    "clean": "rimraf ./dist",
+    "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",
+    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "prepublish": "npm run build",
-    "build": "npm run clean && npm run lint && tsc",
-    "prebuild:test": "npm run clean && npm run test:codegen",
+    "prebuild": "npm run clean",
+    "build": "npm run lint && tsc -p tsconfig.json",
+    "prebuild:test": "npm run clean && npm run codegen",
     "build:test": "tsc -p tsconfig.test.json",
     "watch": "tsc --watch",
-    "start": "npm run build && node dist/main/server.js",
     "pretest": "npm run build:test",
     "test": "npm run test:only --",
-    "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js"
   },
@@ -31,21 +31,18 @@
   "dependencies": {
     "@creditkarma/thrift-server-core": "^0.0.37",
     "@types/hapi": "^16.1.8",
-    "@types/node": "^8.0.31",
-    "@types/thrift": "^0.10.5",
-    "hapi": "^16.1.2",
-    "thrift": "^0.10.0"
+    "hapi": "^16.6.2"
   },
   "devDependencies": {
     "@creditkarma/thrift-client": "^0.0.37",
-    "@creditkarma/thrift-typescript": "^0.0.16",
+    "@creditkarma/thrift-typescript": "^1.0.0",
+    "@types/node": "^8.0.31",
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
     "@types/node-int64": "^0.4.29",
     "@types/q": "^1.0.5",
     "@types/request": "^2.0.8",
     "code": "^4.1.0",
-    "hapi": "^16.6.2",
     "lab": "^14.3.1",
     "request": "^2.83.0",
     "rimraf": "^2.6.2",

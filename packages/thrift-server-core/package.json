@@ -11,11 +11,10 @@
     "clean": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
     "prepublish": "npm run build",
-    "build": "npm run clean && npm run lint && tsc -p tsconfig.json",
-    "build:test": "tsc -p tsconfig.test.json",
+    "prebuild": "npm run clean",
+    "build": "npm run lint && tsc",
     "watch": "tsc --watch",
-    "start": "npm run build && node dist/server.js",
-    "pretest": "npm run build:test",
+    "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js"
@@ -31,18 +30,16 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
   "dependencies": {
-    "thrift": "^0.10.0",
-    "typescript": "^2.6.1"
+    "@types/node-int64": "^0.4.29",
+    "node-int64": "^0.4.0"
   },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
-    "@types/node-int64": "^0.4.29",
     "@types/q": "^1.0.5",
     "@types/rimraf": "0.0.28",
-    "@types/thrift": "0.10.4",
     "body-parser": "^1.17.2",
     "code": "^4.1.0",
     "express": "^4.15.3",
@@ -50,6 +47,7 @@
     "lerna": "^2.0.0",
     "rimraf": "^2.5.4",
     "tslint": "^5.6.0",
-    "tslint-eslint-rules": "^4.1.1"
+    "tslint-eslint-rules": "^4.1.1",
+    "typescript": "^2.6.1"
   }
 }
