@@ -3,7 +3,8 @@ export * from './axios'
 export * from './request'
 export * from './types'
 
-import { AxiosInstance } from 'axios'
+import { AxiosInstance, AxiosRequestConfig } from 'axios'
+import * as request from 'request'
 
 import {
   HttpConnection,
@@ -24,12 +25,12 @@ import {
 
 export function fromAxios<TClient>(
   requestApi: AxiosInstance,
-  options: IHttpConnectionOptions): HttpConnection<TClient> {
+  options: IHttpConnectionOptions): HttpConnection<TClient, AxiosRequestConfig> {
   return new AxiosConnection<TClient>(requestApi, options)
 }
 
 export function fromRequest<TClient>(
   requestApi: RequestInstance,
-  options: IHttpConnectionOptions): HttpConnection<TClient> {
+  options: IHttpConnectionOptions): HttpConnection<TClient, request.CoreOptions> {
   return new RequestConnection<TClient>(requestApi, options)
 }

@@ -4,7 +4,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "noEmitOnError": true,
@@ -13,14 +12,11 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": true,
     "pretty": true,
     "removeComments": true
   },
   "exclude": [
     "node_modules",
-    "dist",
-    "example",
-    "src/tests"
+    "dist"
   ]
 }

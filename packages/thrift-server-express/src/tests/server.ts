@@ -12,12 +12,19 @@ import {
   Work,
 } from './generated/calculator/calculator'
 
-const serviceHandlers = {
+const serviceHandlers: Calculator.IHandler<express.Request> = {
   ping(): void {
     return
   },
   add(a: number, b: number): number {
     return a + b
+  },
+  authAdd(a: number, b: number, context?: express.Request): number {
+    if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
+      return a + b
+    } else {
+      throw new Error('Unauthorized')
+    }
   },
   calculate(logId: number, work: Work): number {
     switch (work.op) {

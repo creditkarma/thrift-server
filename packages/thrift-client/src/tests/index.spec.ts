@@ -8,10 +8,12 @@ import {
 
 import {
   AxiosInstance,
+  AxiosRequestConfig,
   default as axios,
 } from 'axios'
 
 import * as request from 'request'
+import { CoreOptions } from 'request'
 
 import {
   SERVER_CONFIG,
@@ -42,8 +44,8 @@ describe('Thrift Client', () => {
   })
 
   describe('AxiosConnection', () => {
-    let connection: HttpConnection<Calculator.Client>
-    let client: Calculator.Client
+    let connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig>
+    let client: Calculator.Client<AxiosRequestConfig>
 
     before((done: any) => {
       const requestClient: AxiosInstance = axios.create()
@@ -60,14 +62,34 @@ describe('Thrift Client', () => {
         })
     })
 
+    it('should allow passing of a request context', (done: any) => {
+      client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject auth request without context', (done: any) => {
+      client.authAdd(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
+
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client> = fromAxios(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return500',
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+        fromAxios(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return500',
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -81,12 +103,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client> = fromAxios(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return400',
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+        fromAxios(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return400',
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -100,11 +123,12 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client> = fromAxios(requestClient, {
-        hostName: 'fakehost',
-        port: 8080,
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+        fromAxios(requestClient, {
+          hostName: 'fakehost',
+          port: 8080,
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -118,8 +142,8 @@ describe('Thrift Client', () => {
   })
 
   describe('RequestConnection', () => {
-    let connection: HttpConnection<Calculator.Client>
-    let client: Calculator.Client
+    let connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions>
+    let client: Calculator.Client<CoreOptions>
 
     before((done: any) => {
       const requestClient: RequestInstance = request.defaults({})
@@ -136,14 +160,34 @@ describe('Thrift Client', () => {
         })
     })
 
+    it('should allow passing of a request context', (done: any) => {
+      client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject auth request without context', (done: any) => {
+      client.authAdd(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
+
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client> = fromRequest(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return500',
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+        fromRequest(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return500',
+        })
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -157,12 +201,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client> = fromRequest(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return400',
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+        fromRequest(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return400',
+        })
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -176,11 +221,31 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client> = fromRequest(requestClient, {
-        hostName: 'fakehost',
-        port: 8080,
-      })
-      const badClient: Calculator.Client = createClient(Calculator.Client, badConnection)
+      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+        fromRequest(requestClient, {
+          hostName: 'fakehost',
+          port: 8080,
+        })
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
+
+      badClient.add(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(true).to.equal(true)
+          done()
+        })
+    })
+
+    it('should reject for a request to a missing service', (done: any) => {
+      const requestClient: RequestInstance = request.defaults({})
+      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+        fromRequest(requestClient, {
+          hostName: 'fakehost',
+          port: 8080,
+        })
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {

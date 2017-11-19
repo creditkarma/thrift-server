@@ -1,11 +1,15 @@
 import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Lab from 'lab'
+import * as request from 'request'
+import { CoreOptions } from 'request'
+
 import {
-  createHttpClient,
-  createHttpConnection,
+  createClient,
+  fromRequest,
   HttpConnection,
-} from 'thrift'
+  RequestInstance,
+} from '@creditkarma/thrift-client'
 
 import {
   SERVER_CONFIG,
@@ -24,19 +28,16 @@ const after = lab.after
 
 describe('Thrift Server Express', () => {
   let server: any
-  let connection: HttpConnection
-  let client: Calculator.Client
+  let connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions>
+  let client: Calculator.Client<CoreOptions>
 
   before((done: any) => {
     server = childProcess.fork('./dist/tests/server.js')
     server.on('message', (msg: any) => console.log(msg))
-    connection = createHttpConnection(SERVER_CONFIG.hostName, SERVER_CONFIG.port, {
-      path: '/thrift',
-      headers: {
-        'Content-Type': 'application/octet-stream',
-      },
-    })
-    client = createHttpClient(Calculator.Client, connection)
+
+    const requestClient: RequestInstance = request.defaults({})
+    connection = fromRequest(requestClient, SERVER_CONFIG)
+    client = createClient(Calculator.Client, connection)
 
     setTimeout(done, 1000)
   })
@@ -45,6 +46,31 @@ describe('Thrift Server Express', () => {
     client.add(5, 7)
       .then((response: number) => {
         expect(response).to.equal(12)
+        done()
+      }, (err: any) => {
+        console.log('error: ', err)
+        done(err)
+      })
+  })
+
+  it('should correctly handle a service request with context', (done: any) => {
+    client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+      .then((response: number) => {
+        expect(response).to.equal(12)
+        done()
+      }, (err: any) => {
+        console.log('error: ', err)
+        done(err)
+      })
+  })
+
+  it('should reject service call with incorrect context', (done: any) => {
+    client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
+      .then((response: number) => {
+        expect(true).to.equal(false)
+        done()
+      }, (err: any) => {
+        expect(true).to.equal(true)
         done()
       })
   })

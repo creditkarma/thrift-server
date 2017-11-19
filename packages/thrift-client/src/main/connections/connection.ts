@@ -41,7 +41,7 @@ function normalizePath(path: string = '/'): string {
   }
 }
 
-export abstract class HttpConnection<TClient> {
+export abstract class HttpConnection<TClient, Context> {
   public Transport: TTransportConstructor
   public Protocol: TProtocolConstructor
   protected port: number
@@ -57,15 +57,15 @@ export abstract class HttpConnection<TClient> {
     this.Protocol = getProtocol(options.protocol)
   }
 
-  public abstract write(dataToWrite: Buffer): Promise<Buffer>
+  public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
 
   public setClient(client: TClient): void {
     this.client = client
   }
 
-  public send(dataToSend: Buffer, requestId: number): void {
+  public send(dataToSend: Buffer, requestId: number, context?: Context): void {
     const requestCallback = (this.client as any)._reqs[requestId]
-    this.write(dataToSend).then((returnValue: Buffer) => {
+    this.write(dataToSend, context).then((returnValue: Buffer) => {
       const reader: TTransport = createReader(this.Transport, returnValue)
       const proto: TProtocol = new this.Protocol(reader)
 

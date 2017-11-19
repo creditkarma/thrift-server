@@ -48,6 +48,13 @@ const impl = new Calculator.Processor({
   add(a: number, b: number): number {
     return a + b
   },
+  authAdd(a: number, b: number, context?: Hapi.Request): number {
+    if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
+      return a + b
+    } else {
+      throw new Error('Unauthorized')
+    }
+  },
   calculate(logId: number, work: Work): number {
     switch (work.op) {
       case Operation.ADD:
@@ -76,7 +83,7 @@ const impl = new Calculator.Processor({
  */
 server.route({
   method: 'POST',
-  path: '/',
+  path: '/thrift',
   handler: {
     thrift: {
       service: impl,

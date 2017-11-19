@@ -1,8 +1,14 @@
 import {
+  Int64,
   TProtocol,
   TProtocolConstructor,
+  TTransport,
   TTransportConstructor,
 } from 'thrift'
+
+export { Int64 as Int64 }
+export { TProtocol as TProtocol }
+export { TTransport as TTransport }
 
 export type ProtocolType =
   'binary' | 'compact' | 'json'
