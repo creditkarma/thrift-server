@@ -11,14 +11,16 @@
     "example": "example"
   },
   "scripts": {
-    "prepublish": "npm run build",
-    "prebuild": "npm run test:codegen",
-    "build": "npm run clean && npm run lint && tsc",
     "clean": "rimraf ./dist",
+    "prepublish": "npm run build",
+    "build": "npm run clean && npm run lint && tsc -p tsconfig.json",
+    "prebuild:test": "npm run clean && npm run test:codegen",
+    "build:test": "tsc -p tsconfig.test.json",
     "watch": "tsc --watch",
     "start": "ts-node --project ./example ./example/index.ts",
+    "pretest": "npm run build:test",
     "test": "npm run test:only --",
-    "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
+    "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'"
@@ -41,7 +43,7 @@
   },
   "devDependencies": {
     "@creditkarma/thrift-server-hapi": "^0.0.36",
-    "@creditkarma/thrift-typescript": "^0.0.15",
+    "@creditkarma/thrift-typescript": "^0.0.16",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",
     "@types/hapi": "^16.1.10",
@@ -51,6 +53,7 @@
     "hapi": "^16.6.2",
     "lab": "^14.3.1",
     "ts-node": "^3.3.0",
-    "tslint": "^5.7.0"
+    "tslint": "^5.7.0",
+    "typescript": "^2.6.1"
   }
 }

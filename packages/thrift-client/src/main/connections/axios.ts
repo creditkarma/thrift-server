@@ -1,5 +1,6 @@
 import {
   AxiosInstance,
+  AxiosRequestConfig,
   AxiosResponse,
 } from 'axios'
 
@@ -11,7 +12,11 @@ import {
   IHttpConnectionOptions,
 } from './types'
 
-export class AxiosConnection<TClient> extends HttpConnection<TClient> {
+import {
+  deepMerge,
+} from '../utils'
+
+export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosRequestConfig> {
   private request: AxiosInstance
 
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
@@ -21,13 +26,20 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient> {
     this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
   }
 
-  public write(dataToWrite: Buffer): Promise<Buffer> {
-    return this.request.post(this.path, dataToWrite, {
+  public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {
+    // Merge user options with required options
+    const requestOptions: AxiosRequestConfig = deepMerge(context, {
       headers: {
         'content-length': dataToWrite.length,
         'content-type': 'application/octet-stream',
       },
-    }).then((value: AxiosResponse) => {
+    })
+
+    return this.request.post(
+      this.path,
+      dataToWrite,
+      requestOptions,
+    ).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
     })
   }

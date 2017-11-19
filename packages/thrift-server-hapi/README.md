@@ -6,6 +6,18 @@ Hapi plugin for processing Thrift requests.
 
 The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
 
+```sh
+npm install --save-dev @creditkarma/thrift-typescript
+```
+
+Add a script to your package.json to codegen. The 'target' option is important to make thrift-typescript generate for this library instead of the Apache libraries.
+
+```json
+"scripts": {
+  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
+}
+```
+
 ### Install
 
 ```sh
@@ -47,7 +59,7 @@ server.register(ThriftPlugin, err => {
  * all HTTP request data from within your service implementation.
  */
 const impl = new UserService.Processor({
-    getUser: (request: RecommendationsRequest, context: Hapi.Request) => {
+    getUser: (request: RecommendationsRequest, context?: Hapi.Request) => {
         const userId = request.userId
 
         if (userId.toNumber() <= 0) {

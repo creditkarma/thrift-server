@@ -39,12 +39,19 @@ server.register(ThriftPlugin, (err: any) => {
  * passed along to our service by the Hapi thrift plugin. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
-const impl = new Calculator.Processor({
+const impl = new Calculator.Processor<Hapi.Request>({
   ping(): void {
     return
   },
   add(a: number, b: number): number {
     return a + b
+  },
+  authAdd(a: number, b: number, context?: Hapi.Request): number {
+    if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
+      return a + b
+    } else {
+      throw new Error('Unauthorized')
+    }
   },
   calculate(logId: number, work: Work): number {
     switch (work.op) {

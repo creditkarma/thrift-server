@@ -49,7 +49,7 @@ service Calculator {
 }
 ```
 
-Would be used in a TypeScript service client as such:
+Would be used in a TypeScript service client as such (notice the optional context parameter passed into the client methods):
 
 ```typescript
 import {
@@ -81,13 +81,23 @@ const serverConfig = {
 
 // Create thrift client
 const requestClient: AxiosInstance = axios.create()
-const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, clientConfig)
+
+const connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+  fromAxios(requestClient, clientConfig)
+
 const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
+  // Request contexts allow you to do tracing and auth
+  const context: AxiosRequestConfig = {
+    headers: {
+      'X-Trace-Id': 'my-trace-id'
+    }
+  }
+
   // Client methods return a Promise of the expected result
-  thriftClient.add(req.query.left, req.query.right).then((result: number) => {
+  thriftClient.add(req.query.left, req.query.right, context).then((result: number) => {
     res.send(result)
   }, (err: any) => {
     res.status(500).send(err)
@@ -120,7 +130,7 @@ While Thrift Client includes support for Axios and Request using another Http cl
 As an example look at the AxiosConnection:
 
 ```typescript
-export class AxiosConnection<TClient> extends HttpConnection<TClient> {
+export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosRequestConfig> {
   private request: AxiosInstance
 
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
@@ -130,8 +140,20 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient> {
     this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
   }
 
-  public write(dataToWrite: Buffer): Promise<Buffer> {
-    return this.request.post(this.path, dataToWrite).then((value: AxiosResponse) => {
+  public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {
+    // Merge user options with required options
+    const requestOptions: AxiosRequestConfig = deepMerge(context, {
+      headers: {
+        'content-length': dataToWrite.length,
+        'content-type': 'application/octet-stream',
+      },
+    })
+
+    return this.request.post(
+      this.path,
+      dataToWrite,
+      requestOptions,
+    ).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
     })
   }

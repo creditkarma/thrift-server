@@ -1,5 +1,4 @@
 import {
-  Int64,
   TBinaryProtocol,
   TBufferedTransport,
   TCompactProtocol,
@@ -19,8 +18,6 @@ import {
   ProtocolType,
   TransportType,
 } from './types'
-
-export { Int64 as Int64 }
 
 export * from './types'
 
