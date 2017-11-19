@@ -41,7 +41,6 @@ To get things working you need to register the ThriftPlugin and define handlers 
 
 ```typescript
 import * as Hapi from 'hapi'
-import * as Thrift from 'thrift'
 import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import { UserService } from './codegen/user_service'
 
@@ -68,7 +67,7 @@ server.register(ThriftPlugin, err => {
  * all HTTP request data from within your service implementation.
  */
 const handlers: UserService.IHandler<Hapi.Request> = {
-    getUser: (request: RecommendationsRequest, context?: Hapi.Request) => {
+    getUser(request: RecommendationsRequest, context?: Hapi.Request) {
         const userId = request.userId
 
         if (userId.toNumber() <= 0) {
