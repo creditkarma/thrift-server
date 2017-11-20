@@ -54,7 +54,7 @@ describe('Thrift Server Express', () => {
   })
 
   it('should correctly handle a service request with context', (done: any) => {
-    client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+    client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
       .then((response: number) => {
         expect(response).to.equal(12)
         done()
@@ -65,7 +65,7 @@ describe('Thrift Server Express', () => {
   })
 
   it('should reject service call with incorrect context', (done: any) => {
-    client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
+    client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
       .then((response: number) => {
         expect(true).to.equal(false)
         done()

@@ -19,7 +19,7 @@ const serviceHandlers: Calculator.IHandler<express.Request> = {
   add(a: number, b: number): number {
     return a + b
   },
-  authAdd(a: number, b: number, context?: express.Request): number {
+  addWithContext(a: number, b: number, context?: express.Request): number {
     if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
       return a + b
     } else {
