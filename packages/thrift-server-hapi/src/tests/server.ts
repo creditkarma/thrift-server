@@ -48,7 +48,7 @@ const impl = new Calculator.Processor({
   add(a: number, b: number): number {
     return a + b
   },
-  authAdd(a: number, b: number, context?: Hapi.Request): number {
+  addWithContext(a: number, b: number, context?: Hapi.Request): number {
     if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
       return a + b
     } else {

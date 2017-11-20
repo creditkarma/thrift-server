@@ -63,7 +63,7 @@ describe('Thrift Client', () => {
     })
 
     it('should allow passing of a request context', (done: any) => {
-      client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+      client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
         .then((response: number) => {
           expect(response).to.equal(12)
           done()
@@ -71,7 +71,7 @@ describe('Thrift Client', () => {
     })
 
     it('should reject auth request without context', (done: any) => {
-      client.authAdd(5, 7)
+      client.addWithContext(5, 7)
         .then((response: number) => {
           expect(false).to.equal(true)
           done()
@@ -161,7 +161,7 @@ describe('Thrift Client', () => {
     })
 
     it('should allow passing of a request context', (done: any) => {
-      client.authAdd(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+      client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
         .then((response: number) => {
           expect(response).to.equal(12)
           done()
@@ -169,7 +169,7 @@ describe('Thrift Client', () => {
     })
 
     it('should reject auth request without context', (done: any) => {
-      client.authAdd(5, 7)
+      client.addWithContext(5, 7)
         .then((response: number) => {
           expect(false).to.equal(true)
           done()
