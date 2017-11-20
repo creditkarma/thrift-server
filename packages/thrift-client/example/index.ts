@@ -7,7 +7,10 @@ generate({
   rootDir: '.',
   outDir: 'generated',
   sourceDir: 'thrift',
-  files: [ './tutorial.thrift' ]
+  target: 'thrift-server',
+  files: [
+    './tutorial.thrift'
+  ]
 })
 
 const clientProc = fork('./client.ts')
