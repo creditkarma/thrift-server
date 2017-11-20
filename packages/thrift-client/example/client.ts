@@ -8,6 +8,7 @@ import {
 
 import * as path from 'path'
 import * as request from 'request'
+import { CoreOptions } from 'request'
 // import { default as axios, AxiosInstance }from 'axios'
 import * as express from 'express'
 
@@ -28,10 +29,11 @@ const app = express()
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, {
-  hostName: SERVER_CONFIG.host,
-  port: SERVER_CONFIG.port
-})
+const connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+  fromRequest(requestClient, {
+    hostName: SERVER_CONFIG.host,
+    port: SERVER_CONFIG.port
+  })
 const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 // Using Axios
