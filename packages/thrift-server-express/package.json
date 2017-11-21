@@ -19,7 +19,7 @@
     "test": "npm run test:only --",
     "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
+    "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'"
   },
   "keywords": [

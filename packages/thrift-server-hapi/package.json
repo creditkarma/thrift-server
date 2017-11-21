@@ -9,6 +9,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist",
+    "lint": "tslint --fix './src/**/*.ts'",
     "prepublish": "npm run build",
     "build": "npm run clean && npm run lint && tsc",
     "prebuild:test": "npm run clean && npm run test:codegen",
@@ -19,8 +20,7 @@
     "test": "npm run test:only --",
     "test:codegen": "rimraf ./src/tests/generated && thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
-    "lint": "tslint --fix './src/**/*.ts'"
+    "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",

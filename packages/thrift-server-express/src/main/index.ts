@@ -30,17 +30,15 @@ export function thriftExpress<TProcessor extends IThriftProcessor<express.Reques
   const Protocol: TProtocolConstructor = getProtocol(options.protocol)
   const service: TProcessor = getService(Service, handlers)
 
-  async function handler(
-    request: express.Request,
-    response: express.Response,
-    next: express.NextFunction): Promise<void> {
+  return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
     try {
-      const result = await process(service, request.body, Transport, Protocol, request)
-      response.status(200).end(result)
+      process(service, request.body, Transport, Protocol, request).then((result: any) => {
+        response.status(200).end(result)
+      }, (err: any) => {
+        next(err)
+      })
     } catch (err) {
       next(err)
     }
   }
-
-  return handler
 }
