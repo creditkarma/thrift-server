@@ -5,11 +5,8 @@
     "moduleResolution": "node",
     "rootDir": "../",
     "noEmitOnError": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
+    "strict": true,
     "noUnusedLocals": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
     "pretty": true,
     "removeComments": true
   },

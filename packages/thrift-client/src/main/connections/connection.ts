@@ -41,12 +41,16 @@ function normalizePath(path: string = '/'): string {
   }
 }
 
+export type HttpProtocol =
+  'http' | 'https'
+
 export abstract class HttpConnection<TClient, Context = never> {
   public Transport: TTransportConstructor
   public Protocol: TProtocolConstructor
   protected port: number
   protected hostName: string
   protected path: string
+  protected protocol: HttpProtocol
   private client: TClient
 
   constructor(options: IHttpConnectionOptions) {
@@ -55,6 +59,7 @@ export abstract class HttpConnection<TClient, Context = never> {
     this.path = normalizePath(options.path)
     this.Transport = getTransport(options.transport)
     this.Protocol = getProtocol(options.protocol)
+    this.protocol = ((options.https === true) ? 'https' : 'http')
   }
 
   public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
@@ -64,7 +69,7 @@ export abstract class HttpConnection<TClient, Context = never> {
   }
 
   public send(dataToSend: Buffer, requestId: number, context?: Context): void {
-    const requestCallback = (this.client as any)._reqs[requestId]
+    const requestCallback: any = (this.client as any)._reqs[requestId]
     this.write(dataToSend, context).then((returnValue: Buffer) => {
       const reader: TTransport = createReader(this.Transport, returnValue)
       const proto: TProtocol = new this.Protocol(reader)

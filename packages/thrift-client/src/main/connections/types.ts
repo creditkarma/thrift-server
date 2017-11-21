@@ -7,12 +7,7 @@ export interface IHttpConnectionOptions {
   hostName: string
   port: number
   path?: string
+  https?: boolean
   transport?: TransportType
   protocol?: ProtocolType
-}
-
-export interface IHttpConnection {
-  transport: TransportType
-  protocol: ProtocolType
-  write(dataToWrite: Buffer): Promise<Buffer>
 }
