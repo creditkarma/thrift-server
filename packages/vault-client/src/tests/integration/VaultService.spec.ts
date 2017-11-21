@@ -1,6 +1,8 @@
 import { assert } from 'chai'
+import { execSync } from 'child_process'
 import { VaultService } from '../../main/VaultService'
 import { IHVConfig } from '../../main/types'
+import { cleanLastChar } from '../../main/discovery'
 
 describe('VaultService', () => {
 
@@ -14,7 +16,7 @@ describe('VaultService', () => {
   }
   const service = new VaultService(mockConfig)
   const mockObj = { value: 'bar' }
-  const token: string = process.env.VAULT_CLIENT_TOKEN || ''
+  const token: string = cleanLastChar(execSync('curl localhost:8201/client-token').toString())
 
   describe('status', () => {
     it('should read the satus as { intialized: true }', (done) => {

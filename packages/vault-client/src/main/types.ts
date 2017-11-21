@@ -2,14 +2,14 @@ export type Protocol =
   'http' | 'https'
 
 export interface IServiceConfig {
-  protocol: Protocol
-  apiVersion: 'v1'
+  protocol?: Protocol
+  apiVersion?: 'v1'
   destination: string
-  hostHeader: string
+  hostHeader?: string
 }
 
 export interface IHVConfig extends IServiceConfig {
-  namespace: string
+  namespace?: string
   tokenPath: string
 }
 

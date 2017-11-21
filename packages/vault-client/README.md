@@ -83,12 +83,17 @@ Running tests requires a running Vault server. You can start one with:
 $ npm run docker
 ```
 
-Then in another terminal window you can run tests.
-
-Before running tests you need to fetch the token and add it to the environment.
+This docker image has a little sugar on top of the base Vault image. It exposes an endpoint for retrieving the token.
 
 ```sh
-$ export VAULT_CLIENT_TOKEN=`curl localhost:8201/client-token`
+$ curl localhost:8201/client-token
+```
+
+The tests will use this to make calls to Vault.
+
+In another terminal window you can run tests.
+
+```sh
 $ npm test
 ```
 
