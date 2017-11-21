@@ -1,3 +1,6 @@
+// import * as path from 'path'
+import { IHVConfig } from './types'
+
 function isObject(obj: any): boolean {
   return (
     obj !== null &&
@@ -31,4 +34,21 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
   }
 
   return (newObj as Base & Update)
+}
+
+// export function cleanToken() {
+
+// }
+
+export const DEFAULT_CONFIG: IHVConfig = {
+  protocol: 'http',
+  apiVersion: 'v1',
+  destination: '',
+  hostHeader: '',
+  namespace: '',
+  tokenPath: '',
+}
+
+export function resolveConfig(options: Partial<IHVConfig>): IHVConfig {
+  return deepMerge(DEFAULT_CONFIG, options)
 }

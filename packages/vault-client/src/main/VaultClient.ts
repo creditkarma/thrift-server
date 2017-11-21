@@ -1,5 +1,6 @@
 import { getToken } from './discovery'
 import { IHVConfig, IReadResult } from './types'
+import { resolveConfig } from './utils'
 import { VaultService } from './VaultService'
 
 export class VaultClient {
@@ -8,8 +9,8 @@ export class VaultClient {
   private token: string
 
   constructor(config: IHVConfig, service?: VaultService) {
-    this.service = service || new VaultService(config)
-    this.config = config
+    this.config = resolveConfig(config)
+    this.service = service || new VaultService(this.config)
   }
 
   public get<T>(key: string): Promise<T> {

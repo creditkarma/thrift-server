@@ -1,5 +1,6 @@
 import { assert } from 'chai'
 import * as fs from 'fs'
+import { execSync } from 'child_process'
 import { VaultClient } from '../../main/VaultClient'
 import { IHVConfig } from '../../main/types'
 
@@ -18,7 +19,7 @@ describe('VaultClient', () => {
   const mockNum = 5
   const mockBool = true
   const mockObj = { value: 'bar' }
-  const token: string = process.env.VAULT_CLIENT_TOKEN || ''
+  const token: string = execSync('curl localhost:8201/client-token').toString()
 
   // Client expects the token to be available in the local file system
   before((done) => {
