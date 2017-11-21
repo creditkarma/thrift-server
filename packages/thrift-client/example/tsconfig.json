@@ -9,7 +9,7 @@
     "noImplicitThis": true,
     "noUnusedLocals": true,
     "strictNullChecks": true,
-    "allowSyntheticDefaultImports": true,
+    "strictFunctionTypes": true,
     "pretty": true,
     "removeComments": true
   },

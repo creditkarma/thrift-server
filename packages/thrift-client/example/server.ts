@@ -1,7 +1,7 @@
 import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import Hapi = require('hapi');
 
-import { Operation, Calculator, Work } from './generated/tutorial/tutorial'
+import { Operation, Calculator, Work } from './generated/calculator/calculator'
 import { SharedStruct } from './generated/shared/shared'
 
 import {
