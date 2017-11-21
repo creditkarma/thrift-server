@@ -18,6 +18,15 @@ Add a script to your package.json to codegen. The 'target' option is important t
 }
 ```
 
+### Example Service
+
+```c
+service Calculator {
+  i32 add(1: i32 left, 2: i32 right)
+  i32 subtract(1: i32 left, 2: i32 right)
+}
+```
+
 ### Install
 
 ```sh
