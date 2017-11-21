@@ -7,11 +7,8 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "noEmitOnError": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "noImplicitThis": true,
+    "strict": true,
     "noUnusedLocals": true,
-    "allowSyntheticDefaultImports": true,
     "pretty": true,
     "removeComments": true
   },

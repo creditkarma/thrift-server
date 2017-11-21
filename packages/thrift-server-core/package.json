@@ -29,14 +29,14 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
   "dependencies": {
-    "@types/node": "^8.0.31",
-    "@types/node-int64": "^0.4.29",
-    "@types/q": "^1.0.5",
-    "@types/thrift": "0.10.4",
     "thrift": "^0.10.0",
     "typescript": "^2.6.1"
   },
   "devDependencies": {
+    "@types/node": "^8.0.31",
+    "@types/node-int64": "^0.4.29",
+    "@types/q": "^1.0.5",
+    "@types/thrift": "0.10.4",
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
     "@types/lab": "^11.1.0",
