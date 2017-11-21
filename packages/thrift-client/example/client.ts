@@ -3,7 +3,8 @@ import {
   createClient,
   // fromAxios,
   fromRequest,
-  HttpConnection,
+  RequestConnection,
+  // AxiosConnection,
 } from '../src/main/'
 
 import * as path from 'path'
@@ -29,7 +30,7 @@ const app = express()
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+const connection: RequestConnection<Calculator.Client<CoreOptions>> =
   fromRequest(requestClient, {
     hostName: SERVER_CONFIG.host,
     port: SERVER_CONFIG.port
@@ -38,7 +39,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, connecti
 
 // Using Axios
 // const requestClient: AxiosInstance = axios.create()
-// const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
+// const connection: AxiosConnection<Calculator.Client> = fromAxios(requestClient, config)
 // const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
 
 function symbolToOperation(sym: string): Operation {

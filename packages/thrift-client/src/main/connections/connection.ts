@@ -41,7 +41,7 @@ function normalizePath(path: string = '/'): string {
   }
 }
 
-export abstract class HttpConnection<TClient, Context> {
+export abstract class HttpConnection<TClient, Context = never> {
   public Transport: TTransportConstructor
   public Protocol: TProtocolConstructor
   protected port: number

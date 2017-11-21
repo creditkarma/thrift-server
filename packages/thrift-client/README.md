@@ -17,12 +17,12 @@ The sample app can switch between using a Request client or an Axios client by c
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> = fromRequest(requestClient, config)
+const connection: RequestConnection<Calculator.Client<CoreOptions>> = fromRequest(requestClient, config)
 const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, connection)
 
 // Using Axios
 const requestClient: AxiosInstance = axios.create()
-const connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> = fromAxios(requestClient, config)
+const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> = fromAxios(requestClient, config)
 const thriftClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, connection)
 ```
 
@@ -74,7 +74,7 @@ Notice the optional context parameter. All service client methods can take an op
 import {
   createClient,
   fromAxios,
-  HttpConnection,
+  AxiosConnection,
   IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
 
@@ -101,7 +101,7 @@ const serverConfig = {
 // Create thrift client
 const requestClient: AxiosInstance = axios.create()
 
-const connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
   fromAxios(requestClient, clientConfig)
 
 const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)

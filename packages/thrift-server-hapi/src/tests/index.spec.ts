@@ -1,7 +1,7 @@
 import {
   createClient,
   fromRequest,
-  HttpConnection,
+  RequestConnection,
   RequestInstance,
 } from '@creditkarma/thrift-client'
 
@@ -28,7 +28,7 @@ const after = lab.after
 
 describe('Thrift Server Hapi', () => {
   let server: any
-  let connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions>
+  let connection: RequestConnection<Calculator.Client<CoreOptions>>
   let client: Calculator.Client<CoreOptions>
 
   before((done: any) => {
