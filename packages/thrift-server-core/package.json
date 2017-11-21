@@ -8,15 +8,17 @@
     "dist/main"
   ],
   "scripts": {
-    "prepublish": "npm run build",
-    "build": "npm run clean && npm run lint && tsc",
     "clean": "rimraf ./dist",
+    "lint": "tslint --fix './src/**/*.ts'",
+    "prepublish": "npm run build",
+    "build": "npm run clean && npm run lint && tsc -p tsconfig.json",
+    "build:test": "tsc -p tsconfig.test.json",
     "watch": "tsc --watch",
     "start": "npm run build && node dist/server.js",
+    "pretest": "npm run build:test",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js",
-    "lint": "tslint --fix './src/**/*.ts'"
+    "test:only": "lab --verbose -l -S ./dist/**/*.spec.js"
   },
   "keywords": [
     "Thrift",

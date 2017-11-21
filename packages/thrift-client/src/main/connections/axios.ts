@@ -41,6 +41,8 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosReque
       requestOptions,
     ).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
+    }, (err: any) => {
+      return Promise.reject(err)
     })
   }
 }

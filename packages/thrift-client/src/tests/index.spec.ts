@@ -36,12 +36,12 @@ const before = lab.before
 const after = lab.after
 
 describe('Thrift Client', () => {
-  let server: any
+  let server: childProcess.ChildProcess
 
   before((done: any) => {
     server = childProcess.fork('./dist/tests/server.js')
     server.on('message', (msg: any) => console.log(msg))
-    setTimeout(done, 1000)
+    setTimeout(done, 2000)
   })
 
   describe('AxiosConnection', () => {
@@ -207,25 +207,6 @@ describe('Thrift Client', () => {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return400',
-        })
-      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
-
-      badClient.add(5, 7)
-        .then((response: number) => {
-          expect(false).to.equal(true)
-          done()
-        }, (err: any) => {
-          expect(true).to.equal(true)
-          done()
-        })
-    })
-
-    it('should reject for a request to a missing service', (done: any) => {
-      const requestClient: RequestInstance = request.defaults({})
-      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
-        fromRequest(requestClient, {
-          hostName: 'fakehost',
-          port: 8080,
         })
       const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
 

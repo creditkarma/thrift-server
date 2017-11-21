@@ -4,7 +4,6 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "declaration": true,
     "rootDir": "./src",
     "outDir": "./dist",
     "noEmitOnError": true,
@@ -15,7 +14,6 @@
   },
   "exclude": [
     "node_modules",
-    "dist",
-    "src/tests"
+    "dist"
   ]
 }
