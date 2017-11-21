@@ -1,8 +1,9 @@
 import {
+  AxiosConnection,
   createClient,
   fromAxios,
   fromRequest,
-  HttpConnection,
+  RequestConnection,
   RequestInstance,
 } from '../main'
 
@@ -44,7 +45,7 @@ describe('Thrift Client', () => {
   })
 
   describe('AxiosConnection', () => {
-    let connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig>
+    let connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>>
     let client: Calculator.Client<AxiosRequestConfig>
 
     before((done: any) => {
@@ -83,7 +84,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
         fromAxios(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
@@ -103,7 +104,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
         fromAxios(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
@@ -123,7 +124,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> =
+      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
         fromAxios(requestClient, {
           hostName: 'fakehost',
           port: 8080,
@@ -142,7 +143,7 @@ describe('Thrift Client', () => {
   })
 
   describe('RequestConnection', () => {
-    let connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions>
+    let connection: RequestConnection<Calculator.Client<CoreOptions>>
     let client: Calculator.Client<CoreOptions>
 
     before((done: any) => {
@@ -181,7 +182,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
         fromRequest(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
@@ -201,7 +202,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
         fromRequest(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
@@ -221,7 +222,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
         fromRequest(requestClient, {
           hostName: 'fakehost',
           port: 8080,
@@ -240,7 +241,7 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> =
+      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
         fromRequest(requestClient, {
           hostName: 'fakehost',
           port: 8080,
