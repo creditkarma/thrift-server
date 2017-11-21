@@ -67,7 +67,7 @@ server.register(ThriftPlugin, err => {
  * passed along to our service by the Hapi thrift plugin. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
-const impl = new UserService.Processor({
+const handlers: UserService.IHandler<Hapi.Request> = {
     getUser: (request: RecommendationsRequest, context?: Hapi.Request) => {
         const userId = request.userId
 
@@ -77,7 +77,9 @@ const impl = new UserService.Processor({
 
         return getUserForId(userId)
     },
-})
+}
+
+const impl: UserService.Processor<Hapi.Request> = new UserService.Processor(handlers)
 
 /**
  * Route to our thrift service.
