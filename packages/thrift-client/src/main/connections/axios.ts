@@ -23,7 +23,7 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosReque
     super(options)
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
-    this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
+    this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
   }
 
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {

@@ -1,4 +1,12 @@
 import * as request from 'request'
+import {
+  CoreOptions,
+  OptionalUriUrl,
+  Request,
+  RequestAPI,
+  RequestResponse,
+  RequiredUriUrl,
+} from 'request'
 
 import {
   HttpConnection,
@@ -13,17 +21,17 @@ import {
 } from '../utils'
 
 export type RequestInstance =
-  request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl | request.RequiredUriUrl>
+  RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class RequestConnection<TClient> extends HttpConnection<TClient, request.CoreOptions> {
-  private request: RequestInstance
+export class RequestConnection<TClient> extends HttpConnection<TClient, CoreOptions> {
+  private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
 
   constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
     super(options)
     this.request = requestApi.defaults({
       // Encoding needs to be explicitly set to null or the response body will be a string
       encoding: null,
-      url: `http://${this.hostName}:${this.port}${this.path}`,
+      url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
     })
   }
 
@@ -39,7 +47,7 @@ export class RequestConnection<TClient> extends HttpConnection<TClient, request.
 
     return new Promise((resolve, reject) => {
       this.request
-        .post(requestOptions, (err: any, response: request.RequestResponse, body: Buffer) => {
+        .post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
           if (err !== null) {
             reject(err)
           } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
