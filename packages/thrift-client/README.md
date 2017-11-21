@@ -2,7 +2,6 @@
 
 Thrift client library for NodeJS written in TypeScript.
 
-
 ## Running the Sample Application
 
 ```sh
@@ -18,18 +17,43 @@ The sample app can switch between using a Request client or an Axios client by c
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: HttpConnection<Calculator.Client> = fromRequest(requestClient, config)
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const connection: HttpConnection<Calculator.Client<CoreOptions>, CoreOptions> = fromRequest(requestClient, config)
+const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, connection)
 
 // Using Axios
 const requestClient: AxiosInstance = axios.create()
-const connection: HttpConnection<Calculator.Client> = fromAxios(requestClient, config)
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const connection: HttpConnection<Calculator.Client<AxiosRequestConfig>, AxiosRequestConfig> = fromAxios(requestClient, config)
+const thriftClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, connection)
 ```
 
 ## Usage
 
 Functions are available to wrap either Request or Axios instances for making requests to a Thrift service.
+
+### Codegen
+
+The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
+
+```sh
+npm install --save-dev @creditkarma/thrift-typescript
+```
+
+Add a script to your package.json to codegen. The 'target' option is important to make thrift-typescript generate for this library instead of the Apache libraries.
+
+```json
+"scripts": {
+  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
+}
+```
+
+### Example Service
+
+```c
+service Calculator {
+  i32 add(1: i32 left, 2: i32 right)
+  i32 subtract(1: i32 left, 2: i32 right)
+}
+```
 
 ### Install
 
@@ -40,16 +64,11 @@ $ npm install --save @creditkarma/thrift-client
 $ npm install --save axios
 ```
 
-Given the following service definition we will build a sample client.
+### Creating a Client
 
-```c
-service Calculator {
-  i32 add(1: i32 left, 2: i32 right)
-  i32 subtract(1: i32 left, 2: i32 right)
-}
-```
+In this example we will use Axios to create our service client. Using the Request library is very similar.
 
-Would be used in a TypeScript service client as such (notice the optional context parameter passed into the client methods):
+Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Axios or Request respectively. These options will be deep merged with any default options before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
 
 ```typescript
 import {

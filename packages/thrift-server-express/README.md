@@ -4,6 +4,8 @@ Express middleware for processing Thrift requests.
 
 ## Usage
 
+### Codegen
+
 The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
 
 ```sh
@@ -15,6 +17,15 @@ Add a script to your package.json to codegen. The 'target' option is important t
 ```json
 "scripts": {
   "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
+}
+```
+
+### Example Service
+
+```c
+service Calculator {
+  i32 add(1: i32 left, 2: i32 right)
+  i32 subtract(1: i32 left, 2: i32 right)
 }
 ```
 
