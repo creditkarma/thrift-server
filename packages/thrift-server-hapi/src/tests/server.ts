@@ -1,5 +1,3 @@
-'use strict'
-
 import * as Hapi from 'hapi'
 import { ThriftPlugin } from '../main/'
 
@@ -41,7 +39,7 @@ server.register(ThriftPlugin, (err: any) => {
  * passed along to our service by the Hapi thrift plugin. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
-const impl = new Calculator.Processor({
+const handlers: Calculator.IHandler<Hapi.Request> = {
   ping(): void {
     return
   },
@@ -73,7 +71,9 @@ const impl = new Calculator.Processor({
   getStruct(): SharedStruct {
     return new SharedStruct()
   },
-})
+}
+
+const impl: Calculator.Processor<Hapi.Request> = new Calculator.Processor<Hapi.Request>(handlers)
 
 /**
  * Route to our thrift service.
