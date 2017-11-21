@@ -9,7 +9,7 @@ generate({
   sourceDir: 'thrift',
   target: 'thrift-server',
   files: [
-    './tutorial.thrift'
+    './calculator.thrift'
   ]
 })
 

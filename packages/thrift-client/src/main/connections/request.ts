@@ -13,7 +13,7 @@ import {
 } from '../utils'
 
 export type RequestInstance =
-  request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl>
+  request.RequestAPI<request.Request, request.CoreOptions, request.OptionalUriUrl | request.RequiredUriUrl>
 
 export class RequestConnection<TClient> extends HttpConnection<TClient, request.CoreOptions> {
   private request: RequestInstance

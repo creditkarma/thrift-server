@@ -17,7 +17,7 @@ import {
   Work,
   Operation,
   Calculator,
-} from './generated/tutorial/tutorial'
+} from './generated/calculator/calculator'
 
 import {
   SERVER_CONFIG,
