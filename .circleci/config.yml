@@ -12,10 +12,10 @@ jobs:
       - attach_workspace:
           at: ./
       - run:
-          name: npm-install
+          name: Install NPM Dependencies
           command: npm install
       - run:
-          name: npm-test
+          name: Run Test Suite
           command: npm test
 
   publish:
@@ -26,10 +26,13 @@ jobs:
           name: npm-token
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
-          name: npm-install
+          name: Install NPM Dependencies
           command: npm install
       - run:
-          name: npm-publish
+          name: Build Publish Assets
+          command: npm run build
+      - run:
+          name: Publish to NPM
           command: npm run release:publish
 
 workflows:
