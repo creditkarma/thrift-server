@@ -1,10 +1,15 @@
 {
   "name": "@creditkarma/vault-client",
   "version": "0.0.0",
-  "description": "A client for communicating with Hashicorp Vault",
-  "main": "index.js",
+  "description": "A client for communicating with Hashicorp Vault written in TypeScript",
+  "main": "dist/main/index.js",
   "files": [
     "dist/main"
+  ],
+  "keywords": [
+    "TypeScript",
+    "Hashicorp",
+    "Vault"
   ],
   "scripts": {
     "clean": "rimraf dist/",
@@ -23,7 +28,6 @@
     "@types/debug": "0.0.30",
     "@types/mocha": "^2.2.44",
     "@types/node": "^8.0.51",
-    "@types/request-promise-native": "^1.0.10",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
     "rimraf": "^2.6.2",
@@ -31,6 +35,8 @@
     "typescript": "^2.6.1"
   },
   "dependencies": {
+    "@types/request": "^2.0.8",
+    "@types/request-promise-native": "^1.0.10",
     "debug": "^3.1.0",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"

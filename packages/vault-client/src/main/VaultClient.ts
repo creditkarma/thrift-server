@@ -1,21 +1,23 @@
 import { getToken } from './discovery'
 import { IHVConfig, IReadResult } from './types'
-import { resolveConfig } from './utils'
+import { cleanSecret, resolveConfig } from './utils'
 import { VaultService } from './VaultService'
 
 export class VaultClient {
   private service: VaultService
   private config: IHVConfig
   private token: string
+  private namespace: string
 
   constructor(config: IHVConfig, service?: VaultService) {
     this.config = resolveConfig(config)
+    this.namespace = config.namespace || ''
     this.service = service || new VaultService(this.config)
   }
 
   public get<T>(key: string): Promise<T> {
     return this.getToken().then((tokenValue: string) => {
-      return this.service.read(key, tokenValue).then((result: IReadResult) => {
+      return this.service.read(cleanSecret(this.namespace, key), tokenValue).then((result: IReadResult) => {
         if (result.data && result.data.value) {
           return result.data.value
         } else {
@@ -27,7 +29,7 @@ export class VaultClient {
 
   public set<T>(key: string, value: T): Promise<void> {
     return this.getToken().then((tokenValue: string) => {
-      return this.service.write(key, { value }, tokenValue)
+      return this.service.write(cleanSecret(this.namespace, key), { value }, tokenValue)
     })
   }
 

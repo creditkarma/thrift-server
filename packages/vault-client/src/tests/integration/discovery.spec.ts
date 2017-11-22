@@ -7,10 +7,8 @@ describe('TokenDiscovery', () => {
   const tokenFilePath: string = '/tmp/token'
   const tokenValue: string = 'test-token'
   const mockConfig: IHVConfig = {
-    protocol: 'http',
     apiVersion: 'v1',
     destination: '',
-    hostHeader: '',
     namespace: '',
     tokenPath: tokenFilePath
   }
