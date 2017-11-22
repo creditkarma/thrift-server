@@ -1,0 +1,4 @@
+--reporter spec
+--full-trace
+--timeout 10000
+dist/tests/**/*.spec.js

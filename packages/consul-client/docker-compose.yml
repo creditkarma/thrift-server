@@ -1,0 +1,14 @@
+version: '2'
+services:
+  consul:
+    image: consul:latest
+    volumes:
+      - $PWD/consuldata:/tmp/consuldata
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:8600"
+    environment:
+      - "CONSUL_LOCAL_CONFIG={\"disable_update_check\": true}"
+      - "CONSUL_BIND_INTERFACE=eth0"
+    command: "consul agent -dev -client 0.0.0.0 -server -data-dir=/tmp/consuldata -bootstrap-expect=1"
