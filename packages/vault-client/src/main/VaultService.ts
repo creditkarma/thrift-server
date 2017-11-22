@@ -32,7 +32,6 @@ const request = rpn.defaults({
 function fetch(options: IRequestOptions, config: IServiceConfig, token: string = ''): Promise<any> {
   const requestOptions: IRequestOptions = deepMerge(options, {
     headers: {
-      'host': config.hostHeader,
       'X-Vault-Token': token,
     },
   })
@@ -60,7 +59,7 @@ export class VaultService {
 
   constructor(config: IServiceConfig) {
     this.config = config
-    this.dest = `${config.protocol}://${config.destination}/${config.apiVersion}`
+    this.dest = `${config.destination}/${config.apiVersion}`
   }
 
   public status(): Promise<IStatusResult> {

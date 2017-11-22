@@ -1,4 +1,4 @@
-// import * as path from 'path'
+import * as path from 'path'
 import { IHVConfig } from './types'
 
 function isObject(obj: any): boolean {
@@ -36,17 +36,25 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
   return (newObj as Base & Update)
 }
 
-// export function cleanToken() {
+export function cleanSecret(...parts: Array<string>): string {
+  return path.join(...parts.map(removeLeadingTrailingSlash))
+}
 
-// }
+export function removeLeadingTrailingSlash(str: string): string {
+  const tmp: string = (str.charAt(0) === '/') ? str.substring(1, str.length) : str
+  if (tmp.charAt(tmp.length - 1) === '/') {
+    return tmp.substring(0, tmp.length - 1)
+  } else {
+    return tmp
+  }
+}
 
 export const DEFAULT_CONFIG: IHVConfig = {
-  protocol: 'http',
   apiVersion: 'v1',
   destination: '',
-  hostHeader: '',
   namespace: '',
   tokenPath: '',
+  requestOptions: {},
 }
 
 export function resolveConfig(options: Partial<IHVConfig>): IHVConfig {

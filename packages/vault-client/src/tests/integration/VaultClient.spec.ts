@@ -7,12 +7,10 @@ import { IHVConfig } from '../../main/types'
 describe('VaultClient', () => {
 
   const mockConfig: IHVConfig = {
-    protocol: 'http',
     apiVersion: 'v1',
-    destination: 'localhost:8200',
-    hostHeader: '',
-    namespace: '',
-    tokenPath: '/tmp/token'
+    destination: 'http://localhost:8200',
+    namespace: 'secret',
+    tokenPath: '/tmp/token',
   }
   const client: VaultClient = new VaultClient(mockConfig)
   const mockStr = 'test'
@@ -30,7 +28,7 @@ describe('VaultClient', () => {
 
   describe('set', () => {
     it('should write an string to hvault', (done) => {
-      client.set('secret/str', mockStr).then((res: any) => {
+      client.set('str', mockStr).then((res: any) => {
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -39,7 +37,7 @@ describe('VaultClient', () => {
     })
 
     it('should write an number to hvault', (done) => {
-      client.set('secret/num', mockNum).then((res: any) => {
+      client.set('num', mockNum).then((res: any) => {
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -48,7 +46,7 @@ describe('VaultClient', () => {
     })
 
     it('should write an boolean to hvault', (done) => {
-      client.set('secret/bool', mockBool).then((res: any) => {
+      client.set('bool', mockBool).then((res: any) => {
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -57,7 +55,7 @@ describe('VaultClient', () => {
     })
 
     it('should write an object to hvault', (done) => {
-      client.set('secret/obj', mockObj).then((res: any) => {
+      client.set('obj', mockObj).then((res: any) => {
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -68,7 +66,7 @@ describe('VaultClient', () => {
 
   describe('get', () => {
     it('should read a string from hvault', (done) => {
-      client.get('secret/str').then((res: any) => {
+      client.get('str').then((res: any) => {
         assert.equal(res, mockStr)
         done()
       }, (err: any) => {
@@ -78,7 +76,7 @@ describe('VaultClient', () => {
     })
 
     it('should read a number from hvault', (done) => {
-      client.get('secret/num').then((res: any) => {
+      client.get('num').then((res: any) => {
         assert.equal(res, mockNum)
         done()
       }, (err: any) => {
@@ -88,7 +86,7 @@ describe('VaultClient', () => {
     })
 
     it('should read a boolean from hvault', (done) => {
-      client.get('secret/bool').then((res: any) => {
+      client.get('bool').then((res: any) => {
         assert.equal(res, mockBool)
         done()
       }, (err: any) => {
@@ -98,7 +96,7 @@ describe('VaultClient', () => {
     })
 
     it('should read an object from hvault', (done) => {
-      client.get('secret/obj').then((res: any) => {
+      client.get('obj').then((res: any) => {
         assert.deepEqual(res, mockObj)
         done()
       }, (err: any) => {

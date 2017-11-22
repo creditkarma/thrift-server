@@ -7,10 +7,8 @@ import { cleanLastChar } from '../../main/discovery'
 describe('VaultService', () => {
 
   const mockConfig: IHVConfig = {
-    protocol: 'http',
     apiVersion: 'v1',
-    destination: 'localhost:8200',
-    hostHeader: '',
+    destination: 'http://localhost:8200',
     namespace: '',
     tokenPath: ''
   }
@@ -31,8 +29,9 @@ describe('VaultService', () => {
   })
 
   describe('sealStatus', () => {
-    it('should read the satus as { intialized: true }', (done) => {
+    it('should correctly get seal status of vault', (done) => {
       service.sealStatus().then((res) => {
+        assert.equal(res.sealed, false)
         assert.containsAllKeys(res, ['sealed','t','n','progress','version'])
         done()
       }, (err: any) => {

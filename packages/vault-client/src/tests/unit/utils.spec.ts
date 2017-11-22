@@ -44,23 +44,67 @@ describe('Utils', () => {
   describe('resolveConfig', () => {
     it('should apply options to default config', () => {
       const options: IHVConfig = {
-        protocol: 'https',
         destination: 'localhost:8000',
-        hostHeader: 'host',
         namespace: 'path',
         tokenPath: '/tmp/token',
+        requestOptions: {
+          headers: {
+            host: 'localhost'
+          }
+        }
       }
       const expected: IHVConfig = {
-        protocol: 'https',
         apiVersion: 'v1',
         destination: 'localhost:8000',
-        hostHeader: 'host',
         namespace: 'path',
         tokenPath: '/tmp/token',
+        requestOptions: {
+          headers: {
+            host: 'localhost'
+          }
+        }
       }
       const actual = Utils.resolveConfig(options)
 
       assert.deepEqual(actual, expected)
+    })
+  })
+
+  describe('cleanSecret', () => {
+    it('should correctly join a secret path', () => {
+      const namespace: string = 'what'
+      const secret: string = '/secret/key'
+      const actual: string = Utils.cleanSecret(namespace, secret)
+      const expected: string = 'what/secret/key'
+
+      assert.equal(actual, expected)
+    })
+
+    it('should correctly handle extra slashes', () => {
+      const namespace: string = 'what/'
+      const secret: string = '/secret/key'
+      const actual: string = Utils.cleanSecret(namespace, secret)
+      const expected: string = 'what/secret/key'
+
+      assert.equal(actual, expected)
+    })
+
+    it('should remove leading slash', () => {
+      const namespace: string = '/what/'
+      const secret: string = '/secret/key'
+      const actual: string = Utils.cleanSecret(namespace, secret)
+      const expected: string = 'what/secret/key'
+
+      assert.equal(actual, expected)
+    })
+
+    it('should remove trailing slash', () => {
+      const namespace: string = '/what/'
+      const secret: string = '/secret/key/'
+      const actual: string = Utils.cleanSecret(namespace, secret)
+      const expected: string = 'what/secret/key'
+
+      assert.equal(actual, expected)
     })
   })
 })

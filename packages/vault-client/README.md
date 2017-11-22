@@ -20,6 +20,8 @@ VaultClient expects the access token for Vault to be available in a local file. 
 
 The namespace option is a string path that will be appended to all keys for both get and set methods.
 
+The requestOptions are default options passed to the underlying Request library. The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods.
+
 When a secret is written to Vault the vaule you set will be wrapped in an object of this form:
 
 ```typescript
@@ -34,12 +36,15 @@ When reading from Vault with the get method objects of this form are assumed. If
 import { IHVConfig, VaultClient } from '@creditkarma/vault-client'
 
 const options: IHVConfig = {
-  protocol: 'http',
   apiVersion: 'v1',
-  destination: 'localhost:8200',
-  hostHeader: '',
+  destination: 'http://localhost:8200',
   namespace: 'secret',
   tokenPath: '/tmp/token',
+  requestOptions: {
+    headers: {
+      host: 'localhost'
+    }
+  }
 }
 const client: VaultClient = new VaultClient(options)
 
@@ -61,10 +66,13 @@ Like VaultClient all methods return Promises.
 import { IServiceConfig, VaultService } from '@creditkarma/vault-client'
 
 const options: IServiceConfig = {
-  protocol: 'http',
   apiVersion: 'v1',
-  destination: 'localhost:8200',
-  hostHeader: '',
+  destination: 'http://localhost:8200',
+  requestOptions: {
+    headers: {
+      host: 'localhost'
+    }
+  }
 }
 const service: VaultService = new VaultService(options)
 

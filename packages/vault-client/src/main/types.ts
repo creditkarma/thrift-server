@@ -1,11 +1,9 @@
-export type Protocol =
-  'http' | 'https'
+import { CoreOptions } from 'request'
 
 export interface IServiceConfig {
-  protocol?: Protocol
   apiVersion?: 'v1'
-  destination: string
-  hostHeader?: string
+  destination: string,
+  requestOptions?: CoreOptions
 }
 
 export interface IHVConfig extends IServiceConfig {
