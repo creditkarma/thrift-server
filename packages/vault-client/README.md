@@ -20,7 +20,11 @@ VaultClient expects the access token for Vault to be available in a local file. 
 
 The namespace option is a string path that will be appended to all keys for both get and set methods.
 
-The requestOptions are default options passed to the underlying Request library. The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods.
+The requestOptions are default options passed to the underlying [Request library](https://github.com/request/request). The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods.
+
+```typescript
+client.get('key', { ... request options ... })
+```
 
 When a secret is written to Vault the vaule you set will be wrapped in an object of this form:
 
