@@ -1,3 +1,4 @@
+import { CoreOptions } from 'request'
 import { getToken } from './discovery'
 import { IHVConfig, IReadResult } from './types'
 import { cleanSecret, resolveConfig } from './utils'
@@ -15,9 +16,10 @@ export class VaultClient {
     this.service = service || new VaultService(this.config)
   }
 
-  public get<T>(key: string): Promise<T> {
+  public get<T>(key: string, options: CoreOptions = {}): Promise<T> {
     return this.getToken().then((tokenValue: string) => {
-      return this.service.read(cleanSecret(this.namespace, key), tokenValue).then((result: IReadResult) => {
+      const secret: string = cleanSecret(this.namespace, key)
+      return this.service.read(secret, tokenValue, options).then((result: IReadResult) => {
         if (result.data && result.data.value) {
           return result.data.value
         } else {
@@ -27,9 +29,10 @@ export class VaultClient {
     })
   }
 
-  public set<T>(key: string, value: T): Promise<void> {
+  public set<T>(key: string, value: T, options: CoreOptions = {}): Promise<void> {
     return this.getToken().then((tokenValue: string) => {
-      return this.service.write(cleanSecret(this.namespace, key), { value }, tokenValue)
+      const secret: string = cleanSecret(this.namespace, key)
+      return this.service.write(secret, { value }, tokenValue, options)
     })
   }
 

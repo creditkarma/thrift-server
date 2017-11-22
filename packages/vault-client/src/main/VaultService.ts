@@ -1,5 +1,5 @@
+import { CoreOptions, OptionsWithUri } from 'request'
 import * as rpn from 'request-promise-native'
-import * as url from 'url'
 
 import {
   IInitArgs,
@@ -15,22 +15,14 @@ import {
 
 import { deepMerge } from './utils'
 
-export const tokenHeader: string = 'X-Vault-Token'
-
-export interface IRequestOptions {
-  url: string | url.Url
-  method: 'GET' | 'PUT' | 'DELETE' | 'POST',
-  headers: { [name: string]: string | Array<string> }
-}
-
 const request = rpn.defaults({
   json: true,
   resolveWithFullResponse: true,
   simple: false,
 })
 
-function fetch(options: IRequestOptions, config: IServiceConfig, token: string = ''): Promise<any> {
-  const requestOptions: IRequestOptions = deepMerge(options, {
+function fetch(options: OptionsWithUri, token: string = ''): Promise<any> {
+  const requestOptions: OptionsWithUri = deepMerge(options, {
     headers: {
       'X-Vault-Token': token,
     },
@@ -62,70 +54,62 @@ export class VaultService {
     this.dest = `${config.destination}/${config.apiVersion}`
   }
 
-  public status(): Promise<IStatusResult> {
-    const options: any = {
+  public status(options: CoreOptions = {}): Promise<IStatusResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/sys/init`,
       method: 'GET',
-    }
-    return fetch(options, this.config)
+    }))
   }
 
-  public init(data: IInitArgs): Promise<IInitResult> {
-    const options: any = {
+  public init(data: IInitArgs, options: CoreOptions = {}): Promise<IInitResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/sys/init`,
       json: data,
       method: 'PUT',
-    }
-    return fetch(options, this.config)
+    }))
   }
 
-  public sealStatus(): Promise<ISealStatusResult> {
-    const options: any = {
+  public sealStatus(options: CoreOptions = {}): Promise<ISealStatusResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/sys/seal-status`,
       method: 'GET',
-    }
-    return fetch(options, this.config)
+    }))
   }
 
-  public seal(token: string): Promise<void> {
-    const options: any = {
+  public seal(token: string, options: CoreOptions = {}): Promise<void> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/sys/seal`,
       method: 'PUT',
-    }
-    return fetch(options, this.config, token)
+    }), token)
   }
 
-  public unseal(data: IUnsealArgs): Promise<IUnsealResult> {
-    const options: any = {
+  public unseal(data: IUnsealArgs, options: CoreOptions = {}): Promise<IUnsealResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/sys/unseal`,
       json: data,
       method: 'PUT',
-    }
-    return fetch(options, this.config)
+    }))
   }
 
-  public read(path: string, token: string): Promise<IReadResult> {
-    const options: any = {
+  public read(path: string, token: string, options: CoreOptions = {}): Promise<IReadResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/${path}`,
       method: 'GET',
-    }
-    return fetch(options, this.config, token)
+    }), token)
   }
 
-  public list(token: string): Promise<IListResult> {
-    const options: any = {
+  public list(token: string, options: CoreOptions = {}): Promise<IListResult> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/secret?list=true`,
       method: 'GET',
-    }
-    return fetch(options, this.config, token)
+    }), token)
   }
 
-  public write(path: string, data: any, token: string): Promise<void> {
-    const options: any = {
+  public write(path: string, data: any, token: string, options: CoreOptions = {}): Promise<void> {
+    return fetch(deepMerge(options, {
       uri: `${this.dest}/${path}`,
       json: data,
       method: 'POST',
-    }
-    return fetch(options, this.config, token)
+    }), token)
   }
 }
