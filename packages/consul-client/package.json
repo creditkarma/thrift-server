@@ -18,7 +18,7 @@
     "docker:kill": "docker-compose kill consul",
     "build": "npm run clean && npm run lint && tsc",
     "pretest": "npm run build && npm run docker",
-    "test": "wait-on http://localhost:8500 && npm run lint && NODE_ENV=test mocha --opts mocha.opts",
+    "test": "wait-on --timeout 10000 http://localhost:8500 && npm run lint && NODE_ENV=test mocha --opts mocha.opts",
     "posttest": "npm run docker:kill && rimraf consuldata/*"
   },
   "author": "Credit Karma",
