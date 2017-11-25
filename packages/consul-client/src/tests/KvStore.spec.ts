@@ -1,5 +1,5 @@
 import { assert } from 'chai'
-import { exec, execSync } from 'child_process'
+// import { exec, execSync } from 'child_process'
 import { KvStore } from '../main/KvStore'
 
 describe('KvStore', () => {
@@ -12,7 +12,7 @@ describe('KvStore', () => {
 
   // This just gives consul a chance to spin up
   before((done) => {
-    exec('docker-compose up consul')
+    // exec('docker-compose up consul')
     setTimeout(done, 3000)
   })
 
@@ -110,8 +110,8 @@ describe('KvStore', () => {
     })
   })
 
-  after((done) => {
-    execSync('docker-compose kill consul')
-    setTimeout(done, 2000)
-  })
+  // after((done) => {
+  //   execSync('docker-compose kill consul')
+  //   setTimeout(done, 2000)
+  // })
 })
