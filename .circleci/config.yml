@@ -15,9 +15,7 @@ jobs:
           command: npm install
       - run:
           name: Run Test Suite
-          command: |
-            export VAULT_CLIENT_TOKEN=`curl localhost:8201/client-token`
-            npm test
+          command: npm test
 
   publish:
     <<: *defaults
