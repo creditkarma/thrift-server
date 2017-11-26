@@ -3,6 +3,10 @@ export const enum RequestType {
   UpdateRequest = 'UpdateRequest',
 }
 
+export interface IQueryMap {
+  [key: string]: string | number | boolean | undefined
+}
+
 export interface IKey {
   path: string
   dc?: string

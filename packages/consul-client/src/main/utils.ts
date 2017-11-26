@@ -1,6 +1,9 @@
-import { IConsulRequest } from './types'
+import { IConsulRequest, IQueryMap } from './types'
 
-export function decodeBase64(val: any): any {
+/**
+ * Try to decode a base64 encoded string
+ */
+export function decodeBase64(val: string): any {
   return JSON.parse(Buffer.from(val, 'base64').toString('utf-8'))
 }
 
@@ -18,10 +21,6 @@ export function removeLeadingTrailingSlash(str: string): string {
   }
 }
 
-export interface IQueryMap {
-  [key: string]: string | number | boolean | undefined
-}
-
 export function cleanQueryParams(raw: IQueryMap): IQueryMap {
   const cleaned: IQueryMap = {}
 
@@ -37,6 +36,9 @@ export function cleanQueryParams(raw: IQueryMap): IQueryMap {
   return cleaned
 }
 
+/**
+ * Given a ConsulRequest construct a path to the desired resource
+ */
 export function requestToPath(req: IConsulRequest): string {
   const tmp: string = (
     (req.subsection !== undefined) ?

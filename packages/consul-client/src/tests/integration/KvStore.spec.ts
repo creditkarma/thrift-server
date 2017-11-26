@@ -1,9 +1,7 @@
 import { assert } from 'chai'
-// import { exec, execSync } from 'child_process'
-import { KvStore } from '../main/KvStore'
+import { KvStore } from '../../main/KvStore'
 
 describe('KvStore', () => {
-
   const client = new KvStore('http://127.0.0.1:8500')
   const mockObj = { value: 'bar' }
   const mockStr = 'test me'
@@ -12,7 +10,6 @@ describe('KvStore', () => {
 
   // This just gives consul a chance to spin up
   before((done) => {
-    // exec('docker-compose up consul')
     setTimeout(done, 3000)
   })
 
@@ -109,9 +106,4 @@ describe('KvStore', () => {
       })
     })
   })
-
-  // after((done) => {
-  //   execSync('docker-compose kill consul')
-  //   setTimeout(done, 2000)
-  // })
 })

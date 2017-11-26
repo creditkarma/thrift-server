@@ -18,8 +18,10 @@
     "docker:kill": "docker-compose kill consul",
     "build": "npm run clean && npm run lint && tsc",
     "pretest": "npm run build && npm run docker",
-    "test": "wait-on --timeout 10000 http://localhost:8500 && npm run lint && NODE_ENV=test mocha --opts mocha.opts",
-    "posttest": "npm run docker:kill && rimraf consuldata/*"
+    "posttest": "npm run docker:kill && rimraf consuldata/*",
+    "test": "wait-on --timeout 10000 http://localhost:8500 && npm run lint && npm run test:unit && npm run test:integration",
+    "test:unit": "NODE_ENV=test mocha --full-trace dist/tests/unit/**/*.spec.js",
+    "test:integration": "NODE_ENV=test mocha --full-trace --timeout 15000 dist/tests/integration/**/*.spec.js"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",

@@ -12,26 +12,32 @@ import {
   IKey,
 } from './types'
 
-import { decodeBase64 } from './utils'
+import {
+  CONSUL_ADDRESS,
+  DEFAULT_HOST,
+} from './constants'
 
-export const DEFAULT_HOST: string = 'localhost:8500'
-export const DEFAULT_API_VERSION: string = 'v1'
+import {
+  decodeBase64,
+  deepMerge,
+} from './utils'
 
-export const CONSUL_ADDRESS: string = 'CONSUL_ADDRESS'
-export const CONSUL_KV_DC: string = 'CONSUL_KV_DC'
-export const CONSUL_KEYS: string = 'CONSUL_KEYS'
-
-const defaultAddress: string = process.env[CONSUL_ADDRESS] || ''
+const defaultAddress: string = process.env[CONSUL_ADDRESS] || DEFAULT_HOST
 
 /**
  * This class wraps Consul's key/value HTTP API
  */
 export class KvStore {
   private client: ConsulClient
+  private consulAddress: string
+  private baseOptions: CoreOptions
 
   constructor(
-    private consulAddress: string = defaultAddress,
+    consulAddress: string = defaultAddress,
+    baseOptions: CoreOptions = {},
   ) {
+    this.consulAddress = consulAddress
+    this.baseOptions = baseOptions
     this.client = new ConsulClient(this.consulAddress)
   }
 
@@ -51,7 +57,8 @@ export class KvStore {
    * The Value is a Base64 encoded string
    */
   public get<T>(key: IKey, requestOptions: CoreOptions = {}): Promise<T | null> {
-    return this.client.apply(getRequest({ key }), requestOptions).then((res: RequestResponse) => {
+    const extendedOptions = deepMerge(this.baseOptions, requestOptions)
+    return this.client.send(getRequest({ key }), extendedOptions).then((res: RequestResponse) => {
       switch (res.statusCode) {
         case 200:
           const metadata: Array<IConsulMetadata> = res.body
@@ -67,10 +74,11 @@ export class KvStore {
   }
 
   public set(key: IKey, data: any, requestOptions: CoreOptions = {}): Promise<boolean> {
-    return this.client.apply(updateRequest({
+    const extendedOptions = deepMerge(this.baseOptions, requestOptions)
+    return this.client.send(updateRequest({
       key,
       value: data,
-    }), requestOptions).then((res: RequestResponse) => {
+    }), extendedOptions).then((res: RequestResponse) => {
       switch (res.statusCode) {
         case 200:
           return Promise.resolve(res.body as boolean)
