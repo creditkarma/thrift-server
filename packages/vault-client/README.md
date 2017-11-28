@@ -16,25 +16,30 @@ This library exposes two classes for working with Vault, VaultClient and VaultSe
 
 VaultClient provides two methods: get and set. Both methods return Promises.
 
-VaultClient expects the access token for Vault to be available in a local file. Here we pass the path to that file as an option. The contents of this file will be used to make all requests to Vault.
+#### Options
 
-The namespace option is a string path that will be appended to all keys for both get and set methods.
+VaultClient expects the access token for Vault to be available in a local file. The path to this file is passed as an option.
 
-The requestOptions are default options passed to the underlying [Request library](https://github.com/request/request). The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods.
+Available options:
+* apiVersion - API version to use. Currently this can only be 'v1'.
+* destination - The location of the Vault instance. Defaults to 'http://localhost:8200'.
+* namespace - A namespace for secrets. This path will be prepended to all get/set requests. Defaults to ''.
+* tokenPath - The local file path to a file containing the Vault token. Defaults to '/tmp/token'.
+* requestOptions - Options passed to the underlying [Request library](https://github.com/request/request). The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods. This will be used to set up TLS.
 
-```typescript
-client.get('key', { ... request options ... })
-```
+#### Data Formatting
 
-When a secret is written to Vault the vaule you set will be wrapped in an object of this form:
+When a secret is written to Vault the value you set will be wrapped in an object of this form:
 
 ```typescript
 {
-  value: value
+  "value": value
 }
 ```
 
-When reading from Vault with the get method objects of this form are assumed. If there is no value property an exception will be raised. When performing a get only the value of the value key will be returned. This allows set methods to accept primitive values.
+When reading values with VaultClient objects of this form are assumed. If there is no value property an exception will be raised. When performing a get only the value of the value key will be returned. This allows get and set methods to operate on primitive values.
+
+#### Example
 
 ```typescript
 import { IHVConfig, VaultClient } from '@creditkarma/vault-client'
@@ -52,6 +57,7 @@ const options: IHVConfig = {
 }
 const client: VaultClient = new VaultClient(options)
 
+// Because we set a namespace this is actually written to 'secret/key'
 client.set('key', 'value').then(() => {
   // value successfully written
   client.get<string>('key').then((val: string) => {
@@ -63,6 +69,15 @@ client.set('key', 'value').then(() => {
 ### VaultService
 
 VaultService provides more direct access to the raw Vault HTTP API. Method arguments and method return types conform to the [HTTP Vault API](https://www.vaultproject.io/api/).
+
+#### Options
+
+VaultService accepts a sub-set of the options that VaultClient accepts:
+* apiVersion
+* destination
+* requestOptions
+
+#### Example
 
 Like VaultClient all methods return Promises.
 

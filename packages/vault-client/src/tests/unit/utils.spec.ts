@@ -43,10 +43,9 @@ describe('Utils', () => {
 
   describe('resolveConfig', () => {
     it('should apply options to default config', () => {
-      const options: IHVConfig = {
+      const options: Partial<IHVConfig> = {
         destination: 'localhost:8000',
         namespace: 'path',
-        tokenPath: '/tmp/token',
         requestOptions: {
           headers: {
             host: 'localhost'

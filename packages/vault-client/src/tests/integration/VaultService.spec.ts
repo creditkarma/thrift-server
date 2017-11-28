@@ -10,7 +10,8 @@ describe('VaultService', () => {
     apiVersion: 'v1',
     destination: 'http://localhost:8200',
     namespace: '',
-    tokenPath: ''
+    tokenPath: '',
+    requestOptions: {},
   }
   const service = new VaultService(mockConfig)
   const mockObj = { value: 'bar' }
