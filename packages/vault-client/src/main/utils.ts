@@ -8,7 +8,7 @@ function isObject(obj: any): boolean {
   )
 }
 
-export function deepMerge<Base, Update>(base: Base, update: Update): Base & Update {
+function merge<Base, Update>(base: Base, update: Update): Base & Update {
   const newObj: any = {}
   const baseKeys: Array<string> = Object.keys(base)
   const updateKeys: Array<string> = Object.keys(update)
@@ -34,6 +34,15 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
   }
 
   return (newObj as Base & Update)
+}
+
+export function deepMerge<A, B>(a: A, b: B): A & B
+export function deepMerge<A, B, C>(a: A, b: B, c: C): A & B & C
+export function deepMerge<A, B, C, D>(a: A, b: B, c: C, d: D): A & B & C & D
+export function deepMerge(...args: Array<any>): any {
+  return args.reduce((acc: any, next: any) => {
+    return merge(acc, next)
+  }, {})
 }
 
 export function cleanSecret(...parts: Array<string>): string {
