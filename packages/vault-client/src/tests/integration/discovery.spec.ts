@@ -27,7 +27,7 @@ describe('TokenDiscovery', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 

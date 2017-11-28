@@ -3,6 +3,7 @@ import * as fs from 'fs'
 import { execSync } from 'child_process'
 import { VaultClient } from '../../main/VaultClient'
 import { IHVConfig } from '../../main/types'
+import { cleanLastChar } from '../../main/discovery'
 
 describe('VaultClient', () => {
 
@@ -17,7 +18,7 @@ describe('VaultClient', () => {
   const mockNum = 5
   const mockBool = true
   const mockObj = { value: 'bar' }
-  const token: string = execSync('curl localhost:8201/client-token').toString()
+  const token: string = cleanLastChar(execSync('curl localhost:8201/client-token').toString())
 
   // Client expects the token to be available in the local file system
   before((done) => {
@@ -33,7 +34,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an number to hvault', (done) => {
@@ -42,7 +43,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an boolean to hvault', (done) => {
@@ -51,7 +52,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an object to hvault', (done) => {
@@ -60,7 +61,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -72,7 +73,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a number from hvault', (done) => {
@@ -82,7 +83,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a boolean from hvault', (done) => {
@@ -92,7 +93,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read an object from hvault', (done) => {
@@ -102,7 +103,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
