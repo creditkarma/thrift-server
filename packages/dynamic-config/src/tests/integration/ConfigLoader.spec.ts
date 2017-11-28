@@ -1,6 +1,5 @@
 import { assert } from 'chai'
-import { ConfigLoader } from '../../main/ConfigLoader'
-import { IConfigMap } from '../../main/types'
+import { ConfigLoader, IConfigMap } from '../../main/'
 
 describe('ConfigLoader', () => {
   let savedDir: string
@@ -15,7 +14,7 @@ describe('ConfigLoader', () => {
     const loader: ConfigLoader = new ConfigLoader()
 
     it('should load all configs in path', (done) => {
-      loader.load().then((val: Array<[string, object]>) => {
+      loader.load().then((actual: Array<[string, object]>) => {
         const expected: Array<[string, object]> = [
           [ 'default', {
             project: {
@@ -30,7 +29,7 @@ describe('ConfigLoader', () => {
             },
             'hashicorp-vault': {
               apiVersion: 'v1',
-              destination: 'http://localhost:8500',
+              destination: 'http://localhost:8200',
               namespace: 'secret',
               tokenPath: './tmp/token',
             },
@@ -54,9 +53,17 @@ describe('ConfigLoader', () => {
               password: 'bar',
             },
           } ],
+          [ 'test', {
+            project: {
+              health: {
+                control: '/control',
+                response: 'PASS',
+              },
+            },
+          } ],
         ]
 
-        assert.deepEqual(val, expected)
+        assert.deepEqual(actual, expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -68,8 +75,8 @@ describe('ConfigLoader', () => {
   describe('loadConfigMap', () => {
     const loader: ConfigLoader = new ConfigLoader()
 
-    it('should load configs as a hash', (done) => {
-      loader.loadConfigMap().then((val: IConfigMap) => {
+    it('should return configs as a map of environment -> config', (done) => {
+      loader.loadConfigMap().then((actual: IConfigMap) => {
         const expected: IConfigMap = {
           default: {
             project: {
@@ -84,12 +91,20 @@ describe('ConfigLoader', () => {
             },
             'hashicorp-vault': {
               apiVersion: 'v1',
-              destination: 'http://localhost:8500',
+              destination: 'http://localhost:8200',
               namespace: 'secret',
               tokenPath: './tmp/token',
             },
           },
           development: {
+            project: {
+              health: {
+                control: '/control',
+                response: 'PASS',
+              },
+            },
+          },
+          test: {
             project: {
               health: {
                 control: '/control',
@@ -110,7 +125,7 @@ describe('ConfigLoader', () => {
           },
         }
 
-        assert.deepEqual(val, expected)
+        assert.deepEqual(actual, expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -146,7 +161,7 @@ describe('ConfigLoader', () => {
         },
         'hashicorp-vault': {
           apiVersion: 'v1',
-          destination: 'http://localhost:8500',
+          destination: 'http://localhost:8200',
           namespace: 'secret',
           tokenPath: './tmp/token',
         },
@@ -177,7 +192,7 @@ describe('ConfigLoader', () => {
         },
         'hashicorp-vault': {
           apiVersion: 'v1',
-          destination: 'http://localhost:8500',
+          destination: 'http://localhost:8200',
           namespace: 'secret',
           tokenPath: './tmp/token',
         },
@@ -208,7 +223,7 @@ describe('ConfigLoader', () => {
         },
         'hashicorp-vault': {
           apiVersion: 'v1',
-          destination: 'http://localhost:8500',
+          destination: 'http://localhost:8200',
           namespace: 'secret',
           tokenPath: './tmp/token',
         },

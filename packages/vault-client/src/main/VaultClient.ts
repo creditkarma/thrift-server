@@ -4,6 +4,12 @@ import { IHVConfig, IReadResult } from './types'
 import { cleanSecret, resolveConfig } from './utils'
 import { VaultService } from './VaultService'
 
+class HVInvalidResponse extends Error {
+  constructor() {
+    super('Data returned from Vault has incorrect structure')
+  }
+}
+
 export class VaultClient {
   private service: VaultService
   private config: IHVConfig
@@ -23,7 +29,7 @@ export class VaultClient {
         if (result.data && result.data.value) {
           return result.data.value
         } else {
-          throw new Error('Data returned from Vault has incorrect structure')
+          throw new HVInvalidResponse()
         }
       })
     })

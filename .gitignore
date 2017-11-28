@@ -62,3 +62,7 @@ dist
 
 # Codegen artifacts
 generated
+
+# Temp files
+*.tmp
+tmp

@@ -1,5 +1,6 @@
-import { CoreOptions, OptionsWithUri } from 'request'
+import { CoreOptions, OptionsWithUri, RequestResponse } from 'request'
 import * as rpn from 'request-promise-native'
+import * as url from 'url'
 
 import {
   IInitArgs,
@@ -21,6 +22,29 @@ const request = rpn.defaults({
   simple: false,
 })
 
+class HVMissingResource extends Error {
+  constructor(location: string | url.Url) {
+    super(`Unable to locate vault resource at: ${location}`)
+  }
+}
+
+class HVFail extends Error {
+  constructor(message?: string) {
+    super(message)
+  }
+}
+
+function responseAsError(res: RequestResponse): HVFail {
+  let message: string
+  if (res.body && res.body.errors && res.body.errors.length > 0) {
+    message = res.body.errors[0]
+  } else {
+    message = `Status ${res.statusCode}`
+  }
+
+  return new HVFail(message)
+}
+
 function fetch(options: OptionsWithUri, token: string = ''): Promise<any> {
   const requestOptions: OptionsWithUri = deepMerge(options, {
     headers: {
@@ -28,18 +52,18 @@ function fetch(options: OptionsWithUri, token: string = ''): Promise<any> {
     },
   })
 
-  return request(requestOptions).then((res: any) => {
-    if (res.statusCode !== 200 && res.statusCode !== 204) {
-      let message: string
-      if (res.body && res.body.errors && res.body.errors.length > 0) {
-        message = res.body.errors[0]
-      } else {
-        message = `Status ${res.statusCode}`
-      }
-      const error: Error = new Error(message)
-      return Promise.reject(error)
+  return request(requestOptions).then((res: RequestResponse) => {
+    switch (res.statusCode) {
+      case 200:
+      case 204:
+        return Promise.resolve(res.body)
+
+      case 404:
+        return Promise.reject(new HVMissingResource(requestOptions.uri))
+
+      default:
+        return Promise.reject(responseAsError(res))
     }
-    return Promise.resolve(res.body)
   }, (err: any) => {
     return err
   })

@@ -12,6 +12,7 @@ import {
 } from './ConfigLoader'
 
 import {
+  CONFIG_PATH,
   CONSUL_ADDRESS,
   CONSUL_KEYS,
   CONSUL_KV_DC,
@@ -66,11 +67,17 @@ export class DynamicConfig {
   private consulKvDc: Maybe<string>
   private consulKeys: Maybe<string>
 
-  constructor(options: IConfigOptions = {}) {
-    this.consulAddress = Maybe.fromNullable(options.consulAddress || process.env[CONSUL_ADDRESS])
-    this.consulKvDc = Maybe.fromNullable(options.consulKvDc || process.env[CONSUL_KV_DC])
-    this.consulKeys = Maybe.fromNullable(options.consulKeys || process.env[CONSUL_KEYS])
-    this.configLoader = new ConfigLoader({ configPath: options.configPath, configEnv: options.configEnv })
+  constructor({
+    consulAddress = process.env[CONSUL_ADDRESS],
+    consulKvDc = process.env[CONSUL_KV_DC],
+    consulKeys = process.env[CONSUL_KEYS],
+    configPath = process.env[CONFIG_PATH],
+    configEnv = process.env.NODE_ENV,
+  }: IConfigOptions = {}) {
+    this.consulAddress = Maybe.fromNullable(consulAddress)
+    this.consulKvDc = Maybe.fromNullable(consulKvDc)
+    this.consulKeys = Maybe.fromNullable(consulKeys)
+    this.configLoader = new ConfigLoader({ configPath, configEnv })
   }
 
   public async get<T = any>(rootKey: string = ''): Promise<T> {
@@ -88,6 +95,7 @@ export class DynamicConfig {
       if (value !== null) {
         return Promise.resolve(value)
       } else {
+        console.error(`Value for key (${rootKey}) not found in config`)
         return Promise.reject(new DynamicConfigMissingKey(rootKey))
       }
     }
@@ -95,21 +103,23 @@ export class DynamicConfig {
 
   public async getSecretValue<T = any>(
     vaultKey: string,
-    hVaultClient: Promise<Maybe<VaultClient>> = this.getHVaultClient(),
+    vaultClient: Promise<Maybe<VaultClient>> = this.getHVaultClient(),
   ): Promise<T> {
-    const maybeClient = await hVaultClient
+    const maybeClient = await vaultClient
     return maybeClient.fork((client: VaultClient) => {
       return client.get<T>(vaultKey).then((value: T) => {
         return Promise.resolve(value)
       }, (err: any) => {
+        console.error(`Error retrieving key (${vaultKey}) from Vault: `, err)
         return Promise.reject(new HVFailed(err.message))
       })
     }, () => {
+      console.error(`Unable to get ${vaultKey}. Vault is not configured.`)
       return Promise.reject(new HVNotConfigured())
     })
   }
 
-  public async getHVaultClient(): Promise<Maybe<VaultClient>> {
+  private async getHVaultClient(): Promise<Maybe<VaultClient>> {
     if (this.vaultClient) {
       return Promise.resolve(this.vaultClient)
     } else {
@@ -144,7 +154,7 @@ export class DynamicConfig {
     }
   }
 
-  private getConsulConfig<T = any>(
+  private async getConsulConfig<T = any>(
     consulKeys: Maybe<string> = this.consulKeys,
     consulKvDc: Maybe<string> = this.consulKvDc,
     consulClient: Maybe<KvStore> = this.getConsulClient(),
@@ -155,14 +165,14 @@ export class DynamicConfig {
           return client.get({ path: key, dc })
         }))
 
-      const resolvedConfig: Promise<any> =
-        rawConfigs.then((configs: Array<any>) => {
+      const resolvedConfig: Promise<T> =
+        rawConfigs.then((configs: Array<any>): T => {
           return (resolveConfigs(...configs) as T)
         })
 
       return resolvedConfig
     }, () => {
-      return Promise.resolve({})
+      return Promise.resolve({} as T)
     })
   }
 }

@@ -14,6 +14,11 @@ export const CONSUL_KV_DC: string = 'CONSUL_KV_DC'
 export const CONSUL_KEYS: string = 'CONSUL_KEYS'
 
 /**
+ * Path to local config files
+ */
+export const CONFIG_PATH: string = 'CONFIG_PATH'
+
+/**
  * The key in the config where we find Vault configuration
  */
 export const HVAULT_CONFIG_KEY: string = 'hashicorp-vault'

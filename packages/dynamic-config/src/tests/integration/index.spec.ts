@@ -1,20 +1,28 @@
 import { assert } from 'chai'
 import * as path from 'path'
 
-import { DynamicConfig } from '../../main/'
+import { DynamicConfig, getConfig } from '../../main/'
 
-describe('DynamicConfig', () => {
-  const dynamicConfig: DynamicConfig = new DynamicConfig({
-    configEnv: 'development',
-    configPath: path.resolve(__dirname, './config'),
-    consulAddress: 'http://localhost:8500',
-    consulKeys: 'test-config-one',
-    consulKvDc: 'dc1',
-  })
+import {
+  CONFIG_PATH,
+  CONSUL_ADDRESS,
+  CONSUL_KEYS,
+  CONSUL_KV_DC,
+} from '../../main/constants'
+
+describe('DynamicConfig Singleton', () => {
+  // Set environment options for DynamicConfig
+  process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
+  process.env[CONSUL_ADDRESS] = 'http://localhost:8500'
+  process.env[CONSUL_KV_DC] = 'dc1'
+  process.env[CONSUL_KEYS] = 'test-config-one'
+
+  // Get our config singleton
+  const config: DynamicConfig = getConfig()
 
   describe('get', () => {
     it('should return the value from Consul if available', (done) => {
-      dynamicConfig.get<string>('database.username').then((val: string) => {
+      config.get<string>('database.username').then((val: string) => {
         assert.equal(val, 'testUser')
         done()
       }, (err: any) => {
@@ -24,7 +32,7 @@ describe('DynamicConfig', () => {
     })
 
     it('should fallback to returning from local config', (done) => {
-      dynamicConfig.get<object>('project.health').then((val: object) => {
+      config.get<object>('project.health').then((val: object) => {
         assert.deepEqual(val, {
           control: '/control',
           response: 'PASS',
@@ -38,7 +46,7 @@ describe('DynamicConfig', () => {
     })
 
     it('should reject for a missing key', (done) => {
-      dynamicConfig.get<object>('fake.path').then((val: object) => {
+      config.get<object>('fake.path').then((val: object) => {
         done(new Error('Should reject for missing key'))
       }, (err: any) => {
         assert.equal(err.message, 'Unable to retrieve value for key: fake.path')
@@ -49,7 +57,7 @@ describe('DynamicConfig', () => {
 
   describe('getSecretValue', () => {
     it('should get secret value from Vault', (done) => {
-      dynamicConfig.getSecretValue<string>('test-secret').then((val: string) => {
+      config.getSecretValue<string>('test-secret').then((val: string) => {
         assert.equal(val, 'this is a secret')
         done()
       }, (err: any) => {
@@ -59,7 +67,7 @@ describe('DynamicConfig', () => {
     })
 
     it('should reject for a missing secret', (done) => {
-      dynamicConfig.getSecretValue<string>('missing-secret').then((val: string) => {
+      config.getSecretValue<string>('missing-secret').then((val: string) => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
         assert.equal(err.message, 'Unable to locate vault resource at: http://localhost:8200/v1/secret/missing-secret')
