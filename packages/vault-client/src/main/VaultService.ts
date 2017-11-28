@@ -8,7 +8,6 @@ import {
   IListResult,
   IReadResult,
   ISealStatusResult,
-  IServiceConfig,
   IStatusResult,
   IUnsealArgs,
   IUnsealResult,
@@ -73,6 +72,12 @@ function fetch(options: OptionsWithUri, token?: string): Promise<any> {
   })
 }
 
+export interface IVaultServiceArgs {
+  destination: string
+  apiVersion?: 'v1'
+  requestOptions?: CoreOptions
+}
+
 export class VaultService {
   private defaultOptions: CoreOptions
   private dest: string
@@ -81,7 +86,7 @@ export class VaultService {
     destination,
     apiVersion = 'v1',
     requestOptions = {},
-  }: IServiceConfig) {
+  }: IVaultServiceArgs) {
     this.defaultOptions = requestOptions
     this.dest = `${destination}/${apiVersion}`
   }

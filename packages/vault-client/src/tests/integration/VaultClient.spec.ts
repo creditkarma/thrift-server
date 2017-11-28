@@ -12,6 +12,7 @@ describe('VaultClient', () => {
     destination: 'http://localhost:8200',
     namespace: 'secret',
     tokenPath: '/tmp/token',
+    requestOptions: {}
   }
   const client: VaultClient = new VaultClient(mockConfig)
   const mockStr = 'test'

@@ -10,15 +10,23 @@ class HVInvalidResponse extends Error {
   }
 }
 
+export interface IVaultClientArgs {
+  apiVersion?: 'v1'
+  destination?: string,
+  requestOptions?: CoreOptions
+  namespace?: string
+  tokenPath?: string
+}
+
 export class VaultClient {
   private service: VaultService
   private config: IHVConfig
   private token: string
   private namespace: string
 
-  constructor(config: IHVConfig, service?: VaultService) {
+  constructor(config: IVaultClientArgs, service?: VaultService) {
     this.config = resolveConfig(config)
-    this.namespace = config.namespace || ''
+    this.namespace = this.config.namespace
     this.service = service || new VaultService(this.config)
   }
 

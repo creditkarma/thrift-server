@@ -10,7 +10,8 @@ describe('TokenDiscovery', () => {
     apiVersion: 'v1',
     destination: '',
     namespace: '',
-    tokenPath: tokenFilePath
+    tokenPath: tokenFilePath,
+    requestOptions: {},
   }
 
   before((done) => {
