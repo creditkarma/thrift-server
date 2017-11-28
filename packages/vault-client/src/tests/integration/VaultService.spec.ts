@@ -24,7 +24,7 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -37,7 +37,7 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -48,7 +48,7 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -60,7 +60,7 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -72,7 +72,7 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 })

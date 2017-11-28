@@ -1,11 +1,12 @@
 import * as fs from 'fs'
+import * as path from 'path'
 import { IHVConfig } from './types'
 
 const BAD_CHARS: Array<string> = [ '\n', '\r' ]
 
 export function getToken(config: IHVConfig): Promise<string> {
   return new Promise((resolve, reject) => {
-    fs.readFile(config.tokenPath, (err: any, data: Buffer) => {
+    fs.readFile(path.resolve(process.cwd(), config.tokenPath), (err: any, data: Buffer) => {
       if (err !== null && err !== undefined) {
         reject(err)
       } else {

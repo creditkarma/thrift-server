@@ -41,7 +41,12 @@ export function cleanSecret(...parts: Array<string>): string {
 }
 
 export function removeLeadingTrailingSlash(str: string): string {
-  const tmp: string = (str.charAt(0) === '/') ? str.substring(1, str.length) : str
+  const tmp: string = (
+    (str.charAt(0) === '/') ?
+      str.substring(1, str.length) :
+      str
+  )
+
   if (tmp.charAt(tmp.length - 1) === '/') {
     return tmp.substring(0, tmp.length - 1)
   } else {
