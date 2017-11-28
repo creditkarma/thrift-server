@@ -5,8 +5,8 @@ import { cleanSecret, resolveConfig } from './utils'
 import { VaultService } from './VaultService'
 
 class HVInvalidResponse extends Error {
-  constructor() {
-    super('Data returned from Vault has incorrect structure')
+  constructor(key: string) {
+    super(`Data returned from Vault for key (${key}) has incorrect structure`)
   }
 }
 
@@ -29,7 +29,7 @@ export class VaultClient {
         if (result.data && result.data.value) {
           return result.data.value
         } else {
-          throw new HVInvalidResponse()
+          throw new HVInvalidResponse(key)
         }
       })
     })
@@ -43,7 +43,7 @@ export class VaultClient {
   }
 
   private getToken(): Promise<string> {
-    if (this.token) {
+    if (this.token !== undefined) {
       return Promise.resolve(this.token)
     } else {
       return getToken(this.config).then((tokenValue: string) => {
