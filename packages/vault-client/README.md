@@ -104,7 +104,13 @@ service.write(path, value, token)
 
 ## Running Tests
 
-Running tests requires a running Vault server. You can start one with:
+The good ol' `npm test` will work. However, running tests requires a running Vault server. This is done with [docker](https://www.docker.com/). If you don't have `docker-compose` on your system you will be unable to run tests. Make sure you have docker.
+
+```sh
+$ npm test
+```
+
+You can spin up the Vault server without running tests:
 
 ```sh
 $ npm run docker
@@ -114,14 +120,6 @@ This docker image has a little sugar on top of the base Vault image. It exposes 
 
 ```sh
 $ curl localhost:8201/client-token
-```
-
-The tests will use this to make calls to Vault.
-
-In another terminal window you can run tests.
-
-```sh
-$ npm test
 ```
 
 ## Contributing
