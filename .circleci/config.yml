@@ -11,17 +11,11 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Run Vault Server
-          background: true
-          command: docker run --cap-add=IPC_LOCK --rm --name vault-client -p 8200:8200 -p 8201:8201 mannimal/vault-cci:latest
-      - run:
           name: Install NPM Dependencies
           command: npm install
       - run:
           name: Run Test Suite
-          command: |
-            export VAULT_CLIENT_TOKEN=`curl localhost:8201/client-token`
-            npm test
+          command: npm test
 
   publish:
     <<: *defaults
