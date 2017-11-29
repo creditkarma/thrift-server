@@ -6,7 +6,6 @@ export const lab = Lab.script()
 
 const describe = lab.describe
 const it = lab.it
-const before = lab.before
 
 describe('KvStore', () => {
   const client = new KvStore('http://127.0.0.1:8500')
@@ -14,11 +13,6 @@ describe('KvStore', () => {
   const mockStr = 'test me'
   const mockNum = 5
   const mockBool = true
-
-  // This just gives consul a chance to spin up
-  before((done) => {
-    setTimeout(done, 3000)
-  })
 
   describe('write', () => {
     it('should write a string to consul', (done) => {

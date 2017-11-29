@@ -2,7 +2,7 @@
 
 A client for Hashicorp Consul written in TypeScript.
 
-This client currently only supports the Consul KV API
+This client currently only supports the [Consul KV API](https://www.consul.io/api/kv.html).
 
 ## Install
 
