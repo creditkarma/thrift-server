@@ -27,7 +27,6 @@
   "author": "Credit Karma",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/chai": "^4.0.5",
     "@types/debug": "0.0.30",
     "@types/mocha": "^2.2.44",
     "@types/node": "^8.0.51",
