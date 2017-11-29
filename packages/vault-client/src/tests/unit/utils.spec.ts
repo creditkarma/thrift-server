@@ -1,19 +1,26 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import * as Utils from '../../main/utils'
 import { IHVConfig } from '../../main/types'
 
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
+
 describe('Utils', () => {
   describe('deepMerge', () => {
-    it('should merge two objects', () => {
+    it('should merge two objects', (done) => {
       const obj1 = { foo: 'bar' }
       const obj2 = { one: 'two' }
       const expected = { foo: 'bar', one: 'two' }
       const actual = Utils.deepMerge(obj1, obj2)
 
-      assert.deepEqual(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
 
-    it('should perform a deep merge on two objects', () => {
+    it('should perform a deep merge on two objects', (done) => {
       const obj1 = {
         foo: 'bar',
         obj: {
@@ -37,12 +44,13 @@ describe('Utils', () => {
       }
       const actual = Utils.deepMerge(obj1, obj2)
 
-      assert.deepEqual(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
   })
 
   describe('resolveConfig', () => {
-    it('should apply options to default config', () => {
+    it('should apply options to default config', (done) => {
       const options: Partial<IHVConfig> = {
         destination: 'localhost:8000',
         namespace: 'path',
@@ -65,45 +73,50 @@ describe('Utils', () => {
       }
       const actual = Utils.resolveConfig(options)
 
-      assert.deepEqual(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
   })
 
   describe('cleanSecret', () => {
-    it('should correctly join a secret path', () => {
+    it('should correctly join a secret path', (done) => {
       const namespace: string = 'what'
       const secret: string = '/secret/key'
       const actual: string = Utils.cleanSecret(namespace, secret)
       const expected: string = 'what/secret/key'
 
-      assert.equal(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
 
-    it('should correctly handle extra slashes', () => {
+    it('should correctly handle extra slashes', (done) => {
       const namespace: string = 'what/'
       const secret: string = '/secret/key'
       const actual: string = Utils.cleanSecret(namespace, secret)
       const expected: string = 'what/secret/key'
 
-      assert.equal(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
 
-    it('should remove leading slash', () => {
+    it('should remove leading slash', (done) => {
       const namespace: string = '/what/'
       const secret: string = '/secret/key'
       const actual: string = Utils.cleanSecret(namespace, secret)
       const expected: string = 'what/secret/key'
 
-      assert.equal(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
 
-    it('should remove trailing slash', () => {
+    it('should remove trailing slash', (done) => {
       const namespace: string = '/what/'
       const secret: string = '/secret/key/'
       const actual: string = Utils.cleanSecret(namespace, secret)
       const expected: string = 'what/secret/key'
 
-      assert.equal(actual, expected)
+      expect(actual).to.equal(expected)
+      done()
     })
   })
 })
