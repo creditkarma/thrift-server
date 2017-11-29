@@ -1,8 +1,14 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import { execSync } from 'child_process'
 import { VaultService } from '../../main/VaultService'
 import { IHVConfig } from '../../main/types'
 import { cleanLastChar } from '../../main/discovery'
+
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
 
 describe('VaultService', () => {
 
@@ -10,7 +16,8 @@ describe('VaultService', () => {
     apiVersion: 'v1',
     destination: 'http://localhost:8200',
     namespace: '',
-    tokenPath: ''
+    tokenPath: '',
+    requestOptions: {},
   }
   const service = new VaultService(mockConfig)
   const mockObj = { value: 'bar' }
@@ -19,25 +26,25 @@ describe('VaultService', () => {
   describe('status', () => {
     it('should read the satus as { intialized: true }', (done) => {
       service.status().then((res) => {
-        assert.deepEqual(res, { initialized: true })
+        expect(res).to.equal({ initialized: true })
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
   describe('sealStatus', () => {
     it('should correctly get seal status of vault', (done) => {
       service.sealStatus().then((res) => {
-        assert.equal(res.sealed, false)
-        assert.containsAllKeys(res, ['sealed','t','n','progress','version'])
+        expect(res.sealed).to.equal(false)
+        expect(res).to.include(['sealed','t','n','progress','version'])
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
@@ -48,31 +55,31 @@ describe('VaultService', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
   describe('list', () => {
     it('should list all secret names', (done) => {
       service.list(token).then((res: any) => {
-        assert.ok(res.data.keys.indexOf('mock') > -1)
+        expect(res.data.keys).to.include('mock')
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
   describe('read', () => {
     it('should read an object from hvault', (done) => {
       service.read('secret/mock', token).then((res: any) => {
-        assert.deepEqual(res.data, mockObj)
+        expect(res.data).to.equal(mockObj)
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 })

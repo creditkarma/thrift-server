@@ -1,13 +1,16 @@
 import { CoreOptions } from 'request'
 
 export interface IServiceConfig {
-  apiVersion?: 'v1'
+  apiVersion: 'v1'
   destination: string,
-  requestOptions?: CoreOptions
+  requestOptions: CoreOptions
 }
 
-export interface IHVConfig extends IServiceConfig {
-  namespace?: string
+export interface IHVConfig {
+  apiVersion: 'v1'
+  destination: string,
+  requestOptions: CoreOptions
+  namespace: string
   tokenPath: string
 }
 

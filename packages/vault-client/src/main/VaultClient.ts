@@ -4,15 +4,29 @@ import { IHVConfig, IReadResult } from './types'
 import { cleanSecret, resolveConfig } from './utils'
 import { VaultService } from './VaultService'
 
+class HVInvalidResponse extends Error {
+  constructor(key: string) {
+    super(`Data returned from Vault for key (${key}) has incorrect structure`)
+  }
+}
+
+export interface IVaultClientArgs {
+  apiVersion?: 'v1'
+  destination?: string,
+  requestOptions?: CoreOptions
+  namespace?: string
+  tokenPath?: string
+}
+
 export class VaultClient {
   private service: VaultService
   private config: IHVConfig
   private token: string
   private namespace: string
 
-  constructor(config: IHVConfig, service?: VaultService) {
+  constructor(config: IVaultClientArgs, service?: VaultService) {
     this.config = resolveConfig(config)
-    this.namespace = config.namespace || ''
+    this.namespace = this.config.namespace
     this.service = service || new VaultService(this.config)
   }
 
@@ -23,7 +37,7 @@ export class VaultClient {
         if (result.data && result.data.value) {
           return result.data.value
         } else {
-          throw new Error('Data returned from Vault has incorrect structure')
+          throw new HVInvalidResponse(key)
         }
       })
     })
@@ -37,7 +51,7 @@ export class VaultClient {
   }
 
   private getToken(): Promise<string> {
-    if (this.token) {
+    if (this.token !== undefined) {
       return Promise.resolve(this.token)
     } else {
       return getToken(this.config).then((tokenValue: string) => {

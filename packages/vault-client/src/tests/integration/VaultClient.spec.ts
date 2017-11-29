@@ -1,9 +1,17 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import * as fs from 'fs'
 import { execSync } from 'child_process'
 import { VaultClient } from '../../main/VaultClient'
 import { IHVConfig } from '../../main/types'
 import { cleanLastChar } from '../../main/discovery'
+
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
+const before = lab.before
+const after = lab.after
 
 describe('VaultClient', () => {
 
@@ -12,6 +20,7 @@ describe('VaultClient', () => {
     destination: 'http://localhost:8200',
     namespace: 'secret',
     tokenPath: '/tmp/token',
+    requestOptions: {}
   }
   const client: VaultClient = new VaultClient(mockConfig)
   const mockStr = 'test'
@@ -34,7 +43,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an number to hvault', (done) => {
@@ -43,7 +52,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an boolean to hvault', (done) => {
@@ -52,7 +61,7 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should write an object to hvault', (done) => {
@@ -61,49 +70,49 @@ describe('VaultClient', () => {
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
   describe('get', () => {
     it('should read a string from hvault', (done) => {
       client.get('str').then((res: any) => {
-        assert.equal(res, mockStr)
+        expect(res).to.equal(mockStr)
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a number from hvault', (done) => {
       client.get('num').then((res: any) => {
-        assert.equal(res, mockNum)
+        expect(res).to.equal(mockNum)
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read a boolean from hvault', (done) => {
       client.get('bool').then((res: any) => {
-        assert.equal(res, mockBool)
+        expect(res).to.equal(mockBool)
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
 
     it('should read an object from hvault', (done) => {
       client.get('obj').then((res: any) => {
-        assert.deepEqual(res, mockObj)
+        expect(res).to.equal(mockObj)
         done()
       }, (err: any) => {
         console.log('error: ', err)
         done(err)
-      })
+      }).catch(done)
     })
   })
 
