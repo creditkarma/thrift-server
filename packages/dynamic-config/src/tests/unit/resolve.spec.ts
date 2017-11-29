@@ -1,8 +1,14 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import { resolveConfigs } from '../../main/resolve'
 
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
+
 describe('resolveConfigs', () => {
-  it('should override base values with update values', () => {
+  it('should override base values with update values', (done) => {
     const baseConfig = {
       protocol: 'https',
       destination: '127.0.0.1:9000',
@@ -19,7 +25,7 @@ describe('resolveConfigs', () => {
       sslValidation: true,
     }
 
-    const expectedConfig = {
+    const expected = {
       protocol: 'http',
       destination: '127.0.0.1:8200',
       hostHeader: 'hvault.com',
@@ -28,12 +34,13 @@ describe('resolveConfigs', () => {
       tokenPath: '/tmp/test-token',
     }
 
-    const actualConfig = resolveConfigs(baseConfig, updateConfig)
+    const actual = resolveConfigs(baseConfig, updateConfig)
 
-    assert.deepEqual(expectedConfig, actualConfig)
+    expect(actual).to.equal(expected)
+    done()
   })
 
-  it('should correctly handle nested objects', () => {
+  it('should correctly handle nested objects', (done) => {
     const baseConfig = {
       serviceName: 'test',
       lru: {
@@ -49,7 +56,7 @@ describe('resolveConfigs', () => {
       },
     }
 
-    const expectedConfig = {
+    const expected = {
       serviceName: 'test-development',
       lru: {
         max: 500,
@@ -57,8 +64,9 @@ describe('resolveConfigs', () => {
       },
     }
 
-    const actualConfig = resolveConfigs(baseConfig, updateConfig)
+    const actual = resolveConfigs(baseConfig, updateConfig)
 
-    assert.deepEqual(expectedConfig, actualConfig)
+    expect(actual).to.equal(expected)
+    done()
   })
 })

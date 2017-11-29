@@ -1,7 +1,13 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import * as path from 'path'
 
 import { DynamicConfig } from '../../main/'
+
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
 
 describe('DynamicConfig', () => {
   const dynamicConfig: DynamicConfig = new DynamicConfig({
@@ -15,7 +21,7 @@ describe('DynamicConfig', () => {
   describe('get', () => {
     it('should return the value from Consul if available', (done) => {
       dynamicConfig.get<string>('database.username').then((val: string) => {
-        assert.equal(val, 'testUser')
+        expect(val).to.equal('testUser')
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -25,7 +31,7 @@ describe('DynamicConfig', () => {
 
     it('should fallback to returning from local config', (done) => {
       dynamicConfig.get<object>('project.health').then((val: object) => {
-        assert.deepEqual(val, {
+        expect(val).to.equal({
           control: '/control',
           response: 'PASS',
         })
@@ -41,7 +47,7 @@ describe('DynamicConfig', () => {
       dynamicConfig.get<object>('fake.path').then((val: object) => {
         done(new Error('Should reject for missing key'))
       }, (err: any) => {
-        assert.equal(err.message, 'Unable to retrieve value for key: fake.path')
+        expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
         done()
       }).catch(done)
     })
@@ -50,7 +56,7 @@ describe('DynamicConfig', () => {
   describe('getSecretValue', () => {
     it('should get secret value from Vault', (done) => {
       dynamicConfig.getSecretValue<string>('test-secret').then((val: string) => {
-        assert.equal(val, 'this is a secret')
+        expect(val).to.equal('this is a secret')
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -62,7 +68,9 @@ describe('DynamicConfig', () => {
       dynamicConfig.getSecretValue<string>('missing-secret').then((val: string) => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
-        assert.equal(err.message, 'Unable to locate vault resource at: http://localhost:8200/v1/secret/missing-secret')
+        expect(err.message).to.equal(
+          'Unable to locate vault resource at: http://localhost:8200/v1/secret/missing-secret',
+        )
         done()
       }).catch(done)
     })

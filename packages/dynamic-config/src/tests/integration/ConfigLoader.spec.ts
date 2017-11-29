@@ -1,5 +1,15 @@
-import { assert } from 'chai'
+import { expect } from 'code'
+import * as Lab from 'lab'
 import { ConfigLoader, IConfigMap } from '../../main/'
+
+export const lab = Lab.script()
+
+const describe = lab.describe
+const it = lab.it
+const before = lab.before
+const after = lab.after
+const beforeEach = lab.beforeEach
+const afterEach = lab.afterEach
 
 describe('ConfigLoader', () => {
   let savedDir: string
@@ -63,7 +73,7 @@ describe('ConfigLoader', () => {
           } ],
         ]
 
-        assert.deepEqual(actual, expected)
+        expect<Array<[string, object]>>(actual).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -125,7 +135,7 @@ describe('ConfigLoader', () => {
           },
         }
 
-        assert.deepEqual(actual, expected)
+        expect(actual).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -137,12 +147,14 @@ describe('ConfigLoader', () => {
   describe('resolve', () => {
     let savedEnv: string | undefined
 
-    beforeEach(() => {
+    beforeEach((done) => {
       savedEnv = process.env.NODE_ENV
+      done()
     })
 
-    afterEach(() => {
+    afterEach((done) => {
       process.env.NODE_ENV = savedEnv
+      done()
     })
 
     it('should return the correct config map for development', (done) => {
@@ -168,7 +180,7 @@ describe('ConfigLoader', () => {
       }
 
       loader.resolve().then((actual: any) => {
-        assert.deepEqual(actual, expected)
+        expect(actual).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -199,7 +211,7 @@ describe('ConfigLoader', () => {
       }
 
       loader.resolve().then((actual: any) => {
-        assert.deepEqual(actual, expected)
+        expect(actual).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
@@ -230,7 +242,7 @@ describe('ConfigLoader', () => {
       }
 
       loader.resolve().then((actual: any) => {
-        assert.deepEqual(actual, expected)
+        expect(actual).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)
