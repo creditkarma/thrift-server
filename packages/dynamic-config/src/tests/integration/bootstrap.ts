@@ -7,15 +7,15 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 
-const consulClient: KvStore = new KvStore()
+const consulClient: KvStore = new KvStore('http://localhost:8510')
 const vaultClient: VaultClient = new VaultClient({
   apiVersion: 'v1',
-  destination: 'http://localhost:8200',
+  destination: 'http://localhost:8210',
   namespace: 'secret',
   tokenPath: './tmp/token',
 })
 
-const token: string = execSync('curl localhost:8201/client-token').toString()
+const token: string = execSync('curl localhost:8211/client-token').toString()
 
 function rootDir(): string {
   if (os.platform() === 'win32') {
@@ -66,7 +66,7 @@ fs.writeFile('./tmp/token', token, (err: any) => {
     consulClient.set({ path: 'with-vault' }, {
       'hashicorp-vault': {
         apiVersion: 'v1',
-        destination: 'http://localhost:8200',
+        destination: 'http://localhost:8210',
         namespace: 'secret',
         tokenPath: './tmp/token',
       },

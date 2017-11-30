@@ -18,7 +18,7 @@
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "lab --timeout 10000 --verbose -l -S ./dist/tests/unit/*.spec.js",
     "pretest:integration": "cp -r ./src/tests/integration/config ./dist/tests/integration/config",
-    "test:integration": "wait-on --timeout 10000 http://localhost:8500 http://localhost:8201 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S ./dist/tests/integration/*.spec.js"
+    "test:integration": "wait-on --timeout 10000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S ./dist/tests/integration/*.spec.js"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",

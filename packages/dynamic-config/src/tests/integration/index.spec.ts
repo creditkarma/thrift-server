@@ -19,7 +19,7 @@ const it = lab.it
 describe('DynamicConfig Singleton', () => {
   // Set environment options for DynamicConfig
   process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
-  process.env[CONSUL_ADDRESS] = 'http://localhost:8500'
+  process.env[CONSUL_ADDRESS] = 'http://localhost:8510'
   process.env[CONSUL_KV_DC] = 'dc1'
   process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
 
@@ -77,7 +77,7 @@ describe('DynamicConfig Singleton', () => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
         expect(err.message).to.equal(
-          'Unable to locate vault resource at: http://localhost:8200/v1/secret/missing-secret',
+          'Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
         )
         done()
       }).catch(done)

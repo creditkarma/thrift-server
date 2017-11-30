@@ -15,7 +15,7 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
-      consulAddress: 'http://localhost:8500',
+      consulAddress: 'http://localhost:8510',
       consulKeys: 'test-config-one,with-vault',
       consulKvDc: 'dc1',
     })
@@ -36,7 +36,7 @@ describe('DynamicConfig', () => {
             },
             'hashicorp-vault': {
               apiVersion: 'v1',
-              destination: 'http://localhost:8200',
+              destination: 'http://localhost:8210',
               namespace: 'secret',
               tokenPath: './tmp/token',
             },
@@ -98,7 +98,7 @@ describe('DynamicConfig', () => {
           done(new Error('Should reject for missing secret'))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Unable to locate vault resource at: http://localhost:8200/v1/secret/missing-secret',
+            'Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
           )
           done()
         }).catch(done)
@@ -110,7 +110,7 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
-      consulAddress: 'http://localhost:8500',
+      consulAddress: 'http://localhost:8510',
       consulKeys: 'test-config-one',
       consulKvDc: 'dc1',
     })
