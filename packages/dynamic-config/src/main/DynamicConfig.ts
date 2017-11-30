@@ -124,6 +124,7 @@ export class DynamicConfig {
       return Promise.resolve(this.vaultClient)
     } else {
       return this.get<IHVConfig>(HVAULT_CONFIG_KEY).then((vaultConfig: IHVConfig) => {
+        console.log('vaultConfig: ', vaultConfig)
         this.vaultClient = new Just(new VaultClient(vaultConfig))
         return Promise.resolve(this.vaultClient)
       }, (err: any) => {

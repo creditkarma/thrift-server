@@ -21,7 +21,7 @@ describe('DynamicConfig Singleton', () => {
   process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
   process.env[CONSUL_ADDRESS] = 'http://localhost:8500'
   process.env[CONSUL_KV_DC] = 'dc1'
-  process.env[CONSUL_KEYS] = 'test-config-one'
+  process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
 
   // Get our config singleton
   const config: DynamicConfig = getConfig()

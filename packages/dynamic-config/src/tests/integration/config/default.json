@@ -8,11 +8,5 @@
   "database": {
     "username": "root",
     "password": "root"
-  },
-  "hashicorp-vault": {
-    "apiVersion": "v1",
-    "destination": "http://localhost:8200",
-    "namespace": "secret",
-    "tokenPath": "./tmp/token"
   }
 }

@@ -63,6 +63,14 @@ fs.writeFile('./tmp/token', token, (err: any) => {
         username: 'fakeUser',
       },
     }),
+    consulClient.set({ path: 'with-vault' }, {
+      'hashicorp-vault': {
+        apiVersion: 'v1',
+        destination: 'http://localhost:8200',
+        namespace: 'secret',
+        tokenPath: './tmp/token',
+      },
+    }),
     vaultClient.set('test-secret', 'this is a secret'),
   ]).then((result: any) => {
     console.log('done: ', result)

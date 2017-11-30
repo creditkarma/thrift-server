@@ -37,12 +37,6 @@ describe('ConfigLoader', () => {
               username: 'root',
               password: 'root',
             },
-            'hashicorp-vault': {
-              apiVersion: 'v1',
-              destination: 'http://localhost:8200',
-              namespace: 'secret',
-              tokenPath: './tmp/token',
-            },
           } ],
           [ 'development', {
             project: {
@@ -98,12 +92,6 @@ describe('ConfigLoader', () => {
             database: {
               username: 'root',
               password: 'root',
-            },
-            'hashicorp-vault': {
-              apiVersion: 'v1',
-              destination: 'http://localhost:8200',
-              namespace: 'secret',
-              tokenPath: './tmp/token',
             },
           },
           development: {
@@ -171,12 +159,6 @@ describe('ConfigLoader', () => {
           username: 'root',
           password: 'root',
         },
-        'hashicorp-vault': {
-          apiVersion: 'v1',
-          destination: 'http://localhost:8200',
-          namespace: 'secret',
-          tokenPath: './tmp/token',
-        },
       }
 
       loader.resolve().then((actual: any) => {
@@ -202,11 +184,30 @@ describe('ConfigLoader', () => {
           username: 'foo',
           password: 'bar',
         },
-        'hashicorp-vault': {
-          apiVersion: 'v1',
-          destination: 'http://localhost:8200',
-          namespace: 'secret',
-          tokenPath: './tmp/token',
+      }
+
+      loader.resolve().then((actual: any) => {
+        expect(actual).to.equal(expected)
+        done()
+      }, (err: any) => {
+        console.log('error: ', err)
+        done(err)
+      }).catch(done)
+    })
+
+    it('should only load default config if file for NODE_ENV does not exist', (done) => {
+      process.env.NODE_ENV = 'integration'
+      const loader: ConfigLoader = new ConfigLoader()
+      const expected: any = {
+        project: {
+          health: {
+            control: '/check',
+            response: 'GOOD',
+          },
+        },
+        database: {
+          username: 'root',
+          password: 'root',
         },
       }
 
@@ -232,12 +233,6 @@ describe('ConfigLoader', () => {
         database: {
           username: 'root',
           password: 'root',
-        },
-        'hashicorp-vault': {
-          apiVersion: 'v1',
-          destination: 'http://localhost:8200',
-          namespace: 'secret',
-          tokenPath: './tmp/token',
         },
       }
 
