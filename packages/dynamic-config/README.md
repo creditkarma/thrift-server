@@ -17,9 +17,11 @@ When requesting a value from config a Promise of the expected result is returned
 ```typescript
 import { config } from '@creditkarma/dynamic-config'
 
-config.get<string>('config-key').then((configValue: string) => {
-  // Do something with config value
-})
+export async function createHttpClient() {
+  const host: string = await config.get<string>('hostName')
+  const port: number = await config.get<number>('port')
+  return new Client(host, port)
+}
 ```
 
 You can also construct your own instance by importing the underlying DynamicConfig class
@@ -29,9 +31,11 @@ import { DynamicConfig } from '@creditkarma/dynamic-config'
 
 const config: DynamicConfig = new DynamicConfig()
 
-config.get<string>('config-key').then((configValue: string) => {
-  // Do something with config value
-})
+export async function createHttpClient() {
+  const host: string = await config.get<string>('hostName')
+  const port: number = await config.get<number>('port')
+  return new Client(host, port)
+}
 ```
 
 ## Environment Specific Configuration
@@ -68,7 +72,7 @@ $ export CONFIG_PATH=config
 
 Remote configuration allows you to deploy configuration independent from your application source. We support Consul as the remote configuration source.
 
-Remote configuration from Consul is given a higher priority than local configuration. When requesting a key from DynamicConfig the value will first be returned from Consul and only be returned from local config if it is not available in Consul.
+Remote configuration from Consul is given a higher priority than local configuration. Values stored in Consul are assume to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
 
 You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance.
 
