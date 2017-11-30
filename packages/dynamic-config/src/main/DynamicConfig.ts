@@ -59,13 +59,14 @@ export class HVFailed extends Error {
   }
 }
 
-export class DynamicConfig {
+export class DynamicConfig<ConifgType = any> {
   private configLoader: ConfigLoader
   private vaultClient: Maybe<VaultClient>
   private consulClient: Maybe<KvStore>
   private consulAddress: Maybe<string>
   private consulKvDc: Maybe<string>
   private consulKeys: Maybe<string>
+  private savedConfig: ConifgType
 
   constructor({
     consulAddress = process.env[CONSUL_ADDRESS],
@@ -80,23 +81,21 @@ export class DynamicConfig {
     this.configLoader = new ConfigLoader({ configPath, configEnv })
   }
 
-  public async get<T = any>(rootKey: string = ''): Promise<T> {
-    const localConfig: any = await this.configLoader.resolve()
-    const consulConfig: any = await this.getConsulConfig()
-    const resolvedConfig: any = resolveConfigs(localConfig, consulConfig)
+  public async get<T = any>(key: string = ''): Promise<T> {
+    const resolvedConfig: any = await this.getConfig()
 
-    // If the rootKey is not set we return the entire structure
-    if (rootKey === '') {
+    // If the key is not set we return the entire structure
+    if (key === '') {
       return Promise.resolve(resolvedConfig)
 
-    // If the rootKey is set we try to find it in the structure
+    // If the key is set we try to find it in the structure
     } else {
-      const value: T | null = getValueForKey<T>(rootKey, resolvedConfig)
+      const value: T | null = getValueForKey<T>(key, resolvedConfig)
       if (value !== null) {
         return Promise.resolve(value)
       } else {
-        console.error(`Value for key (${rootKey}) not found in config`)
-        return Promise.reject(new DynamicConfigMissingKey(rootKey))
+        console.error(`Value for key (${key}) not found in config`)
+        return Promise.reject(new DynamicConfigMissingKey(key))
       }
     }
   }
@@ -174,5 +173,15 @@ export class DynamicConfig {
     }, () => {
       return Promise.resolve({} as T)
     })
+  }
+
+  private async getConfig(): Promise<ConifgType> {
+    if (this.savedConfig === undefined) {
+      const localConfig: any = await this.configLoader.resolve()
+      const consulConfig: any = await this.getConsulConfig()
+      this.savedConfig = await resolveConfigs(localConfig, consulConfig)
+    }
+
+    return this.savedConfig
   }
 }

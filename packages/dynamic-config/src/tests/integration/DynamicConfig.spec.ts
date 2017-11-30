@@ -21,6 +21,33 @@ describe('DynamicConfig', () => {
     })
 
     describe('get', () => {
+      it('should return full config when making empty call to get', (done) => {
+        dynamicConfig.get<string>().then((val: any) => {
+          expect(val).to.equal({
+            database: {
+              password: 'testPass',
+              username: 'testUser',
+            },
+            project: {
+              health: {
+                control: '/control',
+                response: 'PASS',
+              },
+            },
+            'hashicorp-vault': {
+              apiVersion: 'v1',
+              destination: 'http://localhost:8200',
+              namespace: 'secret',
+              tokenPath: './tmp/token',
+            },
+          })
+          done()
+        }, (err: any) => {
+          console.log('error: ', err)
+          done(err)
+        }).catch(done)
+      })
+
       it('should return the value from Consul if available', (done) => {
         dynamicConfig.get<string>('database.username').then((val: string) => {
           expect(val).to.equal('testUser')
@@ -89,6 +116,27 @@ describe('DynamicConfig', () => {
     })
 
     describe('get', () => {
+      it('should return full config when making empty call to get', (done) => {
+        dynamicConfig.get<string>().then((val: any) => {
+          expect(val).to.equal({
+            database: {
+              password: 'testPass',
+              username: 'testUser',
+            },
+            project: {
+              health: {
+                control: '/control',
+                response: 'PASS',
+              },
+            },
+          })
+          done()
+        }, (err: any) => {
+          console.log('error: ', err)
+          done(err)
+        }).catch(done)
+      })
+
       it('should return the value from Consul if available', (done) => {
         dynamicConfig.get<string>('database.username').then((val: string) => {
           expect(val).to.equal('testUser')
