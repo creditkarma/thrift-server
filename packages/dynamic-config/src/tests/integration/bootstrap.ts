@@ -73,8 +73,8 @@ fs.writeFile('./tmp/token', token, (err: any) => {
     }),
     vaultClient.set('test-secret', 'this is a secret'),
   ]).then((result: any) => {
-    console.log('done: ', result)
+    console.log('Done populating mock data')
   }, (failure: any) => {
-    console.log('error: ', failure)
+    console.log('Error populating mock data: ', failure)
   })
 })
