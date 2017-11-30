@@ -9,8 +9,7 @@
     "outDir": "./dist",
     "noEmitOnError": true,
     "strict": true,
-    // "noUnusedLocals": true,
-    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": true,
     "pretty": true,
     "removeComments": true
   },

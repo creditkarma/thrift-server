@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { KvStore } from '@creditkarma/consul-client'
-import { IHVConfig, VaultClient } from '@creditkarma/vault-client'
+import { VaultClient } from '@creditkarma/vault-client'
 import { execSync } from 'child_process'
 
 import * as fs from 'fs'
