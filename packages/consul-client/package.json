@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/consul-client",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A client for Hashicorp Consul written in TypeScript",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
