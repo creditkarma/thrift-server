@@ -50,3 +50,12 @@ kvStore.get({ path: 'key' }, { headers: { ... } })
 The options given to the KvStore constructor are used on every request. Options given to a method are only used for that request. Options passed to a request method are deep merged with the instance options before performing the request.
 
 Available [Options](https://github.com/request/request#requestoptions-callback)
+
+## Contributing
+
+For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
+External contributors must sign Contributor License Agreement (CLA)
+
+## License
+
+This project is licensed under [Apache License Version 2.0](./LICENSE)
