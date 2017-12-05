@@ -29,11 +29,8 @@ export type ThriftHapiPlugin =
   Hapi.PluginRegistrationObject<IPluginOptions>
 
 function readThriftMethod(buffer: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): string {
-  const transportWithData = new Transport();
-  (transportWithData as any).buffer = buffer;
-  (transportWithData as any).writeCursor = buffer.length
+  const transportWithData = new Transport(buffer)
   const input: TProtocol = new Protocol(transportWithData)
-
   const { fieldName } = input.readMessageBegin()
 
   return fieldName

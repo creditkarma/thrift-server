@@ -143,7 +143,7 @@ export class BufferedTransport extends TTransport {
   }
 
   private ensureAvailable(len: number): void {
-    if (this.readCursor + len > this.writeCursor) {
+    if (this.readCursor + len > this.buffer.length) {
       throw new InputBufferUnderrunError()
     }
   }
