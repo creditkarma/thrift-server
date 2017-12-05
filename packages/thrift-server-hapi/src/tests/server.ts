@@ -3,6 +3,7 @@ import { ThriftPlugin } from '../main/'
 
 import {
   SharedStruct,
+  SharedUnion,
 } from './generated/shared/shared'
 
 import {
@@ -69,7 +70,17 @@ const handlers: Calculator.IHandler<Hapi.Request> = {
     return
   },
   getStruct(): SharedStruct {
-    return new SharedStruct()
+    return new SharedStruct({
+      key: 0,
+      value: 'test',
+    })
+  },
+  getUnion(index: number): SharedUnion {
+    if (index === 1) {
+      return SharedUnion.fromOption1('foo')
+    } else {
+      return SharedUnion.fromOption2('bar')
+    }
   },
 }
 

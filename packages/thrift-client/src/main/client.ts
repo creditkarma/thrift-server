@@ -1,7 +1,7 @@
 import {
   TProtocol,
   TTransport,
-} from 'thrift'
+} from '@creditkarma/thrift-server-core'
 
 import {
   HttpConnection,
@@ -19,12 +19,11 @@ export function createClient<TClient, Context>(
   ServiceClient: IClientConstructor<TClient, Context>,
   connection: HttpConnection<TClient, Context>,
 ): TClient {
-  const transport: TTransport = new connection.Transport(undefined)
   const client: TClient = new ServiceClient(
-    transport,
+    new connection.Transport(),
     connection.Protocol,
-    (data: Buffer, seqid: number, context?: Context): void => {
-      connection.send(data, seqid, context)
+    (data: Buffer, requestId: number, context?: Context): void => {
+      connection.send(data, requestId, context)
     },
   )
 
