@@ -19,6 +19,10 @@ import {
   Calculator,
 } from './generated/calculator/calculator'
 
+import {
+  SharedStruct,
+} from './generated/shared/shared'
+
 export const lab = Lab.script()
 
 const describe = lab.describe
@@ -46,6 +50,21 @@ describe('Thrift Server Express', () => {
     client.add(5, 7)
       .then((response: number) => {
         expect(response).to.equal(12)
+        done()
+      }, (err: any) => {
+        console.log('error: ', err)
+        done(err)
+      })
+  })
+
+  it('should corrently handle a service client request for a struct', (done: any) => {
+    client.getStruct(1)
+      .then((response: SharedStruct) => {
+        const expected = new SharedStruct({
+          key: 0,
+          value: 'test',
+        })
+        expect(response).to.equal(expected)
         done()
       }, (err: any) => {
         console.log('error: ', err)

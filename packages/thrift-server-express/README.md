@@ -53,8 +53,8 @@ import {
 /**
  * Implementation of our thrift service.
  *
- * Notice the optional final parameter, "context" - this is the Hapi request object,
- * passed along to our service by the Hapi thrift plugin. Thus, you have access to
+ * Notice the optional final parameter, "context" - this is the Express request object,
+ * passed along to our service by the Thrift Express middleware. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
 const serviceHandlers: Calculator.IHandler<express.Request> = {

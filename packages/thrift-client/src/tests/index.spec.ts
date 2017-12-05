@@ -63,6 +63,30 @@ describe('Thrift Client', () => {
         })
     })
 
+    it('should corrently handle a void service client request', (done: any) => {
+      client.ping()
+        .then((response: any) => {
+          expect(response).to.equal(undefined)
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a struct', (done: any) => {
+      client.getStruct(5)
+        .then((response: any) => {
+          expect(response).to.equal({ key: 0, value: 'test' })
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a union', (done: any) => {
+      client.getUnion(1)
+        .then((response: any) => {
+          expect(response).to.equal({ option1: 'foo' })
+          done()
+        })
+    })
+
     it('should allow passing of a request context', (done: any) => {
       client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
         .then((response: number) => {
@@ -157,6 +181,30 @@ describe('Thrift Client', () => {
       client.add(5, 7)
         .then((response: number) => {
           expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should corrently handle a void service client request', (done: any) => {
+      client.ping()
+        .then((response: any) => {
+          expect(response).to.equal(undefined)
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a struct', (done: any) => {
+      client.getStruct(5)
+        .then((response: { key: number, value: string }) => {
+          expect(response).to.equal({ key: 0, value: 'test' })
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a union', (done: any) => {
+      client.getUnion(1)
+        .then((response: any) => {
+          expect(response).to.equal({ option1: 'foo' })
           done()
         })
     })
