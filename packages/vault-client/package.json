@@ -29,7 +29,6 @@
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
-    "@types/mocha": "^2.2.44",
     "code": "^4.1.0",
     "lab": "^14.3.1",
     "rimraf": "^2.6.2",

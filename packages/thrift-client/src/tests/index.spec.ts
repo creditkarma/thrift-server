@@ -147,7 +147,7 @@ describe('Thrift Client', () => {
     })
 
     it('should reject for a request to a missing service', (done: any) => {
-      const requestClient: AxiosInstance = axios.create()
+      const requestClient: AxiosInstance = axios.create({ timeout: 5000 })
       const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
         fromAxios(requestClient, {
           hostName: 'fakehost',
@@ -269,7 +269,7 @@ describe('Thrift Client', () => {
     })
 
     it('should reject for a request to a missing service', (done: any) => {
-      const requestClient: RequestInstance = request.defaults({})
+      const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
       const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
         fromRequest(requestClient, {
           hostName: 'fakehost',
