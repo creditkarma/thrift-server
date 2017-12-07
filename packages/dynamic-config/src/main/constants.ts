@@ -32,3 +32,10 @@ export const DEFAULT_CONFIG_PATH: string = 'config'
  * In the event NODE_ENV isn't set, this will be used
  */
 export const DEFAULT_ENVIRONMENT: string = 'development'
+
+/**
+ * Other than cwd, what directories to search for configs (relative to cwd)
+ */
+export const CONFIG_SEARCH_PATHS = [
+  'src', 'lib', 'main',
+]

@@ -15,16 +15,32 @@ export const lab = Lab.script()
 
 const describe = lab.describe
 const it = lab.it
+const before = lab.before
+const after = lab.after
 
 describe('DynamicConfig Singleton', () => {
-  // Set environment options for DynamicConfig
-  process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
-  process.env[CONSUL_ADDRESS] = 'http://localhost:8510'
-  process.env[CONSUL_KV_DC] = 'dc1'
-  process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
+  let config: DynamicConfig
 
-  // Get our config singleton
-  const config: DynamicConfig = getConfig()
+  before((done) => {
+    // Set environment options for DynamicConfig
+    process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
+    process.env[CONSUL_ADDRESS] = 'http://localhost:8510'
+    process.env[CONSUL_KV_DC] = 'dc1'
+    process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
+
+    // Get our config singleton
+    config = getConfig()
+    done()
+  })
+
+  after((done) => {
+    // Reset environment options for DynamicConfig
+    process.env[CONFIG_PATH] = undefined
+    process.env[CONSUL_ADDRESS] = undefined
+    process.env[CONSUL_KV_DC] = undefined
+    process.env[CONSUL_KEYS] = undefined
+    done()
+  })
 
   describe('get', () => {
     it('should return the value from Consul if available', (done) => {

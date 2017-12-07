@@ -21,9 +21,9 @@ describe('ConfigLoader', () => {
   })
 
   describe('load', () => {
-    const loader: ConfigLoader = new ConfigLoader()
 
     it('should load all configs in path', (done) => {
+      const loader: ConfigLoader = new ConfigLoader()
       loader.load().then((actual: Array<[string, object]>) => {
         const expected: Array<[string, object]> = [
           [ 'default', {
@@ -77,9 +77,9 @@ describe('ConfigLoader', () => {
   })
 
   describe('loadConfigMap', () => {
-    const loader: ConfigLoader = new ConfigLoader()
 
     it('should return configs as a map of environment -> config', (done) => {
+      const loader: ConfigLoader = new ConfigLoader()
       loader.loadConfigMap().then((actual: IConfigMap) => {
         const expected: IConfigMap = {
           default: {

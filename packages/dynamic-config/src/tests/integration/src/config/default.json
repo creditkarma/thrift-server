@@ -1,0 +1,12 @@
+{
+  "project": {
+    "health": {
+      "control": "/check",
+      "response": "GOOD"
+    }
+  },
+  "database": {
+    "username": "root",
+    "password": "root"
+  }
+}

@@ -10,16 +10,16 @@ $ npm install @creditkarma/dynamic-config
 
 ## Usage
 
-The most common usage of DynamicConfig is through the exported singleton instance. The singleton instance is configured through envirnoment variables. We'll see that later.
+The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `getConfig`. Subsequent calls to this method will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
 
 When requesting a value from config a Promise of the expected result is returned. If the value is found the Promise is resolved. If the value is not found, either because it is missing or some other error, the Promise is rejected.
 
 ```typescript
-import { config } from '@creditkarma/dynamic-config'
+import { getConfig } from '@creditkarma/dynamic-config'
 
-export async function createHttpClient() {
-  const host: string = await config.get<string>('hostName')
-  const port: number = await config.get<number>('port')
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await getConfig().get<string>('hostName')
+  const port: number = await getConfig().get<number>('port')
   return new Client(host, port)
 }
 ```
@@ -31,12 +31,28 @@ import { DynamicConfig } from '@creditkarma/dynamic-config'
 
 const config: DynamicConfig = new DynamicConfig()
 
-export async function createHttpClient() {
+export async function createHttpClient(): Promise<Client> {
   const host: string = await config.get<string>('hostName')
   const port: number = await config.get<number>('port')
   return new Client(host, port)
 }
 ```
+
+### Sync Config
+
+The reason that all DynamicConfig methods return a Promise is because data is also potentially being pulled from Consul over HTTP (This is cached after first call). Using async/await syntax can alleviate the headaches of dealing with async config. However, we can also choose to pay the price of loading all the configs from Consul up front.
+
+```typescript
+import { getSyncConfig, SyncConfig } from '@creditkarma/dynamic-config'
+
+getSyncConfig().then((config: SyncConfig) => {
+  const host: string = config.get<string>('hostName')
+  const port: number = config.get<number>('port')
+  const client = new Client(host, port)
+})
+```
+
+The `SyncConfig` object is identical to the `DynamicConfig` object with the exception that the `get` method doesn't return a Promise.
 
 ## Environment Specific Configuration
 
@@ -44,7 +60,7 @@ DynamicConfig supports local config in the form of JSON files, remote configurat
 
 ### Local Configs
 
-Local configuration files are store localally with your application source. Typically at the project root in a directory named `config`.
+Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`.
 
 #### Default Configuration
 
@@ -72,7 +88,50 @@ $ export CONFIG_PATH=config
 
 Remote configuration allows you to deploy configuration independent from your application source. We support Consul as the remote configuration source.
 
-Remote configuration from Consul is given a higher priority than local configuration. Values stored in Consul are assume to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
+Remote configuration from Consul is given a higher priority than local configuration. Values stored in Consul are assumed to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
+
+If my local config looks like this:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "database": {
+    "username": "root",
+    "password": "root"
+  }
+}
+```
+
+And the config loaded from Consul looks like this:
+
+```json
+{
+  "server": {
+    "port": 9000
+  },
+  "database": {
+    "password": "test"
+  }
+}
+```
+
+The resulting config my app would use is:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 9000
+  },
+  "database": {
+    "username": "root",
+    "password": "test"
+  }
+}
+```
 
 You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance.
 

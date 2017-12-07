@@ -22,7 +22,7 @@ describe('DynamicConfig', () => {
 
     describe('get', () => {
       it('should return full config when making empty call to get', (done) => {
-        dynamicConfig.get<string>().then((val: any) => {
+        dynamicConfig.get().then((val: any) => {
           expect(val).to.equal({
             database: {
               password: 'testPass',

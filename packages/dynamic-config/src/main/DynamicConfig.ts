@@ -33,40 +33,60 @@ import {
   getValueForKey,
 } from './utils'
 
-export interface IConfigOptions {
-  consulAddress?: string
-  consulKvDc?: string
-  consulKeys?: string
-  configPath?: string
-  configEnv?: string
-}
+import {
+  DynamicConfigMissingKey,
+  HVFailed,
+  HVNotConfigured,
+} from './errors'
 
-export class DynamicConfigMissingKey extends Error {
-  constructor(key: string) {
-    super(`Unable to retrieve value for key: ${key}`)
+import {
+  IConfigOptions,
+} from './types'
+
+export function getConsulClient(consulAddress: Maybe<string>, consulKvDc: Maybe<string>): Maybe<KvStore> {
+  if (consulAddress.isNothing()) {
+    console.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
+    return new Nothing<KvStore>()
+  } else if (consulKvDc.isNothing()) {
+    console.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
+    return new Nothing<KvStore>()
+  } else {
+    return new Just(new KvStore(consulAddress.get()))
   }
 }
 
-export class HVNotConfigured extends Error {
-  constructor() {
-    super(`Hashicorp Vault is not configured`)
-  }
+export function getConsulConfig(
+  consulKeys: Maybe<string>,
+  consulKvDc: Maybe<string>,
+  consulClient: Maybe<KvStore>,
+): Promise<any> {
+  return Maybe.all(consulKeys, consulClient, consulKvDc).fork(([ keys, client, dc ]) => {
+    const rawConfigs: Promise<Array<any>> =
+      Promise.all(keys.split(',').map((key: string) => {
+        return client.get({ path: key, dc })
+      }))
+
+    const resolvedConfigs: Promise<any> =
+      rawConfigs.then((configs: Array<any>): any => {
+        return (resolveConfigs(...configs) as any)
+      })
+
+    return resolvedConfigs
+  }, () => {
+    return Promise.resolve({})
+  })
 }
 
-export class HVFailed extends Error {
-  constructor(message?: string) {
-    super(message)
-  }
-}
-
-export class DynamicConfig<ConifgType = any> {
+export class DynamicConfig<ConfigType = any> {
   private configLoader: ConfigLoader
   private vaultClient: Maybe<VaultClient>
   private consulClient: Maybe<KvStore>
   private consulAddress: Maybe<string>
   private consulKvDc: Maybe<string>
   private consulKeys: Maybe<string>
-  private savedConfig: ConifgType
+  private configValue: ConfigType
+  private consulConfig: Partial<ConfigType>
+  private localConfig: ConfigType
 
   constructor({
     consulAddress = process.env[CONSUL_ADDRESS],
@@ -118,6 +138,16 @@ export class DynamicConfig<ConifgType = any> {
     })
   }
 
+  protected async getConfig(): Promise<ConfigType> {
+    if (this.configValue === undefined) {
+      const localConfig: any = await this.getLocalConfig()
+      const consulConfig: any = await this.getConsulConfig()
+      this.configValue = await resolveConfigs(localConfig, consulConfig)
+    }
+
+    return this.configValue
+  }
+
   private async getHVaultClient(): Promise<Maybe<VaultClient>> {
     if (this.vaultClient) {
       return Promise.resolve(this.vaultClient)
@@ -139,49 +169,30 @@ export class DynamicConfig<ConifgType = any> {
     if (this.consulClient) {
       return this.consulClient
     } else {
-      if (this.consulAddress.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
-        this.consulClient = new Nothing<KvStore>()
-      } else if (this.consulKvDc.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
-        this.consulClient = new Nothing<KvStore>()
-      } else {
-        this.consulClient = new Just(new KvStore(this.consulAddress.get()))
-      }
-
+      this.consulClient = getConsulClient(this.consulAddress, this.consulKvDc)
       return this.consulClient
     }
   }
 
-  private async getConsulConfig<T = any>(
+  private async getConsulConfig(
     consulKeys: Maybe<string> = this.consulKeys,
     consulKvDc: Maybe<string> = this.consulKvDc,
     consulClient: Maybe<KvStore> = this.getConsulClient(),
-  ): Promise<T> {
-    return Maybe.all(consulKeys, consulClient, consulKvDc).fork(([ keys, client, dc ]) => {
-      const rawConfigs: Promise<Array<any>> =
-        Promise.all(keys.split(',').map((key: string) => {
-          return client.get({ path: key, dc })
-        }))
-
-      const resolvedConfig: Promise<T> =
-        rawConfigs.then((configs: Array<any>): T => {
-          return (resolveConfigs(...configs) as T)
-        })
-
-      return resolvedConfig
-    }, () => {
-      return Promise.resolve({} as T)
-    })
+  ): Promise<any> {
+    if (this.consulConfig !== undefined) {
+      return Promise.resolve(this.consulConfig)
+    } else {
+      this.consulConfig = await getConsulConfig(consulKeys, consulKvDc, consulClient)
+      return this.consulConfig
+    }
   }
 
-  private async getConfig(): Promise<ConifgType> {
-    if (this.savedConfig === undefined) {
-      const localConfig: any = await this.configLoader.resolve()
-      const consulConfig: any = await this.getConsulConfig()
-      this.savedConfig = await resolveConfigs(localConfig, consulConfig)
+  private async getLocalConfig(): Promise<ConfigType> {
+    if (this.localConfig) {
+      return Promise.resolve(this.localConfig)
+    } else {
+      this.localConfig = await this.configLoader.resolve()
+      return this.localConfig
     }
-
-    return this.savedConfig
   }
 }
