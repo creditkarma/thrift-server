@@ -1,6 +1,5 @@
 import {
   AxiosConnection,
-  createClient,
   fromAxios,
   fromRequest,
   RequestConnection,
@@ -45,13 +44,13 @@ describe('Thrift Client', () => {
   })
 
   describe('AxiosConnection', () => {
-    let connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>>
+    let connection: AxiosConnection
     let client: Calculator.Client<AxiosRequestConfig>
 
     before((done: any) => {
       const requestClient: AxiosInstance = axios.create()
       connection = fromAxios(requestClient, SERVER_CONFIG)
-      client = createClient(Calculator.Client, connection)
+      client = new Calculator.Client(connection)
       done()
     })
 
@@ -108,13 +107,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
+      const badConnection: AxiosConnection =
         fromAxios(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return500',
         })
-      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -128,13 +127,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: AxiosInstance = axios.create()
-      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
+      const badConnection: AxiosConnection =
         fromAxios(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return400',
         })
-      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -148,12 +147,12 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: AxiosInstance = axios.create({ timeout: 5000 })
-      const badConnection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
+      const badConnection: AxiosConnection =
         fromAxios(requestClient, {
           hostName: 'fakehost',
           port: 8080,
         })
-      const badClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -167,13 +166,13 @@ describe('Thrift Client', () => {
   })
 
   describe('RequestConnection', () => {
-    let connection: RequestConnection<Calculator.Client<CoreOptions>>
+    let connection: RequestConnection
     let client: Calculator.Client<CoreOptions>
 
     before((done: any) => {
       const requestClient: RequestInstance = request.defaults({})
       connection = fromRequest(requestClient, SERVER_CONFIG)
-      client = createClient(Calculator.Client, connection)
+      client = new Calculator.Client(connection)
       done()
     })
 
@@ -230,13 +229,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 500 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
+      const badConnection: RequestConnection =
         fromRequest(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return500',
         })
-      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -250,13 +249,13 @@ describe('Thrift Client', () => {
 
     it('should reject for a 400 server response', (done: any) => {
       const requestClient: RequestInstance = request.defaults({})
-      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
+      const badConnection: RequestConnection =
         fromRequest(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return400',
         })
-      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {
@@ -270,12 +269,12 @@ describe('Thrift Client', () => {
 
     it('should reject for a request to a missing service', (done: any) => {
       const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
-      const badConnection: RequestConnection<Calculator.Client<CoreOptions>> =
+      const badConnection: RequestConnection =
         fromRequest(requestClient, {
           hostName: 'fakehost',
           port: 8080,
         })
-      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, badConnection)
+      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
 
       badClient.add(5, 7)
         .then((response: number) => {

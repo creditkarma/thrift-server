@@ -10,7 +10,7 @@ import {
 
 import {
   HttpConnection,
-} from './connection'
+} from './HttpConnection'
 
 import {
   IHttpConnectionOptions,
@@ -23,7 +23,7 @@ import {
 export type RequestInstance =
   RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class RequestConnection<TClient> extends HttpConnection<TClient, CoreOptions> {
+export class RequestConnection extends HttpConnection<CoreOptions> {
   private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
 
   constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {

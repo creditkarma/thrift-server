@@ -2,7 +2,7 @@ import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import Hapi = require('hapi');
 
 import { Operation, Calculator, Work } from './generated/calculator/calculator'
-import { SharedStruct } from './generated/shared/shared'
+import { SharedStruct, SharedUnion } from './generated/shared/shared'
 
 import {
   SERVER_CONFIG
@@ -36,8 +36,18 @@ const impl = new Calculator.Processor({
     },
     zip(): void {},
     getStruct(): SharedStruct {
-      return new SharedStruct();
-    }
+      return new SharedStruct({
+        key: 0,
+        value: 'test',
+      })
+    },
+    getUnion(index: number): SharedUnion {
+      if (index === 1) {
+        return SharedUnion.fromOption1('foo')
+      } else {
+        return SharedUnion.fromOption2('bar')
+      }
+    },
 })
 
 server.route({
