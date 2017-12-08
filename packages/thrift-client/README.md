@@ -32,6 +32,8 @@ Functions are available to wrap either Request or Axios instances for making req
 
 ### Codegen
 
+Requires @creditkarma/thrift-typescript >= v1.0.2
+
 The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
 
 ```sh
