@@ -1,6 +1,5 @@
 import {
   RequestInstance,
-  createClient,
   // fromAxios,
   fromRequest,
   RequestConnection,
@@ -10,7 +9,7 @@ import {
 import * as path from 'path'
 import * as request from 'request'
 import { CoreOptions } from 'request'
-// import { default as axios, AxiosInstance }from 'axios'
+// import { default as axios, AxiosInstance, AxiosRequestConfig }from 'axios'
 import * as express from 'express'
 
 import {
@@ -30,17 +29,17 @@ const app = express()
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: RequestConnection<Calculator.Client<CoreOptions>> =
+const connection: RequestConnection =
   fromRequest(requestClient, {
     hostName: SERVER_CONFIG.host,
     port: SERVER_CONFIG.port
   })
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 
 // Using Axios
 // const requestClient: AxiosInstance = axios.create()
-// const connection: AxiosConnection<Calculator.Client> = fromAxios(requestClient, config)
-// const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+// const connection: AxiosConnection = fromAxios(requestClient, config)
+// const thriftClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(connection)
 
 function symbolToOperation(sym: string): Operation {
   switch (sym) {

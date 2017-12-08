@@ -12,6 +12,12 @@ export interface ITransportConstructor {
   receiver(data: Buffer): TTransport
 }
 
+export interface IClientConstructor<TClient, Context> {
+  new (
+    connection: IThriftConnection<Context>,
+  ): TClient
+}
+
 export interface IProcessorConstructor<TProcessor, THandler> {
   new (handler: THandler): TProcessor
 }
@@ -38,14 +44,14 @@ export interface IProtocolMap {
   [name: string]: IProtocolConstructor
 }
 
-export type IRequestCallback = (err: Error | object | undefined, val?: any) => void
-
-export interface IRequestCallbackMap {
-  [key: number]: IRequestCallback
-}
-
 export interface IThriftProcessor<Context> {
   process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
+}
+
+export interface IThriftConnection<Context = never> {
+  Transport: ITransportConstructor
+  Protocol: IProtocolConstructor
+  send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
 export enum TType {

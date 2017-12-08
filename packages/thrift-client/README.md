@@ -17,13 +17,13 @@ The sample app can switch between using a Request client or an Axios client by c
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: RequestConnection<Calculator.Client<CoreOptions>> = fromRequest(requestClient, config)
-const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, connection)
+const connection: RequestConnection = fromRequest(requestClient, config)
+const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 
 // Using Axios
 const requestClient: AxiosInstance = axios.create()
-const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> = fromAxios(requestClient, config)
-const thriftClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, connection)
+const connection: AxiosConnection = fromAxios(requestClient, config)
+const thriftClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(connection)
 ```
 
 ## Usage
@@ -72,7 +72,6 @@ Notice the optional context parameter. All service client methods can take an op
 
 ```typescript
 import {
-  createClient,
   fromAxios,
   AxiosConnection,
   IHttpConnectionOptions,
@@ -101,10 +100,10 @@ const serverConfig = {
 // Create thrift client
 const requestClient: AxiosInstance = axios.create()
 
-const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
+const connection: AxiosConnection =
   fromAxios(requestClient, clientConfig)
 
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
@@ -149,14 +148,14 @@ While Thrift Client includes support for Axios and Request using another Http cl
 As an example look at the AxiosConnection:
 
 ```typescript
-export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosRequestConfig> {
+export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
   private request: AxiosInstance
 
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
     super(options)
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
-    this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
+    this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
   }
 
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {
