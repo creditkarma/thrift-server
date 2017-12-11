@@ -41,9 +41,9 @@
     "request": "^2.83.0"
   },
   "devDependencies": {
+    "@creditkarma/thrift-server-core": "^0.1.2",
     "@creditkarma/thrift-server-hapi": "^0.1.2",
     "@creditkarma/thrift-typescript": "^1.0.2",
-    "@creditkarma/thrift-server-core": "^0.1.2",
     "@types/request": "^2.0.8",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",
