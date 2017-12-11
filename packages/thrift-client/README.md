@@ -145,7 +145,7 @@ type ProtocolType = 'binary' | 'compact' | 'json'
 
 ### Middleware
 
-Sometimes you'll want to universally filter responses to pull out startard exceptions (or other responses) and deal with them in a uniform way, or just do some validation on a payload to generate custom responses. You can do this with middleware. A middleware is an object that consists of a handler function. The handler function receives the raw data as a Buffer and returns a Promise of a Buffer.
+Sometimes you'll want to universally filter responses to pull out startard exceptions (or other responses) and deal with them in a uniform way, or just do some validation on a payload to generate custom responses. The thrift server may also attach additional data onto the head of response you need to pull off before your client can handle it properly. You can do this with middleware. A middleware is an object that consists of a handler function. The handler function receives the raw data as a Buffer and returns a Promise of a Buffer. Rejecting the Promise short-circuits the middleware chain.
 
 ```typescript
 // Create thrift client
