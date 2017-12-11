@@ -43,7 +43,7 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
 
   public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
 
-  public register(...middleware: Array<IThriftMiddleware>): void {
+  public register(...middleware: IThriftMiddleware[]): void {
     middleware.forEach((next: IThriftMiddleware) => {
       this.middleware.push(next)
     })
