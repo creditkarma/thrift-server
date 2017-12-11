@@ -1,6 +1,6 @@
 import {
-  BufferedTransport,
   BinaryProtocol,
+  BufferedTransport,
   TProtocol,
   TTransport,
 } from '@creditkarma/thrift-server-core'
@@ -66,7 +66,7 @@ describe('HttpConnection', () => {
           } else {
             return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
           }
-        }
+        },
       })
 
       client.add(5, 7)
@@ -84,7 +84,7 @@ describe('HttpConnection', () => {
           } else {
             return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
           }
-        }
+        },
       })
 
       client.add(5, 7)
