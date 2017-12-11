@@ -6,8 +6,10 @@ const BAD_CHARS: Array<string> = [ '\n', '\r' ]
 
 export function getToken(config: IHVConfig): Promise<string> {
   return new Promise((resolve, reject) => {
-    fs.readFile(path.resolve(process.cwd(), config.tokenPath), (err: any, data: Buffer) => {
+    const tokenPath: string = path.resolve(process.cwd(), config.tokenPath)
+    fs.readFile(tokenPath, (err: any, data: Buffer) => {
       if (err !== null && err !== undefined) {
+        console.warn(`Unable to load Vault token from: ${tokenPath}`)
         reject(err)
       } else {
         resolve(cleanLastChar(data.toString('utf-8')))

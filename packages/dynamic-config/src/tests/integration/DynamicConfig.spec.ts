@@ -8,8 +8,14 @@ export const lab = Lab.script()
 
 const describe = lab.describe
 const it = lab.it
+const before = lab.before
 
 describe('DynamicConfig', () => {
+
+  before((done) => {
+    process.chdir(__dirname)
+    done()
+  })
 
   describe('Configured with Vault and Consul', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({

@@ -20,10 +20,6 @@ import {
 } from './constants'
 
 import {
-  resolveConfigs,
-} from './resolve'
-
-import {
   Just,
   Maybe,
   Nothing,
@@ -31,6 +27,7 @@ import {
 
 import {
   getValueForKey,
+  resolveObjects,
 } from './utils'
 
 import {
@@ -68,13 +65,33 @@ export function getConsulConfig(
 
     const resolvedConfigs: Promise<any> =
       rawConfigs.then((configs: Array<any>): any => {
-        return (resolveConfigs(...configs) as any)
+        return (resolveObjects(...configs) as any)
       })
 
     return resolvedConfigs
   }, () => {
     return Promise.resolve({})
   })
+}
+
+function isSomething(obj: any): boolean {
+  return (obj !== undefined && obj !== null)
+}
+
+export function isConsulKey(obj: any): obj is { key: string } {
+  return (
+    isSomething(obj) &&
+    typeof obj.key === 'string' &&
+    !obj.key.startsWith('/secret')
+  )
+}
+
+export function isSecretKey(obj: any): obj is { key: string } {
+  return (
+    isSomething(obj) &&
+    typeof obj.key === 'string' &&
+    obj.key.startsWith('/secret')
+  )
 }
 
 export class DynamicConfig<ConfigType = any> {
@@ -112,7 +129,13 @@ export class DynamicConfig<ConfigType = any> {
     } else {
       const value: T | null = getValueForKey<T>(key, resolvedConfig)
       if (value !== null) {
-        return Promise.resolve(value)
+        if (isConsulKey(value)) {
+          return Promise.resolve(value)
+        } else if (isSecretKey(value)) {
+          return this.getSecretValue(value.key)
+        } else {
+          return Promise.resolve(value)
+        }
       } else {
         console.error(`Value for key (${key}) not found in config`)
         return Promise.reject(new DynamicConfigMissingKey(key))
@@ -142,7 +165,7 @@ export class DynamicConfig<ConfigType = any> {
     if (this.configValue === undefined) {
       const localConfig: any = await this.getLocalConfig()
       const consulConfig: any = await this.getConsulConfig()
-      this.configValue = await resolveConfigs(localConfig, consulConfig)
+      this.configValue = await resolveObjects(localConfig, consulConfig)
     }
 
     return this.configValue

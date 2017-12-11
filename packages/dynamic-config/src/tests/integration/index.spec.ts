@@ -22,6 +22,8 @@ describe('DynamicConfig Singleton', () => {
   let config: DynamicConfig
 
   before((done) => {
+    process.chdir(__dirname)
+
     // Set environment options for DynamicConfig
     process.env[CONFIG_PATH] = path.resolve(__dirname, './config')
     process.env[CONSUL_ADDRESS] = 'http://localhost:8510'

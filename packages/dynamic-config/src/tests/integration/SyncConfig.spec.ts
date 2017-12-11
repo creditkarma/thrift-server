@@ -12,6 +12,11 @@ const before = lab.before
 
 describe('SyncConifg', () => {
 
+  before((done) => {
+    process.chdir(__dirname)
+    done()
+  })
+
   describe('Configured with Vault and Consul', () => {
     let syncConfig: SyncConfig
 

@@ -6,20 +6,7 @@ import {
   DEFAULT_CONFIG_PATH,
   DEFAULT_ENVIRONMENT,
 } from './constants'
-import { resolveConfigs } from './resolve'
-import { IConfigMap } from './types'
-
-function readDir(dir: string): Promise<Array<string>> {
-  return new Promise((resolve, reject) => {
-    fs.readdir(dir, (err: any, files: Array<string>) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(files)
-      }
-    })
-  })
-}
+import { resolveObjects } from './utils'
 
 function readFile(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -44,13 +31,13 @@ function parseContent<T>(content: string): Promise<T> {
   })
 }
 
-function getConfigPath(sourcePaths: Array<string> = []): string {
-  const firstPath: string = path.resolve(process.cwd(), DEFAULT_CONFIG_PATH)
+function getConfigPath(sourceDir: string): string {
+  const firstPath: string = path.resolve(process.cwd(), sourceDir)
   if (fs.existsSync(firstPath) && fs.statSync(firstPath).isDirectory) {
-    return DEFAULT_CONFIG_PATH
+    return firstPath
   } else {
     for (const next of CONFIG_SEARCH_PATHS) {
-      const nextPath: string = path.resolve(process.cwd(), next, DEFAULT_CONFIG_PATH)
+      const nextPath: string = path.resolve(process.cwd(), next, sourceDir)
       if (fs.existsSync(nextPath) && fs.statSync(nextPath).isDirectory) {
         return nextPath
       }
@@ -70,31 +57,24 @@ export class ConfigLoader<T = any> {
   private configEnv: string
   private savedConfig: T
 
-  constructor({ configPath = getConfigPath(), configEnv = '' }: ILoaderConfig = {}) {
-    this.configPath = configPath
+  constructor({ configPath = DEFAULT_CONFIG_PATH, configEnv }: ILoaderConfig = {}) {
+    this.configPath = getConfigPath(configPath)
     this.configEnv = configEnv || process.env.NODE_ENV || DEFAULT_ENVIRONMENT
   }
 
-  public async load(): Promise<Array<[string, object]>> {
-    return readDir(path.resolve(process.cwd(), this.configPath)).then((filePaths: Array<string>) => {
-      return Promise.all(filePaths.filter((filePath: string) => {
-        return path.extname(filePath) === '.json'
-      }).map((filePath: string) => {
-        return readFile(path.resolve(process.cwd(), this.configPath, filePath)).then((content: string) => {
-          return parseContent(content).then((val: object): [ string, object ] => {
-            return [ path.basename(filePath, '.json'), val ]
-          })
-        })
-      }))
+  public async loadDefault(): Promise<T> {
+    return readFile(path.resolve(this.configPath, 'default.json')).then((content: string) => {
+      return (parseContent(content) as any)
+    }, (err: any) => {
+      return {}
     })
   }
 
-  public async loadConfigMap(): Promise<IConfigMap> {
-    return this.load().then((configs: Array<[string, object]>) => {
-      return configs.reduce((acc: IConfigMap, next: [ string, object ]) => {
-        acc[next[0]] = next[1]
-        return acc
-      }, {} as IConfigMap)
+  public async loadEnvironment(): Promise<T> {
+    return readFile(path.resolve(this.configPath, `${this.configEnv}.json`)).then((content: string) => {
+      return (parseContent(content) as any)
+    }, (err: any) => {
+      return {}
     })
   }
 
@@ -102,12 +82,10 @@ export class ConfigLoader<T = any> {
     if (this.savedConfig !== undefined) {
       return Promise.resolve(this.savedConfig)
     } else {
-      return this.loadConfigMap().then((configs: IConfigMap): T => {
-        const defaultConfig: any = configs.default || {}
-        const envConfig: any = configs[this.configEnv] || {}
-        this.savedConfig = resolveConfigs(defaultConfig, envConfig)
-        return (this.savedConfig)
-      })
+      const defaultConfig: any = await this.loadDefault()
+      const envConfig: any = await this.loadEnvironment()
+      this.savedConfig = resolveObjects(defaultConfig, envConfig)
+      return this.savedConfig
     }
   }
 }

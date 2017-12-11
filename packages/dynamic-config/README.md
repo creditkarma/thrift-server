@@ -40,7 +40,7 @@ export async function createHttpClient(): Promise<Client> {
 
 ### Sync Config
 
-The reason that all DynamicConfig methods return a Promise is because data is also potentially being pulled from Consul over HTTP (This is cached after first call). Using async/await syntax can alleviate the headaches of dealing with async config. However, we can also choose to pay the price of loading all the configs from Consul up front.
+The reason that all DynamicConfig methods return a Promise is because data is also potentially being pulled from Consul/Vault over HTTP (This is cached after first call). Using async/await syntax can alleviate the awkwardness of dealing with async config. However, we can also choose to pay the price of loading all the configs up front.
 
 ```typescript
 import { getSyncConfig, SyncConfig } from '@creditkarma/dynamic-config'
@@ -54,7 +54,7 @@ getSyncConfig().then((config: SyncConfig) => {
 
 The `SyncConfig` object is identical to the `DynamicConfig` object with the exception that the `get` method doesn't return a Promise.
 
-## Environment Specific Configuration
+## Config Resolution
 
 DynamicConfig supports local config in the form of JSON files, remote configuration stored in Consul and secret config values stored in Vault. The usage of Consul and Vault are optional. If these are not configured only local configuration files will be used.
 
@@ -64,7 +64,7 @@ Local configuration files are stored localally with your application source. Typ
 
 #### Default Configuration
 
-The default config for your app is loaded from the `config/default.json` file.
+The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application. You can only use keys that you define in your default config. You can override these values in a variety of ways, but they must follow the schema set by your default configuration file.
 
 Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
@@ -88,50 +88,9 @@ $ export CONFIG_PATH=config
 
 Remote configuration allows you to deploy configuration independent from your application source. We support Consul as the remote configuration source.
 
+#### Consul Configs
+
 Remote configuration from Consul is given a higher priority than local configuration. Values stored in Consul are assumed to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
-
-If my local config looks like this:
-
-```json
-{
-  "server": {
-    "host": "localhost",
-    "port": 8080
-  },
-  "database": {
-    "username": "root",
-    "password": "root"
-  }
-}
-```
-
-And the config loaded from Consul looks like this:
-
-```json
-{
-  "server": {
-    "port": 9000
-  },
-  "database": {
-    "password": "test"
-  }
-}
-```
-
-The resulting config my app would use is:
-
-```json
-{
-  "server": {
-    "host": "localhost",
-    "port": 9000
-  },
-  "database": {
-    "username": "root",
-    "password": "test"
-  }
-}
-```
 
 You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance.
 
@@ -210,6 +169,52 @@ Getting a secret from Vault is similar to getting a value from local config or C
 client.getSecretValue<string>('/secret/username').then((val: string) => {
   // Do something with secret value
 })
+```
+
+## Config Resolution
+
+If my local config looks like this:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "database": {
+    "username": "root",
+    "password": "root"
+  }
+}
+```
+
+And the config loaded from Consul looks like this:
+
+```json
+{
+  "server": {
+    "port": 9000
+  },
+  "database": {
+    "password": "test"
+  }
+}
+```
+
+The resulting config my app would use is:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 9000
+  },
+  "database": {
+    "username": "root",
+    "password": "test"
+  }
+}
+```
 
 ## Contributing
 

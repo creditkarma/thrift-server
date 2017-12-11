@@ -7,6 +7,8 @@ import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
 
+process.chdir(__dirname)
+
 const consulClient: KvStore = new KvStore('http://localhost:8510')
 const vaultClient: VaultClient = new VaultClient({
   apiVersion: 'v1',
@@ -15,7 +17,7 @@ const vaultClient: VaultClient = new VaultClient({
   tokenPath: './tmp/token',
 })
 
-const token: string = execSync('curl localhost:8211/client-token').toString()
+const token: string = execSync('curl http://localhost:8211/client-token').toString()
 
 function rootDir(): string {
   if (os.platform() === 'win32') {
