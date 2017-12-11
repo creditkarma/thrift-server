@@ -11,3 +11,7 @@ export interface IHttpConnectionOptions {
   transport?: TransportType
   protocol?: ProtocolType
 }
+
+export interface IThriftMiddleware {
+  handler(data: Buffer): Promise<Buffer>
+}
