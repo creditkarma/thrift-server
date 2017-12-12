@@ -5,7 +5,6 @@ import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import {
-  createClient,
   fromRequest,
   RequestConnection,
   RequestInstance,
@@ -32,7 +31,7 @@ const after = lab.after
 
 describe('Thrift Server Express', () => {
   let server: any
-  let connection: RequestConnection<Calculator.Client<CoreOptions>>
+  let connection: RequestConnection
   let client: Calculator.Client<CoreOptions>
 
   before((done: any) => {
@@ -41,7 +40,7 @@ describe('Thrift Server Express', () => {
 
     const requestClient: RequestInstance = request.defaults({})
     connection = fromRequest(requestClient, SERVER_CONFIG)
-    client = createClient(Calculator.Client, connection)
+    client = new Calculator.Client(connection)
 
     setTimeout(done, 1000)
   })

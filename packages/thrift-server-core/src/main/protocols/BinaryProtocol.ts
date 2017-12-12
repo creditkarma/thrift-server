@@ -42,7 +42,6 @@ export class BinaryProtocol extends TProtocol {
     this.writeString(name)
     this.writeI32(requestId)
 
-    // Record client requestId to find callback again
     if (this.requestId) {
       log.warning('RequestId already set', { name })
     } else {

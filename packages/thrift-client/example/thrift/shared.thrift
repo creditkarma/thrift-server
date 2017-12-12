@@ -36,6 +36,12 @@ struct SharedStruct {
   2: string value
 }
 
+union SharedUnion {
+  1: string option1
+  2: string option2
+}
+
 service SharedService {
   SharedStruct getStruct(1: i32 key)
+  SharedUnion getUnion(1: i32 index)
 }

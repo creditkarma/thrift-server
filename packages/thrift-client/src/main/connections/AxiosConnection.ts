@@ -6,7 +6,7 @@ import {
 
 import {
   HttpConnection,
-} from './connection'
+} from './HttpConnection'
 
 import {
   IHttpConnectionOptions,
@@ -16,7 +16,7 @@ import {
   deepMerge,
 } from '../utils'
 
-export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosRequestConfig> {
+export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
   private request: AxiosInstance
 
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
@@ -41,8 +41,6 @@ export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosReque
       requestOptions,
     ).then((value: AxiosResponse) => {
       return Buffer.from(value.data)
-    }, (err: any) => {
-      return Promise.reject(err)
     })
   }
 }

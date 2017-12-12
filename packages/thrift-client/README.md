@@ -17,13 +17,13 @@ The sample app can switch between using a Request client or an Axios client by c
 // Create thrift client
 // Using Request
 const requestClient: RequestInstance = request.defaults({})
-const connection: RequestConnection<Calculator.Client<CoreOptions>> = fromRequest(requestClient, config)
-const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, connection)
+const connection: RequestConnection = fromRequest(requestClient, config)
+const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 
 // Using Axios
 const requestClient: AxiosInstance = axios.create()
-const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> = fromAxios(requestClient, config)
-const thriftClient: Calculator.Client<AxiosRequestConfig> = createClient(Calculator.Client, connection)
+const connection: AxiosConnection = fromAxios(requestClient, config)
+const thriftClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(connection)
 ```
 
 ## Usage
@@ -31,6 +31,8 @@ const thriftClient: Calculator.Client<AxiosRequestConfig> = createClient(Calcula
 Functions are available to wrap either Request or Axios instances for making requests to a Thrift service.
 
 ### Codegen
+
+Requires @creditkarma/thrift-typescript >= v1.0.2
 
 The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
 
@@ -72,7 +74,6 @@ Notice the optional context parameter. All service client methods can take an op
 
 ```typescript
 import {
-  createClient,
   fromAxios,
   AxiosConnection,
   IHttpConnectionOptions,
@@ -101,10 +102,10 @@ const serverConfig = {
 // Create thrift client
 const requestClient: AxiosInstance = axios.create()
 
-const connection: AxiosConnection<Calculator.Client<AxiosRequestConfig>> =
+const connection: AxiosConnection =
   fromAxios(requestClient, clientConfig)
 
-const thriftClient: Calculator.Client = createClient(Calculator.Client, connection)
+const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
@@ -142,6 +143,32 @@ The possible protocol types are:
 type ProtocolType = 'binary' | 'compact' | 'json'
 ```
 
+### Middleware
+
+Sometimes you'll want to universally filter responses to pull out startard exceptions (or other responses) and deal with them in a uniform way, or just do some validation on a payload to generate custom responses. The thrift server may also attach additional data onto the head of response you need to pull off before your client can handle it properly. You can do this with middleware. A middleware is an object that consists of a handler function. The handler function receives the raw data as a Buffer and returns a Promise of a Buffer. Rejecting the Promise short-circuits the middleware chain.
+
+```typescript
+// Create thrift client
+const requestClient: AxiosInstance = axios.create()
+
+const connection: AxiosConnection =
+  fromAxios(requestClient, clientConfig)
+
+connection.register({
+  handler(data: Buffer): Promise<Buffer> {
+    if (validatePayload(data)) {
+      return Promise.resolve(data)
+    } else {
+      return Promise.reject(new Error('Payload of thrift response is invalid'))
+    }
+  }
+})
+
+const thriftClient: Calculator.Client = new Calculator.Client(connection)
+```
+
+Middleware are applied in the order in which they are registered.
+
 ## Creating Custom Connections
 
 While Thrift Client includes support for Axios and Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
@@ -149,14 +176,14 @@ While Thrift Client includes support for Axios and Request using another Http cl
 As an example look at the AxiosConnection:
 
 ```typescript
-export class AxiosConnection<TClient> extends HttpConnection<TClient, AxiosRequestConfig> {
+export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
   private request: AxiosInstance
 
   constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
     super(options)
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
-    this.request.defaults.baseURL = `http://${this.hostName}:${this.port}`
+    this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
   }
 
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {

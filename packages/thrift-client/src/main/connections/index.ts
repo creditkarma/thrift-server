@@ -1,31 +1,31 @@
-export * from './connection'
-export * from './axios'
-export * from './request'
+export * from './HttpConnection'
+export * from './AxiosConnection'
+export * from './RequestConnection'
 export * from './types'
 
 import { AxiosInstance } from 'axios'
 
 import {
   AxiosConnection,
-} from './axios'
+} from './AxiosConnection'
 
 import {
   RequestConnection,
   RequestInstance,
-} from './request'
+} from './RequestConnection'
 
 import {
   IHttpConnectionOptions,
 } from './types'
 
-export function fromAxios<TClient>(
+export function fromAxios(
   requestApi: AxiosInstance,
-  options: IHttpConnectionOptions): AxiosConnection<TClient> {
-  return new AxiosConnection<TClient>(requestApi, options)
+  options: IHttpConnectionOptions): AxiosConnection {
+  return new AxiosConnection(requestApi, options)
 }
 
-export function fromRequest<TClient>(
+export function fromRequest(
   requestApi: RequestInstance,
-  options: IHttpConnectionOptions): RequestConnection<TClient> {
-  return new RequestConnection<TClient>(requestApi, options)
+  options: IHttpConnectionOptions): RequestConnection {
+  return new RequestConnection(requestApi, options)
 }
