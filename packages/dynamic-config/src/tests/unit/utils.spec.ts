@@ -9,9 +9,137 @@ const describe = lab.describe
 const it = lab.it
 
 describe('Utils', () => {
-  // describe('overlay', () => {
+  describe('objectMatchesSchema', () => {
+    const objectSchema: ISchema = {
+      type: 'object',
+      properties: {
+        one: {
+          type: 'string',
+        },
+        two: {
+          type: 'number',
+        },
+      },
+    }
 
-  // })
+    const strSchema: ISchema = {
+      type: 'string',
+    }
+
+    const optionalSchema: ISchema = {
+      type: 'object',
+      properties: {
+        one: {
+          type: 'string',
+        },
+        two: {
+          type: 'number',
+          required: false,
+        },
+      },
+    }
+
+    const anySchema: ISchema = {
+      type: 'object',
+      properties: {
+        one: {
+          type: 'any',
+        },
+      },
+    }
+
+    it('should return true if object matches given schema', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(objectSchema, {
+        one: 'one',
+        two: 2,
+      })
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return false if object does not match given schema', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(objectSchema, {
+        one: 'one',
+        two: 'two',
+      })
+      const expected: boolean = false
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return false if object includes fields not in schema', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(objectSchema, {
+        one: 'one',
+        two: 2,
+        three: 3,
+      })
+      const expected: boolean = false
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return true if primitive matches given schema', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(strSchema, 'test')
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return false if primitive does not match given schema', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(strSchema, 5)
+      const expected: boolean = false
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return true object does not include optional fields', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(optionalSchema, {
+        one: 'one',
+      })
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return true with any type matching number', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(anySchema, {
+        one: 5,
+      })
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return true with any type matching string', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(anySchema, {
+        one: 'one',
+      })
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should return true with any type matching object', (done) => {
+      const actual: boolean = Utils.objectMatchesSchema(anySchema, {
+        one: {
+          test: 'test',
+        },
+      })
+      const expected: boolean = true
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+  })
 
   describe('objectAsSimpileSchema', () => {
     it('should correctly generate a schema for an object', (done) => {
@@ -237,6 +365,54 @@ describe('Utils', () => {
     })
   })
 
+  describe('setValueForKey', () => {
+    const mockJSON = {
+      one: {
+        two: {
+          three: false,
+        },
+      },
+    }
+
+    it('should set the value of given key', (done) => {
+      const actual: any = Utils.setValueForKey('one', 'one', mockJSON)
+      const expected: any = {
+        one: 'one',
+      }
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should set the value of given nested key', (done) => {
+      const actual: any = Utils.setValueForKey('one.two.three', true, mockJSON)
+      const expected: any = {
+        one: {
+          two: {
+            three: true,
+          },
+        },
+      }
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should ignore setting non-existent props', (done) => {
+      const actual: any = Utils.setValueForKey('one.two.four', true, mockJSON)
+      const expected: any = {
+        one: {
+          two: {
+            three: false,
+          },
+        },
+      }
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+  })
+
   describe('dashToCamel', () => {
     it('should transform dashed string to camel-case', (done) => {
       const base: string = 'this-is-test'
@@ -266,7 +442,7 @@ describe('Utils', () => {
     })
   })
 
-  describe('resolveObjects', () => {
+  describe('overlayObjects', () => {
     it('should override base values with update values', (done) => {
       const baseConfig = {
         protocol: 'https',
@@ -293,7 +469,7 @@ describe('Utils', () => {
         tokenPath: '/tmp/test-token',
       }
 
-      const actual = Utils.resolveObjects(baseConfig, updateConfig)
+      const actual = Utils.overlayObjects(baseConfig, updateConfig)
 
       expect(actual).to.equal(expected)
       done()
@@ -323,7 +499,7 @@ describe('Utils', () => {
         },
       }
 
-      const actual = Utils.resolveObjects(baseConfig, updateConfig)
+      const actual = Utils.overlayObjects(baseConfig, updateConfig)
 
       expect(actual).to.equal(expected)
       done()

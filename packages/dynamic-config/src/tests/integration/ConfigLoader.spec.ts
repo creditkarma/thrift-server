@@ -30,7 +30,7 @@ describe('ConfigLoader', () => {
       done()
     })
 
-    it('should return the correct config map for development', (done) => {
+    it('should return the correct config for development', (done) => {
       process.env.NODE_ENV = 'development'
       const loader: ConfigLoader = new ConfigLoader()
       const expected: any = {
@@ -55,7 +55,7 @@ describe('ConfigLoader', () => {
       }).catch(done)
     })
 
-    it('should return the correct config map for production', (done) => {
+    it('should return the correct config for production', (done) => {
       process.env.NODE_ENV = 'production'
       const loader: ConfigLoader = new ConfigLoader()
       const expected: any = {

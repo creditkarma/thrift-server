@@ -81,7 +81,7 @@ describe('DynamicConfig Singleton', () => {
 
   describe('getSecretValue', () => {
     it('should get secret value from Vault', (done) => {
-      config.getSecretValue<string>('test-secret').then((val: string) => {
+      config.getSecretValue<string>('/secret/test-secret').then((val: string) => {
         expect(val).to.equal('this is a secret')
         done()
       }, (err: any) => {
@@ -91,11 +91,11 @@ describe('DynamicConfig Singleton', () => {
     })
 
     it('should reject for a missing secret', (done) => {
-      config.getSecretValue<string>('missing-secret').then((val: string) => {
+      config.getSecretValue<string>('/secret/missing-secret').then((val: string) => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
         expect(err.message).to.equal(
-          'Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
+          'Vault failed with error: Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
         )
         done()
       }).catch(done)

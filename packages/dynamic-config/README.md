@@ -38,37 +38,19 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-### Sync Config
-
-The reason that all DynamicConfig methods return a Promise is because data is also potentially being pulled from Consul/Vault over HTTP (This is cached after first call). Using async/await syntax can alleviate the awkwardness of dealing with async config. However, we can also choose to pay the price of loading all the configs up front.
-
-```typescript
-import { getSyncConfig, SyncConfig } from '@creditkarma/dynamic-config'
-
-getSyncConfig().then((config: SyncConfig) => {
-  const host: string = config.get<string>('hostName')
-  const port: number = config.get<number>('port')
-  const client = new Client(host, port)
-})
-```
-
-The `SyncConfig` object is identical to the `DynamicConfig` object with the exception that the `get` method doesn't return a Promise.
-
-## Config Resolution
+## Local Configs
 
 DynamicConfig supports local config in the form of JSON files, remote configuration stored in Consul and secret config values stored in Vault. The usage of Consul and Vault are optional. If these are not configured only local configuration files will be used.
 
-### Local Configs
-
 Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`.
 
-#### Default Configuration
+### Default Configuration
 
 The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application. You can only use keys that you define in your default config. You can override these values in a variety of ways, but they must follow the schema set by your default configuration file.
 
 Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
-#### Configuration Path
+### Configuration Path
 
 The path to the config files is configurable when instantiating the DynamicConfig object. The option can either be an absolute path or a path relative to `process.cwd()`. The option can be defined both when constructing an instance or through an environment variable.
 
@@ -84,15 +66,15 @@ Through environment:
 $ export CONFIG_PATH=config
 ```
 
-### Remote Configs
+## Remote Configs
 
 Remote configuration allows you to deploy configuration independent from your application source. We support Consul as the remote configuration source.
 
-#### Consul Configs
+### Consul Configs
 
 Remote configuration from Consul is given a higher priority than local configuration. Values stored in Consul are assumed to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
 
-You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance.
+You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance. The values loaded with these keys are expected to be valid JSON objects.
 
 In TypeScript:
 ```typescript
@@ -106,7 +88,103 @@ Through environment:
 $ export CONSUL_KEYS=production-config,production-east-config
 ```
 
-### Available Options
+#### Config Overlay
+
+If my local config looks like this:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 8080
+  },
+  "database": {
+    "username": "root",
+    "password": "root"
+  }
+}
+```
+
+And the config loaded from Consul looks like this:
+
+```json
+{
+  "server": {
+    "port": 9000
+  },
+  "database": {
+    "password": "test"
+  }
+}
+```
+
+The resulting config my app would use is:
+
+```json
+{
+  "server": {
+    "host": "localhost",
+    "port": 9000
+  },
+  "database": {
+    "username": "root",
+    "password": "test"
+  }
+}
+```
+
+#### Config Placeholders
+
+You can also callout that a single key is stored in Consul. A config placeholder is a simple object with one required field and one optional field:
+
+```typescript
+interface IConfigPlaceholder {
+  key: string
+  default?: any
+}
+```
+
+This object can appear in your local config and will callout a point where we need to fetch a value from a remote source. If your local configs have resolved to this:
+
+```json
+{
+  "database": {
+    "username": "root",
+    "password": {
+      "key": "consul!/service-name/password"
+    }
+  }
+}
+```
+
+The `password` field will be resolved from Consul and the resulting value from Consul will replace the placeholder in the resolved config:
+
+```json
+{
+  "database": {
+    "username": "root",
+    "password": "S0m3S3cr3tP@55w0rd"
+  }
+}
+```
+
+You can also set a default value for when Consul is not configured. If Consul fails and there is no default an exception is raised.
+
+```json
+{
+  "server": {
+    "host": {
+      "key": "consul!/service-name/host",
+      "default": "localhost"
+    },
+    "port": 8080
+  }
+}
+```
+
+In these examples the `consul!` is important and this is the flag that idicates this key is to be fetched from Consul.
+
+#### Available Options
 
 Here are the available options for DynamicConfig:
 
@@ -171,50 +249,22 @@ client.getSecretValue<string>('/secret/username').then((val: string) => {
 })
 ```
 
-## Config Resolution
+#### Config Placeholders
 
-If my local config looks like this:
+Config placeholders can also be used for secret keys. To callout that a key should be fetched from Vault the config placeholder must begin with `/secret`.
 
 ```json
 {
-  "server": {
-    "host": "localhost",
-    "port": 8080
-  },
   "database": {
     "username": "root",
-    "password": "root"
+    "password": {
+      "key": "/secret/service-name/password"
+    }
   }
 }
 ```
 
-And the config loaded from Consul looks like this:
-
-```json
-{
-  "server": {
-    "port": 9000
-  },
-  "database": {
-    "password": "test"
-  }
-}
-```
-
-The resulting config my app would use is:
-
-```json
-{
-  "server": {
-    "host": "localhost",
-    "port": 9000
-  },
-  "database": {
-    "username": "root",
-    "password": "test"
-  }
-}
-```
+Secrets do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
 
 ## Contributing
 

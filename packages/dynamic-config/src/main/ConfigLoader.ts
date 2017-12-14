@@ -6,7 +6,8 @@ import {
   DEFAULT_CONFIG_PATH,
   DEFAULT_ENVIRONMENT,
 } from './constants'
-import { resolveObjects } from './utils'
+
+import * as utils from './utils'
 
 function readFile(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -84,7 +85,7 @@ export class ConfigLoader<T = any> {
     } else {
       const defaultConfig: any = await this.loadDefault()
       const envConfig: any = await this.loadEnvironment()
-      this.savedConfig = resolveObjects(defaultConfig, envConfig)
+      this.savedConfig = utils.overlayObjects(defaultConfig, envConfig)
       return this.savedConfig
     }
   }

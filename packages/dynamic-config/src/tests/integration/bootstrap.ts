@@ -14,7 +14,6 @@ setTimeout(() => {
   const vaultClient: VaultClient = new VaultClient({
     apiVersion: 'v1',
     destination: 'http://localhost:8210',
-    namespace: 'secret',
     tokenPath: './tmp/token',
   })
 
@@ -58,23 +57,31 @@ setTimeout(() => {
       consulClient.set({ path: 'test-config-one' }, {
         database: {
           username: 'testUser',
-          password: 'testPass',
+          password: 'consul!/password',
         },
       }),
       consulClient.set({ path: 'test-config-two' }, {
         database: {
           username: 'fakeUser',
+          password: {
+            key: 'consul!/missing-password',
+            default: 'NotSoSecret',
+          },
         },
       }),
+      consulClient.set({ path: 'password' }, 'Sup3rS3cr3t'),
       consulClient.set({ path: 'with-vault' }, {
+        database: {
+          password: '/secret/password',
+        },
         'hashicorp-vault': {
           apiVersion: 'v1',
           destination: 'http://localhost:8210',
-          namespace: 'secret',
           tokenPath: './tmp/token',
         },
       }),
-      vaultClient.set('test-secret', 'this is a secret'),
+      vaultClient.set('/secret/test-secret', 'this is a secret'),
+      vaultClient.set('/secret/password', 'K1ndaS3cr3t'),
     ]).then((result: any) => {
       console.log('Done populating mock data')
     }, (failure: any) => {

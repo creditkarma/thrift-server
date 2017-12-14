@@ -1,6 +1,7 @@
 {
 	"extends": "tslint:recommended",
 	"rules": {
+    "max-line-length": false,
     "max-classes-per-file": false,
 		"object-literal-sort-keys": false,
 		"no-console": false,

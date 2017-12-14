@@ -5,13 +5,25 @@ export class DynamicConfigMissingKey extends Error {
 }
 
 export class HVNotConfigured extends Error {
-  constructor() {
-    super(`Hashicorp Vault is not configured`)
+  constructor(key: string) {
+    super(`Unable to retrieve key: ${key}. Hashicorp Vault is not configured`)
   }
 }
 
 export class HVFailed extends Error {
   constructor(message?: string) {
-    super(message)
+    super(`Vault failed with error: ${message}`)
+  }
+}
+
+export class ConsulFailed extends Error {
+  constructor(message?: string) {
+    super(`Consul failed with error: ${message}`)
+  }
+}
+
+export class ConsulNotConfigured extends Error {
+  constructor(key: string) {
+    super(`Unable to retrieve key: ${key}. Hashicorp Consul is not configured`)
   }
 }
