@@ -93,11 +93,10 @@ export class DynamicConfig<ConfigType = any> {
     this.vaultClient = this.getVaultClient()
   }
 
-  public async get<T = any>(key: string = ''): Promise<T> {
-    console.log('get: ', key)
+  public async get<T = any>(key?: string): Promise<T> {
     return this.getConfig().then((resolvedConfig: any) => {
       // If the key is not set we return the entire structure
-      if (key === '') {
+      if (key === undefined) {
         return Promise.resolve(resolvedConfig as any)
 
       // If the key is set we try to find it in the structure
@@ -258,6 +257,10 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
+  /**
+   * Just a warning for when the config schema changes. Eventually we'll probably raise an error for this. When
+   * I'm more confident in the validation.
+   */
   private validateConfigSchema(): void {
     if (!utils.objectMatchesSchema(this.configSchema, this.resolvedConfig)) {
       console.warn('The shape of the config changed during resolution. This may indicate an error.')

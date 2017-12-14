@@ -157,6 +157,8 @@ This object can appear in your local config and will callout a point where we ne
 }
 ```
 
+Here, `consul!` is the important bit that calls out that this should be resolved from Consul. The remaining part of the string is the key we look up in the Consul KV store (`service-name/password`). You can also pass override arguments to Consul and URL parameters attaches to this key. For example to change the datacenter you could use `consul!/service-name/password?dc=dc1`.
+
 The `password` field will be resolved from Consul and the resulting value from Consul will replace the placeholder in the resolved config:
 
 ```json
@@ -181,8 +183,6 @@ You can also set a default value for when Consul is not configured. If Consul fa
   }
 }
 ```
-
-In these examples the `consul!` is important and this is the flag that idicates this key is to be fetched from Consul.
 
 #### Available Options
 

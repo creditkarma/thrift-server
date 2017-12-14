@@ -180,20 +180,15 @@ export function findSchemaForKey(schema: ISchema, key: string): ISchema {
   const [ head, ...tail ]: Array<string> =
     key.split('.').filter((next: string) => next.trim() !== '')
 
-  if (tail.length > 0) {
-    if (schema.type === 'object') {
-      if (schema.properties[head] !== undefined) {
-        return findSchemaForKey(schema.properties[head], tail.join('.'))
-      }
-    }
+  if (tail.length > 0 && schema.type === 'object' && schema.properties[head] !== undefined) {
+    return findSchemaForKey(schema.properties[head], tail.join('.'))
 
-  } else if (schema.type === 'object') {
-    if (schema.properties[head] !== undefined) {
-      return schema.properties[head]
-    }
+  } else if (schema.type === 'object' && schema.properties[head] !== undefined) {
+    return schema.properties[head]
+
+  } else {
+    throw new Error(`No schema for: ${head}`)
   }
-
-  throw new Error(`No schema for: ${head}`)
 }
 
 export function objectAsSimpleSchema(obj: any): ISchema {
