@@ -9,9 +9,7 @@ import {
   CONSUL_KV_DC,
 } from './constants'
 
-import {
-  getValueForKey,
-} from './utils'
+import * as utils from './utils'
 
 import {
   IConfigOptions,
@@ -45,7 +43,7 @@ export class SyncConfig<ConfigType = any> {
 
     // If the key is set we try to find it in the structure
     } else {
-      const value: T | null = getValueForKey<T>(key, this.resolvedConfig)
+      const value: T | null = utils.getValueForKey<T>(key, this.resolvedConfig)
       if (value !== null) {
         return value
       } else {

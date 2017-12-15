@@ -1,14 +1,9 @@
 import { CoreOptions } from 'request'
 import { getToken } from './discovery'
+import { HVInvalidResponse } from './errors'
 import { IHVConfig, IReadResult } from './types'
 import * as utils from './utils'
 import { VaultService } from './VaultService'
-
-class HVInvalidResponse extends Error {
-  constructor(key: string) {
-    super(`Data returned from Vault for key (${key}) has incorrect structure`)
-  }
-}
 
 export interface IVaultClientArgs {
   apiVersion?: 'v1'

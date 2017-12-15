@@ -1,6 +1,5 @@
 import { CoreOptions, OptionsWithUri, RequestResponse } from 'request'
 import * as rpn from 'request-promise-native'
-import * as url from 'url'
 
 import {
   IInitArgs,
@@ -13,25 +12,18 @@ import {
   IUnsealResult,
 } from './types'
 
-import { deepMerge } from './utils'
+import {
+  HVFail,
+  HVMissingResource,
+} from './errors'
+
+import * as utils from './utils'
 
 const request = rpn.defaults({
   json: true,
   resolveWithFullResponse: true,
   simple: false,
 })
-
-class HVMissingResource extends Error {
-  constructor(location: string | url.Url) {
-    super(`Unable to locate vault resource at: ${location}`)
-  }
-}
-
-class HVFail extends Error {
-  constructor(message?: string) {
-    super(message)
-  }
-}
 
 function responseAsError(res: RequestResponse): HVFail {
   let message: string
@@ -47,7 +39,7 @@ function responseAsError(res: RequestResponse): HVFail {
 function fetch(options: OptionsWithUri, token?: string): Promise<any> {
   const requestOptions: OptionsWithUri = (
     (token !== undefined) ?
-      deepMerge(options, {
+      utils.deepMerge(options, {
         headers: {
           'X-Vault-Token': token,
         },
@@ -92,14 +84,14 @@ export class VaultService {
   }
 
   public status(options: CoreOptions = {}): Promise<IStatusResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/sys/init`,
       method: 'GET',
     }))
   }
 
   public init(data: IInitArgs, options: CoreOptions = {}): Promise<IInitResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/sys/init`,
       json: data,
       method: 'PUT',
@@ -107,21 +99,21 @@ export class VaultService {
   }
 
   public sealStatus(options: CoreOptions = {}): Promise<ISealStatusResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/sys/seal-status`,
       method: 'GET',
     }))
   }
 
   public seal(token: string, options: CoreOptions = {}): Promise<void> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/sys/seal`,
       method: 'PUT',
     }), token)
   }
 
   public unseal(data: IUnsealArgs, options: CoreOptions = {}): Promise<IUnsealResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/sys/unseal`,
       json: data,
       method: 'PUT',
@@ -129,21 +121,21 @@ export class VaultService {
   }
 
   public read(path: string, token: string, options: CoreOptions = {}): Promise<IReadResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/${path}`,
       method: 'GET',
     }), token)
   }
 
   public list(token: string, options: CoreOptions = {}): Promise<IListResult> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/secret?list=true`,
       method: 'GET',
     }), token)
   }
 
   public write(path: string, data: any, token: string, options: CoreOptions = {}): Promise<void> {
-    return fetch(deepMerge(this.defaultOptions, options, {
+    return fetch(utils.deepMerge(this.defaultOptions, options, {
       uri: `${this.dest}/${path}`,
       json: data,
       method: 'POST',
