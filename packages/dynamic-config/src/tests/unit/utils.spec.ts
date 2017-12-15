@@ -9,6 +9,72 @@ const describe = lab.describe
 const it = lab.it
 
 describe('Utils', () => {
+  describe('resolveObjectPromises', () => {
+    it('should resolve nested Promises within an object', async () => {
+      const actual = await Utils.resolveObjectPromises({
+        one: Promise.resolve(5),
+        two: {
+          three: Promise.resolve(6),
+          four: 8,
+          five: {
+            six: Promise.resolve(9),
+          },
+        },
+        seven: {
+          eight: 90,
+          nine: {
+            ten: Promise.resolve(34),
+          },
+        },
+      })
+
+      const expected = {
+        one: 5,
+        two: {
+          three: 6,
+          four: 8,
+          five: {
+            six: 9,
+          },
+        },
+        seven: {
+          eight: 90,
+          nine: {
+            ten: 34,
+          },
+        },
+      }
+
+      expect(actual).to.equal(expected)
+    })
+
+    it('should reject if one of the nested Promises reject', (done) => {
+      const objectPromise = Utils.resolveObjectPromises({
+        one: Promise.resolve(5),
+        two: {
+          three: Promise.resolve(6),
+          four: 8,
+          five: {
+            six: Promise.reject(new Error('Unable to load value')),
+          },
+        },
+        seven: {
+          eight: 90,
+          nine: {
+            ten: Promise.resolve(34),
+          },
+        },
+      })
+
+      objectPromise.then((value: any) => {
+        done(new Error('Promise should fail'))
+      }, (err: any) => {
+        expect(err.message).to.equal('Unable to load value')
+        done()
+      })
+    })
+  })
+
   describe('objectMatchesSchema', () => {
     const objectSchema: ISchema = {
       type: 'object',
@@ -20,6 +86,7 @@ describe('Utils', () => {
           type: 'number',
         },
       },
+      required: [ 'one', 'two' ],
     }
 
     const strSchema: ISchema = {
@@ -34,9 +101,9 @@ describe('Utils', () => {
         },
         two: {
           type: 'number',
-          required: false,
         },
       },
+      required: [ 'one' ],
     }
 
     const anySchema: ISchema = {
@@ -46,6 +113,7 @@ describe('Utils', () => {
           type: 'any',
         },
       },
+      required: [ 'one' ],
     }
 
     it('should return true if object matches given schema', (done) => {
@@ -98,7 +166,7 @@ describe('Utils', () => {
       done()
     })
 
-    it('should return true object does not include optional fields', (done) => {
+    it('should return true if object does not include optional fields', (done) => {
       const actual: boolean = Utils.objectMatchesSchema(optionalSchema, {
         one: 'one',
       })
@@ -173,8 +241,10 @@ describe('Utils', () => {
                 },
               },
             },
+            required: [ 'type', 'values' ],
           },
         },
+        required: [ 'one', 'two', 'three' ],
       }
 
       expect(actual).to.equal(expected)
@@ -209,6 +279,7 @@ describe('Utils', () => {
       const expected: ISchema = {
         type: 'object',
         properties: {},
+        required: [],
       }
 
       expect(actual).to.equal(expected)
@@ -238,7 +309,7 @@ describe('Utils', () => {
         ],
       },
     }
-    const mockSchema = Utils.objectAsSimpleSchema(mockData)
+    const mockSchema: ISchema = Utils.objectAsSimpleSchema(mockData)
 
     it('should get schema for key', (done) => {
       const actual = Utils.findSchemaForKey(mockSchema, 'user')
@@ -261,8 +332,10 @@ describe('Utils', () => {
                 type: 'string',
               },
             },
+            required: [ 'state', 'city' ],
           },
         },
+        required: [ 'name', 'age', 'location' ],
       }
 
       expect(actual).to.equal(expected)
@@ -292,6 +365,7 @@ describe('Utils', () => {
               },
             },
           },
+          required: [ 'title', 'date', 'body', 'tags' ],
         },
       }
 
@@ -391,6 +465,33 @@ describe('Utils', () => {
           two: {
             three: true,
           },
+        },
+      }
+
+      expect(actual).to.equal(expected)
+      done()
+    })
+
+    it('should set the value of an array at given index', (done) => {
+      const mockWithArray = {
+        one: {
+          two: [
+            { three: true },
+            { three: true },
+            { three: true },
+            { three: true },
+          ],
+        },
+      }
+      const actual: any = Utils.setValueForKey('one.two.2.three', false, mockWithArray)
+      const expected: any = {
+        one: {
+          two: [
+            { three: true },
+            { three: true },
+            { three: false },
+            { three: true },
+          ],
         },
       }
 

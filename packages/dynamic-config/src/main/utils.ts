@@ -1,9 +1,12 @@
 import {
+  ConfigPlaceholder,
+  IConfigPlaceholder,
   IObjectSchema,
   ISchema,
+  ObjectUpdate,
 } from './types'
 
-function isPrimitive(obj: any): boolean {
+export function isPrimitive(obj: any): boolean {
   return (
     typeof obj === 'number' ||
     typeof obj === 'string' ||
@@ -11,14 +14,14 @@ function isPrimitive(obj: any): boolean {
   )
 }
 
-function isNothing(obj: any): boolean {
+export function isNothing(obj: any): boolean {
   return (
     obj === null ||
     obj === undefined
   )
 }
 
-function isObject(obj: any): boolean {
+export function isObject(obj: any): boolean {
   return (
     obj !== null &&
     typeof obj === 'object'
@@ -67,7 +70,7 @@ export function getValueForKey<T>(key: string, obj: any): T | null {
   }
 }
 
-export function setValueForKey<T>(key: string, value: any, oldObj: any, newObj: any = {}): T {
+export function setValueForKey<T>(key: string, value: any, oldObj: any): T {
   if (typeof key !== 'string') {
     throw new Error('Property to set must be a string')
 
@@ -75,6 +78,7 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any, newObj: 
     throw new Error(`Cannot set value on null type at key: ${key}`)
 
   } else {
+    const newObj: any = (Array.isArray(oldObj)) ? [] : {}
     const [ head, ...tail ] = (key || '').split('.').filter((val: string) => {
       return val.trim() !== ''
     })
@@ -85,7 +89,7 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any, newObj: 
       if (prop === head) {
         if (tail.length > 0) {
           const nextObj = oldObj[prop] || {}
-          newObj[prop] = setValueForKey(tail.join('.'), value, nextObj, {})
+          newObj[prop] = setValueForKey(tail.join('.'), value, nextObj)
         } else {
           newObj[prop] = value
         }
@@ -94,9 +98,9 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any, newObj: 
         newObj[prop] = oldObj[prop]
       }
     }
-  }
 
-  return newObj
+    return newObj
+  }
 }
 
 /**
@@ -202,11 +206,15 @@ export function objectAsSimpleSchema(obj: any): ISchema {
     const schema: IObjectSchema = {
       type: 'object',
       properties: {},
+      required: [],
     }
 
     if (obj !== null) {
       for (const key of Object.keys(obj)) {
         schema.properties[key] = objectAsSimpleSchema(obj[key])
+        if (schema.required !== undefined) {
+          schema.required.push(key)
+        }
       }
     }
 
@@ -260,17 +268,15 @@ export function objectsAreEqual(obj1: any, obj2: any): boolean {
 }
 
 export function objectMatchesSchema(schema: ISchema, obj: any): boolean {
-  if (obj === undefined && schema.required === false) {
-    return true
-  }
-
   if (Array.isArray(obj) && schema.type === 'array') {
     return objectMatchesSchema(schema.items, obj[0])
 
   } else if (typeof obj === 'object' && schema.type === 'object') {
     const schemaKeys: Array<string> = Object.keys(schema.properties)
+
     if (obj === null) {
       return schemaKeys.length === 0
+
     } else {
       const objKeys: Array<string> = Object.keys(obj)
       for (const key of objKeys) {
@@ -282,7 +288,10 @@ export function objectMatchesSchema(schema: ISchema, obj: any): boolean {
       for (const key of schemaKeys) {
         const nextSchema: ISchema = schema.properties[key]
         const nextObj: any = obj[key]
-        if (!objectMatchesSchema(nextSchema, nextObj)) {
+        if (nextObj === undefined && schema.required !== undefined) {
+          return schema.required.indexOf(key) === -1
+
+        } else if (!objectMatchesSchema(nextSchema, nextObj)) {
           return false
         }
       }
@@ -311,30 +320,22 @@ export function objectHasShape(...args: Array<any>): any {
   }
 }
 
-export interface IConfigPlaceholder {
-  default?: any
-  key: string
-}
-
-export type PlaceholderType =
-  IConfigPlaceholder | string
-
 function isConfigPlaceholder(obj: any): obj is IConfigPlaceholder {
   return objectMatchesSchema({
     type: 'object',
     properties: {
       default: {
         type: 'any',
-        required: false,
       },
       key: {
         type: 'string',
       },
     },
+    required: [ 'key' ],
   }, obj)
 }
 
-export function isConsulKey(obj: any): obj is PlaceholderType {
+export function isConsulKey(obj: any): obj is ConfigPlaceholder {
   return (
     (
       typeof obj === 'string' &&
@@ -347,7 +348,7 @@ export function isConsulKey(obj: any): obj is PlaceholderType {
   )
 }
 
-export function isSecretKey(obj: any): obj is PlaceholderType {
+export function isSecretKey(obj: any): obj is ConfigPlaceholder {
   return (
     (
       typeof obj === 'string' &&
@@ -358,4 +359,53 @@ export function isSecretKey(obj: any): obj is PlaceholderType {
       obj.key.startsWith('/secret')
     )
   )
+}
+
+function appendUpdateForObject(value: any, path: Array<string>, updates: Array<ObjectUpdate>): void {
+  if (value instanceof Promise) {
+    updates.push([ path, value ])
+
+  } else if (typeof value === 'object') {
+    collectUnresolvedPromises(value, path, updates)
+  }
+}
+
+function collectUnresolvedPromises(
+  obj: any,
+  path: Array<string> = [],
+  updates: Array<ObjectUpdate> = [],
+): Array<ObjectUpdate> {
+  if (Array.isArray(obj)) {
+    for (let i = 0; i < obj.length; i++) {
+      const value = obj[i]
+      const newPath: Array<string> = [ ...path, `${i}` ]
+      appendUpdateForObject(value, newPath, updates)
+    }
+
+    return updates
+
+  } else if (typeof obj === 'object') {
+    for (const key of Object.keys(obj)) {
+      const value = obj[key]
+      const newPath: Array<string> = [ ...path, key ]
+      appendUpdateForObject(value, newPath, updates)
+    }
+
+    return updates
+
+  } else {
+    return []
+  }
+}
+
+export async function resolveObjectPromises(obj: object): Promise<object> {
+  const unresolved: Array<ObjectUpdate> = collectUnresolvedPromises(obj)
+  const paths: Array<string> = unresolved.map((next: ObjectUpdate) => next[0].join('.'))
+  const promises: Array<Promise<any>> = unresolved.map((next: ObjectUpdate) => next[1])
+  const resolvedPromises: Array<any> = await Promise.all(promises)
+  const newObj: object = resolvedPromises.reduce((acc: object, next: any, currentIndex: number) => {
+    return setValueForKey(paths[currentIndex], next, acc)
+  }, obj)
+
+  return newObj
 }

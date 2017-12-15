@@ -36,8 +36,10 @@ import {
 } from './errors'
 
 import {
+  ConfigPlaceholder,
   IConfigOptions,
   ISchema,
+  ObjectUpdate,
 } from './types'
 
 interface IConsulOptionMap {
@@ -93,6 +95,10 @@ export class DynamicConfig<ConfigType = any> {
     this.vaultClient = this.getVaultClient()
   }
 
+  /**
+   * Gets a given key from the config. There are not guarantees that the config is already
+   * loaded, so we must return a Promise.
+   */
   public async get<T = any>(key?: string): Promise<T> {
     return this.getConfig().then((resolvedConfig: any) => {
       // If the key is not set we return the entire structure
@@ -103,47 +109,12 @@ export class DynamicConfig<ConfigType = any> {
       } else {
         const value: any = utils.getValueForKey<T>(key, resolvedConfig)
 
+        // If the value is a thing we need to resolve any placeholders
         if (value !== null) {
-          if (utils.isConsulKey(value)) {
-            const consulKey: string = (
-              (typeof value === 'string') ?
-                value.replace('consul!/', '') :
-                value.key.replace('consul!/', '')
-            )
-
-            return this.getConsulValue(consulKey).then((consulValue: any) => {
-              if (consulValue === null && typeof value !== 'string' && value.default !== undefined) {
-                return value.default
-              } else if (consulValue !== null) {
-                this.resolvedConfig = utils.setValueForKey(key, consulValue, this.resolvedConfig)
-                this.validateConfigSchema()
-                return consulValue
-              } else {
-                return Promise.reject(new DynamicConfigMissingKey(key))
-              }
-            }, (err: any) => {
-              return Promise.reject(err)
-            })
-
-          } else if (utils.isSecretKey(value)) {
-            const vaultKey: string =
-              (typeof value === 'string') ? value : value.key
-
-            return this.getSecretValue(vaultKey).then((secretValue: any) => {
-              if (secretValue !== null) {
-                this.resolvedConfig = utils.setValueForKey(key, secretValue, this.resolvedConfig)
-                this.validateConfigSchema()
-                return secretValue
-              } else {
-                return Promise.reject(new DynamicConfigMissingKey(key))
-              }
-            }, (err: any) => {
-              return Promise.reject(err)
-            })
-
-          } else {
-            return Promise.resolve(value)
-          }
+          return this.replaceConfigPlaceholders(value, key).then((resolvedValue: any) => {
+            this.resolvedConfig = utils.setValueForKey(key, resolvedValue, this.resolvedConfig)
+            return resolvedValue
+          })
 
         } else {
           console.error(`Value for key (${key}) not found in config`)
@@ -153,7 +124,12 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
-  public async getConsulValue<T = any>(
+  /**
+   * Get a value from Consul, if it is configured.
+   *
+   * @param consulKey Key to look up
+   */
+  public async getRemoteValue<T = any>(
     consulKey: string,
   ): Promise<T> {
     const options: IConsulOptionMap = toConsulOptionMap(consulKey)
@@ -168,6 +144,10 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
+  /**
+   * Get a value from Vault,
+   * @param vaultKey Key to look up
+   */
   public async getSecretValue<T = any>(
     vaultKey: string,
   ): Promise<T> {
@@ -185,6 +165,133 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
+  private async getSecretPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
+    const vaultKey: string =
+      (typeof value === 'string') ? value : value.key
+
+    return this.getSecretValue(vaultKey).then((secretValue: any) => {
+      if (secretValue !== null) {
+        this.resolvedConfig = utils.setValueForKey(key, secretValue, this.resolvedConfig)
+        this.validateConfigSchema()
+        return secretValue
+
+      } else {
+        return Promise.reject(new DynamicConfigMissingKey(key))
+      }
+    }, (err: any) => {
+      console.log('vault error: ', err)
+      return Promise.reject(err)
+    })
+  }
+
+  private async getConsulPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
+    const consulKey: string = (
+      (typeof value === 'string') ?
+        value.replace('consul!/', '') :
+        value.key.replace('consul!/', '')
+    )
+
+    return this.getRemoteValue(consulKey).then((consulValue: any) => {
+      if (consulValue === null && typeof value !== 'string' && value.default !== undefined) {
+        return value.default
+
+      } else if (consulValue !== null) {
+        this.resolvedConfig = utils.setValueForKey(key, consulValue, this.resolvedConfig)
+        this.validateConfigSchema()
+        return consulValue
+
+      } else {
+        return Promise.reject(new DynamicConfigMissingKey(key))
+      }
+    }, (err: any) => {
+      if (typeof value !== 'string' && value.default !== undefined) {
+        return Promise.resolve(value.default)
+
+      } else {
+        return Promise.reject(err)
+      }
+    })
+  }
+
+  /**
+   * I personally think this is gross, a function that exists only to mutate one
+   * of its arguments. Shh, it's a private function. We'll keep it a secret.
+   */
+  private appendUpdatesForObject(
+    obj: any,
+    requestedKey: string,
+    path: Array<string>,
+    updates: Array<ObjectUpdate>,
+  ): void {
+    if (utils.isConsulKey(obj)) {
+      updates.push([ path, this.getConsulPlaceholder(obj, requestedKey) ])
+
+    } else if (utils.isSecretKey(obj)) {
+      updates.push([ path, this.getSecretPlaceholder(obj, requestedKey) ])
+
+    } else if (typeof obj === 'object') {
+      this.collectConfigPlaceholders(obj, requestedKey, path, updates)
+    }
+  }
+
+  private collectConfigPlaceholders(
+    obj: any,
+    requestedKey: string,
+    path: Array<string>,
+    updates: Array<ObjectUpdate>,
+  ): Array<ObjectUpdate> {
+    if (Array.isArray(obj)) {
+      for (let i = 0; i < obj.length; i++) {
+        const arrValue = obj[i]
+        const newPath: Array<string> = [ ...path, `${i}` ]
+        this.appendUpdatesForObject(arrValue, requestedKey, newPath, updates)
+      }
+
+      return updates
+
+    } else if (typeof obj === 'object') {
+      for (const objKey of Object.keys(obj)) {
+        const objValue = obj[objKey]
+        const newPath: Array<string> = [ ...path, objKey ]
+        this.appendUpdatesForObject(objValue, requestedKey, newPath, updates)
+      }
+
+      return updates
+
+    } else {
+      return []
+    }
+  }
+
+  /**
+   * When a config value is requested there is a chance that the value currently in the
+   * resolved config is a placeholder, or, in the more complex case, the requested value
+   * is an object that contains placeholders within nested keys. We need to find and resolve
+   * any placeholders that remain in the
+   */
+  private async replaceConfigPlaceholders(value: any, key: string): Promise<any> {
+    if (utils.isConsulKey(value)) {
+      return this.getConsulPlaceholder(value, key)
+
+    } else if (utils.isSecretKey(value)) {
+      return this.getSecretPlaceholder(value, key)
+
+    } else if (utils.isObject(value)) {
+      const unresolved: Array<ObjectUpdate> = this.collectConfigPlaceholders(value, key, [], [])
+      const paths: Array<string> = unresolved.map((next: ObjectUpdate) => next[0].join('.'))
+      const promises: Array<Promise<any>> = unresolved.map((next: ObjectUpdate) => next[1])
+      const resolvedPromises: Array<any> = await Promise.all(promises)
+      const newObj: object = resolvedPromises.reduce((acc: object, next: any, currentIndex: number) => {
+        return utils.setValueForKey(paths[currentIndex], next, acc)
+      }, value)
+
+      return utils.resolveObjectPromises(newObj)
+
+    } else {
+      return Promise.resolve(value)
+    }
+  }
+
   private async getConfig(): Promise<ConfigType> {
     if (this.resolvedConfig === undefined) {
       this.defaultConfig = await this.configLoader.loadDefault()
@@ -192,8 +299,6 @@ export class DynamicConfig<ConfigType = any> {
       this.consulConfig = await this.getConsulConfig()
       this.resolvedConfig = await utils.overlayObjects(this.defaultConfig, this.envConfig, this.consulConfig)
       this.configSchema = utils.objectAsSimpleSchema(this.defaultConfig)
-
-      this.validateConfigSchema()
     }
 
     return this.resolvedConfig

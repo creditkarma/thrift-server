@@ -6,6 +6,10 @@
 		"object-literal-sort-keys": false,
 		"no-console": false,
     "no-var-requires": false,
+    "variable-name": [true,
+      "check-format",
+      "allow-leading-underscore"
+    ],
     "array-type": [
       true,
       "generic"

@@ -6,6 +6,23 @@ export interface IConfigOptions {
   configEnv?: string
 }
 
+export interface IConfig {
+  [key: string]: {
+
+  }
+}
+
+export interface IConfigPlaceholder {
+  default?: any
+  key: string
+}
+
+export type ConfigPlaceholder =
+  IConfigPlaceholder | string
+
+export type ObjectUpdate =
+  [ Array<string>, Promise<any> ]
+
 export interface ISchemaMap {
   [key: string]: ISchema
 }
@@ -17,36 +34,30 @@ export type ISchema =
 export interface IArraySchema {
   type: 'array'
   items: ISchema
-  required?: boolean
 }
 
 export interface IObjectSchema {
   type: 'object'
   properties: ISchemaMap
-  required?: boolean
+  required?: Array<string>
 }
 
 export interface IStringSchema {
   type: 'string'
-  required?: boolean
 }
 
 export interface INumberSchema {
   type: 'number'
-  required?: boolean
 }
 
 export interface IBooleanSchema {
   type: 'boolean'
-  required?: boolean
 }
 
 export interface IAnySchema {
   type: 'any'
-  required?: boolean
 }
 
 export interface IUndefinedSchema {
   type: 'undefined'
-  required?: boolean
 }

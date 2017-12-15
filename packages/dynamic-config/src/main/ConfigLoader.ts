@@ -63,6 +63,9 @@ export class ConfigLoader<T = any> {
     this.configEnv = configEnv || process.env.NODE_ENV || DEFAULT_ENVIRONMENT
   }
 
+  /**
+   * Loads default JSON config file. This is required.
+   */
   public async loadDefault(): Promise<T> {
     return readFile(path.resolve(this.configPath, 'default.json')).then((content: string) => {
       return (parseContent(content) as any)
@@ -71,6 +74,9 @@ export class ConfigLoader<T = any> {
     })
   }
 
+  /**
+   * Loads JSON config file based on NODE_ENV.
+   */
   public async loadEnvironment(): Promise<T> {
     return readFile(path.resolve(this.configPath, `${this.configEnv}.json`)).then((content: string) => {
       return (parseContent(content) as any)
@@ -79,6 +85,9 @@ export class ConfigLoader<T = any> {
     })
   }
 
+  /**
+   * Returns the overlay of the default and environment local config.
+   */
   public async resolve(): Promise<T> {
     if (this.savedConfig !== undefined) {
       return Promise.resolve(this.savedConfig)
