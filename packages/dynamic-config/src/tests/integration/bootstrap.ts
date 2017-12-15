@@ -81,8 +81,8 @@ setTimeout(() => {
           tokenPath: './tmp/token',
         },
       }),
-      vaultClient.set('/secret/test-secret', 'this is a secret'),
-      vaultClient.set('/secret/password', 'K1ndaS3cr3t'),
+      vaultClient.set('test-secret', 'this is a secret'),
+      vaultClient.set('password', 'K1ndaS3cr3t'),
     ]).then((result: any) => {
       console.log('Done populating mock data')
     }, (failure: any) => {

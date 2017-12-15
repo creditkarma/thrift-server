@@ -287,7 +287,7 @@ Config placeholders can also be used for secret keys. To callout that a key shou
 }
 ```
 
-Our configured mount is default for Vault `secret`. Given that the password in our config will be resolved to the value loaded from `http://localhost:8200/secret/service-name/password`.
+Our configured mount is default for Vault `secret`. Given that, the password in our config will be resolved to the value loaded from `http://localhost:8200/secret/service-name/password`.
 
 Secret placeholders differ from Consul placeholders in that they do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
 
