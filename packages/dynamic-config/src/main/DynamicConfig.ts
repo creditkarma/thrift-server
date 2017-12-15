@@ -125,6 +125,20 @@ export class DynamicConfig<ConfigType = any> {
   }
 
   /**
+   * Looks up a key in the config. If the key cannot be found the default is returned.
+   *
+   * @param key The key to look up
+   * @param defaultVal The value to return if the get fails
+   */
+  public async getWithDefault<T = any>(key: string, defaultVal: T): Promise<T> {
+    return this.get(key).then((val: T) => {
+      return Promise.resolve(val)
+    }, (err: any) => {
+      return Promise.resolve(defaultVal)
+    })
+  }
+
+  /**
    * Get a value from Consul, if it is configured.
    *
    * @param consulKey Key to look up
@@ -165,6 +179,9 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
+  /**
+   * Given a ConfigPlaceholder attempt to find the value in Vault
+   */
   private async getSecretPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
     const vaultKey: string =
       (typeof value === 'string') ? value : value.key
@@ -179,11 +196,13 @@ export class DynamicConfig<ConfigType = any> {
         return Promise.reject(new DynamicConfigMissingKey(key))
       }
     }, (err: any) => {
-      console.log('vault error: ', err)
       return Promise.reject(err)
     })
   }
 
+  /**
+   * Given a ConfigPlaceholder attempt to find the value in Consul
+   */
   private async getConsulPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
     const consulKey: string = (
       (typeof value === 'string') ?

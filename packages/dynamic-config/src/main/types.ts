@@ -6,12 +6,6 @@ export interface IConfigOptions {
   configEnv?: string
 }
 
-export interface IConfig {
-  [key: string]: {
-
-  }
-}
-
 export interface IConfigPlaceholder {
   default?: any
   key: string

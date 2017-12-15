@@ -38,11 +38,25 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
+You can also assign a default value in the event that the key cannot be found.
+
+```typescript
+import { getConfig } from '@creditkarma/dynamic-config'
+
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await getConfig().getWithDefault<string>('hostName', 'localhost')
+  const port: number = await getConfig().getWithDefault<number>('port', 8080)
+  return new Client(host, port)
+}
+```
+
 ## Local Configs
 
 DynamicConfig supports local config in the form of JSON files, remote configuration stored in Consul and secret config values stored in Vault. The usage of Consul and Vault are optional. If these are not configured only local configuration files will be used.
 
-Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`.
+Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config` and `dist/config`. Alternative config locations can be set.
+
+Currently, DynamicConfig only support confing in form of JSON. Support for JS/TS files will be added.
 
 ### Default Configuration
 
@@ -55,6 +69,7 @@ Overwriting the default values is done by adding additional files corresponding 
 The path to the config files is configurable when instantiating the DynamicConfig object. The option can either be an absolute path or a path relative to `process.cwd()`. The option can be defined both when constructing an instance or through an environment variable.
 
 In TypeScript:
+
 ```typescript
 const dynamicConfig: DynamicConfig = new DynamicConfig({
   configPath: path.resolve(__dirname, './config'),
@@ -62,6 +77,7 @@ const dynamicConfig: DynamicConfig = new DynamicConfig({
 ```
 
 Through environment:
+
 ```sh
 $ export CONFIG_PATH=config
 ```
@@ -77,6 +93,7 @@ Remote configuration from Consul is given a higher priority than local configura
 You define what configs to load from Consul through the `CONSUL_KEYS` option. This option can be set when constructing an instance or through an environment variable for the singleton instance. The values loaded with these keys are expected to be valid JSON objects.
 
 In TypeScript:
+
 ```typescript
 const dynamicConfig: DynamicConfig = new DynamicConfig({
   consulKeys: 'production-config,production-east-config',
@@ -84,6 +101,7 @@ const dynamicConfig: DynamicConfig = new DynamicConfig({
 ```
 
 Through environment:
+
 ```sh
 $ export CONSUL_KEYS=production-config,production-east-config
 ```
@@ -132,6 +150,8 @@ The resulting config my app would use is:
   }
 }
 ```
+
+Config objects from all sources are deeply merged.
 
 #### Config Placeholders
 
@@ -264,7 +284,7 @@ Config placeholders can also be used for secret keys. To callout that a key shou
 }
 ```
 
-Secrets do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
+Secret placeholders differ from Consul placeholders in that they do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
 
 ## Contributing
 
