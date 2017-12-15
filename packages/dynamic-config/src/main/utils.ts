@@ -352,11 +352,11 @@ export function isSecretKey(obj: any): obj is ConfigPlaceholder {
   return (
     (
       typeof obj === 'string' &&
-      obj.startsWith('/secret')
+      obj.startsWith('vault!')
     ) ||
     (
       isConfigPlaceholder(obj) &&
-      obj.key.startsWith('/secret')
+      obj.key.startsWith('vault!')
     )
   )
 }

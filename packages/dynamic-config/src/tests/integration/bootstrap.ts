@@ -72,11 +72,12 @@ setTimeout(() => {
       consulClient.set({ path: 'password' }, 'Sup3rS3cr3t'),
       consulClient.set({ path: 'with-vault' }, {
         database: {
-          password: '/secret/password',
+          password: 'vault!/password',
         },
         'hashicorp-vault': {
           apiVersion: 'v1',
           destination: 'http://localhost:8210',
+          mount: 'secret',
           tokenPath: './tmp/token',
         },
       }),

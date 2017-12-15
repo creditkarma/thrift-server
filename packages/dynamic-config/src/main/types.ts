@@ -6,6 +6,15 @@ export interface IConfigOptions {
   configEnv?: string
 }
 
+export interface IConfigValue {
+  source: 'local' | 'consul' | 'secret'
+  value: string | number | boolean | IConfigValue
+}
+
+export interface IConfig {
+  [key: string]: IConfigValue
+}
+
 export interface IConfigPlaceholder {
   default?: any
   key: string

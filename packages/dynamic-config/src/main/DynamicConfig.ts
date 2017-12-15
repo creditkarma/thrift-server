@@ -125,6 +125,13 @@ export class DynamicConfig<ConfigType = any> {
   }
 
   /**
+   * Get n number of keys from the config and return a Promise of an Array of those values.
+   */
+  public async getAll(...args: Array<string>): Promise<Array<any>> {
+    return Promise.all(args.map((key: string) => this.get(key)))
+  }
+
+  /**
    * Looks up a key in the config. If the key cannot be found the default is returned.
    *
    * @param key The key to look up
@@ -183,8 +190,12 @@ export class DynamicConfig<ConfigType = any> {
    * Given a ConfigPlaceholder attempt to find the value in Vault
    */
   private async getSecretPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
-    const vaultKey: string =
-      (typeof value === 'string') ? value : value.key
+
+    const vaultKey: string = (
+      (typeof value === 'string') ?
+        value.replace('vault!/', '') :
+        value.key.replace('vault!/', '')
+    )
 
     return this.getSecretValue(vaultKey).then((secretValue: any) => {
       if (secretValue !== null) {

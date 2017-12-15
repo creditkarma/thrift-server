@@ -36,7 +36,7 @@ describe('SyncConifg', () => {
         const expected = {
           database: {
             username: 'testUser',
-            password: '/secret/password',
+            password: 'vault!/password',
           },
           project: {
             health: {
@@ -47,6 +47,7 @@ describe('SyncConifg', () => {
           'hashicorp-vault': {
             apiVersion: 'v1',
             destination: 'http://localhost:8210',
+            mount: 'secret',
             tokenPath: './tmp/token',
           },
         }
@@ -82,7 +83,7 @@ describe('SyncConifg', () => {
 
     describe('getSecretValue', () => {
       it('should get secret value from Vault', (done) => {
-        syncConfig.getSecretValue<string>('/secret/test-secret').then((actual: string) => {
+        syncConfig.getSecretValue<string>('test-secret').then((actual: string) => {
           expect(actual).to.equal('this is a secret')
           done()
         }, (err: any) => {
@@ -92,7 +93,7 @@ describe('SyncConifg', () => {
       })
 
       it('should reject for a missing secret', (done) => {
-        syncConfig.getSecretValue<string>('/secret/missing-secret').then((actual: string) => {
+        syncConfig.getSecretValue<string>('missing-secret').then((actual: string) => {
           done(new Error('Should reject for missing secret'))
         }, (err: any) => {
           expect(err.message).to.equal(
@@ -162,11 +163,11 @@ describe('SyncConifg', () => {
 
     describe('getSecretValue', () => {
       it('should reject when Vault not configured', (done) => {
-        syncConfig.getSecretValue<string>('/secret/test-secret').then((actual: string) => {
+        syncConfig.getSecretValue<string>('test-secret').then((actual: string) => {
           done(new Error('Should reject when Vault not configured'))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Unable to retrieve key: /secret/test-secret. Hashicorp Vault is not configured',
+            'Unable to retrieve key: test-secret. Hashicorp Vault is not configured',
           )
           done()
         }).catch(done)
@@ -209,11 +210,11 @@ describe('SyncConifg', () => {
 
     describe('getSecretValue', () => {
       it('should reject when Vault not configured', (done) => {
-        syncConfig.getSecretValue<string>('/secret/test-secret').then((actual: string) => {
+        syncConfig.getSecretValue<string>('test-secret').then((actual: string) => {
           done(new Error('Should reject when Vault not configured'))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Unable to retrieve key: /secret/test-secret. Hashicorp Vault is not configured',
+            'Unable to retrieve key: test-secret. Hashicorp Vault is not configured',
           )
           done()
         }).catch(done)

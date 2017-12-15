@@ -18,7 +18,8 @@ describe('VaultClient', () => {
   const mockConfig: IHVConfig = {
     apiVersion: 'v1',
     destination: 'http://localhost:8200',
-    namespace: 'secret',
+    mount: 'secret',
+    namespace: '',
     tokenPath: '/tmp/token',
     requestOptions: {}
   }

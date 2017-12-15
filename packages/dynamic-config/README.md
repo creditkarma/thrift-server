@@ -253,7 +253,8 @@ The configuration must conform to what is expected from [@creditkarma/vault-clie
 "hashicorp-vault": {
   "apiVersion": "v1",
   "destination": "http://localhost:8200",
-  "namespace": "secret",
+  "mount": "secret",
+  "namespace": "",
   "tokenPath": "./tmp/token",
   "requestOptions": {}
 }
@@ -263,26 +264,30 @@ The configuration must conform to what is expected from [@creditkarma/vault-clie
 
 Getting a secret from Vault is similar to getting a value from local config or Consul.
 
+Based on the configuration the following code will try to load a secret from `http://localhost:8200/secret/username`.
+
 ```typescript
-client.getSecretValue<string>('/secret/username').then((val: string) => {
+client.getSecretValue<string>('username').then((val: string) => {
   // Do something with secret value
 })
 ```
 
 #### Config Placeholders
 
-Config placeholders can also be used for secret keys. To callout that a key should be fetched from Vault the config placeholder must begin with `/secret`.
+Config placeholders can also be used for secret keys. To callout that a key should be fetched from Vault the config placeholder must begin with `vault!`.
 
 ```json
 {
   "database": {
     "username": "root",
     "password": {
-      "key": "/secret/service-name/password"
+      "key": "vault!/service-name/password"
     }
   }
 }
 ```
+
+Our configured mount is default for Vault `secret`. Given that the password in our config will be resolved to the value loaded from `http://localhost:8200/secret/service-name/password`.
 
 Secret placeholders differ from Consul placeholders in that they do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
 

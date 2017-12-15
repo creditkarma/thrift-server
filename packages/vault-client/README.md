@@ -23,6 +23,7 @@ VaultClient expects the access token for Vault to be available in a local file. 
 Available options:
 * apiVersion - API version to use. Currently this can only be 'v1'.
 * destination - The location of the Vault instance. Defaults to 'http://localhost:8200'.
+* mount - The mount at which secrets can be found. Defaults to 'secret'.
 * namespace - A namespace for secrets. This path will be prepended to all get/set requests. Defaults to ''.
 * tokenPath - The local file path to a file containing the Vault token. Defaults to '/tmp/token'.
 * requestOptions - Options passed to the underlying [Request library](https://github.com/request/request). The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods. This will be used to set up TLS.
@@ -47,7 +48,8 @@ import { IHVConfig, VaultClient } from '@creditkarma/vault-client'
 const options: IHVConfig = {
   apiVersion: 'v1',
   destination: 'http://localhost:8200',
-  namespace: 'secret',
+  mount: 'secret',
+  namespace: '',
   tokenPath: '/tmp/token',
   requestOptions: {
     headers: {
