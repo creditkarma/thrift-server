@@ -56,7 +56,6 @@ describe('DynamicConfig', () => {
 
       it('should return the value from Consul if available', (done) => {
         dynamicConfig.get<string>('database.username').then((actual: string) => {
-          console.log('actual: ', actual)
           expect(actual).to.equal('testUser')
           done()
         }, (err: any) => {

@@ -2,7 +2,7 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 import * as path from 'path'
 
-import { SyncConfig } from '../../main/'
+import { SyncConfig } from '../../main/SyncConfig'
 
 export const lab = Lab.script()
 
