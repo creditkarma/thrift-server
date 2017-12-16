@@ -12,16 +12,16 @@ $ npm install @creditkarma/dynamic-config
 
 ## Usage
 
-The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `getConfig`. Subsequent calls to this method will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
+The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `config`. Subsequent calls to this function will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
 
 When requesting a value from config a Promise of the expected result is returned. If the value is found the Promise is resolved. If the value is not found, either because it is missing or some other error, the Promise is rejected.
 
 ```typescript
-import { getConfig } from '@creditkarma/dynamic-config'
+import { config } from '@creditkarma/dynamic-config'
 
 export async function createHttpClient(): Promise<Client> {
-  const host: string = await getConfig().get<string>('hostName')
-  const port: number = await getConfig().get<number>('port')
+  const host: string = await config().get<string>('hostName')
+  const port: number = await config().get<number>('port')
   return new Client(host, port)
 }
 ```
@@ -43,12 +43,24 @@ export async function createHttpClient(): Promise<Client> {
 You can also assign a default value in the event that the key cannot be found.
 
 ```typescript
-import { getConfig } from '@creditkarma/dynamic-config'
+import { config } from '@creditkarma/dynamic-config'
 
 export async function createHttpClient(): Promise<Client> {
-  const host: string = await getConfig().getWithDefault<string>('hostName', 'localhost')
-  const port: number = await getConfig().getWithDefault<number>('port', 8080)
+  const host: string = await config().getWithDefault<string>('hostName', 'localhost')
+  const port: number = await config().getWithDefault<number>('port', 8080)
   return new Client(host, port)
+}
+```
+
+Additionally, you can batch get config values. The promise here will only resolve if all of the keys can be retrieved.
+
+```typescript
+import { config } from '@creditkarma/dynamic-config'
+
+export async function createHttpClient(): Promise<Client> {
+  return config().getAll('hostName', 'port').then(([ host, port ]) => {
+    return new Client(host, port)
+  })
 }
 ```
 
@@ -71,8 +83,10 @@ The path to the config files is configurable when instantiating the DynamicConfi
 In TypeScript:
 
 ```typescript
+import { DynamicConfig } from '@creditkarma/dynamic-config'
+
 const dynamicConfig: DynamicConfig = new DynamicConfig({
-  configPath: path.resolve(__dirname, './config'),
+  configPath: './config',
 })
 ```
 

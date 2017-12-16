@@ -2,7 +2,7 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 import * as path from 'path'
 
-import { DynamicConfig, getConfig } from '../../main/'
+import { config } from '../../main/'
 
 import {
   CONFIG_PATH,
@@ -19,8 +19,6 @@ const before = lab.before
 const after = lab.after
 
 describe('DynamicConfig Singleton', () => {
-  let config: DynamicConfig
-
   before((done) => {
     process.chdir(__dirname)
 
@@ -30,8 +28,6 @@ describe('DynamicConfig Singleton', () => {
     process.env[CONSUL_KV_DC] = 'dc1'
     process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
 
-    // Get our config singleton
-    config = getConfig()
     done()
   })
 
@@ -46,7 +42,7 @@ describe('DynamicConfig Singleton', () => {
 
   describe('get', () => {
     it('should return the value from Consul if available', (done) => {
-      config.get<string>('database.username').then((val: string) => {
+      config().get<string>('database.username').then((val: string) => {
         expect(val).to.equal('testUser')
         done()
       }, (err: any) => {
@@ -56,7 +52,7 @@ describe('DynamicConfig Singleton', () => {
     })
 
     it('should fallback to returning from local config', (done) => {
-      config.get<object>('project.health').then((val: object) => {
+      config().get<object>('project.health').then((val: object) => {
         expect(val).to.equal({
           control: '/control',
           response: 'PASS',
@@ -70,7 +66,7 @@ describe('DynamicConfig Singleton', () => {
     })
 
     it('should reject for a missing key', (done) => {
-      config.get<object>('fake.path').then((val: object) => {
+      config().get<object>('fake.path').then((val: object) => {
         done(new Error('Should reject for missing key'))
       }, (err: any) => {
         expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
@@ -81,7 +77,7 @@ describe('DynamicConfig Singleton', () => {
 
   describe('getSecretValue', () => {
     it('should get secret value from Vault', (done) => {
-      config.getSecretValue<string>('test-secret').then((val: string) => {
+      config().getSecretValue<string>('test-secret').then((val: string) => {
         expect(val).to.equal('this is a secret')
         done()
       }, (err: any) => {
@@ -91,7 +87,7 @@ describe('DynamicConfig Singleton', () => {
     })
 
     it('should reject for a missing secret', (done) => {
-      config.getSecretValue<string>('missing-secret').then((val: string) => {
+      config().getSecretValue<string>('missing-secret').then((val: string) => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
         expect(err.message).to.equal(

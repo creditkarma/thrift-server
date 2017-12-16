@@ -98,6 +98,40 @@ describe('DynamicConfig', () => {
       })
     })
 
+    describe('getAll', () => {
+      it('should resolve with all requested config values', (done) => {
+        dynamicConfig.getAll('database.username', 'database.password').then((actual: any) => {
+          expect(actual).to.equal([ 'testUser', 'K1ndaS3cr3t' ])
+          done()
+        })
+      })
+
+      it('should reject if one of the values is missing', (done) => {
+        dynamicConfig.getAll('database.username', 'database.fake').then((val: any) => {
+          done(new Error('Promise should reject'))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unable to retrieve value for key: database.fake')
+          done()
+        })
+      })
+    })
+
+    describe('getWithDefault', () => {
+      it('should resolve with with value if found', (done) => {
+        dynamicConfig.getWithDefault('database.username', 'defaultUser').then((actual: any) => {
+          expect(actual).to.equal('testUser')
+          done()
+        })
+      })
+
+      it('should resolve with with default if value not found', (done) => {
+        dynamicConfig.getWithDefault('database.fake', 'defaultResponse').then((actual: any) => {
+          expect(actual).to.equal('defaultResponse')
+          done()
+        })
+      })
+    })
+
     describe('getSecretValue', () => {
       it('should get secret value from Vault', (done) => {
         dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {

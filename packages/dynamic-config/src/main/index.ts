@@ -11,7 +11,7 @@ export * from './types'
 let configInstance: DynamicConfig
 // let syncInstance: SyncConfig
 
-export function getConfig(options: IConfigOptions = {}): DynamicConfig {
+export function config(options: IConfigOptions = {}): DynamicConfig {
   if (configInstance === undefined) {
     configInstance = new DynamicConfig(options)
   }
