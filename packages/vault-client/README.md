@@ -28,6 +28,12 @@ Available options:
 * tokenPath - The local file path to a file containing the Vault token. Defaults to '/tmp/token'.
 * requestOptions - Options passed to the underlying [Request library](https://github.com/request/request). The options can be overriden on a per-request basis by passing an optional final parameter to any of the service or client methods. This will be used to set up TLS.
 
+#### Mount vs Namespace
+
+The mount is the underlying Vault path at which secrets are stored. By default this is `secret`. So all of your secrets would be stored at an address like: `http://localhost:8200/secret/<key>`. This can be configured differently per Vault instance.
+
+The namespace is an addition on this path to organize your secrets. Your service may share a Vault instance with other services. The namespace could then be your service name. All your secrets would be stored at: `http://localhost;8200/secret/<namespace>/<key>`.
+
 #### Data Formatting
 
 When a secret is written to Vault the value you set will be wrapped in an object of this form:

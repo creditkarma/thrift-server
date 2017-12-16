@@ -2,6 +2,8 @@
 
 A dynamic configuration library for Node.js written in TypeScript and backed by Hashicorp Consul and Vault.
 
+DynamicConfig supports local config in the form of JSON files, remote configuration stored in Consul and secret config values stored in Vault. The usage of Consul and Vault are optional. If these are not configured only local configuration files will be used. At least one local configuration file (`default.json`) is required.
+
 ## Install
 
 ```sh
@@ -52,11 +54,9 @@ export async function createHttpClient(): Promise<Client> {
 
 ## Local Configs
 
-DynamicConfig supports local config in the form of JSON files, remote configuration stored in Consul and secret config values stored in Vault. The usage of Consul and Vault are optional. If these are not configured only local configuration files will be used.
+Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
 
-Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config` and `dist/config`. Alternative config locations can be set.
-
-Currently, DynamicConfig only support confing in form of JSON. Support for JS/TS files will be added.
+Currently, DynamicConfig only support confing in the form of JSON. Support for JS/TS files will be added.
 
 ### Default Configuration
 
@@ -290,6 +290,13 @@ Config placeholders can also be used for secret keys. To callout that a key shou
 Our configured mount is default for Vault `secret`. Given that, the password in our config will be resolved to the value loaded from `http://localhost:8200/secret/service-name/password`.
 
 Secret placeholders differ from Consul placeholders in that they do not support default values. If the given key cannot be fetched from Vault an exception will be raised.
+
+### Roadmap
+
+* Add ability to watch a value for runtime changes
+* Support `.js` and `.ts` local config files
+* Add the ability to register remote mounts to resolve config placeholders
+* Explore options for providing a synchronous API
 
 ## Contributing
 

@@ -6,8 +6,13 @@ export interface IConfigOptions {
   configEnv?: string
 }
 
+export type SourceType =
+  'local' | 'remote' | 'secret'
+
 export interface IConfigValue {
-  source: 'local' | 'consul' | 'secret'
+  source: SourceType
+  resolved: boolean
+  timestamp: number
   value: string | number | boolean | IConfigValue
 }
 
