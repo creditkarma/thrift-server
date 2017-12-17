@@ -6,6 +6,12 @@ import {
   ObjectUpdate,
 } from './types'
 
+import {
+  Just,
+  Maybe,
+  Nothing,
+} from './Maybe'
+
 export function isPrimitive(obj: any): boolean {
   return (
     typeof obj === 'number' ||
@@ -180,7 +186,7 @@ export function arraysAreEqual(arr1: Array<any>, arr2: Array<any>): boolean {
   return true
 }
 
-export function findSchemaForKey(schema: ISchema, key: string): ISchema {
+export function findSchemaForKey(schema: ISchema, key: string): Maybe<ISchema> {
   const [ head, ...tail ]: Array<string> =
     key.split('.').filter((next: string) => next.trim() !== '')
 
@@ -188,10 +194,10 @@ export function findSchemaForKey(schema: ISchema, key: string): ISchema {
     return findSchemaForKey(schema.properties[head], tail.join('.'))
 
   } else if (schema.type === 'object' && schema.properties[head] !== undefined) {
-    return schema.properties[head]
+    return new Just(schema.properties[head])
 
   } else {
-    throw new Error(`No schema for: ${head}`)
+    return new Nothing()
   }
 }
 

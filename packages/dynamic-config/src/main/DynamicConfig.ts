@@ -30,6 +30,7 @@ import * as utils from './utils'
 import {
   ConsulFailed,
   ConsulNotConfigured,
+  DynamicConfigInvalidObject,
   DynamicConfigMissingKey,
   HVFailed,
   HVNotConfigured,
@@ -42,13 +43,13 @@ import {
   ObjectUpdate,
 } from './types'
 
-interface IConsulOptionMap {
+export interface IConsulOptionMap {
   key: string
   [name: string]: string
 }
 
-function toConsulOptionMap(str: string): IConsulOptionMap {
-  const temp = str.replace('!consul/', '')
+export function toConsulOptionMap(str: string): IConsulOptionMap {
+  const temp = str.replace('consul!/', '')
   const parts = temp.split('?')
   const result: IConsulOptionMap = {
     key: parts[0],
@@ -66,6 +67,13 @@ function toConsulOptionMap(str: string): IConsulOptionMap {
   return result
 }
 
+export interface IConfigResolver {
+  type: 'remote' | 'secret'
+  name: string
+  init(config: DynamicConfig): void
+  get<T>(key: string): T
+}
+
 export class DynamicConfig<ConfigType = any> {
   private configLoader: ConfigLoader
   private vaultClient: Promise<Maybe<VaultClient>>
@@ -80,6 +88,8 @@ export class DynamicConfig<ConfigType = any> {
   private consulConfig: Partial<ConfigType>
   private resolvedConfig: ConfigType
 
+  private resolvers: Array<IConfigResolver>
+
   constructor({
     consulAddress = process.env[CONSUL_ADDRESS],
     consulKvDc = process.env[CONSUL_KV_DC],
@@ -91,8 +101,11 @@ export class DynamicConfig<ConfigType = any> {
     this.consulKvDc = Maybe.fromNullable(consulKvDc)
     this.consulKeys = Maybe.fromNullable(consulKeys)
     this.configLoader = new ConfigLoader({ configPath, configEnv })
-    this.consulClient = this.getConsulClient()
-    this.vaultClient = this.getVaultClient()
+    this.resolvers = []
+  }
+
+  public register(resolver: IConfigResolver): void {
+    this.resolvers.push(resolver)
   }
 
   /**
@@ -112,12 +125,22 @@ export class DynamicConfig<ConfigType = any> {
         // If the value is a thing we need to resolve any placeholders
         if (value !== null) {
           return this.replaceConfigPlaceholders(value, key).then((resolvedValue: any) => {
-            this.resolvedConfig = utils.setValueForKey(key, resolvedValue, this.resolvedConfig)
-            return resolvedValue
+            return utils.findSchemaForKey(this.configSchema, key).fork((schemaForKey: ISchema) => {
+              if (utils.objectMatchesSchema(schemaForKey, resolvedValue)) {
+                this.resolvedConfig = utils.setValueForKey(key, resolvedValue, this.resolvedConfig)
+                return resolvedValue
+              } else {
+                console.error(`Value for key '${key}' does not match expected schema`)
+                return Promise.reject(new DynamicConfigInvalidObject(key))
+              }
+            }, () => {
+              console.warn(`Unable to find schema for key: ${key}. Object may be invalid.`)
+              return Promise.resolve(resolvedValue)
+            })
           })
 
         } else {
-          console.error(`Value for key (${key}) not found in config`)
+          console.error(`Value for key '${key}' not found in config`)
           return Promise.reject(new DynamicConfigMissingKey(key))
         }
       }
@@ -154,7 +177,7 @@ export class DynamicConfig<ConfigType = any> {
     consulKey: string,
   ): Promise<T> {
     const options: IConsulOptionMap = toConsulOptionMap(consulKey)
-    return this.consulClient.fork((client: KvStore) => {
+    return this.getConsulClient().fork((client: KvStore) => {
       return client.get({ path: options.key, dc: options.dc }).then((val: any) => {
         return val
       }, (err: any) => {
@@ -172,16 +195,16 @@ export class DynamicConfig<ConfigType = any> {
   public async getSecretValue<T = any>(
     vaultKey: string,
   ): Promise<T> {
-    const maybeClient = await this.vaultClient
+    const maybeClient = await this.getVaultClient()
     return maybeClient.fork((client: VaultClient) => {
       return client.get<T>(vaultKey).then((value: T) => {
         return Promise.resolve(value)
       }, (err: any) => {
-        console.error(`Error retrieving key (${vaultKey}) from Vault: `, err)
+        console.error(`Error retrieving key '${vaultKey}' from Vault: `, err)
         return Promise.reject(new HVFailed(err.message))
       })
     }, () => {
-      console.error(`Unable to get ${vaultKey}. Vault is not configured.`)
+      console.error(`Unable to get key '${vaultKey}'. Vault is not configured.`)
       return Promise.reject(new HVNotConfigured(vaultKey))
     })
   }
@@ -190,7 +213,6 @@ export class DynamicConfig<ConfigType = any> {
    * Given a ConfigPlaceholder attempt to find the value in Vault
    */
   private async getSecretPlaceholder(value: ConfigPlaceholder, key: string): Promise<any> {
-
     const vaultKey: string = (
       (typeof value === 'string') ?
         value.replace('vault!/', '') :
@@ -341,7 +363,7 @@ export class DynamicConfig<ConfigType = any> {
       this.vaultClient = this.get<IHVConfig>(HVAULT_CONFIG_KEY).then((vaultConfig: IHVConfig) => {
         return Promise.resolve(new Just(new VaultClient(vaultConfig)))
       }, (err: any) => {
-        console.log(`Vault is not configured`)
+        console.log(`Unable to find valid configuration for Vault`)
         return Promise.resolve(new Nothing<VaultClient>())
       }).catch((err: any) => {
         console.error(`Error creating VaultClient: `, err)
@@ -370,12 +392,12 @@ export class DynamicConfig<ConfigType = any> {
     }
   }
 
-  private async getConsulConfig(
-    consulKeys: Maybe<string> = this.consulKeys,
-    consulKvDc: Maybe<string> = this.consulKvDc,
-    consulClient: Maybe<KvStore> = this.consulClient,
-  ): Promise<any> {
-    return Maybe.all(consulKeys, consulClient, consulKvDc).fork(([ keys, client, dc ]) => {
+  private async getConsulConfig(): Promise<any> {
+    return Maybe.all(
+      this.consulKeys,
+      this.getConsulClient(),
+      this.consulKvDc,
+    ).fork(([ keys, client, dc ]) => {
       const rawConfigs: Promise<Array<any>> =
         Promise.all(keys.split(',').map((key: string) => {
           return client.get({ path: key, dc })

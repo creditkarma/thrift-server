@@ -338,7 +338,7 @@ describe('Utils', () => {
         required: [ 'name', 'age', 'location' ],
       }
 
-      expect(actual).to.equal(expected)
+      expect(actual.get()).to.equal(expected)
       done()
     })
 
@@ -369,7 +369,7 @@ describe('Utils', () => {
         },
       }
 
-      expect(actual).to.equal(expected)
+      expect(actual.get()).to.equal(expected)
       done()
     })
   })

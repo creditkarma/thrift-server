@@ -3,7 +3,7 @@ import { DynamicConfig } from './DynamicConfig'
 import { IConfigOptions } from './types'
 
 export * from './ConfigLoader'
-export * from './DynamicConfig'
+export { DynamicConfig } from './DynamicConfig'
 // export * from './SyncConfig'
 export * from './constants'
 export * from './types'

@@ -4,6 +4,12 @@ export class DynamicConfigMissingKey extends Error {
   }
 }
 
+export class DynamicConfigInvalidObject extends Error {
+  constructor(key: string) {
+    super(`Object for does not match expected schema for: ${key}`)
+  }
+}
+
 export class HVNotConfigured extends Error {
   constructor(key: string) {
     super(`Unable to retrieve key: ${key}. Hashicorp Vault is not configured`)
