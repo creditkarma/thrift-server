@@ -92,7 +92,7 @@ describe('DynamicConfig', () => {
         dynamicConfig.get<object>('fake.path').then((actual: object) => {
           done(new Error('Should reject for missing key'))
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key: fake.path')
           done()
         }).catch(done)
       })
@@ -110,7 +110,7 @@ describe('DynamicConfig', () => {
         dynamicConfig.getAll('database.username', 'database.fake').then((val: any) => {
           done(new Error('Promise should reject'))
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to retrieve value for key: database.fake')
+          expect(err.message).to.equal('Unable to find value for key: database.fake')
           done()
         })
       })
@@ -246,7 +246,7 @@ describe('DynamicConfig', () => {
         dynamicConfig.get<object>('fake.path').then((actual: object) => {
           done(new Error('Should reject for missing key'))
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key: fake.path')
           done()
         }).catch(done)
       })
@@ -347,7 +347,7 @@ describe('DynamicConfig', () => {
         dynamicConfig.get<object>('fake.path').then((actual: object) => {
           done(new Error('Should reject for missing key'))
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key: fake.path')
           done()
         }).catch(done)
       })

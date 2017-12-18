@@ -47,7 +47,7 @@ export class SyncConfig<ConfigType = any> {
       if (value !== null) {
         return value
       } else {
-        console.error(`Value for key (${key}) not found in config`)
+        console.error(`Value for key '${key}' not found in config`)
         return null
       }
     }

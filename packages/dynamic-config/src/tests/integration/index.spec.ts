@@ -69,7 +69,7 @@ describe('DynamicConfig Singleton', () => {
       config().get<object>('fake.path').then((val: object) => {
         done(new Error('Should reject for missing key'))
       }, (err: any) => {
-        expect(err.message).to.equal('Unable to retrieve value for key: fake.path')
+        expect(err.message).to.equal('Unable to find value for key: fake.path')
         done()
       }).catch(done)
     })
