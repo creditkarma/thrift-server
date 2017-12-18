@@ -45,7 +45,8 @@ export function deepMerge(...args: Array<any>): any {
   }, {})
 }
 
-export function cleanSecret(...parts: Array<string>): string {
+export function resolveSecretPath(mount: string, namespace: string, key: string): string
+export function resolveSecretPath(...parts: Array<string>): string {
   return path.join(...parts.map(removeLeadingTrailingSlash))
 }
 
@@ -66,6 +67,7 @@ export function removeLeadingTrailingSlash(str: string): string {
 export const DEFAULT_CONFIG: IHVConfig = {
   apiVersion: 'v1',
   destination: 'http://localhost:8200',
+  mount: '/secret',
   namespace: '',
   tokenPath: '/tmp/token',
   requestOptions: {},

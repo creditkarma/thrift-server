@@ -9,7 +9,7 @@
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap --hoist",
     "prebootstrap": "npm install",
-    "pretest": "lerna exec -- npm run build",
+    "pretest": "npm run build",
     "test": "lerna exec -- npm run test",
     "release:patch": "lerna publish --cd-version patch --skip-npm --yes --force-publish=*&& npm run release:push",
     "release:minor": "lerna publish --cd-version minor --skip-npm --yes --force-publish=*&& npm run release:push",

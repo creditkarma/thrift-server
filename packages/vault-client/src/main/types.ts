@@ -2,14 +2,15 @@ import { CoreOptions } from 'request'
 
 export interface IServiceConfig {
   apiVersion: 'v1'
-  destination: string,
+  destination: string
   requestOptions: CoreOptions
 }
 
 export interface IHVConfig {
   apiVersion: 'v1'
-  destination: string,
+  destination: string
   requestOptions: CoreOptions
+  mount: string
   namespace: string
   tokenPath: string
 }

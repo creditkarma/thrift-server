@@ -63,6 +63,7 @@ describe('Utils', () => {
       const expected: IHVConfig = {
         apiVersion: 'v1',
         destination: 'localhost:8000',
+        mount: '/secret',
         namespace: 'path',
         tokenPath: '/tmp/token',
         requestOptions: {
@@ -78,42 +79,46 @@ describe('Utils', () => {
     })
   })
 
-  describe('cleanSecret', () => {
+  describe('resolveSecretPath', () => {
     it('should correctly join a secret path', (done) => {
+      const mount: string = 'secret'
       const namespace: string = 'what'
-      const secret: string = '/secret/key'
-      const actual: string = Utils.cleanSecret(namespace, secret)
-      const expected: string = 'what/secret/key'
+      const secret: string = 'key'
+      const actual: string = Utils.resolveSecretPath(mount, namespace, secret)
+      const expected: string = 'secret/what/key'
 
       expect(actual).to.equal(expected)
       done()
     })
 
     it('should correctly handle extra slashes', (done) => {
-      const namespace: string = 'what/'
-      const secret: string = '/secret/key'
-      const actual: string = Utils.cleanSecret(namespace, secret)
-      const expected: string = 'what/secret/key'
+      const mount: string = 'secret/'
+      const namespace: string = '/what/'
+      const secret: string = '/key'
+      const actual: string = Utils.resolveSecretPath(mount, namespace, secret)
+      const expected: string = 'secret/what/key'
 
       expect(actual).to.equal(expected)
       done()
     })
 
     it('should remove leading slash', (done) => {
+      const mount: string = '/secret/'
       const namespace: string = '/what/'
-      const secret: string = '/secret/key'
-      const actual: string = Utils.cleanSecret(namespace, secret)
-      const expected: string = 'what/secret/key'
+      const secret: string = '/key'
+      const actual: string = Utils.resolveSecretPath(mount, namespace, secret)
+      const expected: string = 'secret/what/key'
 
       expect(actual).to.equal(expected)
       done()
     })
 
     it('should remove trailing slash', (done) => {
+      const mount: string = '/secret/'
       const namespace: string = '/what/'
-      const secret: string = '/secret/key/'
-      const actual: string = Utils.cleanSecret(namespace, secret)
-      const expected: string = 'what/secret/key'
+      const secret: string = '/key/'
+      const actual: string = Utils.resolveSecretPath(mount, namespace, secret)
+      const expected: string = 'secret/what/key'
 
       expect(actual).to.equal(expected)
       done()

@@ -1,0 +1,40 @@
+{
+  "name": "@creditkarma/dynamic-config",
+  "version": "0.0.0",
+  "description": "Dynamic Config for Node.js backed by Consul and Vault",
+  "main": "dist/main/index.js",
+  "types": "dist/main/index.d.ts",
+  "files": [
+    "dist/main"
+  ],
+  "scripts": {
+    "clean": "rimraf dist/",
+    "lint": "tslint --fix './src/**/*.ts'",
+    "build": "npm run clean && npm run lint && tsc",
+    "docker": "docker-compose up --force-recreate &",
+    "docker:kill": "docker-compose kill",
+    "pretest": "npm run build && npm run docker",
+    "posttest": "npm run docker:kill",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "lab --timeout 10000 --verbose -l -S ./dist/tests/unit/*.spec.js",
+    "pretest:integration": "cp -r ./src/tests/integration/config ./dist/tests/integration/config",
+    "test:integration": "wait-on --timeout 20000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S ./dist/tests/integration/*.spec.js"
+  },
+  "author": "Credit Karma",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/node": "^8.0.51",
+    "@types/code": "^4.0.3",
+    "@types/lab": "^11.1.0",
+    "code": "^4.1.0",
+    "lab": "^14.3.1",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1",
+    "wait-on": "^2.0.2"
+  },
+  "dependencies": {
+    "@creditkarma/consul-client": "^0.1.1",
+    "@creditkarma/vault-client": "^0.1.1"
+  }
+}

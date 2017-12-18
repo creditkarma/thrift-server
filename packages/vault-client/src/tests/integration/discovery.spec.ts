@@ -16,6 +16,7 @@ describe('TokenDiscovery', () => {
   const tokenValue: string = 'test-token'
   const mockConfig: IHVConfig = {
     apiVersion: 'v1',
+    mount: 'secret',
     destination: '',
     namespace: '',
     tokenPath: tokenFilePath,
