@@ -2,7 +2,11 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 import * as path from 'path'
 
-import { DynamicConfig } from '../../main/'
+import {
+  defaultConsulResolver,
+  defaultVaultResolver,
+  DynamicConfig,
+} from '../../main/'
 
 export const lab = Lab.script()
 
@@ -21,10 +25,19 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
-      consulAddress: 'http://localhost:8510',
-      consulKeys: 'test-config-one,with-vault',
-      consulKvDc: 'dc1',
+      remoteOptions: {
+        consul: {
+          consulAddress: 'http://localhost:8510',
+          consulKeys: 'test-config-one,with-vault',
+          consulKvDc: 'dc1',
+        },
+      },
     })
+
+    dynamicConfig.register(
+      defaultConsulResolver(),
+      defaultVaultResolver(),
+    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', (done) => {
@@ -32,7 +45,7 @@ describe('DynamicConfig', () => {
           expect(actual).to.equal({
             database: {
               username: 'testUser',
-              password: 'vault!/password',
+              password: 'K1ndaS3cr3t',
             },
             project: {
               health: {
@@ -148,7 +161,7 @@ describe('DynamicConfig', () => {
           done(new Error('Should reject for missing secret'))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Vault failed with error: Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
+            'Unable to find value for key: missing-secret',
           )
           done()
         }).catch(done)
@@ -160,10 +173,19 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
-      consulAddress: 'http://localhost:8510',
-      consulKeys: 'test-config-one',
-      consulKvDc: 'dc1',
+      remoteOptions: {
+        consul: {
+          consulAddress: 'http://localhost:8510',
+          consulKeys: 'test-config-one',
+          consulKvDc: 'dc1',
+        },
+      },
     })
+
+    dynamicConfig.register(
+      defaultConsulResolver(),
+      defaultVaultResolver(),
+    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', (done) => {
@@ -171,7 +193,7 @@ describe('DynamicConfig', () => {
           expect(actual).to.equal({
             database: {
               username: 'testUser',
-              password: 'consul!/password',
+              password: 'Sup3rS3cr3t',
             },
             project: {
               health: {
@@ -258,7 +280,7 @@ describe('DynamicConfig', () => {
           done(new Error('Should reject when Vault not configured'))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Unable to retrieve key: test-secret. Hashicorp Vault is not configured',
+            'Unable to find value for key: test-secret',
           )
           done()
         }).catch(done)
@@ -270,10 +292,19 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
-      consulAddress: 'http://localhost:8510',
-      consulKeys: 'test-config-one,test-config-two',
-      consulKvDc: 'dc1',
+      remoteOptions: {
+        consul: {
+          consulAddress: 'http://localhost:8510',
+          consulKeys: 'test-config-one,test-config-two',
+          consulKvDc: 'dc1',
+        },
+      },
     })
+
+    dynamicConfig.register(
+      defaultConsulResolver(),
+      defaultVaultResolver(),
+    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', (done) => {
@@ -281,10 +312,7 @@ describe('DynamicConfig', () => {
           expect(actual).to.equal({
             database: {
               username: 'fakeUser',
-              password: {
-                key: 'consul!/missing-password',
-                default: 'NotSoSecret',
-              },
+              password: 'NotSoSecret',
             },
             project: {
               health: {
@@ -359,7 +387,7 @@ describe('DynamicConfig', () => {
           done(new Error(`Unable to retrieve key: 'test-secret'. Should reject when Vault not configured`))
         }, (err: any) => {
           expect(err.message).to.equal(
-            'Unable to retrieve key: test-secret. Hashicorp Vault is not configured',
+            'Unable to retrieve key: test-secret. No resolver found',
           )
           done()
         }).catch(done)

@@ -1,98 +1,123 @@
 import {
-  IHVConfig,
-  VaultClient,
-} from '@creditkarma/vault-client'
-
-import {
-  KvStore,
-} from '@creditkarma/consul-client'
-
-import {
   ConfigLoader,
 } from './ConfigLoader'
 
 import {
   CONFIG_PATH,
-  CONSUL_ADDRESS,
-  CONSUL_KEYS,
-  CONSUL_KV_DC,
-  HVAULT_CONFIG_KEY,
 } from './constants'
-
-import {
-  Just,
-  Maybe,
-  Nothing,
-} from './Maybe'
 
 import * as utils from './utils'
 
 import {
-  ConsulFailed,
-  ConsulNotConfigured,
   DynamicConfigInvalidObject,
   DynamicConfigMissingKey,
-  HVFailed,
-  HVNotConfigured,
   MissingConfigPlaceholder,
+  ResolverUnavailable,
 } from './errors'
 
 import {
   ConfigPlaceholder,
   IConfigOptions,
+  IRemoteOptions,
+  IResolvedPlaceholder,
   ISchema,
   ObjectUpdate,
+  ResolverType,
 } from './types'
 
-export interface IConsulOptionMap {
-  key: string
-  [name: string]: string
+export interface IResolverMap {
+  names: Set<string>
+  all: Map<string, ConfigResolver>
 }
 
-export function toConsulOptionMap(str: string): IConsulOptionMap {
-  const temp = str.replace('consul!/', '')
-  const parts = temp.split('?')
-  const result: IConsulOptionMap = {
-    key: parts[0],
-  }
+export type ConfigResolver =
+  IRemoteResolver | ISecretResolver
 
-  if (parts.length > 1) {
-    const params = parts[1]
-    const options = params.split('&')
-    for (const option of options) {
-      const [ key, value ] = option.split('=')
-      result[key] = value
+export type IRemoteInitializer = (dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions) => Promise<any>
+
+export interface IRemoteResolver {
+  type: 'remote'
+  name: string
+  init: IRemoteInitializer
+  get<T>(key: string): Promise<T>
+}
+
+export type IInitMethod<T extends object> = (dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions) => Promise<T>
+
+export interface ISecretResolver {
+  type: 'secret'
+  name: string
+  init: IRemoteInitializer
+  get<T>(key: string): Promise<T>
+}
+
+function normalizeConfigPlaceholder(
+  placeholder: ConfigPlaceholder,
+  resolvers: IResolverMap,
+): IResolvedPlaceholder {
+  if (typeof placeholder === 'string') {
+    const [ name, key ] = placeholder.split('!/')
+    const resolver = resolvers.all.get(name)
+    if (resolver !== undefined) {
+      return {
+        key,
+        name,
+        type: resolver.type,
+      }
+    }
+
+  } else {
+    const [ name, key ]: Array<string> = placeholder.key.split('!/')
+    const resolver = resolvers.all.get(name)
+    if (resolver !== undefined) {
+      return {
+        key,
+        name,
+        type: resolver.type,
+        default: placeholder.default,
+      }
     }
   }
 
-  return result
+  throw new Error(`No resolver found for remote: ${name}`)
 }
 
+type ConfigState =
+  'startup' | 'init' | 'running'
+
 export class DynamicConfig<ConfigType = any> {
+  private configState: ConfigState
   private configLoader: ConfigLoader
-  private vaultClient: Promise<Maybe<VaultClient>>
-  private consulClient: Maybe<KvStore>
-  private consulAddress: Maybe<string>
-  private consulKvDc: Maybe<string>
-  private consulKeys: Maybe<string>
+  private remoteOptions: IRemoteOptions
 
   private configSchema: ISchema
-  private defaultConfig: ConfigType
-  private envConfig: Partial<ConfigType>
-  private consulConfig: Partial<ConfigType>
   private resolvedConfig: ConfigType
 
+  private resolvers: IResolverMap
+
   constructor({
-    consulAddress = process.env[CONSUL_ADDRESS],
-    consulKvDc = process.env[CONSUL_KV_DC],
-    consulKeys = process.env[CONSUL_KEYS],
     configPath = process.env[CONFIG_PATH],
     configEnv = process.env.NODE_ENV,
+    remoteOptions = {},
   }: IConfigOptions = {}) {
-    this.consulAddress = Maybe.fromNullable(consulAddress)
-    this.consulKvDc = Maybe.fromNullable(consulKvDc)
-    this.consulKeys = Maybe.fromNullable(consulKeys)
+    this.configState = 'startup'
     this.configLoader = new ConfigLoader({ configPath, configEnv })
+    this.remoteOptions = remoteOptions
+    this.resolvers = {
+      names: new Set<string>(),
+      all: new Map(),
+    }
+  }
+
+  public register(...resolvers: Array<ConfigResolver>): void {
+    if (this.configState !== 'running') {
+      resolvers.forEach((resolver: ConfigResolver) => {
+        this.resolvers.names.add(resolver.name)
+        this.resolvers.all.set(resolver.name, resolver)
+      })
+    } else {
+      throw new Error(`Resolvers cannot be registered once requests have been made`)
+    }
   }
 
   /**
@@ -100,13 +125,15 @@ export class DynamicConfig<ConfigType = any> {
    * loaded, so we must return a Promise.
    */
   public async get<T = any>(key?: string): Promise<T> {
+    this.configState = 'running'
     return this.getConfig().then((resolvedConfig: any) => {
+
       // If the key is not set we return the entire structure
       if (key === undefined) {
         return this.replaceConfigPlaceholders(resolvedConfig).then((resolvedValue: any) => {
           this.resolvedConfig = utils.overlayObjects(this.resolvedConfig, resolvedValue)
           this.validateConfigSchema()
-          return Promise.resolve(resolvedConfig as any)
+          return Promise.resolve(this.resolvedConfig as any)
         })
 
       // If the key is set we try to find it in the structure
@@ -160,100 +187,54 @@ export class DynamicConfig<ConfigType = any> {
     })
   }
 
-  /**
-   * Get a value from Consul, if it is configured.
-   *
-   * @param consulKey Key to look up
-   */
-  public async getRemoteValue<T = any>(
-    remoteKey: string,
-  ): Promise<T> {
-    return this.getConsulClient().fork((client: KvStore) => {
-      const options: IConsulOptionMap = toConsulOptionMap(remoteKey)
-      return client.get({ path: options.key, dc: options.dc }).then((val: any) => {
-        return val
-      }, (err: any) => {
-        return Promise.reject(new ConsulFailed(err.message))
-      })
-    }, () => {
-      return Promise.reject(new ConsulNotConfigured(remoteKey))
-    })
+  public async getRemoteValue<T>(key: string): Promise<T> {
+    return this.getValueFromResolver<T>(key, 'remote')
   }
 
-  /**
-   * Get a value from Vault,
-   * @param vaultKey Key to look up
-   */
-  public async getSecretValue<T = any>(
-    secretKey: string,
-  ): Promise<T> {
-    return this.getVaultClient().then((maybeClient: Maybe<VaultClient>) => {
-      return maybeClient.fork((client: VaultClient) => {
-        return client.get<T>(secretKey).then((value: T) => {
-          return Promise.resolve(value)
-        }, (err: any) => {
-          console.error(`Error retrieving key '${secretKey}' from Vault: `, err)
-          return Promise.reject(new HVFailed(err.message))
-        })
-      }, () => {
-        console.error(`Unable to get key '${secretKey}'. Vault is not configured.`)
-        return Promise.reject(new HVNotConfigured(secretKey))
-      })
-    })
+  public async getSecretValue<T>(key: string): Promise<T> {
+    return this.getValueFromResolver<T>(key, 'secret')
   }
 
   /**
    * Given a ConfigPlaceholder attempt to find the value in Vault
    */
-  private async getSecretPlaceholder(value: ConfigPlaceholder): Promise<any> {
-    const vaultKey: string = (
-      (typeof value === 'string') ?
-        value.replace('vault!/', '') :
-        value.key.replace('vault!/', '')
-    )
-
-    return this.getSecretValue(vaultKey).then((secretValue: any) => {
-      if (secretValue !== null) {
-        return secretValue
-
+  private async getSecretPlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
+    return this.getSecretValue(placeholder.key).catch((err: any) => {
+      if (err instanceof DynamicConfigMissingKey) {
+        return Promise.reject(new MissingConfigPlaceholder(placeholder.key))
       } else {
-        console.error(`Unable to resolve secret placeholder: ${vaultKey}`)
-        return Promise.reject(new MissingConfigPlaceholder(vaultKey))
+        return Promise.reject(err)
       }
-    }, (err: any) => {
-      return Promise.reject(err)
     })
   }
 
   /**
    * Given a ConfigPlaceholder attempt to find the value in Consul
    */
-  private async getRemotePlaceholder(value: ConfigPlaceholder): Promise<any> {
-    const consulKey: string = (
-      (typeof value === 'string') ?
-        value.replace('consul!/', '') :
-        value.key.replace('consul!/', '')
-    )
-
-    return this.getRemoteValue(consulKey).then((consulValue: any) => {
-      if (consulValue === null && typeof value !== 'string' && value.default !== undefined) {
-        return value.default
-
-      } else if (consulValue !== null) {
-        return consulValue
-
-      } else {
-        console.error(`Unable to resolve remote placeholder: ${consulKey}`)
-        return Promise.reject(new MissingConfigPlaceholder(consulKey))
-      }
+  private async getRemotePlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
+    return this.getRemoteValue(placeholder.key).then((consulValue: any) => {
+      return Promise.resolve(consulValue)
     }, (err: any) => {
-      if (typeof value !== 'string' && value.default !== undefined) {
-        return Promise.resolve(value.default)
+      if (placeholder.default !== undefined) {
+        return Promise.resolve(placeholder.default)
+
+      } else if (err instanceof DynamicConfigMissingKey) {
+        return Promise.reject(new MissingConfigPlaceholder(placeholder.key))
 
       } else {
         return Promise.reject(err)
       }
     })
+  }
+
+  private resolvePlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
+    switch (placeholder.type) {
+      case 'remote':
+        return this.getRemotePlaceholder(placeholder)
+
+      case 'secret':
+        return this.getSecretPlaceholder(placeholder)
+    }
   }
 
   /**
@@ -265,11 +246,9 @@ export class DynamicConfig<ConfigType = any> {
     path: Array<string>,
     updates: Array<ObjectUpdate>,
   ): void {
-    if (utils.isConsulKey(obj)) {
-      updates.push([ path, this.getRemotePlaceholder(obj) ])
-
-    } else if (utils.isSecretKey(obj)) {
-      updates.push([ path, this.getSecretPlaceholder(obj) ])
+    if (utils.isConfigPlaceholder(obj, this.resolvers.names)) {
+      const resolvedPlaceholder: IResolvedPlaceholder = normalizeConfigPlaceholder(obj, this.resolvers)
+      updates.push([ path, this.resolvePlaceholder(resolvedPlaceholder) ])
 
     } else if (typeof obj === 'object') {
       this.collectConfigPlaceholders(obj, path, updates)
@@ -311,11 +290,9 @@ export class DynamicConfig<ConfigType = any> {
    * any placeholders that remain in the
    */
   private async replaceConfigPlaceholders(value: any): Promise<any> {
-    if (utils.isConsulKey(value)) {
-      return this.getRemotePlaceholder(value)
-
-    } else if (utils.isSecretKey(value)) {
-      return this.getSecretPlaceholder(value)
+    if (utils.isConfigPlaceholder(value, this.resolvers.names)) {
+      const resolvedPlaceholder: IResolvedPlaceholder = normalizeConfigPlaceholder(value, this.resolvers)
+      return this.resolvePlaceholder(resolvedPlaceholder)
 
     } else if (utils.isObject(value)) {
       const unresolved: Array<ObjectUpdate> = this.collectConfigPlaceholders(value, [], [])
@@ -335,72 +312,15 @@ export class DynamicConfig<ConfigType = any> {
 
   private async getConfig(): Promise<ConfigType> {
     if (this.resolvedConfig === undefined) {
-      this.defaultConfig = await this.configLoader.loadDefault()
-      this.envConfig = await this.configLoader.loadEnvironment()
-      this.consulConfig = await this.getConsulConfig()
-      this.resolvedConfig = await utils.overlayObjects(this.defaultConfig, this.envConfig, this.consulConfig)
-      this.configSchema = utils.objectAsSimpleSchema(this.defaultConfig)
+      this.configState = 'init'
+      const defaultConfig = await this.configLoader.loadDefault()
+      const envConfig = await this.configLoader.loadEnvironment()
+      const remoteConfigs: Array<any> = await this.initializeResolvers()
+      this.resolvedConfig = await utils.overlayObjects(defaultConfig, envConfig, ...remoteConfigs)
+      this.configSchema = utils.objectAsSimpleSchema(defaultConfig)
     }
 
     return this.resolvedConfig
-  }
-
-  private async getVaultClient(): Promise<Maybe<VaultClient>> {
-    if (this.vaultClient) {
-      return this.vaultClient
-    } else {
-      this.vaultClient = this.get<IHVConfig>(HVAULT_CONFIG_KEY).then((vaultConfig: IHVConfig) => {
-        return Promise.resolve(new Just(new VaultClient(vaultConfig)))
-      }, (err: any) => {
-        console.log(`Unable to find valid configuration for Vault`)
-        return Promise.resolve(new Nothing<VaultClient>())
-      }).catch((err: any) => {
-        console.error(`Error creating VaultClient: `, err)
-        return Promise.reject(new Error('Unable to create VaultClient'))
-      })
-
-      return this.vaultClient
-    }
-  }
-
-  private getConsulClient(): Maybe<KvStore> {
-    if (this.consulClient) {
-      return this.consulClient
-    } else {
-      if (this.consulAddress.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
-        this.consulClient = new Nothing<KvStore>()
-      } else if (this.consulKvDc.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
-        this.consulClient = new Nothing<KvStore>()
-      } else {
-        this.consulClient = new Just(new KvStore(this.consulAddress.get()))
-      }
-
-      return this.consulClient
-    }
-  }
-
-  private async getConsulConfig(): Promise<any> {
-    return Maybe.all(
-      this.consulKeys,
-      this.getConsulClient(),
-      this.consulKvDc,
-    ).fork(([ keys, client, dc ]) => {
-      const rawConfigs: Promise<Array<any>> =
-        Promise.all(keys.split(',').map((key: string) => {
-          return client.get({ path: key, dc })
-        }))
-
-      const resolvedConfigs: Promise<any> =
-        rawConfigs.then((configs: Array<any>): any => {
-          return (utils.overlayObjects(...configs) as any)
-        })
-
-      return resolvedConfigs
-    }, () => {
-      return Promise.resolve({})
-    })
   }
 
   /**
@@ -410,6 +330,37 @@ export class DynamicConfig<ConfigType = any> {
   private validateConfigSchema(): void {
     if (!utils.objectMatchesSchema(this.configSchema, this.resolvedConfig)) {
       console.warn('The shape of the config changed during resolution. This may indicate an error.')
+    }
+  }
+
+  private initializeResolvers(): Promise<Array<any>> {
+    return Promise.all([ ...this.resolvers.all.values() ].map((next: ConfigResolver) => {
+      return next.init(this, this.remoteOptions[next.name])
+    }))
+  }
+
+  private getValueFromResolver<T>(key: string, type: ResolverType): Promise<T> {
+    const resolvers = [ ...this.resolvers.all.values() ].filter((next: ConfigResolver) => {
+      return next.type === type
+    })
+
+    if (resolvers.length > 0) {
+      return utils.race(resolvers.map((next: ConfigResolver) => {
+        return next.get<T>(key)
+      })).then((remoteValue: T) => {
+        if (remoteValue !== null) {
+          return Promise.resolve(remoteValue)
+
+        } else {
+          console.error(`Unable to resolve remote value: ${key}`)
+          return Promise.reject(new DynamicConfigMissingKey(key))
+        }
+      }, (err: any) => {
+        console.error(`Unable to resolve remote value: ${key}`)
+        return Promise.reject(new DynamicConfigMissingKey(key))
+      })
+    } else {
+      return Promise.reject(new ResolverUnavailable(key))
     }
   }
 }

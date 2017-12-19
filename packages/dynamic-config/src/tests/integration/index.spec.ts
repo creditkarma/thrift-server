@@ -91,7 +91,7 @@ describe('DynamicConfig Singleton', () => {
         done(new Error('Should reject for missing secret'))
       }, (err: any) => {
         expect(err.message).to.equal(
-          'Vault failed with error: Unable to locate vault resource at: http://localhost:8210/v1/secret/missing-secret',
+          'Unable to find value for key: missing-secret',
         )
         done()
       }).catch(done)

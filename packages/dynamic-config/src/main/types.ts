@@ -1,10 +1,25 @@
+export interface IRemoteOptions {
+  [name: string]: any
+}
+
 export interface IConfigOptions {
+  configPath?: string
+  configEnv?: string
+  remoteOptions?: IRemoteOptions
+}
+
+export interface IConsulOptions {
   consulAddress?: string
   consulKvDc?: string
   consulKeys?: string
-  configPath?: string
-  configEnv?: string
 }
+
+export interface IRemoteOverrides {
+  key: string
+  [name: string]: string
+}
+
+// CONFIG TYPES
 
 export type SourceType =
   'local' | 'remote' | 'secret'
@@ -20,16 +35,32 @@ export interface IConfig {
   [key: string]: IConfigValue
 }
 
-export interface IConfigPlaceholder {
-  default?: any
+// CONFIG PLACEHOLDER TYPES
+
+export type ResolverType =
+  'remote' | 'secret'
+
+export interface IResolvedPlaceholder {
+  name: string
   key: string
+  type: ResolverType
+  default?: any
+}
+
+export interface IConfigPlaceholder {
+  key: string
+  default?: any
 }
 
 export type ConfigPlaceholder =
   IConfigPlaceholder | string
 
+// UTILITY TYPES
+
 export type ObjectUpdate =
   [ Array<string>, Promise<any> ]
+
+// SCHEMA TYPES
 
 export interface ISchemaMap {
   [key: string]: ISchema

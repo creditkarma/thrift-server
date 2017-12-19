@@ -39,3 +39,9 @@ export class ConsulFailed extends Error {
     super(`Consul failed with error: ${message}`)
   }
 }
+
+export class ResolverUnavailable extends Error {
+  constructor(key: string) {
+    super(`Unable to retrieve key: ${key}. No resolver found`)
+  }
+}
