@@ -116,6 +116,8 @@ Remote configuration allows you to deploy configuration independent from your ap
 
 Registering a remote source is fairly straight-forward. You use the `register` method on your config instance.
 
+Note: You can only register remote resolvers util your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
+
 ```typescript
 import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config`
 
@@ -131,6 +133,17 @@ config.register({
     // Fetch your key
   }
 })
+```
+
+The `register` method will accept a comma-separated of resolver objects. For additional clarity, the resolver objects have the following TypeScript interface:
+
+```typescript
+interface IRemoteResolver {
+  type: 'remote' | 'secret'
+  name: string
+  init(dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions): Promise<any>
+  get<T>(key: string): Promise<T>
+}
 ```
 
 #### `type`
@@ -266,7 +279,7 @@ If we're looking for a key in a remote registered simply as type `remote` we can
 }
 ```
 
-In this case if the key `my-service/host` can't be found in Consul, or if Consul just isn't configured, then the default vault `'localhost'` is returned.
+In this case if the key `my-service/host` can't be found in Consul, or if Consul just isn't configured, then the default value `'localhost'` is returned.
 
 If you do not wish to provide a default you can use the shorthand notation of just using the remote key in place of the desired value:
 
@@ -281,7 +294,7 @@ If you do not wish to provide a default you can use the shorthand notation of ju
 
 ## Consul Configs
 
-DynamicConfig ships with support for Consul. Now we're going to explore some of the specifics of using the included Consul resolver.
+DynamicConfig ships with support for Consul. Now we're going to explore some of the specifics of using the included Consul resolver. The underlying Consul client comes from: [@creditkarma/consul-client](https://github.com/creditkarma/thrift-server/tree/dynamic-config/packages/consul-client).
 
 Values stored in Consul are assumed to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
 
@@ -343,7 +356,7 @@ const config: DynamicConfig = new DynamicConfig({
 })
 ```
 
-## Hashicorp Vault Configuration
+## Vault Configuration
 
 The configuration for Vault needs to be available somewhere in the config path, either in a local config or in Consul (or some other registered remote). This configuration mush be available under the key name `'hashicorp-vault'`.
 
