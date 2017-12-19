@@ -48,7 +48,7 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-#### getWithDefault
+#### `getWithDefault`
 
 You can also assign a default value in the event that the key cannot be found.
 
@@ -62,7 +62,7 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-#### getAll
+#### `getAll`
 
 Additionally, you can batch get config values. The promise here will only resolve if all of the keys can be retrieved.
 
