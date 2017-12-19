@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/dynamic-config",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "description": "Dynamic Config for Node.js backed by Consul and Vault",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -23,9 +23,9 @@
   "author": "Credit Karma",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/node": "^8.0.51",
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
+    "@types/node": "^8.0.51",
     "code": "^4.1.0",
     "lab": "^14.3.1",
     "rimraf": "^2.6.2",
@@ -34,7 +34,7 @@
     "wait-on": "^2.0.2"
   },
   "dependencies": {
-    "@creditkarma/consul-client": "^0.1.1",
-    "@creditkarma/vault-client": "^0.1.1"
+    "@creditkarma/consul-client": "^0.2.0",
+    "@creditkarma/vault-client": "^0.2.0"
   }
 }
