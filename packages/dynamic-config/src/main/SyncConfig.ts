@@ -4,9 +4,6 @@ import {
 
 import {
   CONFIG_PATH,
-  CONSUL_ADDRESS,
-  CONSUL_KEYS,
-  CONSUL_KV_DC,
 } from './constants'
 
 import * as utils from './utils'
@@ -17,13 +14,11 @@ import {
 
 export class SyncConfig<ConfigType = any> {
   public static async getSyncConfig<T>({
-    consulAddress = process.env[CONSUL_ADDRESS],
-    consulKvDc = process.env[CONSUL_KV_DC],
-    consulKeys = process.env[CONSUL_KEYS],
     configPath = process.env[CONFIG_PATH],
     configEnv = process.env.NODE_ENV,
+    remoteOptions = {},
   }: IConfigOptions = {}): Promise<SyncConfig<T>> {
-    const dynamicConifg = new DynamicConfig({ consulAddress, consulKvDc, consulKeys, configPath, configEnv })
+    const dynamicConifg = new DynamicConfig({ configPath, configEnv, remoteOptions })
     const resolvedConfig: T = await dynamicConifg.get()
     return new SyncConfig<T>(resolvedConfig, dynamicConifg)
   }
@@ -54,6 +49,6 @@ export class SyncConfig<ConfigType = any> {
   }
 
   public async getSecretValue<T = any>(vaultKey: string): Promise<T> {
-    return this.dynamicConfig.getSecretValue(vaultKey)
+    return this.dynamicConfig.getSecretValue<T>(vaultKey)
   }
 }

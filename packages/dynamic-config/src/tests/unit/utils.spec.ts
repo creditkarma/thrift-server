@@ -9,6 +9,44 @@ const describe = lab.describe
 const it = lab.it
 
 describe('Utils', () => {
+  describe('race', () => {
+    it('should resolve to value of first successful Promise', async () => {
+      return Utils.race([
+        Promise.reject('error 1'),
+        Promise.reject('error 2'),
+        Promise.resolve(6),
+        Promise.resolve(10),
+      ]).then((actual: any) => {
+        expect(actual).to.equal(6)
+      })
+    })
+
+    it('should reject if all Promises reject', async () => {
+      return Utils.race([
+        Promise.reject('error 1'),
+        Promise.reject('error 2'),
+        Promise.reject('error 3'),
+      ]).then((actual: any) => {
+        Promise.reject(new Error('Promise should reject'))
+      }, (err: any) => {
+        expect(err.message).to.equal('All Promises resolved without success')
+      })
+    })
+  })
+
+  describe('toRemoteOptionMap', () => {
+    it('should return an object representing Consul request', async () => {
+      const actual = Utils.toRemoteOptionMap('consul!/password?dc=dc1&keys=true', 'consul')
+      const expected = {
+        key: 'password',
+        dc: 'dc1',
+        keys: 'true',
+      }
+
+      expect(actual).to.equal(expected)
+    })
+  })
+
   describe('resolveObjectPromises', () => {
     it('should resolve nested Promises within an object', async () => {
       const actual = await Utils.resolveObjectPromises({

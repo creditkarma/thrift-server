@@ -2,6 +2,7 @@ import {
   ConfigPlaceholder,
   IConfigPlaceholder,
   IObjectSchema,
+  IRemoteOverrides,
   ISchema,
   ObjectUpdate,
 } from './types'
@@ -326,47 +327,6 @@ export function objectHasShape(...args: Array<any>): any {
   }
 }
 
-function isConfigPlaceholder(obj: any): obj is IConfigPlaceholder {
-  return objectMatchesSchema({
-    type: 'object',
-    properties: {
-      default: {
-        type: 'any',
-      },
-      key: {
-        type: 'string',
-      },
-    },
-    required: [ 'key' ],
-  }, obj)
-}
-
-export function isConsulKey(obj: any): obj is ConfigPlaceholder {
-  return (
-    (
-      typeof obj === 'string' &&
-      obj.startsWith('consul!')
-    ) ||
-    (
-      isConfigPlaceholder(obj) &&
-      obj.key.startsWith('consul!')
-    )
-  )
-}
-
-export function isSecretKey(obj: any): obj is ConfigPlaceholder {
-  return (
-    (
-      typeof obj === 'string' &&
-      obj.startsWith('vault!')
-    ) ||
-    (
-      isConfigPlaceholder(obj) &&
-      obj.key.startsWith('vault!')
-    )
-  )
-}
-
 function appendUpdateForObject(value: any, path: Array<string>, updates: Array<ObjectUpdate>): void {
   if (value instanceof Promise) {
     updates.push([ path, value ])
@@ -414,4 +374,79 @@ export async function resolveObjectPromises(obj: object): Promise<object> {
   }, obj)
 
   return newObj
+}
+
+export function isValidRemote(name: string, resolvers: Set<string>): boolean {
+  return resolvers.has(name)
+}
+
+function isPlaceholderKey(key: string, resolvers: Set<string>): boolean {
+  const parts: Array<string> = key.split('!/')
+  return (parts.length > 1) && (resolvers.has(parts[0]))
+}
+
+function matchesPlaceholderSchema(obj: any): obj is IConfigPlaceholder {
+  return objectMatchesSchema({
+    type: 'object',
+    properties: {
+      default: {
+        type: 'any',
+      },
+      key: {
+        type: 'string',
+      },
+    },
+    required: [ 'key' ],
+  }, obj)
+}
+
+export function isConfigPlaceholder(obj: any, resolvers: Set<string>): obj is ConfigPlaceholder {
+  if (typeof obj === 'string') {
+    return isPlaceholderKey(obj, resolvers)
+
+  } else {
+    return (
+      matchesPlaceholderSchema(obj) &&
+      isPlaceholderKey(obj.key, resolvers)
+    )
+  }
+}
+
+export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverrides {
+  const temp = str.replace(`${remoteName}!/`, '')
+  const [ key, ...tail ] = temp.split('?')
+  const result: IRemoteOverrides = { key }
+
+  if (tail.length > 0) {
+    const params = tail[0]
+    const options = params.split('&')
+    for (const option of options) {
+      const [ name, value ] = option.split('=')
+      result[name] = value
+    }
+  }
+
+  return result
+}
+
+export async function race(promises: Array<Promise<any>>): Promise<any> {
+  const count: number = promises.length
+  let current: number = 0
+  let resolved: boolean = false
+
+  return new Promise((resolve, reject) => {
+    promises.forEach((next: Promise<any>) => {
+      next.then((val: any) => {
+        if (!resolved) {
+          resolved = true
+          resolve(val)
+        }
+      }, (err: any) => {
+        current++
+        if (!resolved && current === count) {
+          reject(new Error('All Promises resolved without success'))
+        }
+      })
+    })
+  })
 }
