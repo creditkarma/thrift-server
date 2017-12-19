@@ -443,7 +443,7 @@ export async function race(promises: Array<Promise<any>>): Promise<any> {
         }
       }, (err: any) => {
         current++
-        if (current === count) {
+        if (!resolved && current === count) {
           reject(new Error('All Promises resolved without success'))
         }
       })
