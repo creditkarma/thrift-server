@@ -84,9 +84,15 @@ Currently, DynamicConfig only support confing in the form of JSON. Support for J
 
 ### Default Configuration
 
-The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application. At runtime a schema is built from this default config file and warnings are logged if the schema is broken. You can only use keys that you define in your default config. You can override these values in a variety of ways, but they must follow the schema set by your default configuration file.
+The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application.
 
-Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
+#### Config Schema
+
+At runtime a schema (a subset of [JSON Schema](http://json-schema.org/)) is built from this default config file. You can only use keys that you define in your default config and they must have the same shape. Config values should be predictable. If the form of your config is mutable this is very likely the source (or result of) a bug.
+
+#### Local Overrides
+
+You can override these values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
 ### Configuration Path
 
@@ -119,7 +125,7 @@ Registering a remote source is fairly straight-forward. You use the `register` m
 Note: You can only register remote resolvers util your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
 
 ```typescript
-import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config`
+import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config'
 
 const config: DynamicConfig = new DynamicConfig()
 
@@ -174,7 +180,7 @@ const config: DynamicConfig = new DynamicConfig({
 })
 ```
 
-When a resolver with the name `'consul'` is registered this object will passed to the init method. Therefore, the `remoteOptions` parameter is of the form:
+When a resolver with the name `'consul'` is registered this object will be passed to the init method. Therefore, the `remoteOptions` parameter is of the form:
 
 ```typescript
 interface IRemoteOptions {
@@ -395,9 +401,8 @@ As mentioned config placeholders can also be used for `secret` stores. Review ab
 
 ### Roadmap
 
-* Add ability to watch a value for runtime changes
 * Support `.js` and `.ts` local config files
-* Add the ability to register remote mounts to resolve config placeholders
+* Add ability to watch a value for runtime changes
 * Explore options for providing a synchronous API
 
 ## Contributing

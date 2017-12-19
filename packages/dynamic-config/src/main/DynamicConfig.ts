@@ -110,7 +110,7 @@ export class DynamicConfig<ConfigType = any> {
   }
 
   public register(...resolvers: Array<ConfigResolver>): void {
-    if (this.configState !== 'running') {
+    if (this.configState === 'startup') {
       resolvers.forEach((resolver: ConfigResolver) => {
         this.resolvers.names.add(resolver.name)
         this.resolvers.all.set(resolver.name, resolver)
@@ -126,8 +126,8 @@ export class DynamicConfig<ConfigType = any> {
    */
   public async get<T = any>(key?: string): Promise<T> {
     this.configState = 'running'
-    return this.getConfig().then((resolvedConfig: any) => {
 
+    return this.getConfig().then((resolvedConfig: any) => {
       // If the key is not set we return the entire structure
       if (key === undefined) {
         return this.replaceConfigPlaceholders(resolvedConfig).then((resolvedValue: any) => {
@@ -315,7 +315,7 @@ export class DynamicConfig<ConfigType = any> {
       this.configState = 'init'
       const defaultConfig = await this.configLoader.loadDefault()
       const envConfig = await this.configLoader.loadEnvironment()
-      const remoteConfigs: Array<any> = await this.initializeResolvers()
+      const remoteConfigs = await this.initializeResolvers()
       this.resolvedConfig = await utils.overlayObjects(defaultConfig, envConfig, ...remoteConfigs)
       this.configSchema = utils.objectAsSimpleSchema(defaultConfig)
     }
