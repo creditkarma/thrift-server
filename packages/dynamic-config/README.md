@@ -2,7 +2,7 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
-DynamicConfig supports local config in the form of JSON files, remote configuration and secret configuration. By default remote configuration is stored in Consul and secret config values are stored in Vault. There is also an API for registering other remote config sources. The use of remote configuration is option. If these are not configurated only local config will be used. At least one local configuration file (`default.json`) is required.
+DynamicConfig supports local config in the form of JSON files and remote configuration for secrets and other independently deployed configuration. By default remote configuration is stored in Consul and secret config values are stored in Vault. There is also an API for registering other remote config sources. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.json`) is required.
 
 ## Install
 
@@ -12,13 +12,15 @@ $ npm install @creditkarma/dynamic-config
 
 ## Usage
 
-The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `config`. Subsequent calls to this function will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below. The singleton instance registers resolvers for Consul and Vault.
+The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `config`. Subsequent calls to this function will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
 
 ### Promise-based
 
 When requesting a value from config a Promise of the expected result is returned. If the value is found the Promise is resolved. If the value is not found, either because it is missing or some other error, the Promise is rejected.
 
 #### Singleton
+
+The singleton instance registers resolvers for Consul and Vault. We'll see more documentation for these default implementations below.
 
 ```typescript
 import { config } from '@creditkarma/dynamic-config'
@@ -76,13 +78,13 @@ export async function createHttpClient(): Promise<Client> {
 
 ## Local Configs
 
-Local configuration files are stored localally with your application source. Typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
+Local configuration files are stored localally with your application source, typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
 
 Currently, DynamicConfig only support confing in the form of JSON. Support for JS/TS files will be added.
 
 ### Default Configuration
 
-The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application. You can only use keys that you define in your default config. You can override these values in a variety of ways, but they must follow the schema set by your default configuration file.
+The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application. At runtime a schema is built from this default config file and warnings are logged if the schema is broken. You can only use keys that you define in your default config. You can override these values in a variety of ways, but they must follow the schema set by your default configuration file.
 
 Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
@@ -108,7 +110,7 @@ $ export CONFIG_PATH=config
 
 ## Remote Configs
 
-Remote configuration allows you to deploy configuration independent from your application source. We support Consul as the remote configuration source.
+Remote configuration allows you to deploy configuration independent from your application source.
 
 ### Registering a Remote Source
 
@@ -123,7 +125,7 @@ config.register({
   type: 'remote'
   name: 'consul',
   init(instance: DynamicConfig, options: IRemoteOptions): Promise<any> {
-    // Load any initial remote configuration
+    // Do set up and load any initial remote configuration
   },
   get<T>(key: string): Promise<T> {
     // Fetch your key
@@ -131,15 +133,15 @@ config.register({
 })
 ```
 
-#### type
+#### `type`
 
 The type parameter can be set to either `remote` or `secret`. The only difference is that `remote` allows for default values.
 
-#### name
+#### `name`
 
 The name for this remote. This is used to lookup config placeholders. We'll get to that in a bit.
 
-#### init
+#### `init`
 
 The init method is called and resolved before any request to `get` can be completed. The init method returns a Promise. The resolved value of this Promise is deeply merged with the local config files. This is where you load remote configuration that should be available on application startup.
 
@@ -167,7 +169,7 @@ interface IRemoteOptions {
 }
 ```
 
-#### get
+#### `get`
 
 This is easy, given a string key return a value for it. This method is called when a value in the config needs to be resolved remotely. Usually this will be because of a config placeholder. Once this method resolves, the return value will be cached in the config object and this method will not be called for that same key again.
 
@@ -248,7 +250,7 @@ interface IConfigPlaceholder {
 
 The `default` property is ignored for `secret` resolvers.
 
-The `key` is the more interesting bit now. It it divided into two parts, the header and the body. The header is the part before `!/`. This refers to the name of remote to resolve this key. This example will use the remote registered as `vault` and will request the value for the key `'my-service/password'`. Since we are searching for a secret, if it cannot be found and error is raised.
+The `key` is the more interesting bit now. It it divided into two parts, the header and the body. The header is the part before `!/`. This refers to the name of remote to resolve this key. This example will use the remote registered as `vault` and will request the value for the key `'my-service/password'`. Since we are searching for a secret, if it cannot be found an error is raised.
 
 If we're looking for a key in a remote registered simply as type `remote` we can provide a default value.
 
@@ -330,6 +332,7 @@ They can also be set on the DynamicConfig constructor.
 ```typescript
 const config: DynamicConfig = new DynamicConfig({
   configPath: 'config',
+  configEnv: 'development',
   remoteOptions: {
     consul: {
       consulAddress: 'http://localhost:8500',
