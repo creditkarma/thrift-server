@@ -35,6 +35,10 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
     })
   }
 
+  public emptyContext(): CoreOptions {
+    return {}
+  }
+
   public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
     // Merge user options with required options
     const requestOptions: request.CoreOptions = deepMerge(context, {

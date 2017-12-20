@@ -13,6 +13,10 @@ import {
   SERVER_CONFIG,
 } from '../config'
 
+import {
+  readThriftMethod
+} from '../../main/utils'
+
 import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Lab from 'lab'
@@ -152,6 +156,186 @@ describe('AxiosConnection', () => {
         expect(true).to.equal(true)
         done()
       })
+  })
+
+  describe('IncomingMiddleware', () => {
+    it('should resolve when middleware allows', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        handler(data: Buffer): Promise<Buffer> {
+          if (readThriftMethod(data) === 'add') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should resolve when middleware passes method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        methods: [ 'add' ],
+        handler(data: Buffer): Promise<Buffer> {
+          console.log('data: ', data)
+          if (readThriftMethod(data) === 'add') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject when middleware rejects', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        handler(data: Buffer): Promise<Buffer> {
+          if (readThriftMethod(data) === 'nope') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unrecognized method name: add')
+          done()
+        })
+    })
+
+    it('should skip handler when middleware fails method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        methods: [ 'nope' ],
+        handler(data: Buffer): Promise<Buffer> {
+          return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+  })
+
+  describe('OutgoingMiddleware', () => {
+    it('should resolve when middleware adds auth token', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        type: 'outgoing',
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
+      })
+
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should resolve when middleware passes method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        type: 'outgoing',
+        methods: [ 'addWithContext' ],
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
+      })
+
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject when middleware does not add auth token', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
+
+    it('should resolve when middleware fails method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        type: 'outgoing',
+        methods: [ 'add' ],
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
+      })
+
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
   })
 
   after((done: any) => {

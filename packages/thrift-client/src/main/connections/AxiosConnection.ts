@@ -26,6 +26,10 @@ export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
     this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
   }
 
+  public emptyContext(): AxiosRequestConfig {
+    return {}
+  }
+
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {
     // Merge user options with required options
     const requestOptions: AxiosRequestConfig = deepMerge(context, {
