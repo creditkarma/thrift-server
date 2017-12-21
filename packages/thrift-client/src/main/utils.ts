@@ -1,10 +1,10 @@
 import {
   BinaryProtocol,
   BufferedTransport,
+  IProtocolConstructor,
+  ITransportConstructor,
   TProtocol,
   TTransport,
-  ITransportConstructor,
-  IProtocolConstructor,
 } from '@creditkarma/thrift-server-core'
 
 function isObject(obj: any): boolean {
