@@ -145,7 +145,31 @@ type ProtocolType = 'binary' | 'compact' | 'json'
 
 ### Middleware
 
-Sometimes you'll want to universally filter responses to pull out startard exceptions (or other responses) and deal with them in a uniform way, or just do some validation on a payload to generate custom responses. The thrift server may also attach additional data onto the head of response you need to pull off before your client can handle it properly. You can do this with middleware. A middleware is an object that consists of a handler function. The handler function receives the raw data as a Buffer and returns a Promise of a Buffer. Rejecting the Promise short-circuits the middleware chain.
+Sometimes you'll want to universally filter or modify response, or you'll want to universally add certain headers to outgoing client requests. You can do these things with middleware.
+
+A middleware is an object that consists of a handler function, the type of middleware and an optional list of client method names to apply the middleware to.
+
+Middleware are applied in the order in which they are registered.
+
+```typescript
+interface IIncomingMiddleware {
+  type: 'incoming'
+  methods: Array<string>
+  hander(data: Buffer): Promise<Buffer>
+}
+
+interface IOutgoingMiddleware<Context> {
+  type: 'outgoing'
+  mthods: Array<string>
+  handler(context: Context): Promise<Context>
+}
+```
+
+#### Incoming Middleware
+
+`incoming` middleware acts on responses coming into the client. The middleware receives the response before the Thrift processor so the data is a raw `Buffer` object. The middleware returns a `Promise` of data that will continue down the middleware chain to the Thrift processor. If the `Promise` is rejected the chain is broken and the client method call is rejected.
+
+`incoming` is the default middleware, so if the `type` property is ommited the middleware will be assumed to be incoming.
 
 ```typescript
 // Create thrift client
@@ -155,6 +179,7 @@ const connection: AxiosConnection =
   fromAxios(requestClient, clientConfig)
 
 connection.register({
+  type: 'incoming',
   handler(data: Buffer): Promise<Buffer> {
     if (validatePayload(data)) {
       return Promise.resolve(data)
@@ -167,7 +192,32 @@ connection.register({
 const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
-Middleware are applied in the order in which they are registered.
+#### Outgoing Middleware
+
+`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using request and type `AxiosRequestConfig` when using axios. Changes to the context are applied before any context passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
+
+Here, the `X-Fake-Token` will be added to every outgoing client method call:
+
+```typescript
+// Create thrift client
+const requestClient: AxiosInstance = axios.create()
+
+const connection: AxiosConnection =
+  fromAxios(requestClient, clientConfig)
+
+connection.register({
+  type: 'outgoing',
+  handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+    return Promise.resolve(Object.assign({}, context, {
+      headers: {
+        'X-Fake-Token': 'fake-token',
+      },
+    }))
+  },
+})
+
+const thriftClient: Calculator.Client = new Calculator.Client(connection)
+```
 
 ## Creating Custom Connections
 
@@ -184,6 +234,11 @@ export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
     this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
+  }
+
+  // Provides an empty context for outgoing middleware
+  public emptyContext(): AxiosRequestConfig {
+    return {}
   }
 
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {

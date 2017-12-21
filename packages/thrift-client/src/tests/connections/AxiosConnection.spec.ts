@@ -13,6 +13,10 @@ import {
   SERVER_CONFIG,
 } from '../config'
 
+import {
+  readThriftMethod,
+} from '../../main/utils'
+
 import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Lab from 'lab'
@@ -30,128 +34,312 @@ const after = lab.after
 
 describe('AxiosConnection', () => {
   let server: childProcess.ChildProcess
-  let connection: AxiosConnection
-  let client: Calculator.Client<AxiosRequestConfig>
 
   before((done: any) => {
     server = childProcess.fork('./dist/tests/server.js')
     server.on('message', (msg: any) => console.log(msg))
-    setTimeout(() => {
+    setTimeout(done, 2000)
+  })
+
+  describe('Basic Usage', () => {
+    let connection: AxiosConnection
+    let client: Calculator.Client<AxiosRequestConfig>
+
+    before((done: any) => {
       const requestClient: AxiosInstance = axios.create()
       connection = fromAxios(requestClient, SERVER_CONFIG)
       client = new Calculator.Client(connection)
       done()
-    }, 2000)
+    })
+
+    it('should corrently handle a service client request', (done: any) => {
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should corrently handle a void service client request', (done: any) => {
+      client.ping()
+        .then((response: any) => {
+          expect(response).to.equal(undefined)
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a struct', (done: any) => {
+      client.getStruct(5)
+        .then((response: any) => {
+          expect(response).to.equal({ key: 0, value: 'test' })
+          done()
+        })
+    })
+
+    it('should corrently handle a service client request that returns a union', (done: any) => {
+      client.getUnion(1)
+        .then((response: any) => {
+          expect(response).to.equal({ option1: 'foo' })
+          done()
+        })
+    })
+
+    it('should allow passing of a request context', (done: any) => {
+      client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject auth request without context', (done: any) => {
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
+
+    it('should reject for a 500 server response', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const badConnection: AxiosConnection =
+        fromAxios(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return500',
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
+
+      badClient.add(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(true).to.equal(true)
+          done()
+        })
+    })
+
+    it('should reject for a 400 server response', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const badConnection: AxiosConnection =
+        fromAxios(requestClient, {
+          hostName: SERVER_CONFIG.hostName,
+          port: SERVER_CONFIG.port,
+          path: '/return400',
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
+
+      badClient.add(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(true).to.equal(true)
+          done()
+        })
+    })
+
+    it('should reject for a request to a missing service', (done: any) => {
+      const requestClient: AxiosInstance = axios.create({ timeout: 5000 })
+      const badConnection: AxiosConnection =
+        fromAxios(requestClient, {
+          hostName: 'fakehost',
+          port: 8080,
+        })
+      const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
+
+      badClient.add(5, 7)
+        .then((response: number) => {
+          expect(false).to.equal(true)
+          done()
+        }, (err: any) => {
+          expect(true).to.equal(true)
+          done()
+        })
+    })
   })
 
-  it('should corrently handle a service client request', (done: any) => {
-    client.add(5, 7)
-      .then((response: number) => {
-        expect(response).to.equal(12)
-        done()
+  describe('IncomingMiddleware', () => {
+    it('should resolve when middleware allows', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        handler(data: Buffer): Promise<Buffer> {
+          if (readThriftMethod(data) === 'add') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
       })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should resolve when middleware passes method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        methods: [ 'add' ],
+        handler(data: Buffer): Promise<Buffer> {
+          if (readThriftMethod(data) === 'add') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
+
+    it('should reject when middleware rejects', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        handler(data: Buffer): Promise<Buffer> {
+          if (readThriftMethod(data) === 'nope') {
+            return Promise.resolve(data)
+          } else {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          }
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unrecognized method name: add')
+          done()
+        })
+    })
+
+    it('should skip handler when middleware fails method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
+
+      connection.register({
+        methods: [ 'nope' ],
+        handler(data: Buffer): Promise<Buffer> {
+          return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+        },
+      })
+
+      client.add(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
   })
 
-  it('should corrently handle a void service client request', (done: any) => {
-    client.ping()
-      .then((response: any) => {
-        expect(response).to.equal(undefined)
-        done()
-      })
-  })
+  describe('OutgoingMiddleware', () => {
+    it('should resolve when middleware adds auth token', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
 
-  it('should corrently handle a service client request that returns a struct', (done: any) => {
-    client.getStruct(5)
-      .then((response: any) => {
-        expect(response).to.equal({ key: 0, value: 'test' })
-        done()
+      connection.register({
+        type: 'outgoing',
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
       })
-  })
 
-  it('should corrently handle a service client request that returns a union', (done: any) => {
-    client.getUnion(1)
-      .then((response: any) => {
-        expect(response).to.equal({ option1: 'foo' })
-        done()
-      })
-  })
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
 
-  it('should allow passing of a request context', (done: any) => {
-    client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
-      .then((response: number) => {
-        expect(response).to.equal(12)
-        done()
-      })
-  })
+    it('should resolve when middleware passes method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
 
-  it('should reject auth request without context', (done: any) => {
-    client.addWithContext(5, 7)
-      .then((response: number) => {
-        expect(false).to.equal(true)
-        done()
-      }, (err: any) => {
-        expect(err.message).to.equal('Unauthorized')
-        done()
+      connection.register({
+        type: 'outgoing',
+        methods: [ 'addWithContext' ],
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
       })
-  })
 
-  it('should reject for a 500 server response', (done: any) => {
-    const requestClient: AxiosInstance = axios.create()
-    const badConnection: AxiosConnection =
-      fromAxios(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return500',
-      })
-    const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          expect(response).to.equal(12)
+          done()
+        })
+    })
 
-    badClient.add(5, 7)
-      .then((response: number) => {
-        expect(false).to.equal(true)
-        done()
-      }, (err: any) => {
-        expect(true).to.equal(true)
-        done()
-      })
-  })
+    it('should reject when middleware does not add auth token', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
 
-  it('should reject for a 400 server response', (done: any) => {
-    const requestClient: AxiosInstance = axios.create()
-    const badConnection: AxiosConnection =
-      fromAxios(requestClient, {
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: '/return400',
-      })
-    const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
 
-    badClient.add(5, 7)
-      .then((response: number) => {
-        expect(false).to.equal(true)
-        done()
-      }, (err: any) => {
-        expect(true).to.equal(true)
-        done()
-      })
-  })
+    it('should resolve when middleware fails method filter', (done: any) => {
+      const requestClient: AxiosInstance = axios.create()
+      const connection: AxiosConnection = fromAxios(requestClient, SERVER_CONFIG)
+      const client = new Calculator.Client(connection)
 
-  it('should reject for a request to a missing service', (done: any) => {
-    const requestClient: AxiosInstance = axios.create({ timeout: 5000 })
-    const badConnection: AxiosConnection =
-      fromAxios(requestClient, {
-        hostName: 'fakehost',
-        port: 8080,
+      connection.register({
+        type: 'outgoing',
+        methods: [ 'add' ],
+        handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+          return Promise.resolve(Object.assign({}, context, {
+            headers: {
+              'X-Fake-Token': 'fake-token',
+            },
+          }))
+        },
       })
-    const badClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(badConnection)
 
-    badClient.add(5, 7)
-      .then((response: number) => {
-        expect(false).to.equal(true)
-        done()
-      }, (err: any) => {
-        expect(true).to.equal(true)
-        done()
-      })
+      client.addWithContext(5, 7)
+        .then((response: number) => {
+          done(new Error(`Mehtods should fail when middleware rejects`))
+        }, (err: any) => {
+          expect(err.message).to.equal('Unauthorized')
+          done()
+        })
+    })
   })
 
   after((done: any) => {
