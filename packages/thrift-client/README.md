@@ -145,7 +145,7 @@ type ProtocolType = 'binary' | 'compact' | 'json'
 
 ### Middleware
 
-Sometimes you'll want to universally filter responses to pull out startard exceptions (or other responses) and deal with them in a uniform way, or just do some validation on a payload to generate custom responses. The thrift server may also attach additional data onto the head of response you need to pull off before your client can handle it properly. Conversely, you may want to attach data to a request across all of your client requests, such as an authentication header. You can do all of this with middleware.
+Sometimes you'll want to universally filter or modify response, or you'll want to universally add certain headers to outgoing client requests. You can do these things with middleware.
 
 A middleware is an object that consists of a handler function, the type of middleware and an optional list of client method names to apply the middleware to.
 
@@ -165,7 +165,7 @@ interface IOutgoingMiddleware<Context> {
 }
 ```
 
-#### Incoming Middleward
+#### Incoming Middleware
 
 `incoming` middleware acts on responses coming into the client. The middleware receives the response before the Thrift processor so the data is a raw `Buffer` object. The middleware returns a `Promise` of data that will continue down the middleware chain to the Thrift processor. If the `Promise` is rejected the chain is broken and the client method call is rejected.
 
@@ -179,6 +179,7 @@ const connection: AxiosConnection =
   fromAxios(requestClient, clientConfig)
 
 connection.register({
+  type: 'incoming',
   handler(data: Buffer): Promise<Buffer> {
     if (validatePayload(data)) {
       return Promise.resolve(data)
@@ -195,7 +196,7 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 `outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using request and type `AxiosRequestConfig` when using axios. Changes to the context are applied before any context passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
 
-Here, the `X-Fake-Token` will be added to every outgoing client method call.
+Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
 ```typescript
 // Create thrift client
@@ -233,6 +234,11 @@ export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
     this.request = requestApi
     this.request.defaults.responseType = 'arraybuffer'
     this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
+  }
+
+  // Provides an empty context for outgoing middleware
+  public emptyContext(): AxiosRequestConfig {
+    return {}
   }
 
   public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {

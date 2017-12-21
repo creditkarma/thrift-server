@@ -74,6 +74,7 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
     }
   }
 
+  // Provides an empty context for outgoing middleware
   public abstract emptyContext(): Context
 
   public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
