@@ -192,7 +192,6 @@ describe('RequestConnection', () => {
       connection.register({
         methods: [ 'add' ],
         handler(data: Buffer): Promise<Buffer> {
-          console.log('data: ', data)
           if (readThriftMethod(data) === 'add') {
             return Promise.resolve(data)
           } else {
