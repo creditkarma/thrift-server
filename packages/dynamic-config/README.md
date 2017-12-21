@@ -381,9 +381,13 @@ The configuration must conform to what is expected from [@creditkarma/vault-clie
 }
 ```
 
-#### Getting a Secret from Vault
+### Getting a Secret from Vault
 
 Getting a secret from Vault is similar to getting a value from local config or Consul.
+
+#### `getSecretValue`
+
+Will try to get a key from whatever remote is registered as a `secret` store.
 
 Based on the configuration the following code will try to load a secret from `http://localhost:8200/secret/username`.
 
@@ -393,13 +397,11 @@ client.getSecretValue<string>('username').then((val: string) => {
 })
 ```
 
-The method `getSecretValue` will try to get a key from whatever remote is registered as a `secret` store.
-
-#### Config Placeholders
+### Config Placeholders
 
 As mentioned config placeholders can also be used for `secret` stores. Review above for more information.
 
-### Roadmap
+## Roadmap
 
 * Support `.js` and `.ts` local config files
 * Add ability to watch a value for runtime changes
