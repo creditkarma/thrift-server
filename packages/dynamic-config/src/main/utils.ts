@@ -113,7 +113,7 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any): T {
 /**
  * Only copies properties from update into base if they already were defined in base
  */
-export function overlay<Base>(base: Base, update: Partial<Base>): Base {
+export function overlay<Base,Update>(base: Base, update: Update): Base & Update {
   const newObj: any = {}
   const baseKeys: Array<string> = Object.keys(base)
   const updateKeys: Array<string> = Object.keys(update)
@@ -141,7 +141,7 @@ export function overlay<Base>(base: Base, update: Partial<Base>): Base {
     }
   }
 
-  return (newObj as Base)
+  return newObj
 }
 
 export function overlayObjects<A, B, C, D, E>(one: A, two: B, three: C, four: D, five: E): A & B & C & D & E
@@ -429,6 +429,11 @@ export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverr
   return result
 }
 
+/**
+ * Given an array of Promises return a new Promise that resolves with the value
+ * of the first of the array to resolve, ignoring rejections. The resulting Promise
+ * only rejects if all of the Promises reject.
+ */
 export async function race(promises: Array<Promise<any>>): Promise<any> {
   const count: number = promises.length
   let current: number = 0

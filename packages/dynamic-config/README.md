@@ -118,9 +118,9 @@ $ export CONFIG_PATH=config
 
 Remote configuration allows you to deploy configuration independent from your application source.
 
-### Registering a Remote Source
+### Remote Resolver
 
-Registering a remote source is fairly straight-forward. You use the `register` method on your config instance.
+Registering a remote resolver is fairly straight-forward. You use the `register` method on your config instance.
 
 Note: You can only register remote resolvers util your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
 
@@ -324,7 +324,7 @@ Through environment:
 $ export CONSUL_KEYS=production-config,production-east-config
 ```
 
-#### Available Options
+### Available Options
 
 Here are the available options for DynamicConfig:
 
@@ -333,7 +333,7 @@ Here are the available options for DynamicConfig:
 * `CONSUL_KEYS` - Comma-separated list of keys pointing to configs stored in Consul. They are merged in left -> right order, meaning the rightmost key has highest priority.
 * `CONFIG_PATH` - Path to local configuration files.
 
-#### Environment Variables
+### Environment Variables
 
 All options can be set through the environment.
 
@@ -344,7 +344,7 @@ $ export CONSUL_KEYS=production-config,production-east-config
 $ export CONFIG_PATH=config
 ```
 
-#### Constructor Options
+### Constructor Options
 
 They can also be set on the DynamicConfig constructor.
 
