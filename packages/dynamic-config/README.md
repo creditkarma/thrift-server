@@ -101,9 +101,9 @@ You can override the values from the default config in a variety of ways, but th
 
 ### Returning Promises
 
-When using `js` or `ts` configs your conifg values can be Promises. Dynamic Config will resolve all Promises will building the ultimate representation of your application config.
+When using `js` or `ts` configs your conifg values can be Promises. Dynamic Config will resolve all Promises while building the ultimate representation of your application config.
 
-Your local `js` config file:
+As an example, this could be your local `js` config file:
 
 ```typescript
 export const server = Promise.resolve({
@@ -126,9 +126,9 @@ export async function createHttpClient(): Promise<Client> {
 
 Promises can also be nested, meaning keys within your returned config object can also have Promise values. Dynamic Config will recursively resolve all Promises before placing values in the resolved config object.
 
-This API can be used for loading config values from sources that don't neatly fit with the rest of the API. It does however make configs more messy and should be ideally be used sparingly. We'll cover how to get values from remote sources in a more organized fashion.
+This API can be used for loading config values from sources that don't neatly fit with the rest of the API. It does however make configs more messy and should ideally be used sparingly. We'll cover how to get values from remote sources in a more organized fashion shortly.
 
-Note: If a nested Promise rejects the wrapping Promise also rejects and all values are ignored.
+Note: If a nested Promise rejects the wrapping Promise also rejects and all values within the wrapping Promise are ignored.
 
 ### Configuration Path
 
