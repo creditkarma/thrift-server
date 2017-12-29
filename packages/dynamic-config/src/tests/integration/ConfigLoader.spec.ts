@@ -36,7 +36,7 @@ describe('ConfigLoader', () => {
       const expected: any = {
         project: {
           health: {
-            control: '/control',
+            control: '/javascript',
             response: 'PASS',
           },
         },
@@ -61,7 +61,7 @@ describe('ConfigLoader', () => {
       const expected: any = {
         project: {
           health: {
-            control: '/check',
+            control: '/typescript',
             response: 'PASS',
           },
         },
@@ -111,7 +111,7 @@ describe('ConfigLoader', () => {
       const expected: any = {
         project: {
           health: {
-            control: '/control',
+            control: '/javascript',
             response: 'PASS',
           },
         },

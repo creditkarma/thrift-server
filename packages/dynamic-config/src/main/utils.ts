@@ -84,6 +84,9 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any): T {
   } else if (oldObj === null) {
     throw new Error(`Cannot set value on null type at key: ${key}`)
 
+  } else if (key === '') {
+    return value
+
   } else {
     const newObj: any = (Array.isArray(oldObj)) ? [] : {}
     const [ head, ...tail ] = (key || '').split('.').filter((val: string) => {
@@ -113,7 +116,7 @@ export function setValueForKey<T>(key: string, value: any, oldObj: any): T {
 /**
  * Only copies properties from update into base if they already were defined in base
  */
-export function overlay<Base,Update>(base: Base, update: Update): Base & Update {
+export function overlay<Base, Update>(base: Base, update: Update): Base & Update {
   const newObj: any = {}
   const baseKeys: Array<string> = Object.keys(base)
   const updateKeys: Array<string> = Object.keys(update)
@@ -350,6 +353,10 @@ function collectUnresolvedPromises(
 
     return updates
 
+  } else if (obj instanceof Promise) {
+    updates.push([ path, obj ])
+    return updates
+
   } else if (typeof obj === 'object') {
     for (const key of Object.keys(obj)) {
       const value = obj[key]
@@ -364,16 +371,30 @@ function collectUnresolvedPromises(
   }
 }
 
-export async function resolveObjectPromises(obj: object): Promise<object> {
-  const unresolved: Array<ObjectUpdate> = collectUnresolvedPromises(obj)
+async function handleUnresolved(unresolved: Array<ObjectUpdate>, base: object): Promise<object> {
   const paths: Array<string> = unresolved.map((next: ObjectUpdate) => next[0].join('.'))
-  const promises: Array<Promise<any>> = unresolved.map((next: ObjectUpdate) => next[1])
-  const resolvedPromises: Array<any> = await Promise.all(promises)
+  const promises: Array<Promise<object>> = unresolved.map((next: ObjectUpdate) => next[1])
+  const resolvedPromises: Array<object> = await Promise.all(promises.map((next: Promise<object>) => {
+    return next.then((val: object) => {
+      const nested: Array<ObjectUpdate> = collectUnresolvedPromises(val)
+      if (nested.length > 0) {
+        return handleUnresolved(nested, val)
+      } else {
+        return Promise.resolve(val)
+      }
+    })
+  }))
+
   const newObj: object = resolvedPromises.reduce((acc: object, next: any, currentIndex: number) => {
     return setValueForKey(paths[currentIndex], next, acc)
-  }, obj)
+  }, base)
 
   return newObj
+}
+
+export async function resolveObjectPromises(obj: object): Promise<object> {
+  const unresolved: Array<ObjectUpdate> = collectUnresolvedPromises(obj)
+  return handleUnresolved(unresolved, obj)
 }
 
 export function isValidRemote(name: string, resolvers: Set<string>): boolean {
@@ -453,5 +474,35 @@ export async function race(promises: Array<Promise<any>>): Promise<any> {
         }
       })
     })
+  })
+}
+
+function processValues(values: Array<[object, number]>): Array<object> {
+  return values.sort((a: [object, number], b: [object, number]) => {
+    if (a[1] < b[1]) {
+      return -1
+    } else {
+      return 1
+    }
+  }).map((next: [object, number]) => {
+    return next[0]
+  })
+}
+
+function resolveAtIndex(promise: Promise<object>, index: number): Promise<[object, number]> {
+  return new Promise((resolve, reject) => {
+    promise.then((val: object) => {
+      return resolve([val, index])
+    }, (err: any) => {
+      return resolve([{}, index])
+    })
+  })
+}
+
+export async function valuesForPromises(promises: Array<Promise<object>>): Promise<Array<object>> {
+  return Promise.all(promises.map((next: Promise<object>, index: number) => {
+    return resolveAtIndex(next, index)
+  })).then((values: Array<[object, number]>) => {
+    return processValues(values)
   })
 }

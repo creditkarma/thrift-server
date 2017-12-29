@@ -2,7 +2,7 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
-DynamicConfig supports local config in the form of JSON files and remote configuration for secrets and other independently deployed configuration. By default remote configuration is stored in Consul and secret config values are stored in Vault. There is also an API for registering other remote config sources. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.json`) is required.
+DynamicConfig supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.(json|js|ts)`) is required.
 
 ## Install
 
@@ -16,7 +16,7 @@ The most common usage of DynamicConfig is through a singleton instance. The sing
 
 ### Promise-based
 
-When requesting a value from config a Promise of the expected result is returned. If the value is found the Promise is resolved. If the value is not found, either because it is missing or some other error, the Promise is rejected.
+When requesting a value from Dynamic Config a Promise of the expected result is returned. If the value is found the Promise is resolved. If the value is not found, either because it is missing or some other error, the Promise is rejected.
 
 #### Singleton
 
@@ -70,9 +70,8 @@ Additionally, you can batch get config values. The promise here will only resolv
 import { config } from '@creditkarma/dynamic-config'
 
 export async function createHttpClient(): Promise<Client> {
-  return config().getAll('hostName', 'port').then(([ host, port ]) => {
-    return new Client(host, port)
-  })
+  const [ host, port ] = await config().getAll('hostName', 'port')
+  return new Client(host, port)
 }
 ```
 
@@ -84,7 +83,13 @@ Currently, DynamicConfig only support confing in the form of JSON. Support for J
 
 ### Default Configuration
 
-The default config for your app is loaded from the `config/default.json` file. The default configuration is required. The default configuration is the contract between you and your application.
+The default config for your app is loaded from the `config/default.(json|js|ts)` file. The default configuration is required. The default configuration is the contract between you and your application. If there is both a `default.json` file and a `default.js` file the values from the `default.js` file will have presidence.
+
+#### File Presidence
+
+JSON files have the lowest presidence, JS files have middle precidence and TS files have the highest presidence.
+
+Using TS files is convinient for co-locating your configs with the TypeScript interfaces for those configs.
 
 #### Config Schema
 
@@ -92,7 +97,38 @@ At runtime a schema (a subset of [JSON Schema](http://json-schema.org/)) is buil
 
 #### Local Overrides
 
-You can override these values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.json`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
+You can override the values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.(json|js|ts)`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
+
+### Returning Promises
+
+When using `js` or `ts` configs your conifg values can be Promises. Dynamic Config will resolve all Promises while building the ultimate representation of your application config.
+
+As an example, this could be your local `js` config file:
+
+```typescript
+export const server = Promise.resolve({
+  hostName: 'localhost',
+  port: 8080
+})
+```
+
+Then when you fetch from Dynamic Config the Promise in your config is transparent:
+
+```typescript
+import { config } from '@creditkarma/dynamic-config'
+
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await config().get('server.hostName')
+  const port: number = await config().get('server.port')
+  return new Client(host, port)
+}
+```
+
+Promises can also be nested, meaning keys within your returned config object can also have Promise values. Dynamic Config will recursively resolve all Promises before placing values in the resolved config object.
+
+This API can be used for loading config values from sources that don't neatly fit with the rest of the API. It does however make configs more messy and should ideally be used sparingly. We'll cover how to get values from remote sources in a more organized fashion shortly.
+
+Note: If a nested Promise rejects the wrapping Promise also rejects and all values within the wrapping Promise are ignored.
 
 ### Configuration Path
 
@@ -403,7 +439,6 @@ As mentioned config placeholders can also be used for `secret` stores. Review ab
 
 ## Roadmap
 
-* Support `.js` and `.ts` local config files
 * Add ability to watch a value for runtime changes
 * Explore options for providing a synchronous API
 
