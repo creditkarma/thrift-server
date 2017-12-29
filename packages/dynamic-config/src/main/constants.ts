@@ -39,3 +39,10 @@ export const DEFAULT_ENVIRONMENT: string = 'development'
 export const CONFIG_SEARCH_PATHS = [
   'src', 'lib', 'main', 'dist', 'app',
 ]
+
+/**
+ * Supported config file extensions. Configs are applied in this order.
+ */
+export const SUPPORTED_FILE_TYPES = [
+  'json', 'js', 'ts',
+]

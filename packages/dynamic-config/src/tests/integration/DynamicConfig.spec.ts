@@ -49,7 +49,7 @@ describe('DynamicConfig', () => {
             },
             project: {
               health: {
-                control: '/control',
+                control: '/javascript',
                 response: 'PASS',
               },
             },
@@ -90,7 +90,7 @@ describe('DynamicConfig', () => {
       it('should fallback to returning from local config', (done) => {
         dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
-            control: '/control',
+            control: '/javascript',
             response: 'PASS',
           })
 
@@ -197,7 +197,7 @@ describe('DynamicConfig', () => {
             },
             project: {
               health: {
-                control: '/control',
+                control: '/javascript',
                 response: 'PASS',
               },
             },
@@ -238,7 +238,7 @@ describe('DynamicConfig', () => {
             },
             project: {
               health: {
-                control: '/control',
+                control: '/javascript',
                 response: 'PASS',
               },
             },
@@ -253,7 +253,7 @@ describe('DynamicConfig', () => {
       it('should fallback to returning from local config', (done) => {
         dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
-            control: '/control',
+            control: '/javascript',
             response: 'PASS',
           })
 
@@ -316,7 +316,7 @@ describe('DynamicConfig', () => {
             },
             project: {
               health: {
-                control: '/control',
+                control: '/javascript',
                 response: 'PASS',
               },
             },
@@ -360,7 +360,7 @@ describe('DynamicConfig', () => {
       it('should fallback to returning from local config', (done) => {
         dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
-            control: '/control',
+            control: '/javascript',
             response: 'PASS',
           })
 

@@ -13,12 +13,12 @@
     "build": "npm run clean && npm run lint && tsc",
     "docker": "docker-compose up --force-recreate &",
     "docker:kill": "docker-compose kill",
-    "pretest": "npm run build && npm run docker",
-    "posttest": "npm run docker:kill",
+    "pretest": "npm run build",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "lab --timeout 10000 --verbose -l -S ./dist/tests/unit/*.spec.js",
-    "pretest:integration": "cp -r ./src/tests/integration/config ./dist/tests/integration/config",
-    "test:integration": "wait-on --timeout 20000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S ./dist/tests/integration/*.spec.js"
+    "test:unit": "lab --timeout 10000 --verbose -l -S dist/tests/unit/*.spec.js",
+    "pretest:integration": "rimraf dist/tests/integration/config && cp -r src/tests/integration/config dist/tests/integration/config && npm run docker",
+    "test:integration": "wait-on --timeout 20000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S dist/tests/integration/*.spec.js",
+    "posttest:integration": "npm run docker:kill"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@creditkarma/consul-client": "^0.2.0",
-    "@creditkarma/vault-client": "^0.2.0"
+    "@creditkarma/vault-client": "^0.2.0",
+    "ts-node": "^4.1.0"
   }
 }

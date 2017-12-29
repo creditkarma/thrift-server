@@ -111,6 +111,44 @@ describe('Utils', () => {
         done()
       })
     })
+
+    it('should resolve nested Promises', async () => {
+      const actual = await Utils.resolveObjectPromises(Promise.resolve({
+        one: Promise.resolve(5),
+        two: {
+          three: Promise.resolve(6),
+          four: 8,
+          five: {
+            six: Promise.resolve(9),
+          },
+        },
+        seven: {
+          eight: 90,
+          nine: {
+            ten: Promise.resolve(34),
+          },
+        },
+      }))
+
+      const expected = {
+        one: 5,
+        two: {
+          three: 6,
+          four: 8,
+          five: {
+            six: 9,
+          },
+        },
+        seven: {
+          eight: 90,
+          nine: {
+            ten: 34,
+          },
+        },
+      }
+
+      expect(actual).to.equal(expected)
+    })
   })
 
   describe('objectMatchesSchema', () => {

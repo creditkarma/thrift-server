@@ -5,6 +5,7 @@ import {
   CONFIG_SEARCH_PATHS,
   DEFAULT_CONFIG_PATH,
   DEFAULT_ENVIRONMENT,
+  SUPPORTED_FILE_TYPES,
 } from './constants'
 
 import * as utils from './utils'
@@ -48,6 +49,37 @@ function getConfigPath(sourceDir: string): string {
   throw new Error('No local config directory found')
 }
 
+async function loadFileWithName<T>(configPath: string, name: string): Promise<T> {
+  const configs: Array<any> = await utils.valuesForPromises(SUPPORTED_FILE_TYPES.map((ext: string) => {
+    const filePath: string = path.resolve(configPath, `${name}.${ext}`)
+
+    return readFile(filePath).then((content: string) => {
+      switch (ext) {
+        case 'js':
+          return require(filePath)
+
+        case 'ts':
+          require('ts-node').register({
+            lazy: true,
+            compilerOptions: {
+              allowJs: true,
+              rootDir: '.',
+            },
+          })
+
+          return require(filePath)
+
+        default:
+          return (parseContent(content) as any)
+      }
+    }, (err: any) => {
+      return {}
+    })
+  }))
+
+  return (utils.overlayObjects(...configs) as T)
+}
+
 export interface ILoaderConfig {
   configPath?: string
   configEnv?: string
@@ -67,22 +99,14 @@ export class ConfigLoader<T = any> {
    * Loads default JSON config file. This is required.
    */
   public async loadDefault(): Promise<T> {
-    return readFile(path.resolve(this.configPath, 'default.json')).then((content: string) => {
-      return (parseContent(content) as any)
-    }, (err: any) => {
-      return {}
-    })
+    return loadFileWithName<T>(this.configPath, 'default')
   }
 
   /**
    * Loads JSON config file based on NODE_ENV.
    */
   public async loadEnvironment(): Promise<T> {
-    return readFile(path.resolve(this.configPath, `${this.configEnv}.json`)).then((content: string) => {
-      return (parseContent(content) as any)
-    }, (err: any) => {
-      return {}
-    })
+    return loadFileWithName<T>(this.configPath, this.configEnv)
   }
 
   /**
