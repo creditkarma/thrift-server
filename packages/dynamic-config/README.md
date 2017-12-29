@@ -2,7 +2,7 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
-DynamicConfig supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.json`) is required.
+DynamicConfig supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.(json|js|ts)`) is required.
 
 ## Install
 
