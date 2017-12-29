@@ -48,7 +48,7 @@ describe('Utils', () => {
   })
 
   describe('resolveObjectPromises', () => {
-    it('should resolve nested Promises within an object', async () => {
+    it('should resolve Promises within an object', async () => {
       const actual = await Utils.resolveObjectPromises({
         one: Promise.resolve(5),
         two: {
@@ -86,7 +86,7 @@ describe('Utils', () => {
       expect(actual).to.equal(expected)
     })
 
-    it('should reject if one of the nested Promises reject', (done) => {
+    it('should reject if one of the Promises reject', (done) => {
       const objectPromise = Utils.resolveObjectPromises({
         one: Promise.resolve(5),
         two: {
@@ -122,12 +122,12 @@ describe('Utils', () => {
             six: Promise.resolve(9),
           },
         },
-        seven: {
+        seven: Promise.resolve({
           eight: 90,
           nine: {
             ten: Promise.resolve(34),
           },
-        },
+        }),
       }))
 
       const expected = {
