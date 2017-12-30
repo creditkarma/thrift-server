@@ -85,21 +85,62 @@ Currently, DynamicConfig only support confing in the form of JSON. Support for J
 
 The default config for your app is loaded from the `config/default.(json|js|ts)` file. The default configuration is required. The default configuration is the contract between you and your application. If there is both a `default.json` file and a `default.js` file the values from the `default.js` file will have presidence.
 
-#### File Presidence
+### File Types
 
-JSON files have the lowest presidence, JS files have middle precidence and TS files have the highest presidence.
+The three different file types are loaded in a predictable order. This means that if you have multiple files with the same base name but different extensions (`default.json` vs `default.ts`) the two files have different presidence based on their extension. JSON files are merged first, then JS and finally TS. This means that `ts` files have the highest presidence as their values are merged last.
+
+#### TypeScript
 
 Using TS files is convinient for co-locating your configs with the TypeScript interfaces for those configs.
 
-#### Config Schema
+#### Exporting Values from TypeScript and JavaScript
 
-At runtime a schema (a subset of [JSON Schema](http://json-schema.org/)) is built from this default config file. You can only use keys that you define in your default config and they must have the same shape. Config values should be predictable. If the form of your config is mutable this is very likely the source (or result of) a bug.
+When exporting config values from a `ts` or `js` file you can either use named or default exports.
 
-#### Local Overrides
+Named exports:
 
-You can override the values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.(json|js|ts)`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
+```typescript
+export const server = {
+  hostName: 'localhost',
+  port: 8080,
+}
 
-### Returning Promises
+export const database = {
+  username: 'root',
+  password: 'root',
+}
+```
+
+Default exports:
+
+```typescript
+export default {
+  server: {
+    hostName: 'localhost',
+    port: 8080,
+  },
+  database: {
+    username: 'root',
+    password: 'root',
+  }
+}
+```
+
+Either of these will add two keys to the compiled application config object.
+
+You can get at these values as:
+
+```typescript
+import { config } from '@creditkarma/dynamic-config'
+
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await config().get('server.hostName')
+  const port: number = await config().get('server.port')
+  return new Client(host, port)
+}
+```
+
+#### Returning Promises
 
 When using `js` or `ts` configs your conifg values can be Promises. Dynamic Config will resolve all Promises while building the ultimate representation of your application config.
 
@@ -129,6 +170,14 @@ Promises can also be nested, meaning keys within your returned config object can
 This API can be used for loading config values from sources that don't neatly fit with the rest of the API. It does however make configs more messy and should ideally be used sparingly. We'll cover how to get values from remote sources in a more organized fashion shortly.
 
 Note: If a nested Promise rejects the wrapping Promise also rejects and all values within the wrapping Promise are ignored.
+
+### Config Schema
+
+At runtime a schema (a subset of [JSON Schema](http://json-schema.org/)) is built from this default config file. You can only use keys that you define in your default config and they must have the same shape. Config values should be predictable. If the form of your config is mutable this is very likely the source (or result of) a bug.
+
+### Local Overrides
+
+You can override the values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.(json|js|ts)`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
 ### Configuration Path
 

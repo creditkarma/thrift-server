@@ -55,10 +55,17 @@ async function loadFileWithName<T>(configPath: string, name: string): Promise<T>
 
     return readFile(filePath).then((content: string) => {
       switch (ext) {
-        case 'js':
-          return require(filePath)
+        case 'js': {
+          const configObj = require(filePath)
 
-        case 'ts':
+          if (typeof configObj.default === 'object') {
+            return configObj.default
+          } else {
+            return configObj
+          }
+        }
+
+        case 'ts': {
           require('ts-node').register({
             lazy: true,
             compilerOptions: {
@@ -67,7 +74,14 @@ async function loadFileWithName<T>(configPath: string, name: string): Promise<T>
             },
           })
 
-          return require(filePath)
+          const configObj = require(filePath)
+
+          if (typeof configObj.default === 'object') {
+            return configObj.default
+          } else {
+            return configObj
+          }
+        }
 
         default:
           return (parseContent(content) as any)

@@ -80,6 +80,31 @@ describe('ConfigLoader', () => {
       }).catch(done)
     })
 
+    it('should return the correct config for test', (done) => {
+      process.env.NODE_ENV = 'test'
+      const loader: ConfigLoader = new ConfigLoader()
+      const expected: any = {
+        project: {
+          health: {
+            control: '/test',
+            response: 'PASS',
+          },
+        },
+        database: {
+          username: 'root',
+          password: 'root',
+        },
+      }
+
+      loader.resolve().then((actual: any) => {
+        expect(actual).to.equal(expected)
+        done()
+      }, (err: any) => {
+        console.log('error: ', err)
+        done(err)
+      }).catch(done)
+    })
+
     it('should only load default config if file for NODE_ENV does not exist', (done) => {
       process.env.NODE_ENV = 'integration'
       const loader: ConfigLoader = new ConfigLoader()
