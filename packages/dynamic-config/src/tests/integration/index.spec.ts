@@ -54,7 +54,7 @@ describe('DynamicConfig Singleton', () => {
     it('should fallback to returning from local config', (done) => {
       config().get<object>('project.health').then((val: object) => {
         expect(val).to.equal({
-          control: '/control',
+          control: '/test',
           response: 'PASS',
         })
 
