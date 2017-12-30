@@ -87,7 +87,7 @@ The default config for your app is loaded from the `config/default.(json|js|ts)`
 
 ### File Types
 
-The three different file types are loaded in a predictable order. JSON files are merged first, then JS and finally TS. This means that `ts` files have the highest presidence as their values are merged last.
+The three different file types are loaded in a predictable order. This means that if you have multiple files with the same base name but different extensions (`default.json` vs `default.ts`) the two files have different presidence based on their extension. JSON files are merged first, then JS and finally TS. This means that `ts` files have the highest presidence as their values are merged last.
 
 #### TypeScript
 
