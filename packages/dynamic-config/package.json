@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/dynamic-config",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Dynamic Config for Node.js backed by Consul and Vault",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -34,8 +34,8 @@
     "wait-on": "^2.0.2"
   },
   "dependencies": {
-    "@creditkarma/consul-client": "^0.3.2",
-    "@creditkarma/vault-client": "^0.3.2",
+    "@creditkarma/consul-client": "^0.3.3",
+    "@creditkarma/vault-client": "^0.3.3",
     "ts-node": "^4.1.0"
   }
 }
