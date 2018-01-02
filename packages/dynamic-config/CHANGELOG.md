@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.1"></a>
+## [0.3.1](https://github.com/creditkarma/thrift-server/compare/v0.3.0...v0.3.1) (2018-01-02)
+
+
+### Bug Fixes
+
+* Fix lerna publish ([#36](https://github.com/creditkarma/thrift-server/issues/36)) ([53571eb](https://github.com/creditkarma/thrift-server/commit/53571eb))
+
+
+
+
 <a name="0.3.0"></a>
 # [0.3.0](https://github.com/creditkarma/thrift-server/compare/v0.2.0...v0.3.0) (2018-01-02)
 
