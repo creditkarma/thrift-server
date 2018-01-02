@@ -12,9 +12,6 @@
     "Hashicorp",
     "Vault"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "clean": "rimraf dist/",
     "lint": "tslint --fix src/**/*.ts",

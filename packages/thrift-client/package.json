@@ -10,9 +10,6 @@
   "directories": {
     "example": "example"
   },
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",
