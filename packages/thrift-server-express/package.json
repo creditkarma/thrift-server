@@ -7,6 +7,9 @@
   "files": [
     "dist/main"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated ",
     "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
