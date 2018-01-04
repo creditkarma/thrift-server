@@ -7,6 +7,12 @@
   "files": [
     "dist/main"
   ],
+  "keywords": [
+    "TypeScript",
+    "Node.js",
+    "Config",
+    "Configuration"
+  ],
   "scripts": {
     "clean": "rimraf dist/",
     "lint": "tslint --fix './src/**/*.ts'",
@@ -22,6 +28,10 @@
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config"
+  },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
