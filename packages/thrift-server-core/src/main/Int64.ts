@@ -29,9 +29,10 @@ export class Int64 extends Int64_Base {
       let high = Math.floor(low / POW2_32) + high5 * 232830  // The literal is 10^15 / 2^&32
       low = low % POW2_32
 
-      if (high >= POW2_31 &&
-          !(negative && (high === POW2_31) && (low === 0))  // Allow minimum Int64
-        ) {
+      if (
+        high >= POW2_31 &&
+        !(negative && (high === POW2_31) && (low === 0))  // Allow minimum Int64
+      ) {
         throw new RangeError('The magnitude is too large for Int64.')
       }
 
@@ -55,8 +56,10 @@ export class Int64 extends Int64_Base {
     let b = i64.buffer
     const o = i64.offset
 
-    if ((!b[o] && !(b[o + 1] & 0xe0)) ||
-        (!~b[o] && !~(b[o + 1] & 0xe0))) {
+    if (
+      (!b[o] && !(b[o + 1] & 0xe0)) ||
+      (!~b[o] && !~(b[o + 1] & 0xe0))
+    ) {
       // The magnitude is small enough.
       return i64.toString()
 

@@ -7,6 +7,12 @@
   "files": [
     "dist/main"
   ],
+  "keywords": [
+    "Thrift",
+    "Express",
+    "TypeScript",
+    "RPC"
+  ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated ",
     "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
@@ -22,10 +28,6 @@
     "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js",
     "lint": "tslint --fix './src/**/*.ts'"
   },
-  "keywords": [
-    "Thrift",
-    "TypeScript"
-  ],
   "author": "Credit Karma",
   "license": "Apache-2.0",
   "repository": {

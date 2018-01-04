@@ -7,6 +7,11 @@
   "files": [
     "dist/main"
   ],
+  "keywords": [
+    "Thrift",
+    "TypeScript",
+    "RPC"
+  ],
   "scripts": {
     "clean": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
@@ -19,10 +24,6 @@
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --verbose -l -S ./dist/**/*.spec.js"
   },
-  "keywords": [
-    "Thrift",
-    "TypeScript"
-  ],
   "author": "Credit Karma",
   "license": "Apache-2.0",
   "repository": {

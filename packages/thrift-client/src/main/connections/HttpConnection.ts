@@ -11,7 +11,7 @@ import {
   IIncomingMiddleware,
   IOutgoingMiddleware,
   ThriftMiddlewareConfig,
-} from './types'
+} from '../types'
 
 import {
   readThriftMethod,

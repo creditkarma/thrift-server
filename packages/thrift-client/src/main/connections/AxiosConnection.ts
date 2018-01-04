@@ -10,7 +10,7 @@ import {
 
 import {
   IHttpConnectionOptions,
-} from './types'
+} from '../types'
 
 import {
   deepMerge,

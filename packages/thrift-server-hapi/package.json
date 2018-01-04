@@ -7,6 +7,12 @@
   "files": [
     "dist/main"
   ],
+  "keywords": [
+    "Thrift",
+    "Hapi",
+    "TypeScript",
+    "RPC"
+  ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",

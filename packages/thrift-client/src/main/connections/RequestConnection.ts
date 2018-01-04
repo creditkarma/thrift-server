@@ -14,7 +14,7 @@ import {
 
 import {
   IHttpConnectionOptions,
-} from './types'
+} from '../types'
 
 import {
   deepMerge,
@@ -50,16 +50,15 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
     })
 
     return new Promise((resolve, reject) => {
-      this.request
-        .post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
-          if (err !== null) {
-            reject(err)
-          } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
-            reject(new Error(body.toString()))
-          } else {
-            resolve(body)
-          }
-        })
+      this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
+        if (err !== null) {
+          reject(err)
+        } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
+          reject(new Error(body.toString()))
+        } else {
+          resolve(body)
+        }
+      })
     })
   }
 }

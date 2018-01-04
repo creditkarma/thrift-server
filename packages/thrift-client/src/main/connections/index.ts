@@ -1,7 +1,6 @@
 export * from './HttpConnection'
 export * from './AxiosConnection'
 export * from './RequestConnection'
-export * from './types'
 
 import { AxiosInstance } from 'axios'
 
@@ -16,7 +15,7 @@ import {
 
 import {
   IHttpConnectionOptions,
-} from './types'
+} from '../types'
 
 export function fromAxios(
   requestApi: AxiosInstance,

@@ -10,6 +10,11 @@
   "directories": {
     "example": "example"
   },
+  "keywords": [
+    "Thrift",
+    "TypeScript",
+    "RPC"
+  ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",
