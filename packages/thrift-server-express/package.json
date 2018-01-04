@@ -36,10 +36,8 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "^0.3.3",
-    "@types/express": "^4.0.37"
-  },
-  "dependencies": {
-    "express": "^4.15.3"
+    "@types/express": "^4.0.37",
+    "express": "^4.16.0"
   },
   "devDependencies": {
     "@creditkarma/thrift-client": "^0.3.3",
@@ -56,6 +54,7 @@
     "@types/rimraf": "0.0.28",
     "body-parser": "^1.17.2",
     "code": "^4.1.0",
+    "express": "^4.16.0",
     "lab": "^14.2.0",
     "lerna": "^2.0.0",
     "request": "^2.83.0",

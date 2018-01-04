@@ -43,7 +43,7 @@
     "@types/rimraf": "0.0.28",
     "body-parser": "^1.17.2",
     "code": "^4.1.0",
-    "express": "^4.15.3",
+    "express": "^4.16.0",
     "lab": "^14.2.0",
     "lerna": "^2.0.0",
     "rimraf": "^2.5.4",

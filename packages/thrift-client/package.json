@@ -39,9 +39,7 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "^0.3.3",
-    "@types/request": "^2.0.8"
-  },
-  "dependencies": {
+    "@types/request": "^2.0.8",
     "axios": "^0.16.2",
     "request": "^2.83.0"
   },
@@ -56,10 +54,12 @@
     "@types/node": "^8.0.31",
     "@types/q": "^1.0.5",
     "@types/request": "^2.0.8",
+    "axios": "^0.16.2",
     "code": "^4.1.0",
     "express": "^4.16.0",
     "hapi": "^16.6.2",
     "lab": "^14.3.1",
+    "request": "^2.83.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
     "typescript": "^2.6.1"
