@@ -1,6 +1,9 @@
 import { expect } from 'code'
 import * as Lab from 'lab'
-import { ConfigLoader } from '../../main/'
+import {
+  ConfigLoader,
+  IRootConfigValue,
+} from '../../main/'
 
 export const lab = Lab.script()
 
@@ -30,129 +33,439 @@ describe('ConfigLoader', () => {
       done()
     })
 
-    it('should return the correct config for development', (done) => {
+    it('should return the correct config for development', async () => {
       process.env.NODE_ENV = 'development'
       const loader: ConfigLoader = new ConfigLoader()
-      const expected: any = {
-        project: {
-          health: {
-            control: '/javascript',
-            response: 'PASS',
+      const expected: IRootConfigValue = {
+        type: 'root',
+        properties: {
+          project: {
+            source: {
+              type: 'local',
+              name: 'development',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              health: {
+                source: {
+                  type: 'local',
+                  name: 'development',
+                },
+                resolved: true,
+                type: 'object',
+                properties: {
+                  control: {
+                    source: {
+                      type: 'local',
+                      name: 'development',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: '/javascript',
+                    watchers: [],
+                  },
+                  response: {
+                    source: {
+                      type: 'local',
+                      name: 'development',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: 'PASS',
+                    watchers: [],
+                  },
+                },
+                watchers: [],
+              },
+            },
+            watchers: [],
           },
-        },
-        database: {
-          username: 'root',
-          password: 'root',
+          database: {
+            source: {
+              type: 'local',
+              name: 'default',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              username: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+              password: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+            },
+            watchers: [],
+          },
         },
       }
 
-      loader.resolve().then((actual: any) => {
+      return loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should return the correct config for production', (done) => {
+    it('should return the correct config for production', async () => {
       process.env.NODE_ENV = 'production'
       const loader: ConfigLoader = new ConfigLoader()
-      const expected: any = {
-        project: {
-          health: {
-            control: '/typescript',
-            response: 'PASS',
+      const expected: IRootConfigValue = {
+        type: 'root',
+        properties: {
+          project: {
+            source: {
+              type: 'local',
+              name: 'production',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              health: {
+                source: {
+                  type: 'local',
+                  name: 'production',
+                },
+                resolved: true,
+                type: 'object',
+                properties: {
+                  control: {
+                    source: {
+                      type: 'local',
+                      name: 'production',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: '/typescript',
+                    watchers: [],
+                  },
+                  response: {
+                    source: {
+                      type: 'local',
+                      name: 'production',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: 'PASS',
+                    watchers: [],
+                  },
+                },
+                watchers: [],
+              },
+            },
+            watchers: [],
           },
-        },
-        database: {
-          username: 'foo',
-          password: 'bar',
+          database: {
+            source: {
+              type: 'local',
+              name: 'production',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              username: {
+                source: {
+                  type: 'local',
+                  name: 'production',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'foo',
+                watchers: [],
+              },
+              password: {
+                source: {
+                  type: 'local',
+                  name: 'production',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'bar',
+                watchers: [],
+              },
+            },
+            watchers: [],
+          },
         },
       }
 
-      loader.resolve().then((actual: any) => {
+      return loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should return the correct config for test', (done) => {
+    it('should return the correct config for test', async () => {
       process.env.NODE_ENV = 'test'
       const loader: ConfigLoader = new ConfigLoader()
-      const expected: any = {
-        project: {
-          health: {
-            control: '/test',
-            response: 'PASS',
+      const expected: IRootConfigValue = {
+        type: 'root',
+        properties: {
+          project: {
+            source: {
+              type: 'local',
+              name: 'test',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              health: {
+                source: {
+                  type: 'local',
+                  name: 'test',
+                },
+                resolved: true,
+                type: 'object',
+                properties: {
+                  control: {
+                    source: {
+                      type: 'local',
+                      name: 'test',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: '/test',
+                    watchers: [],
+                  },
+                  response: {
+                    source: {
+                      type: 'local',
+                      name: 'test',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: 'PASS',
+                    watchers: [],
+                  },
+                },
+                watchers: [],
+              },
+            },
+            watchers: [],
           },
-        },
-        database: {
-          username: 'root',
-          password: 'root',
+          database: {
+            source: {
+              type: 'local',
+              name: 'default',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              username: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+              password: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+            },
+            watchers: [],
+          },
         },
       }
 
-      loader.resolve().then((actual: any) => {
+      return loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should only load default config if file for NODE_ENV does not exist', (done) => {
+    it('should only load default config if file for NODE_ENV does not exist', async () => {
       process.env.NODE_ENV = 'integration'
       const loader: ConfigLoader = new ConfigLoader()
-      const expected: any = {
-        project: {
-          health: {
-            control: '/check',
-            response: 'GOOD',
+      const expected: IRootConfigValue = {
+        type: 'root',
+        properties: {
+          project: {
+            source: {
+              type: 'local',
+              name: 'default',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              health: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'object',
+                properties: {
+                  control: {
+                    source: {
+                      type: 'local',
+                      name: 'default',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: '/check',
+                    watchers: [],
+                  },
+                  response: {
+                    source: {
+                      type: 'local',
+                      name: 'default',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: 'GOOD',
+                    watchers: [],
+                  },
+                },
+                watchers: [],
+              },
+            },
+            watchers: [],
           },
-        },
-        database: {
-          username: 'root',
-          password: 'root',
+          database: {
+            source: {
+              type: 'local',
+              name: 'default',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              username: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+              password: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+            },
+            watchers: [],
+          },
         },
       }
 
-      loader.resolve().then((actual: any) => {
+      return loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should default to loading development config', (done) => {
+    it('should default to loading development config', async () => {
       process.env.NODE_ENV = ''
       const loader: ConfigLoader = new ConfigLoader()
-      const expected: any = {
-        project: {
-          health: {
-            control: '/javascript',
-            response: 'PASS',
+      const expected: IRootConfigValue = {
+        type: 'root',
+        properties: {
+          project: {
+            source: {
+              type: 'local',
+              name: 'development',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              health: {
+                source: {
+                  type: 'local',
+                  name: 'development',
+                },
+                resolved: true,
+                type: 'object',
+                properties: {
+                  control: {
+                    source: {
+                      type: 'local',
+                      name: 'development',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: '/javascript',
+                    watchers: [],
+                  },
+                  response: {
+                    source: {
+                      type: 'local',
+                      name: 'development',
+                    },
+                    resolved: true,
+                    type: 'string',
+                    value: 'PASS',
+                    watchers: [],
+                  },
+                },
+                watchers: [],
+              },
+            },
+            watchers: [],
           },
-        },
-        database: {
-          username: 'root',
-          password: 'root',
+          database: {
+            source: {
+              type: 'local',
+              name: 'default',
+            },
+            resolved: true,
+            type: 'object',
+            properties: {
+              username: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+              password: {
+                source: {
+                  type: 'local',
+                  name: 'default',
+                },
+                resolved: true,
+                type: 'string',
+                value: 'root',
+                watchers: [],
+              },
+            },
+            watchers: [],
+          },
         },
       }
 
       loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
   })
 })

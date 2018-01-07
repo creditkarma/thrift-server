@@ -16,9 +16,8 @@ const before = lab.before
 
 describe('DynamicConfig', () => {
 
-  before((done) => {
+  before(async () => {
     process.chdir(__dirname)
-    done()
   })
 
   describe('Configured with Vault and Consul', () => {
@@ -40,8 +39,8 @@ describe('DynamicConfig', () => {
     )
 
     describe('get', () => {
-      it('should return full config when making empty call to get', (done) => {
-        dynamicConfig.get().then((actual: any) => {
+      it('should return full config when making empty call to get', async () => {
+        return dynamicConfig.get().then((actual: any) => {
           expect(actual).to.equal({
             database: {
               username: 'testUser',
@@ -50,7 +49,7 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'PASS',
+                response: 'DELAYED',
               },
             },
             'hashicorp-vault': {
@@ -60,111 +59,84 @@ describe('DynamicConfig', () => {
               tokenPath: './tmp/token',
             },
           })
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should return the value from Consul if available', (done) => {
-        dynamicConfig.get<string>('database.username').then((actual: string) => {
+      it('should return the value from Consul if available', async () => {
+        return dynamicConfig.get<string>('database.username').then((actual: string) => {
           expect(actual).to.equal('testUser')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should fetch value from Vault when value is Vault placeholder', (done) => {
-        dynamicConfig.get<string>('database.password').then((actual: string) => {
+      it('should fetch value from Vault when value is Vault placeholder', async () => {
+        return dynamicConfig.get<string>('database.password').then((actual: string) => {
           expect(actual).to.equal('K1ndaS3cr3t')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should fallback to returning from local config', (done) => {
-        dynamicConfig.get<object>('project.health').then((actual: object) => {
+      it('should fallback to returning from local config', async () => {
+        return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'PASS',
+            response: 'DELAYED',
           })
-
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should reject for a missing key', (done) => {
-        dynamicConfig.get<object>('fake.path').then((actual: object) => {
-          done(new Error('Should reject for missing key'))
+      it('should reject for a missing key', async () => {
+        return dynamicConfig.get<object>('fake.path').then((actual: object) => {
+          throw new Error('Should reject for missing key')
         }, (err: any) => {
           expect(err.message).to.equal('Unable to find value for key: fake.path')
-          done()
-        }).catch(done)
+        })
       })
     })
 
     describe('getAll', () => {
-      it('should resolve with all requested config values', (done) => {
-        dynamicConfig.getAll('database.username', 'database.password').then((actual: any) => {
+      it('should resolve with all requested config values', async () => {
+        return dynamicConfig.getAll('database.username', 'database.password').then((actual: any) => {
           expect(actual).to.equal([ 'testUser', 'K1ndaS3cr3t' ])
-          done()
         })
       })
 
-      it('should reject if one of the values is missing', (done) => {
-        dynamicConfig.getAll('database.username', 'database.fake').then((val: any) => {
-          done(new Error('Promise should reject'))
+      it('should reject if one of the values is missing', async () => {
+        return dynamicConfig.getAll('database.username', 'database.fake').then((val: any) => {
+          throw new Error('Promise should reject')
         }, (err: any) => {
           expect(err.message).to.equal('Unable to find value for key: database.fake')
-          done()
         })
       })
     })
 
     describe('getWithDefault', () => {
-      it('should resolve with with value if found', (done) => {
-        dynamicConfig.getWithDefault('database.username', 'defaultUser').then((actual: any) => {
+      it('should resolve with with value if found', async () => {
+        return dynamicConfig.getWithDefault('database.username', 'defaultUser').then((actual: any) => {
           expect(actual).to.equal('testUser')
-          done()
         })
       })
 
-      it('should resolve with with default if value not found', (done) => {
-        dynamicConfig.getWithDefault('database.fake', 'defaultResponse').then((actual: any) => {
+      it('should resolve with with default if value not found', async () => {
+        return dynamicConfig.getWithDefault('database.fake', 'defaultResponse').then((actual: any) => {
           expect(actual).to.equal('defaultResponse')
-          done()
         })
       })
     })
 
     describe('getSecretValue', () => {
-      it('should get secret value from Vault', (done) => {
-        dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
+      it('should get secret value from Vault', async () => {
+        return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
           expect(actual).to.equal('this is a secret')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should reject for a missing secret', (done) => {
-        dynamicConfig.getSecretValue<string>('missing-secret').then((actual: string) => {
-          done(new Error('Should reject for missing secret'))
+      it('should reject for a missing secret', async () => {
+        return dynamicConfig.getSecretValue<string>('missing-secret').then((actual: string) => {
+          throw new Error('Should reject for missing secret')
         }, (err: any) => {
           expect(err.message).to.equal(
             'Unable to find value for key: missing-secret',
           )
-          done()
-        }).catch(done)
+        })
       })
     })
   })
@@ -188,8 +160,8 @@ describe('DynamicConfig', () => {
     )
 
     describe('get', () => {
-      it('should return full config when making empty call to get', (done) => {
-        dynamicConfig.get<string>().then((actual: any) => {
+      it('should return full config when making empty call to get', async () => {
+        return dynamicConfig.get<string>().then((actual: any) => {
           expect(actual).to.equal({
             database: {
               username: 'testUser',
@@ -198,39 +170,27 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'PASS',
+                response: 'DELAYED',
               },
             },
           })
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should return the value from Consul if available', (done) => {
-        dynamicConfig.get<string>('database.username').then((actual: string) => {
+      it('should return the value from Consul if available', async () => {
+        return dynamicConfig.get<string>('database.username').then((actual: string) => {
           expect(actual).to.equal('testUser')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should fetch value from Consul when value is Consul placeholder', (done) => {
-        dynamicConfig.get<string>('database.password').then((actual: string) => {
+      it('should fetch value from Consul when value is Consul placeholder', async () => {
+        return dynamicConfig.get<string>('database.password').then((actual: string) => {
           expect(actual).to.equal('Sup3rS3cr3t')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should mutate config after getting new data from Consul', (done) => {
-        dynamicConfig.get<string>().then((actual: any) => {
+      it('should mutate config after getting new data from Consul', async () => {
+        return dynamicConfig.get<string>().then((actual: any) => {
           expect(actual).to.equal({
             database: {
               username: 'testUser',
@@ -239,51 +199,40 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'PASS',
+                response: 'DELAYED',
               },
             },
           })
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should fallback to returning from local config', (done) => {
-        dynamicConfig.get<object>('project.health').then((actual: object) => {
+      it('should fallback to returning from local config', async () => {
+        return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'PASS',
+            response: 'DELAYED',
           })
-
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should reject for a missing key', (done) => {
-        dynamicConfig.get<object>('fake.path').then((actual: object) => {
-          done(new Error('Should reject for missing key'))
+      it('should reject for a missing key', async () => {
+        return dynamicConfig.get<object>('fake.path').then((actual: object) => {
+          throw new Error('Should reject for missing key')
         }, (err: any) => {
           expect(err.message).to.equal('Unable to find value for key: fake.path')
-          done()
-        }).catch(done)
+        })
       })
     })
 
     describe('getSecretValue', () => {
-      it('should reject when Vault not configured', (done) => {
-        dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
-          done(new Error('Should reject when Vault not configured'))
+      it('should reject when Vault not configured', async () => {
+        return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
+          throw new Error('Should reject when Vault not configured')
         }, (err: any) => {
           expect(err.message).to.equal(
             'Unable to find value for key: test-secret',
           )
-          done()
-        }).catch(done)
+        })
       })
     })
   })
@@ -307,8 +256,8 @@ describe('DynamicConfig', () => {
     )
 
     describe('get', () => {
-      it('should return full config when making empty call to get', (done) => {
-        dynamicConfig.get<string>().then((actual: any) => {
+      it('should return full config when making empty call to get', async () => {
+        return dynamicConfig.get<string>().then((actual: any) => {
           expect(actual).to.equal({
             database: {
               username: 'fakeUser',
@@ -317,25 +266,17 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'PASS',
+                response: 'DELAYED',
               },
             },
           })
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should return default value if unable to get from Consul', (done) => {
-        dynamicConfig.get<string>('database.password').then((actual: any) => {
+      it('should return default value if unable to get from Consul', async () => {
+        return dynamicConfig.get<string>('database.password').then((actual: any) => {
           expect(actual).to.equal('NotSoSecret')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
     })
   })
@@ -347,50 +288,39 @@ describe('DynamicConfig', () => {
     })
 
     describe('get', () => {
-      it('should return the value from local config', (done) => {
-        dynamicConfig.get<string>('database.username').then((actual: string) => {
+      it('should return the value from local config', async () => {
+        return dynamicConfig.get<string>('database.username').then((actual: string) => {
           expect(actual).to.equal('root')
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should fallback to returning from local config', (done) => {
-        dynamicConfig.get<object>('project.health').then((actual: object) => {
+      it('should fallback to returning from local config', async () => {
+        return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'PASS',
+            response: 'DELAYED',
           })
-
-          done()
-        }, (err: any) => {
-          console.log('error: ', err)
-          done(err)
-        }).catch(done)
+        })
       })
 
-      it('should reject for a missing key', (done) => {
-        dynamicConfig.get<object>('fake.path').then((actual: object) => {
-          done(new Error('Should reject for missing key'))
+      it('should reject for a missing key', async () => {
+        return dynamicConfig.get<object>('fake.path').then((actual: object) => {
+          throw new Error('Should reject for missing key')
         }, (err: any) => {
           expect(err.message).to.equal('Unable to find value for key: fake.path')
-          done()
-        }).catch(done)
+        })
       })
     })
 
     describe('getSecretValue', () => {
-      it('should reject when Vault not configured', (done) => {
-        dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
-          done(new Error(`Unable to retrieve key: 'test-secret'. Should reject when Vault not configured`))
+      it('should reject when Vault not configured', async () => {
+        return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
+          throw new Error(`Unable to retrieve key: 'test-secret'. Should reject when Vault not configured`)
         }, (err: any) => {
           expect(err.message).to.equal(
             'Unable to retrieve key: test-secret. No resolver found',
           )
-          done()
-        }).catch(done)
+        })
       })
     })
   })

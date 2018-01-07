@@ -7,13 +7,17 @@ import {
   HVAULT_CONFIG_KEY,
 } from '../constants'
 
-import { DynamicConfig, ISecretResolver } from '../DynamicConfig'
+import { DynamicConfig } from '../DynamicConfig'
 import { Just, Maybe, Nothing } from '../Maybe'
 
 import {
   HVFailed,
   HVNotConfigured,
 } from '../errors'
+
+import {
+  ISecretResolver,
+} from '../types'
 
 export function defaultVaultResolver(): ISecretResolver {
   let vaultClient: Promise<Maybe<VaultClient>>

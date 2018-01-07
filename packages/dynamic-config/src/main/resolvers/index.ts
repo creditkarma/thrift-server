@@ -1,2 +1,2 @@
-export * from './consul'
-export * from './vault'
+export { defaultConsulResolver } from './consul'
+export { defaultVaultResolver } from './vault'

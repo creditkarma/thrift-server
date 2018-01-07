@@ -21,9 +21,9 @@
     "docker:kill": "docker-compose kill",
     "pretest": "npm run build",
     "test": "npm run test:unit && npm run test:integration",
-    "test:unit": "lab --timeout 10000 --verbose -l -S dist/tests/unit/*.spec.js",
+    "test:unit": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/unit",
     "pretest:integration": "rimraf dist/tests/integration/config && cp -r src/tests/integration/config dist/tests/integration/config && npm run docker",
-    "test:integration": "wait-on --timeout 20000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S dist/tests/integration/*.spec.js",
+    "test:integration": "wait-on --timeout 20000 http://localhost:8510 http://localhost:8211 && node dist/tests/integration/bootstrap.js && lab --timeout 15000 --verbose -l -S -P DynamicConfig dist/tests/integration",
     "posttest:integration": "npm run docker:kill"
   },
   "author": "Credit Karma",
