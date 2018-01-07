@@ -2,7 +2,7 @@ import {
   KvStore,
 } from '@creditkarma/consul-client'
 
-import { DynamicConfig, IRemoteResolver } from '../DynamicConfig'
+import { DynamicConfig } from '../DynamicConfig'
 import { Just, Maybe, Nothing } from '../Maybe'
 
 import {
@@ -19,9 +19,29 @@ import {
 import {
   IConsulOptions,
   IRemoteOverrides,
+  IRemoteResolver,
 } from '../types'
 
-import * as utils from '../utils'
+import {
+  ObjectUtils,
+} from '../utils'
+
+export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverrides {
+  const temp = str.replace(`${remoteName}!/`, '')
+  const [ key, ...tail ] = temp.split('?')
+  const result: IRemoteOverrides = { key }
+
+  if (tail.length > 0) {
+    const params = tail[0]
+    const options = params.split('&')
+    for (const option of options) {
+      const [ name, value ] = option.split('=')
+      result[name] = value
+    }
+  }
+
+  return result
+}
 
 export function defaultConsulResolver(): IRemoteResolver {
   let consulClient: Maybe<KvStore>
@@ -67,7 +87,7 @@ export function defaultConsulResolver(): IRemoteResolver {
 
         const resolvedConfigs: Promise<any> =
           rawConfigs.then((configs: Array<any>): any => {
-            return (utils.overlayObjects(...configs) as any)
+            return (ObjectUtils.overlayObjects(...configs) as any)
           })
 
         return resolvedConfigs
@@ -78,7 +98,7 @@ export function defaultConsulResolver(): IRemoteResolver {
 
     get<T = any>(key: string): Promise<T> {
       return getConsulClient().fork((client: KvStore) => {
-        const remoteOptions: IRemoteOverrides = utils.toRemoteOptionMap(key, 'consul')
+        const remoteOptions: IRemoteOverrides = toRemoteOptionMap(key, 'consul')
         return client.get({ path: remoteOptions.key, dc: remoteOptions.dc }).then((val: any) => {
           return val
         }, (err: any) => {

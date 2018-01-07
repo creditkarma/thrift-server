@@ -8,7 +8,15 @@ import {
   SUPPORTED_FILE_TYPES,
 } from './constants'
 
-import * as utils from './utils'
+import {
+  ConfigBuilder,
+  ObjectUtils,
+  PromiseUtils,
+} from './utils'
+
+import {
+  IRootConfigValue,
+} from './types'
 
 function readFile(filePath: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -49,10 +57,9 @@ function getConfigPath(sourceDir: string): string {
   throw new Error('No local config directory found')
 }
 
-async function loadFileWithName<T>(configPath: string, name: string): Promise<T> {
-  const configs: Array<any> = await utils.valuesForPromises(SUPPORTED_FILE_TYPES.map((ext: string) => {
+async function loadFileWithName(configPath: string, name: string): Promise<IRootConfigValue> {
+  const configs: Array<object> = await PromiseUtils.valuesForPromises(SUPPORTED_FILE_TYPES.map((ext: string) => {
     const filePath: string = path.resolve(configPath, `${name}.${ext}`)
-
     return readFile(filePath).then((content: string) => {
       switch (ext) {
         case 'js': {
@@ -91,7 +98,9 @@ async function loadFileWithName<T>(configPath: string, name: string): Promise<T>
     })
   }))
 
-  return (utils.overlayObjects(...configs) as T)
+  return (ObjectUtils.overlayObjects(...configs.map((next: any): IRootConfigValue => {
+    return ConfigBuilder.createConfigObject(name, 'local', next)
+  })) as IRootConfigValue)
 }
 
 export interface ILoaderConfig {
@@ -99,10 +108,10 @@ export interface ILoaderConfig {
   configEnv?: string
 }
 
-export class ConfigLoader<T = any> {
+export class ConfigLoader {
   private configPath: string
   private configEnv: string
-  private savedConfig: T
+  private savedConfig: IRootConfigValue
 
   constructor({ configPath = DEFAULT_CONFIG_PATH, configEnv }: ILoaderConfig = {}) {
     this.configPath = getConfigPath(configPath)
@@ -112,27 +121,27 @@ export class ConfigLoader<T = any> {
   /**
    * Loads default JSON config file. This is required.
    */
-  public async loadDefault(): Promise<T> {
-    return loadFileWithName<T>(this.configPath, 'default')
+  public async loadDefault(): Promise<IRootConfigValue> {
+    return loadFileWithName(this.configPath, 'default')
   }
 
   /**
    * Loads JSON config file based on NODE_ENV.
    */
-  public async loadEnvironment(): Promise<T> {
-    return loadFileWithName<T>(this.configPath, this.configEnv)
+  public async loadEnvironment(): Promise<IRootConfigValue> {
+    return loadFileWithName(this.configPath, this.configEnv)
   }
 
   /**
    * Returns the overlay of the default and environment local config.
    */
-  public async resolve(): Promise<T> {
+  public async resolve(): Promise<IRootConfigValue> {
     if (this.savedConfig !== undefined) {
       return Promise.resolve(this.savedConfig)
     } else {
       const defaultConfig: any = await this.loadDefault()
       const envConfig: any = await this.loadEnvironment()
-      this.savedConfig = utils.overlayObjects(defaultConfig, envConfig)
+      this.savedConfig = ObjectUtils.overlayObjects(defaultConfig, envConfig)
       return this.savedConfig
     }
   }
