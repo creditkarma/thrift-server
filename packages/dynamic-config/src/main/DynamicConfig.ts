@@ -261,7 +261,7 @@ export class DynamicConfig implements IDynamicConfig {
       const promises: Array<Promise<BaseConfigValue>> = unresolved.map((next: PromisedUpdate) => next[1])
       const resolvedPromises: Array<BaseConfigValue> = await Promise.all(promises)
       const newObj: ConfigValue = resolvedPromises.reduce((acc: ConfigValue, next: BaseConfigValue, currentIndex: number) => {
-        return ConfigUtils.setConfigValueForKey(paths[currentIndex], next, acc)
+        return ConfigUtils.setValueForKey(paths[currentIndex], next, acc)
       }, configValue)
 
       return ConfigPromises.resolveConfigPromises(newObj)

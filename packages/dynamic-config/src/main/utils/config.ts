@@ -112,7 +112,7 @@ function setObjectPropertyValue(key: string, value: BaseConfigValue, configObjec
   }
 }
 
-export function setValueForConfigValue(key: string, value: BaseConfigValue, oldValue: BaseConfigValue): BaseConfigValue {
+export function setBaseConfigValueForKey(key: string, value: BaseConfigValue, oldValue: BaseConfigValue): BaseConfigValue {
   if (typeof key !== 'string') {
     throw new Error('Property to set must be a string')
 
@@ -133,7 +133,7 @@ export function setValueForConfigValue(key: string, value: BaseConfigValue, oldV
           type: 'object',
           properties: Object.keys(oldValue.properties).reduce((acc: IConfigProperties, next: string) => {
             if (next === head) {
-              acc[next] = setValueForConfigValue(tail.join('.'), value, oldValue.properties[next])
+              acc[next] = setBaseConfigValueForKey(tail.join('.'), value, oldValue.properties[next])
             } else {
               acc[next] = oldValue.properties[next]
             }
@@ -176,7 +176,7 @@ export function setRootConfigValueForKey(key: string, value: BaseConfigValue, ol
     for (const prop of props) {
       if (prop === head) {
         if (tail.length > 0) {
-          newConfig.properties[prop] = setValueForConfigValue(tail.join('.'), value, oldConfig.properties[prop])
+          newConfig.properties[prop] = setBaseConfigValueForKey(tail.join('.'), value, oldConfig.properties[prop])
 
         } else {
           newConfig.properties[prop] = value
@@ -191,11 +191,11 @@ export function setRootConfigValueForKey(key: string, value: BaseConfigValue, ol
   }
 }
 
-export function setConfigValueForKey(key: string, value: BaseConfigValue, oldConfig: ConfigValue): ConfigValue {
+export function setValueForKey(key: string, value: BaseConfigValue, oldConfig: ConfigValue): ConfigValue {
   if (oldConfig.type === 'root') {
     return setRootConfigValueForKey(key, value, oldConfig)
   } else {
-    return setValueForConfigValue(key, value, oldConfig)
+    return setBaseConfigValueForKey(key, value, oldConfig)
   }
 }
 
