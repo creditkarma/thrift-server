@@ -16,7 +16,7 @@ const it = lab.it
 
 describe('SchemaUtils', () => {
   describe('objectAsSimpileSchema', () => {
-    it('should correctly generate a schema for an object', (done) => {
+    it('should correctly generate a schema for an object', async () => {
       const actual: ISchema = SchemaUtils.objectAsSimpleSchema({
         one: 'one',
         two: 56,
@@ -59,10 +59,9 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should assign empty arrays to have undefined item types', (done) => {
+    it('should assign empty arrays to have undefined item types', async () => {
       const actual: ISchema = SchemaUtils.objectAsSimpleSchema([])
       const expected: ISchema = {
         type: 'array',
@@ -74,10 +73,9 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should correctly generate schema for primitive objects', (done) => {
+    it('should correctly generate schema for primitive objects', async () => {
       const actual: ISchema = SchemaUtils.objectAsSimpleSchema(3)
       const expected: ISchema = {
         type: 'number',
@@ -85,10 +83,9 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should correctly generate schema for null objects', (done) => {
+    it('should correctly generate schema for null objects', async () => {
       const actual: ISchema = SchemaUtils.objectAsSimpleSchema(null)
       const expected: ISchema = {
         type: 'object',
@@ -97,7 +94,6 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
   })
 
@@ -146,7 +142,7 @@ describe('SchemaUtils', () => {
       required: true,
     }
 
-    it('should return true if object matches given schema', (done) => {
+    it('should return true if object matches given schema', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(objectSchema, {
         one: 'one',
         two: 2,
@@ -154,10 +150,9 @@ describe('SchemaUtils', () => {
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return false if object does not match given schema', (done) => {
+    it('should return false if object does not match given schema', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(objectSchema, {
         one: 'one',
         two: 'two',
@@ -165,10 +160,9 @@ describe('SchemaUtils', () => {
       const expected: boolean = false
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return false if object includes fields not in schema', (done) => {
+    it('should return false if object includes fields not in schema', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(objectSchema, {
         one: 'one',
         two: 2,
@@ -177,56 +171,50 @@ describe('SchemaUtils', () => {
       const expected: boolean = false
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return true if primitive matches given schema', (done) => {
+    it('should return true if primitive matches given schema', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(strSchema, 'test')
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return false if primitive does not match given schema', (done) => {
+    it('should return false if primitive does not match given schema', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(strSchema, 5)
       const expected: boolean = false
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return true if object does not include optional fields', (done) => {
+    it('should return true if object does not include optional fields', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(optionalSchema, {
         one: 'one',
       })
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return true with any type matching number', (done) => {
+    it('should return true with any type matching number', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(anySchema, {
         one: 5,
       })
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return true with any type matching string', (done) => {
+    it('should return true with any type matching string', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(anySchema, {
         one: 'one',
       })
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should return true with any type matching object', (done) => {
+    it('should return true with any type matching object', async () => {
       const actual: boolean = SchemaUtils.objectMatchesSchema(anySchema, {
         one: {
           test: 'test',
@@ -235,7 +223,6 @@ describe('SchemaUtils', () => {
       const expected: boolean = true
 
       expect(actual).to.equal(expected)
-      done()
     })
   })
 
@@ -263,7 +250,7 @@ describe('SchemaUtils', () => {
     }
     const mockSchema: ISchema = SchemaUtils.objectAsSimpleSchema(mockData)
 
-    it('should get schema for key', (done) => {
+    it('should get schema for key', async () => {
       const actual = SchemaUtils.findSchemaForKey(mockSchema, 'user')
       const expected: ISchema = {
         type: 'object',
@@ -295,10 +282,9 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual.get()).to.equal(expected)
-      done()
     })
 
-    it('should get schema for nested key', (done) => {
+    it('should get schema for nested key', async () => {
       const actual = SchemaUtils.findSchemaForKey(mockSchema, 'data.posts')
       const expected: ISchema = {
         type: 'array',
@@ -332,7 +318,6 @@ describe('SchemaUtils', () => {
       }
 
       expect(actual.get()).to.equal(expected)
-      done()
     })
   })
 })

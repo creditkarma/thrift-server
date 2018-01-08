@@ -16,7 +16,7 @@ const it = lab.it
 
 describe('ConfigBuilder', () => {
   describe('createConfigObject', () => {
-    it('should build config for object', (done) => {
+    it('should build config for object', async () => {
       const actual: IRootConfigValue = ConfigBuilder.createConfigObject(
         'test',
         'local',
@@ -97,10 +97,9 @@ describe('ConfigBuilder', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should build config with nested keys', (done) => {
+    it('should build config with nested keys', async () => {
       const actual: IRootConfigValue = ConfigBuilder.createConfigObject(
         'test',
         'local',
@@ -150,10 +149,9 @@ describe('ConfigBuilder', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should build config with promised values', (done) => {
+    it('should build config with promised values', async () => {
       const actual: IRootConfigValue = ConfigBuilder.createConfigObject(
         'test',
         'local',
@@ -203,10 +201,9 @@ describe('ConfigBuilder', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should build config with placeholder values', (done) => {
+    it('should build config with placeholder values', async () => {
       const actual: IRootConfigValue = ConfigBuilder.createConfigObject(
         'test',
         'local',
@@ -264,14 +261,12 @@ describe('ConfigBuilder', () => {
       }
 
       expect(actual).to.equal(expected)
-      done()
     })
 
-    it('should throw if config value is not an object', (done) => {
+    it('should throw if config value is not an object', async () => {
       expect(() => {
         ConfigBuilder.createConfigObject('test', 'local', 5)
       }).to.throw()
-      done()
     })
   })
 })

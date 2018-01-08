@@ -15,22 +15,19 @@ const afterEach = lab.afterEach
 
 describe('ConfigLoader', () => {
 
-  before((done) => {
+  before(async () => {
     process.chdir(__dirname)
-    done()
   })
 
   describe('resolve', () => {
     let savedEnv: string | undefined
 
-    beforeEach((done) => {
+    beforeEach(async () => {
       savedEnv = process.env.NODE_ENV
-      done()
     })
 
-    afterEach((done) => {
+    afterEach(async () => {
       process.env.NODE_ENV = savedEnv
-      done()
     })
 
     it('should return the correct config for development', async () => {

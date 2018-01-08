@@ -75,7 +75,7 @@ describe('PromiseUtils', () => {
       expect(actual).to.equal(expected)
     })
 
-    it('should reject if one of the Promises reject', (done) => {
+    it('should reject if one of the Promises reject', async () => {
       const objectPromise = PromiseUtils.resolveObjectPromises({
         one: Promise.resolve(5),
         two: {
@@ -93,11 +93,10 @@ describe('PromiseUtils', () => {
         },
       })
 
-      objectPromise.then((value: any) => {
-        done(new Error('Promise should fail'))
+      return objectPromise.then((value: any) => {
+        throw new Error('Promise should fail')
       }, (err: any) => {
         expect(err.message).to.equal('Unable to load value')
-        done()
       })
     })
 

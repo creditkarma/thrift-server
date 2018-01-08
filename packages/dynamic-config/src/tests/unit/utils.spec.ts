@@ -14,31 +14,28 @@ const it = lab.it
 describe('Utils', () => {
   describe('BasicUtils', () => {
     describe('dashToCamel', () => {
-      it('should transform dashed string to camel-case', (done) => {
+      it('should transform dashed string to camel-case', async () => {
         const base: string = 'this-is-test'
         const actual: string = Utils.dashToCamel(base)
         const expected: string = 'thisIsTest'
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should return a camel-case string unaltered', (done) => {
+      it('should return a camel-case string unaltered', async () => {
         const base: string = 'thisIsTest'
         const actual: string = Utils.dashToCamel(base)
         const expected: string = 'thisIsTest'
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should normalize case to lower and capitalize each word', (done) => {
+      it('should normalize case to lower and capitalize each word', async () => {
         const base: string = 'THIS-Is-Test'
         const actual: string = Utils.dashToCamel(base)
         const expected: string = 'thisIsTest'
 
         expect(actual).to.equal(expected)
-        done()
       })
     })
   })
@@ -57,7 +54,7 @@ describe('Utils', () => {
         },
       }
 
-      it('should return value for key at object root', (done) => {
+      it('should return value for key at object root', async () => {
         const actual: any = ObjectUtils.getValueForKey('one', mockJSON)
         const expected: any = {
           two: {
@@ -66,23 +63,20 @@ describe('Utils', () => {
         }
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should return null for a missing key', (done) => {
+      it('should return null for a missing key', async () => {
         const actual: any = ObjectUtils.getValueForKey('two', mockJSON)
         const expected: any = null
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should return value for a nested key', (done) => {
+      it('should return value for a nested key', async () => {
         const actual: any = ObjectUtils.getValueForKey('one.two.three', mockJSON)
         const expected: any = false
 
         expect(actual).to.equal(expected)
-        done()
       })
     })
 
@@ -95,17 +89,16 @@ describe('Utils', () => {
         },
       }
 
-      it('should set the value of given key', (done) => {
+      it('should set the value of given key', async () => {
         const actual: any = ObjectUtils.setValueForKey('one', 'one', mockJSON)
         const expected: any = {
           one: 'one',
         }
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should set the value of given nested key', (done) => {
+      it('should set the value of given nested key', async () => {
         const actual: any = ObjectUtils.setValueForKey('one.two.three', true, mockJSON)
         const expected: any = {
           one: {
@@ -116,10 +109,9 @@ describe('Utils', () => {
         }
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should set the value of an array at given index', (done) => {
+      it('should set the value of an array at given index', async () => {
         const mockWithArray = {
           one: {
             two: [
@@ -143,10 +135,9 @@ describe('Utils', () => {
         }
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should ignore setting non-existent props', (done) => {
+      it('should ignore setting non-existent props', async () => {
         const actual: any = ObjectUtils.setValueForKey('one.two.four', true, mockJSON)
         const expected: any = {
           one: {
@@ -157,7 +148,6 @@ describe('Utils', () => {
         }
 
         expect(actual).to.equal(expected)
-        done()
       })
     })
 
@@ -167,29 +157,27 @@ describe('Utils', () => {
         key: 'key',
       })
 
-      it('shoult return true if object matches given shape', (done) => {
+      it('shoult return true if object matches given shape', async () => {
         const actual: boolean = tester({
           default: 'foo',
           key: 'bar',
         })
 
         expect(actual).to.equal(true)
-        done()
       })
 
-      it('shoult return false if object does not match given shape', (done) => {
+      it('shoult return false if object does not match given shape', async () => {
         const actual: boolean = tester({
           foo: 'foo',
           key: 'bar',
         })
 
         expect(actual).to.equal(false)
-        done()
       })
     })
 
     describe('overlayObjects', () => {
-      it('should override base values with update values', (done) => {
+      it('should override base values with update values', async () => {
         const baseConfig = {
           protocol: 'https',
           destination: '127.0.0.1:9000',
@@ -218,10 +206,9 @@ describe('Utils', () => {
         const actual = ObjectUtils.overlayObjects(baseConfig, updateConfig)
 
         expect(actual).to.equal(expected)
-        done()
       })
 
-      it('should correctly handle nested objects', (done) => {
+      it('should correctly handle nested objects', async () => {
         const baseConfig = {
           serviceName: 'test',
           lru: {
@@ -248,7 +235,6 @@ describe('Utils', () => {
         const actual = ObjectUtils.overlayObjects(baseConfig, updateConfig)
 
         expect(actual).to.equal(expected)
-        done()
       })
     })
   })
