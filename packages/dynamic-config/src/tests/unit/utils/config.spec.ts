@@ -130,8 +130,6 @@ describe('ConfigUtils', () => {
         watchers: [],
       }
 
-      console.log('actual: ', JSON.stringify(actual, null, 2))
-
       expect(actual).to.equal(expected)
     })
   })
