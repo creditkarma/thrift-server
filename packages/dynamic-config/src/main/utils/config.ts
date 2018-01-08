@@ -94,20 +94,15 @@ function setObjectPropertyValue(key: string, value: BaseConfigValue, configObjec
       resolved: configObject.resolved,
       type: 'object',
       properties: Object.keys(configObject.properties).reduce((acc: IConfigProperties, next: string) => {
-        console.log('next 1: ', next)
-        console.log('next 1: key: ', key)
         if (next === key) {
           acc[next] = value
         } else {
           acc[next] = configObject.properties[next]
         }
-        console.log('next 1: acc: ', JSON.stringify(acc, null, 2))
         return acc
       }, {}),
       watchers: configObject.watchers,
     }
-
-    console.log('what: ', JSON.stringify(what, null, 2))
 
     return what
 
@@ -137,7 +132,6 @@ export function setValueForConfigValue(key: string, value: BaseConfigValue, oldV
           resolved: oldValue.resolved,
           type: 'object',
           properties: Object.keys(oldValue.properties).reduce((acc: IConfigProperties, next: string) => {
-            console.log('next: ', next)
             if (next === head) {
               acc[next] = setValueForConfigValue(tail.join('.'), value, oldValue.properties[next])
             } else {
@@ -230,11 +224,11 @@ export function readConfigValue(obj: ConfigValue): any {
       return obj.value
 
     case 'placeholder':
-      console.warn(`ConfigUtils.readConfigValue trying to read unresolved Placeholder`)
+      console.warn(`Trying to read value of unresolved Placeholder`)
       return null
 
     case 'promise':
-      console.warn(`ConfigUtils.readConfigValue trying to read unresolved Promise`)
+      console.warn(`Trying to read value of unresolved Promise`)
       return null
 
     default:

@@ -72,11 +72,7 @@ async function handleUnresolved(unresolved: Array<PromisedUpdate>, base: ConfigV
 
   const newObj: ConfigValue = resolvedPromises.reduce(
     (acc: ConfigValue, next: BaseConfigValue, currentIndex: number): ConfigValue => {
-      console.log('path: ', paths[currentIndex])
-      console.log('acc: ', JSON.stringify(acc, null, 2))
-      const test = ConfigUtils.setConfigValueForKey(paths[currentIndex], next, acc)
-      console.log('test: ', JSON.stringify(test, null, 2))
-      return test
+      return ConfigUtils.setConfigValueForKey(paths[currentIndex], next, acc)
     },
     base,
   )

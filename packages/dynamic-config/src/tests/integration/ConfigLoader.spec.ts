@@ -70,9 +70,9 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
-                    type: 'string',
-                    value: 'PASS',
+                    resolved: false,
+                    type: 'promise',
+                    value: Promise.resolve('DELAYED'),
                     watchers: [],
                   },
                 },
@@ -418,9 +418,9 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
-                    type: 'string',
-                    value: 'PASS',
+                    resolved: false,
+                    type: 'promise',
+                    value: Promise.resolve('DELAYED'),
                     watchers: [],
                   },
                 },
@@ -463,7 +463,7 @@ describe('ConfigLoader', () => {
         },
       }
 
-      loader.resolve().then((actual: any) => {
+      return loader.resolve().then((actual: any) => {
         expect(actual).to.equal(expected)
       })
     })
