@@ -19,7 +19,7 @@ const before = lab.before
 const after = lab.after
 
 describe('DynamicConfig Singleton', () => {
-  before((done) => {
+  before(async () => {
     process.chdir(__dirname)
 
     // Set environment options for DynamicConfig
@@ -27,74 +27,56 @@ describe('DynamicConfig Singleton', () => {
     process.env[CONSUL_ADDRESS] = 'http://localhost:8510'
     process.env[CONSUL_KV_DC] = 'dc1'
     process.env[CONSUL_KEYS] = 'test-config-one,with-vault'
-
-    done()
   })
 
-  after((done) => {
+  after(async () => {
     // Reset environment options for DynamicConfig
     process.env[CONFIG_PATH] = undefined
     process.env[CONSUL_ADDRESS] = undefined
     process.env[CONSUL_KV_DC] = undefined
     process.env[CONSUL_KEYS] = undefined
-    done()
   })
 
   describe('get', () => {
-    it('should return the value from Consul if available', (done) => {
-      config().get<string>('database.username').then((val: string) => {
+    it('should return the value from Consul if available', async () => {
+      return config().get<string>('database.username').then((val: string) => {
         expect(val).to.equal('testUser')
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should fallback to returning from local config', (done) => {
-      config().get<object>('project.health').then((val: object) => {
+    it('should fallback to returning from local config', async () => {
+      return config().get<object>('project.health').then((val: object) => {
         expect(val).to.equal({
           control: '/test',
           response: 'PASS',
         })
-
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should reject for a missing key', (done) => {
-      config().get<object>('fake.path').then((val: object) => {
-        done(new Error('Should reject for missing key'))
+    it('should reject for a missing key', async () => {
+      return config().get<object>('fake.path').then((val: object) => {
+        throw new Error('Should reject for missing key')
       }, (err: any) => {
         expect(err.message).to.equal('Unable to find value for key: fake.path')
-        done()
-      }).catch(done)
+      })
     })
   })
 
   describe('getSecretValue', () => {
-    it('should get secret value from Vault', (done) => {
-      config().getSecretValue<string>('test-secret').then((val: string) => {
+    it('should get secret value from Vault', async () => {
+      return config().getSecretValue<string>('test-secret').then((val: string) => {
         expect(val).to.equal('this is a secret')
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      }).catch(done)
+      })
     })
 
-    it('should reject for a missing secret', (done) => {
-      config().getSecretValue<string>('missing-secret').then((val: string) => {
-        done(new Error('Should reject for missing secret'))
+    it('should reject for a missing secret', async () => {
+      return config().getSecretValue<string>('missing-secret').then((val: string) => {
+        throw new Error('Should reject for missing secret')
       }, (err: any) => {
         expect(err.message).to.equal(
           'Unable to find value for key: missing-secret',
         )
-        done()
-      }).catch(done)
+      })
     })
   })
 })

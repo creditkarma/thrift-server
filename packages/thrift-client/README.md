@@ -79,7 +79,7 @@ import {
   IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
 
-import { default as axios, AxiosInstance }from 'axios'
+import { default as axios, AxiosInstance } from 'axios'
 import * as express from 'express'
 import { Calculator } from './codegen/calculator'
 

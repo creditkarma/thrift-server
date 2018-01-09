@@ -6,7 +6,14 @@ import {
   CONFIG_PATH,
 } from './constants'
 
-import * as utils from './utils'
+import {
+  ConfigBuilder,
+  ConfigPromises,
+  ConfigUtils,
+  ObjectUtils,
+  PromiseUtils,
+  SchemaUtils,
+} from './utils'
 
 import {
   DynamicConfigInvalidObject,
@@ -16,82 +23,30 @@ import {
 } from './errors'
 
 import {
-  ConfigPlaceholder,
+  BaseConfigValue,
+  ConfigResolver,
+  ConfigValue,
   IConfigOptions,
+  IDynamicConfig,
   IRemoteOptions,
   IResolvedPlaceholder,
+  IResolverMap,
+  IRootConfigValue,
   ISchema,
-  ObjectUpdate,
+  PromisedUpdate,
   ResolverType,
 } from './types'
-
-export interface IResolverMap {
-  names: Set<string>
-  all: Map<string, ConfigResolver>
-}
-
-export type ConfigResolver =
-  IRemoteResolver | ISecretResolver
-
-export type IRemoteInitializer = (dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions) => Promise<any>
-
-export interface IRemoteResolver {
-  type: 'remote'
-  name: string
-  init: IRemoteInitializer
-  get<T>(key: string): Promise<T>
-}
-
-export type IInitMethod<T extends object> = (dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions) => Promise<T>
-
-export interface ISecretResolver {
-  type: 'secret'
-  name: string
-  init: IRemoteInitializer
-  get<T>(key: string): Promise<T>
-}
-
-function normalizeConfigPlaceholder(
-  placeholder: ConfigPlaceholder,
-  resolvers: IResolverMap,
-): IResolvedPlaceholder {
-  if (typeof placeholder === 'string') {
-    const [ name, key ] = placeholder.split('!/')
-    const resolver = resolvers.all.get(name)
-    if (resolver !== undefined) {
-      return {
-        key,
-        name,
-        type: resolver.type,
-      }
-    }
-
-  } else {
-    const [ name, key ]: Array<string> = placeholder.key.split('!/')
-    const resolver = resolvers.all.get(name)
-    if (resolver !== undefined) {
-      return {
-        key,
-        name,
-        type: resolver.type,
-        default: placeholder.default,
-      }
-    }
-  }
-
-  throw new Error(`No resolver found for remote: ${name}`)
-}
 
 type ConfigState =
   'startup' | 'init' | 'running'
 
-export class DynamicConfig<ConfigType = any> {
+export class DynamicConfig implements IDynamicConfig {
   private configState: ConfigState
   private configLoader: ConfigLoader
   private remoteOptions: IRemoteOptions
 
   private configSchema: ISchema
-  private resolvedConfig: ConfigType
+  private resolvedConfig: IRootConfigValue
 
   private resolvers: IResolverMap
 
@@ -127,39 +82,45 @@ export class DynamicConfig<ConfigType = any> {
   public async get<T = any>(key?: string): Promise<T> {
     this.configState = 'running'
 
-    return this.getConfig().then((resolvedConfig: any) => {
+    return this.getConfig().then((resolvedConfig: IRootConfigValue) => {
       // If the key is not set we return the entire structure
       if (key === undefined) {
-        return this.replaceConfigPlaceholders(resolvedConfig).then((resolvedValue: any) => {
-          this.resolvedConfig = utils.overlayObjects(this.resolvedConfig, resolvedValue)
-          this.validateConfigSchema()
-          return Promise.resolve(this.resolvedConfig as any)
-        })
+        return this.replaceConfigPlaceholders(resolvedConfig).then(
+          (resolvedValue: IRootConfigValue): Promise<IRootConfigValue> => {
+            this.resolvedConfig = ObjectUtils.overlayObjects(this.resolvedConfig, resolvedValue)
+            this.validateConfigSchema()
+            return Promise.resolve(
+              ConfigUtils.readConfigValue(this.resolvedConfig),
+            )
+          },
+        )
 
       // If the key is set we try to find it in the structure
       } else {
-        const value: any = utils.getValueForKey<T>(key, resolvedConfig)
+        const value: ConfigValue | null = ConfigUtils.getConfigForKey(key, resolvedConfig)
 
         // If the value is a thing we need to resolve any placeholders
         if (value !== null) {
-          return this.replaceConfigPlaceholders(value).then((resolvedValue: any) => {
-            return utils.findSchemaForKey(this.configSchema, key).fork((schemaForKey: ISchema) => {
-              if (utils.objectMatchesSchema(schemaForKey, resolvedValue)) {
-                this.resolvedConfig = utils.setValueForKey(key, resolvedValue, this.resolvedConfig)
-                return Promise.resolve(resolvedValue)
+          return this.replaceConfigPlaceholders(value).then((resolvedValue: BaseConfigValue) => {
+            const baseValue = ConfigUtils.readConfigValue(resolvedValue)
+
+            return SchemaUtils.findSchemaForKey(this.configSchema, key).fork((schemaForKey: ISchema) => {
+              if (SchemaUtils.objectMatchesSchema(schemaForKey, baseValue)) {
+                this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, baseValue, this.resolvedConfig)
+                return Promise.resolve(baseValue)
               } else {
-                console.error(`Value for key '${key}' does not match expected schema`)
+                console.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
                 return Promise.reject(new DynamicConfigInvalidObject(key))
               }
             }, () => {
-              console.warn(`Unable to find schema for key: ${key}. Object may be invalid.`)
-              this.resolvedConfig = utils.setValueForKey(key, resolvedValue, this.resolvedConfig)
-              return Promise.resolve(resolvedValue)
+              console.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
+              this.resolvedConfig = ObjectUtils.setValueForKey(key, baseValue, this.resolvedConfig)
+              return Promise.resolve(baseValue)
             })
           })
 
         } else {
-          console.error(`Value for key '${key}' not found in config`)
+          console.error(`Value for key[${key}] not found in config`)
           return Promise.reject(new DynamicConfigMissingKey(key))
         }
       }
@@ -212,8 +173,8 @@ export class DynamicConfig<ConfigType = any> {
    * Given a ConfigPlaceholder attempt to find the value in Consul
    */
   private async getRemotePlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
-    return this.getRemoteValue(placeholder.key).then((consulValue: any) => {
-      return Promise.resolve(consulValue)
+    return this.getRemoteValue(placeholder.key).then((remoteValue: any) => {
+      return Promise.resolve(remoteValue)
     }, (err: any) => {
       if (placeholder.default !== undefined) {
         return Promise.resolve(placeholder.default)
@@ -242,37 +203,36 @@ export class DynamicConfig<ConfigType = any> {
    * of its arguments. Shh, it's a private function. We'll keep it a secret.
    */
   private appendUpdatesForObject(
-    obj: any,
+    configValue: ConfigValue,
     path: Array<string>,
-    updates: Array<ObjectUpdate>,
+    updates: Array<PromisedUpdate>,
   ): void {
-    if (utils.isConfigPlaceholder(obj, this.resolvers.names)) {
-      const resolvedPlaceholder: IResolvedPlaceholder = normalizeConfigPlaceholder(obj, this.resolvers)
-      updates.push([ path, this.resolvePlaceholder(resolvedPlaceholder) ])
+    if (configValue.type === 'placeholder') {
+      const resolvedPlaceholder: IResolvedPlaceholder =
+        ConfigUtils.normalizeConfigPlaceholder(configValue.value, this.resolvers)
 
-    } else if (typeof obj === 'object') {
-      this.collectConfigPlaceholders(obj, path, updates)
+      updates.push([ path, this.resolvePlaceholder(resolvedPlaceholder).then((value: any) => {
+        return ConfigBuilder.buildBaseConfigValue(
+          resolvedPlaceholder.name,
+          resolvedPlaceholder.type,
+          value,
+        )
+      }) ])
+
+    } else if (configValue.type === 'object') {
+      this.collectConfigPlaceholders(configValue, path, updates)
     }
   }
 
   private collectConfigPlaceholders(
-    obj: any,
+    configValue: ConfigValue,
     path: Array<string>,
-    updates: Array<ObjectUpdate>,
-  ): Array<ObjectUpdate> {
-    if (Array.isArray(obj)) {
-      for (let i = 0; i < obj.length; i++) {
-        const arrValue = obj[i]
-        const newPath: Array<string> = [ ...path, `${i}` ]
-        this.appendUpdatesForObject(arrValue, newPath, updates)
-      }
-
-      return updates
-
-    } else if (typeof obj === 'object') {
-      for (const objKey of Object.keys(obj)) {
-        const objValue = obj[objKey]
-        const newPath: Array<string> = [ ...path, objKey ]
+    updates: Array<PromisedUpdate>,
+  ): Array<PromisedUpdate> {
+    if (configValue.type === 'object' || configValue.type === 'root') {
+      for (const key of Object.keys(configValue.properties)) {
+        const objValue: BaseConfigValue = configValue.properties[key]
+        const newPath: Array<string> = [ ...path, key ]
         this.appendUpdatesForObject(objValue, newPath, updates)
       }
 
@@ -287,37 +247,38 @@ export class DynamicConfig<ConfigType = any> {
    * When a config value is requested there is a chance that the value currently in the
    * resolved config is a placeholder, or, in the more complex case, the requested value
    * is an object that contains placeholders within nested keys. We need to find and resolve
-   * any placeholders that remain in the
+   * any placeholders that remain in the config
    */
-  private async replaceConfigPlaceholders(value: any): Promise<any> {
-    if (utils.isConfigPlaceholder(value, this.resolvers.names)) {
-      const resolvedPlaceholder: IResolvedPlaceholder = normalizeConfigPlaceholder(value, this.resolvers)
-      return this.resolvePlaceholder(resolvedPlaceholder)
+  private async replaceConfigPlaceholders(configValue: ConfigValue): Promise<ConfigValue> {
+    if (configValue.type === 'placeholder') {
+      return this.resolvePlaceholder(
+        ConfigUtils.normalizeConfigPlaceholder(configValue.value, this.resolvers),
+      )
 
-    } else if (utils.isObject(value)) {
-      const unresolved: Array<ObjectUpdate> = this.collectConfigPlaceholders(value, [], [])
-      const paths: Array<string> = unresolved.map((next: ObjectUpdate) => next[0].join('.'))
-      const promises: Array<Promise<any>> = unresolved.map((next: ObjectUpdate) => next[1])
-      const resolvedPromises: Array<any> = await Promise.all(promises)
-      const newObj: object = resolvedPromises.reduce((acc: object, next: any, currentIndex: number) => {
-        return utils.setValueForKey(paths[currentIndex], next, acc)
-      }, value)
+    } else if (configValue.type === 'object' || configValue.type === 'root') {
+      const unresolved: Array<PromisedUpdate> = this.collectConfigPlaceholders(configValue, [], [])
+      const paths: Array<string> = unresolved.map((next: PromisedUpdate) => next[0].join('.'))
+      const promises: Array<Promise<BaseConfigValue>> = unresolved.map((next: PromisedUpdate) => next[1])
+      const resolvedPromises: Array<BaseConfigValue> = await Promise.all(promises)
+      const newObj: ConfigValue = resolvedPromises.reduce((acc: ConfigValue, next: BaseConfigValue, currentIndex: number) => {
+        return ConfigUtils.setValueForKey(paths[currentIndex], next, acc)
+      }, configValue)
 
-      return utils.resolveObjectPromises(newObj)
+      return ConfigPromises.resolveConfigPromises(newObj)
 
     } else {
-      return Promise.resolve(value)
+      return Promise.resolve(configValue)
     }
   }
 
-  private async getConfig(): Promise<ConfigType> {
+  private async getConfig(): Promise<IRootConfigValue> {
     if (this.resolvedConfig === undefined) {
       this.configState = 'init'
-      const defaultConfig = await this.configLoader.loadDefault()
-      const envConfig = await this.configLoader.loadEnvironment()
-      const remoteConfigs = await this.initializeResolvers()
-      this.resolvedConfig = await utils.overlayObjects(defaultConfig, envConfig, ...remoteConfigs)
-      this.configSchema = utils.objectAsSimpleSchema(defaultConfig)
+      const defaultConfig: IRootConfigValue = await this.configLoader.loadDefault()
+      const envConfig: IRootConfigValue = await this.configLoader.loadEnvironment()
+      const remoteConfigs: Array<IRootConfigValue> = await this.initializeResolvers()
+      this.resolvedConfig = await ObjectUtils.overlayObjects(defaultConfig, envConfig, ...remoteConfigs)
+      this.configSchema = SchemaUtils.objectAsSimpleSchema(defaultConfig)
     }
 
     return this.resolvedConfig
@@ -328,38 +289,41 @@ export class DynamicConfig<ConfigType = any> {
    * I'm more confident in the validation.
    */
   private validateConfigSchema(): void {
-    if (!utils.objectMatchesSchema(this.configSchema, this.resolvedConfig)) {
+    if (!SchemaUtils.objectMatchesSchema(this.configSchema, this.resolvedConfig)) {
       console.warn('The shape of the config changed during resolution. This may indicate an error.')
     }
   }
 
-  private initializeResolvers(): Promise<Array<any>> {
+  private initializeResolvers(): Promise<Array<IRootConfigValue>> {
     return Promise.all([ ...this.resolvers.all.values() ].map((next: ConfigResolver) => {
-      return next.init(this, this.remoteOptions[next.name])
+      return next.init(this, this.remoteOptions[next.name]).then((config: any) => {
+        return ConfigBuilder.createConfigObject(next.name, next.type, config)
+      })
     }))
   }
 
-  private getValueFromResolver<T>(key: string, type: ResolverType): Promise<T> {
+  private getValueFromResolver<T>(key: string, type: ResolverType): Promise <T> {
     const resolvers = [ ...this.resolvers.all.values() ].filter((next: ConfigResolver) => {
       return next.type === type
     })
 
     if (resolvers.length > 0) {
-      return utils.race(resolvers.map((next: ConfigResolver) => {
+      return PromiseUtils.race(resolvers.map((next: ConfigResolver) => {
         return next.get<T>(key)
       })).then((remoteValue: T) => {
         if (remoteValue !== null) {
           return Promise.resolve(remoteValue)
 
         } else {
-          console.error(`Unable to resolve remote value: ${key}`)
+          console.error(`Unable to resolve remote value for key[${key}]`)
           return Promise.reject(new DynamicConfigMissingKey(key))
         }
       }, (err: any) => {
-        console.error(`Unable to resolve remote value: ${key}`)
+        console.error(`Unable to resolve remote value for key[${key}]`)
         return Promise.reject(new DynamicConfigMissingKey(key))
       })
     } else {
+      console.error(`There are no remote resolvers for key[${key}]`)
       return Promise.reject(new ResolverUnavailable(key))
     }
   }
