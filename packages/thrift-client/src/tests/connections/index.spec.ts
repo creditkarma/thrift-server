@@ -1,10 +1,7 @@
 import {
-  fromRequest,
-  RequestConnection,
-  RequestInstance,
+  createClient,
 } from '../../main'
 
-import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import {
@@ -30,7 +27,7 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('RequestConnection', () => {
+describe('createClient', () => {
   let server: childProcess.ChildProcess
 
   before((done: any) => {
@@ -40,13 +37,10 @@ describe('RequestConnection', () => {
   })
 
   describe('Basic Usage', () => {
-    let connection: RequestConnection
     let client: Calculator.Client<CoreOptions>
 
     before(async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      connection = fromRequest(requestClient, SERVER_CONFIG)
-      client = new Calculator.Client(connection)
+      client = createClient(Calculator.Client, SERVER_CONFIG)
     })
 
     it('should corrently handle a service client request', async () => {
@@ -94,14 +88,11 @@ describe('RequestConnection', () => {
     })
 
     it('should reject for a 500 server response', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const badConnection: RequestConnection =
-        fromRequest(requestClient, {
-          hostName: SERVER_CONFIG.hostName,
-          port: SERVER_CONFIG.port,
-          path: '/return500',
-        })
-      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        path: '/return500',
+      })
 
       return badClient.add(5, 7)
         .then((response: number) => {
@@ -112,14 +103,11 @@ describe('RequestConnection', () => {
     })
 
     it('should reject for a 400 server response', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const badConnection: RequestConnection =
-        fromRequest(requestClient, {
-          hostName: SERVER_CONFIG.hostName,
-          port: SERVER_CONFIG.port,
-          path: '/return400',
-        })
-      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        path: '/return400',
+      })
 
       return badClient.add(5, 7)
         .then((response: number) => {
@@ -130,13 +118,10 @@ describe('RequestConnection', () => {
     })
 
     it('should reject for a request to a missing service', async () => {
-      const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
-      const badConnection: RequestConnection =
-        fromRequest(requestClient, {
-          hostName: 'fakehost',
-          port: 8080,
-        })
-      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
+      const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+        hostName: 'fakehost',
+        port: 8080,
+      })
 
       return badClient.add(5, 7)
         .then((response: number) => {
@@ -149,18 +134,18 @@ describe('RequestConnection', () => {
 
   describe('IncomingMiddleware', () => {
     it('should resolve when middleware allows', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        handler(data: Buffer): Promise<Buffer> {
-          if (readThriftMethod(data) === 'add') {
-            return Promise.resolve(data)
-          } else {
-            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
-          }
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          handler(data: Buffer): Promise<Buffer> {
+            if (readThriftMethod(data) === 'add') {
+              return Promise.resolve(data)
+            } else {
+              return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+            }
+          },
+        }],
       })
 
       return client.add(5, 7)
@@ -170,19 +155,19 @@ describe('RequestConnection', () => {
     })
 
     it('should resolve when middleware passes method filter', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        methods: [ 'add' ],
-        handler(data: Buffer): Promise<Buffer> {
-          if (readThriftMethod(data) === 'add') {
-            return Promise.resolve(data)
-          } else {
-            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
-          }
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          methods: [ 'add' ],
+          handler(data: Buffer): Promise<Buffer> {
+            if (readThriftMethod(data) === 'add') {
+              return Promise.resolve(data)
+            } else {
+              return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+            }
+          },
+        }],
       })
 
       return client.add(5, 7)
@@ -192,18 +177,18 @@ describe('RequestConnection', () => {
     })
 
     it('should reject when middleware rejects', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        handler(data: Buffer): Promise<Buffer> {
-          if (readThriftMethod(data) === 'nope') {
-            return Promise.resolve(data)
-          } else {
-            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
-          }
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          handler(data: Buffer): Promise<Buffer> {
+            if (readThriftMethod(data) === 'nope') {
+              return Promise.resolve(data)
+            } else {
+              return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+            }
+          },
+        }],
       })
 
       return client.add(5, 7)
@@ -215,15 +200,15 @@ describe('RequestConnection', () => {
     })
 
     it('should skip handler when middleware fails method filter', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        methods: [ 'nope' ],
-        handler(data: Buffer): Promise<Buffer> {
-          return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          methods: [ 'nope' ],
+          handler(data: Buffer): Promise<Buffer> {
+            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+          },
+        }],
       })
 
       return client.add(5, 7)
@@ -235,19 +220,19 @@ describe('RequestConnection', () => {
 
   describe('OutgoingMiddleware', () => {
     it('should resolve when middleware adds auth token', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        type: 'outgoing',
-        handler(context: CoreOptions): Promise<CoreOptions> {
-          return Promise.resolve(Object.assign({}, context, {
-            headers: {
-              'X-Fake-Token': 'fake-token',
-            },
-          }))
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          type: 'outgoing',
+          handler(context: CoreOptions): Promise<CoreOptions> {
+            return Promise.resolve(Object.assign({}, context, {
+              headers: {
+                'X-Fake-Token': 'fake-token',
+              },
+            }))
+          },
+        }],
       })
 
       return client.addWithContext(5, 7)
@@ -257,20 +242,20 @@ describe('RequestConnection', () => {
     })
 
     it('should resolve when middleware passes method filter', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        type: 'outgoing',
-        methods: [ 'addWithContext' ],
-        handler(context: CoreOptions): Promise<CoreOptions> {
-          return Promise.resolve(Object.assign({}, context, {
-            headers: {
-              'X-Fake-Token': 'fake-token',
-            },
-          }))
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          type: 'outgoing',
+          methods: [ 'addWithContext' ],
+          handler(context: CoreOptions): Promise<CoreOptions> {
+            return Promise.resolve(Object.assign({}, context, {
+              headers: {
+                'X-Fake-Token': 'fake-token',
+              },
+            }))
+          },
+        }],
       })
 
       return client.addWithContext(5, 7)
@@ -280,9 +265,7 @@ describe('RequestConnection', () => {
     })
 
     it('should reject when middleware does not add auth token', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
+      const client = createClient(Calculator.Client, SERVER_CONFIG)
 
       return client.addWithContext(5, 7)
         .then((response: number) => {
@@ -293,20 +276,20 @@ describe('RequestConnection', () => {
     })
 
     it('should resolve when middleware fails method filter', async () => {
-      const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
-      const client = new Calculator.Client(connection)
-
-      connection.register({
-        type: 'outgoing',
-        methods: [ 'add' ],
-        handler(context: CoreOptions): Promise<CoreOptions> {
-          return Promise.resolve(Object.assign({}, context, {
-            headers: {
-              'X-Fake-Token': 'fake-token',
-            },
-          }))
-        },
+      const client = createClient(Calculator.Client, {
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        register: [{
+          type: 'outgoing',
+          methods: [ 'add' ],
+          handler(context: CoreOptions): Promise<CoreOptions> {
+            return Promise.resolve(Object.assign({}, context, {
+              headers: {
+                'X-Fake-Token': 'fake-token',
+              },
+            }))
+          },
+        }],
       })
 
       return client.addWithContext(5, 7)

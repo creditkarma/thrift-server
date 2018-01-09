@@ -15,7 +15,7 @@ export interface IHttpConnectionOptions {
 export type MiddlewareType =
   'outgoing' | 'incoming'
 
-export type ThriftMiddlewareConfig<Context> =
+export type ThriftMiddleware<Context> =
   IIncomingMiddlewareConfig | IOutgoingMiddlewareConfig<Context>
 
 export interface IThriftMiddlewareConfig {
