@@ -54,7 +54,7 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
         if (err !== null) {
           reject(err)
         } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
-          reject(new Error(body.toString()))
+          reject(response)
         } else {
           resolve(body)
         }

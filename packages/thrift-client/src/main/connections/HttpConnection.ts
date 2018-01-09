@@ -10,7 +10,7 @@ import {
   IHttpConnectionOptions,
   IIncomingMiddleware,
   IOutgoingMiddleware,
-  ThriftMiddlewareConfig,
+  ThriftMiddleware,
 } from '../types'
 
 import {
@@ -79,8 +79,8 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
 
   public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
 
-  public register(...middleware: Array<ThriftMiddlewareConfig<Context>>): void {
-    middleware.forEach((next: ThriftMiddlewareConfig<Context>) => {
+  public register(...middleware: Array<ThriftMiddleware<Context>>): void {
+    middleware.forEach((next: ThriftMiddleware<Context>) => {
       switch (next.type) {
         case 'outgoing':
           return this.middleware.outgoing.push({

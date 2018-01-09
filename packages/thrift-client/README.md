@@ -11,7 +11,7 @@ $ npm start
 
 This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
 
-The sample app can switch between using a Request client or an Axios client by commenting these lines in example/client.ts
+The sample app can switch between using a Request client or an Axios client by commenting these lines in example/client.ts. Using Request is the perferred method.
 
 ```typescript
 // Create thrift client
@@ -68,18 +68,19 @@ $ npm install --save axios
 
 ### Creating a Client
 
-In this example we will use Axios to create our service client. Using the Request library is very similar.
+In this example we will use Request to create our service client. Using the Axios library is very similar.
 
-Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Axios or Request respectively. These options will be deep merged with any default options before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
+Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request or Axios respectively. These options will be deep merged with any default options before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
 
 ```typescript
 import {
-  fromAxios,
-  AxiosConnection,
+  fromRequest,
+  RequestInstance,
+  RequestConnection,
   IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
 
-import { default as axios, AxiosInstance } from 'axios'
+import * as request from 'request'
 import * as express from 'express'
 import { Calculator } from './codegen/calculator'
 
@@ -100,10 +101,10 @@ const serverConfig = {
 }
 
 // Create thrift client
-const requestClient: AxiosInstance = axios.create()
+const requestClient: RequestInstance = request.defaults({})
 
-const connection: AxiosConnection =
-  fromAxios(requestClient, clientConfig)
+const connection: RequestConnection =
+  fromRequest(requestClient, clientConfig)
 
 const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
@@ -129,7 +130,7 @@ app.listen(serverConfig.port, () => {
 })
 ```
 
-### Options
+#### Options
 
 The possible transport types are:
 
@@ -142,6 +143,26 @@ The possible protocol types are:
 ```typescript
 type ProtocolType = 'binary' | 'compact' | 'json'
 ```
+
+#### `createClient`
+
+It may seem unnecessary to have to create a Request/Axios instance and a connection before finally making a client. We include this to allow maximum customization. Usually you will want to use the `createClient` function that will do this wiring for you.
+
+```typescript
+import {
+  createClient
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+const thriftClient: Calculator.Client = createClient(Calculator.Client, {
+  hostName: 'localhost',
+  port: 8080,
+  requestOptions: {} // CoreOptions to pass to Request
+})
+```
+
+The options here are still of type `IHttpConnectionOptions`, so you can pass all the same options. The service client created by `createClient` uses the Request library for its underlying connection. As such, the `requestOptions` here will be of type `CoreOptions`.
 
 ### Middleware
 
@@ -173,10 +194,10 @@ interface IOutgoingMiddleware<Context> {
 
 ```typescript
 // Create thrift client
-const requestClient: AxiosInstance = axios.create()
+const requestClient: RequestInstance = request.defaults({})
 
-const connection: AxiosConnection =
-  fromAxios(requestClient, clientConfig)
+const connection: RequestConnection =
+  fromRequest(requestClient, clientConfig)
 
 connection.register({
   type: 'incoming',
@@ -194,16 +215,16 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 #### Outgoing Middleware
 
-`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using request and type `AxiosRequestConfig` when using axios. Changes to the context are applied before any context passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
+`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request and type `AxiosRequestConfig` when using Axios. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
 
 Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
 ```typescript
 // Create thrift client
-const requestClient: AxiosInstance = axios.create()
+const requestClient: RequestInstance = request.defaults({})
 
-const connection: AxiosConnection =
-  fromAxios(requestClient, clientConfig)
+const connection: RequestConnection =
+  fromRequest(requestClient, clientConfig)
 
 connection.register({
   type: 'outgoing',
@@ -219,43 +240,78 @@ connection.register({
 const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
+#### `createClient`
+
+When using middleware with `createClient` you can pass middleware in as an option.
+
+```typescript
+import {
+  createClient
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+const thriftClient: Calculator.Client = createClient(Calculator.Client, {
+  hostName: 'localhost',
+  port: 8080,
+  register: [{
+    type: 'outgoing',
+    handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+      return Promise.resolve(Object.assign({}, context, {
+        headers: {
+          'X-Fake-Token': 'fake-token',
+        },
+      }))
+    },
+  }]
+})
+```
+
+The optional `register` option takes an array of middleware to apply. Unsurprisingly they are applied in the order you pass them in.
+
 ## Creating Custom Connections
 
 While Thrift Client includes support for Axios and Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
 
-As an example look at the AxiosConnection:
+As an example look at the RequestConnection:
 
 ```typescript
-export class AxiosConnection extends HttpConnection<AxiosRequestConfig> {
-  private request: AxiosInstance
+export class RequestConnection extends HttpConnection<CoreOptions> {
+  private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
 
-  constructor(requestApi: AxiosInstance, options: IHttpConnectionOptions) {
+  constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
     super(options)
-    this.request = requestApi
-    this.request.defaults.responseType = 'arraybuffer'
-    this.request.defaults.baseURL = `${this.protocol}://${this.hostName}:${this.port}`
+    this.request = requestApi.defaults({
+      // Encoding needs to be explicitly set to null or the response body will be a string
+      encoding: null,
+      url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
+    })
   }
 
-  // Provides an empty context for outgoing middleware
-  public emptyContext(): AxiosRequestConfig {
+  public emptyContext(): CoreOptions {
     return {}
   }
 
-  public write(dataToWrite: Buffer, context: AxiosRequestConfig = {}): Promise<Buffer> {
+  public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
     // Merge user options with required options
-    const requestOptions: AxiosRequestConfig = deepMerge(context, {
+    const requestOptions: request.CoreOptions = deepMerge(context, {
+      body: dataToWrite,
       headers: {
         'content-length': dataToWrite.length,
         'content-type': 'application/octet-stream',
       },
     })
 
-    return this.request.post(
-      this.path,
-      dataToWrite,
-      requestOptions,
-    ).then((value: AxiosResponse) => {
-      return Buffer.from(value.data)
+    return new Promise((resolve, reject) => {
+      this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
+        if (err !== null) {
+          reject(err)
+        } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
+          reject(new Error(body.toString()))
+        } else {
+          resolve(body)
+        }
+      })
     })
   }
 }
