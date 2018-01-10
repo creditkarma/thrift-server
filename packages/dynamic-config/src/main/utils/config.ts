@@ -19,6 +19,8 @@ import {
   IRootConfigValue,
 } from '../types'
 
+import * as logger from '../logger'
+
 export function formatConfigPlaceholder(
   placeholder: string | IConfigPlaceholder,
 ): IConfigPlaceholder {
@@ -107,7 +109,7 @@ function setObjectPropertyValue(key: string, value: BaseConfigValue, configObjec
     return what
 
   } else {
-    console.warn(`Cannot set value for key[${key}] on a non-object`)
+    logger.warn(`Cannot set value for key[${key}] on a non-object`)
     return configObject
   }
 }
@@ -224,12 +226,12 @@ export function readConfigValue(obj: ConfigValue): any {
       return obj.value
 
     case 'placeholder':
-      console.warn(`Trying to read value of unresolved Placeholder`)
-      return null
+    logger.warn(`Trying to read value of unresolved Placeholder`)
+    return null
 
     case 'promise':
-      console.warn(`Trying to read value of unresolved Promise`)
-      return null
+    logger.warn(`Trying to read value of unresolved Promise`)
+    return null
 
     default:
       return null

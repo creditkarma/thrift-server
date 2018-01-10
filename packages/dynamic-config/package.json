@@ -46,6 +46,7 @@
   "dependencies": {
     "@creditkarma/consul-client": "^0.3.3",
     "@creditkarma/vault-client": "^0.3.3",
+    "@types/debug": "0.0.30",
     "ts-node": "^4.1.0"
   }
 }

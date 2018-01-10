@@ -26,6 +26,8 @@ import {
   ObjectUtils,
 } from '../utils'
 
+import * as logger from '../logger'
+
 export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverrides {
   const temp = str.replace(`${remoteName}!/`, '')
   const [ key, ...tail ] = temp.split('?')
@@ -54,10 +56,10 @@ export function defaultConsulResolver(): IRemoteResolver {
       return consulClient
     } else {
       if (consulAddress.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
+        logger.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
         consulClient = new Nothing<KvStore>()
       } else if (consulKvDc.isNothing()) {
-        console.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
+        logger.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
         consulClient = new Nothing<KvStore>()
       } else {
         consulClient = new Just(new KvStore(consulAddress.get()))
@@ -102,7 +104,7 @@ export function defaultConsulResolver(): IRemoteResolver {
         return client.get({ path: remoteOptions.key, dc: remoteOptions.dc }).then((val: any) => {
           return val
         }, (err: any) => {
-          console.error(`Error retrieving key '${key}' from Consul: `, err)
+          logger.error(`Error retrieving key '${key}' from Consul: `, err)
           return Promise.reject(new ConsulFailed(err.message))
         })
       }, () => {
