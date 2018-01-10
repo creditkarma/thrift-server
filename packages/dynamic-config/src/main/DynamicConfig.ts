@@ -37,6 +37,8 @@ import {
   ResolverType,
 } from './types'
 
+import * as logger from './logger'
+
 type ConfigState =
   'startup' | 'init' | 'running'
 
@@ -109,18 +111,18 @@ export class DynamicConfig implements IDynamicConfig {
                 this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, baseValue, this.resolvedConfig)
                 return Promise.resolve(baseValue)
               } else {
-                console.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
+                logger.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
                 return Promise.reject(new DynamicConfigInvalidObject(key))
               }
             }, () => {
-              console.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
+              logger.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
               this.resolvedConfig = ObjectUtils.setValueForKey(key, baseValue, this.resolvedConfig)
               return Promise.resolve(baseValue)
             })
           })
 
         } else {
-          console.error(`Value for key[${key}] not found in config`)
+          logger.error(`Value for key[${key}] not found in config`)
           return Promise.reject(new DynamicConfigMissingKey(key))
         }
       }
@@ -290,7 +292,7 @@ export class DynamicConfig implements IDynamicConfig {
    */
   private validateConfigSchema(): void {
     if (!SchemaUtils.objectMatchesSchema(this.configSchema, this.resolvedConfig)) {
-      console.warn('The shape of the config changed during resolution. This may indicate an error.')
+      logger.warn('The shape of the config changed during resolution. This may indicate an error.')
     }
   }
 
@@ -315,15 +317,15 @@ export class DynamicConfig implements IDynamicConfig {
           return Promise.resolve(remoteValue)
 
         } else {
-          console.error(`Unable to resolve remote value for key[${key}]`)
+          logger.error(`Unable to resolve remote value for key[${key}]`)
           return Promise.reject(new DynamicConfigMissingKey(key))
         }
       }, (err: any) => {
-        console.error(`Unable to resolve remote value for key[${key}]`)
+        logger.error(`Unable to resolve remote value for key[${key}]`)
         return Promise.reject(new DynamicConfigMissingKey(key))
       })
     } else {
-      console.error(`There are no remote resolvers for key[${key}]`)
+      logger.error(`There are no remote resolvers for key[${key}]`)
       return Promise.reject(new ResolverUnavailable(key))
     }
   }

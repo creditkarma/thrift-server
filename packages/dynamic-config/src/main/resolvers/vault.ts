@@ -19,6 +19,8 @@ import {
   ISecretResolver,
 } from '../types'
 
+import * as logger from '../logger'
+
 export function defaultVaultResolver(): ISecretResolver {
   let vaultClient: Promise<Maybe<VaultClient>>
   let dynamicConfig: DynamicConfig
@@ -30,10 +32,10 @@ export function defaultVaultResolver(): ISecretResolver {
       vaultClient = dynamicConfig.get<IHVConfig>(HVAULT_CONFIG_KEY).then((vaultConfig: IHVConfig) => {
         return Promise.resolve(new Just(new VaultClient(vaultConfig)))
       }, (err: any) => {
-        console.log(`Unable to find valid configuration for Vault`)
+        logger.log(`Unable to find valid configuration for Vault`)
         return Promise.resolve(new Nothing<VaultClient>())
       }).catch((err: any) => {
-        console.error(`Error creating VaultClient: `, err)
+        logger.error(`Error creating VaultClient: `, err)
         return Promise.reject(new Error('Unable to create VaultClient'))
       })
 
@@ -54,11 +56,11 @@ export function defaultVaultResolver(): ISecretResolver {
           return client.get<T>(key).then((value: T) => {
             return Promise.resolve(value)
           }, (err: any) => {
-            console.error(`Error retrieving key '${key}' from Vault: `, err)
+            logger.error(`Error retrieving key '${key}' from Vault: `, err)
             return Promise.reject(new HVFailed(err.message))
           })
         }, () => {
-          console.error(`Unable to get key '${key}'. Vault is not configured.`)
+          logger.error(`Unable to get key '${key}'. Vault is not configured.`)
           return Promise.reject(new HVNotConfigured(key))
         })
       })
