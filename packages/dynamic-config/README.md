@@ -489,6 +489,7 @@ As mentioned config placeholders can also be used for `secret` stores. Review ab
 ## Roadmap
 
 * Add ability to watch a value for runtime changes
+* Pull K/V store functionality out into own module
 * Explore options for providing a synchronous API
 
 ## Contributing
