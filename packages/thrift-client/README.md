@@ -162,7 +162,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
 })
 ```
 
-The options here are still of type `IHttpConnectionOptions`, so you can pass all the same options. The service client created by `createClient` uses the Request library for its underlying connection. As such, the `requestOptions` here will be of type `CoreOptions`.
+The options here extend `IHttpConnectionOptions`, so you can pass all the same options. The service client created by `createClient` uses the Request library for its underlying connection. As such, the `requestOptions` here will be of type `CoreOptions`.
 
 ### Middleware
 

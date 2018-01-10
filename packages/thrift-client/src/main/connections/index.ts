@@ -6,10 +6,6 @@ import { AxiosInstance } from 'axios'
 import * as request from 'request'
 
 import {
-  IThriftConnection,
-} from '@creditkarma/thrift-server-core'
-
-import {
   AxiosConnection,
 } from './AxiosConnection'
 
@@ -19,8 +15,9 @@ import {
 } from './RequestConnection'
 
 import {
+  IClientConstructor,
+  ICreateClientOptions,
   IHttpConnectionOptions,
-  ThriftMiddleware,
 } from '../types'
 
 export function fromAxios(
@@ -33,17 +30,6 @@ export function fromRequest(
   requestApi: RequestInstance,
   options: IHttpConnectionOptions): RequestConnection {
   return new RequestConnection(requestApi, options)
-}
-
-export interface IClientConstructor<TClient, Context> {
-  new (
-    connection: IThriftConnection<Context>,
-  ): TClient
-}
-
-export interface ICreateClientOptions<Context> extends IHttpConnectionOptions {
-  register?: Array<ThriftMiddleware<Context>>
-  requestOptions?: request.CoreOptions
 }
 
 export function createClient<TClient>(

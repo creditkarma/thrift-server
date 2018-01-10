@@ -1,7 +1,10 @@
 import {
+  IThriftConnection,
   ProtocolType,
   TransportType,
 } from '@creditkarma/thrift-server-core'
+
+import * as request from 'request'
 
 export interface IHttpConnectionOptions {
   hostName: string
@@ -10,6 +13,17 @@ export interface IHttpConnectionOptions {
   https?: boolean
   transport?: TransportType
   protocol?: ProtocolType
+}
+
+export interface ICreateClientOptions<Context> extends IHttpConnectionOptions {
+  register?: Array<ThriftMiddleware<Context>>
+  requestOptions?: request.CoreOptions
+}
+
+export interface IClientConstructor<TClient, Context> {
+  new (
+    connection: IThriftConnection<Context>,
+  ): TClient
 }
 
 export type MiddlewareType =
