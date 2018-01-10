@@ -33,6 +33,7 @@
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
+    "@types/node": "^8.0.51",
     "code": "^4.1.0",
     "lab": "^14.3.1",
     "rimraf": "^2.6.2",
@@ -41,7 +42,6 @@
     "wait-on": "^2.0.2"
   },
   "dependencies": {
-    "@types/node": "^8.0.51",
     "@types/request": "^2.0.8",
     "@types/request-promise-native": "^1.0.10",
     "request": "^2.83.0",
