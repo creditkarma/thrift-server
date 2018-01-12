@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.6"></a>
+## [0.3.6](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.3.5...v0.3.6) (2018-01-12)
+
+
+### Bug Fixes
+
+* **thrift-client:** Remove dependency on Axios ([#42](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/issues/42)) ([1eb65fc](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/commit/1eb65fc))
+
+
+
+
 <a name="0.3.5"></a>
 ## [0.3.5](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.3.4...v0.3.5) (2018-01-12)
 
