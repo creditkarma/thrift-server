@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.3.4"></a>
+## [0.3.4](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/compare/v0.3.3...v0.3.4) (2018-01-12)
+
+
+
+
+**Note:** Version bump only for package @creditkarma/thrift-server-express
+
 <a name="0.3.1"></a>
 ## [0.3.1](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/compare/v0.3.0...v0.3.1) (2018-01-02)
 
