@@ -117,7 +117,6 @@ Manually creating your Thrift client allows you to choose the use of another HTT
 
 ```typescript
 import {
-  fromRequest,
   RequestInstance,
   RequestConnection,
   IHttpConnectionOptions,
@@ -144,7 +143,7 @@ const serverConfig = {
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
-  fromRequest(requestClient, clientConfig)
+  new RequestConnection(requestClient, clientConfig)
 
 const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 ```
@@ -233,7 +232,7 @@ interface IOutgoingMiddleware<Context> {
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
-  fromRequest(requestClient, clientConfig)
+  new RequestConnection(requestClient, clientConfig)
 
 connection.register({
   type: 'incoming',
@@ -260,7 +259,7 @@ Here, the `X-Fake-Token` will be added to every outgoing client method call:
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
-  fromRequest(requestClient, clientConfig)
+  new RequestConnection(requestClient, clientConfig)
 
 connection.register({
   type: 'outgoing',
