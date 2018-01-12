@@ -1,5 +1,4 @@
 import {
-  fromRequest,
   RequestConnection,
   RequestInstance,
 } from '../../main'
@@ -45,7 +44,7 @@ describe('RequestConnection', () => {
 
     before(async () => {
       const requestClient: RequestInstance = request.defaults({})
-      connection = fromRequest(requestClient, SERVER_CONFIG)
+      connection = new RequestConnection(requestClient, SERVER_CONFIG)
       client = new Calculator.Client(connection)
     })
 
@@ -96,7 +95,7 @@ describe('RequestConnection', () => {
     it('should reject for a 500 server response', async () => {
       const requestClient: RequestInstance = request.defaults({})
       const badConnection: RequestConnection =
-        fromRequest(requestClient, {
+        new RequestConnection(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return500',
@@ -114,7 +113,7 @@ describe('RequestConnection', () => {
     it('should reject for a 400 server response', async () => {
       const requestClient: RequestInstance = request.defaults({})
       const badConnection: RequestConnection =
-        fromRequest(requestClient, {
+        new RequestConnection(requestClient, {
           hostName: SERVER_CONFIG.hostName,
           port: SERVER_CONFIG.port,
           path: '/return400',
@@ -132,7 +131,7 @@ describe('RequestConnection', () => {
     it('should reject for a request to a missing service', async () => {
       const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
       const badConnection: RequestConnection =
-        fromRequest(requestClient, {
+        new RequestConnection(requestClient, {
           hostName: 'fakehost',
           port: 8080,
         })
@@ -150,7 +149,7 @@ describe('RequestConnection', () => {
   describe('IncomingMiddleware', () => {
     it('should resolve when middleware allows', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -171,7 +170,7 @@ describe('RequestConnection', () => {
 
     it('should resolve when middleware passes method filter', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -193,7 +192,7 @@ describe('RequestConnection', () => {
 
     it('should reject when middleware rejects', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -216,7 +215,7 @@ describe('RequestConnection', () => {
 
     it('should skip handler when middleware fails method filter', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -236,7 +235,7 @@ describe('RequestConnection', () => {
   describe('OutgoingMiddleware', () => {
     it('should resolve when middleware adds auth token', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -258,7 +257,7 @@ describe('RequestConnection', () => {
 
     it('should resolve when middleware passes method filter', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({
@@ -281,7 +280,7 @@ describe('RequestConnection', () => {
 
     it('should reject when middleware does not add auth token', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       return client.addWithContext(5, 7)
@@ -294,7 +293,7 @@ describe('RequestConnection', () => {
 
     it('should resolve when middleware fails method filter', async () => {
       const requestClient: RequestInstance = request.defaults({})
-      const connection: RequestConnection = fromRequest(requestClient, SERVER_CONFIG)
+      const connection: RequestConnection = new RequestConnection(requestClient, SERVER_CONFIG)
       const client = new Calculator.Client(connection)
 
       connection.register({

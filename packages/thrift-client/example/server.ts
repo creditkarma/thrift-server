@@ -1,5 +1,5 @@
 import { config } from '@creditkarma/dynamic-config'
-import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
+import { createPlugin } from '@creditkarma/thrift-server-hapi'
 import Hapi = require('hapi');
 
 import { Operation, Calculator, Work } from './generated/calculator/calculator'
@@ -10,7 +10,7 @@ async function createServer(): Promise<Hapi.Server> {
   const server: Hapi.Server = new Hapi.Server();
   server.connection(SERVER_CONFIG);
 
-  server.register(ThriftPlugin, (err: any) => {
+  server.register(createPlugin<Calculator.Processor>(), (err: any) => {
     if (err) {
       throw err;
     }

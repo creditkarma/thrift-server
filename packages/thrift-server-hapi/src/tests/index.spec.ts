@@ -1,13 +1,10 @@
 import {
-  fromRequest,
-  RequestConnection,
-  RequestInstance,
+  createClient,
 } from '@creditkarma/thrift-client'
 
 import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Lab from 'lab'
-import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import {
@@ -31,16 +28,12 @@ const after = lab.after
 
 describe('Thrift Server Hapi', () => {
   let server: any
-  let connection: RequestConnection
   let client: Calculator.Client<CoreOptions>
 
   before((done: any) => {
     server = childProcess.fork('./dist/tests/server.js')
     server.on('message', (msg: any) => console.log(msg))
-
-    const requestClient: RequestInstance = request.defaults({})
-    connection = fromRequest(requestClient, SERVER_CONFIG)
-    client = new Calculator.Client(connection)
+    client = createClient(Calculator.Client, SERVER_CONFIG)
 
     setTimeout(done, 1000)
   })
