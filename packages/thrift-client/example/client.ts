@@ -1,17 +1,11 @@
 import { config } from '@creditkarma/dynamic-config'
 
 import {
-  RequestInstance,
-  // fromAxios,
-  fromRequest,
-  RequestConnection,
-  // AxiosConnection,
+  createClient,
 } from '../src/main/'
 
 import * as path from 'path'
-import * as request from 'request'
 import { CoreOptions } from 'request'
-// import { default as axios, AxiosInstance, AxiosRequestConfig }from 'axios'
 import * as express from 'express'
 
 import {
@@ -28,19 +22,10 @@ import {
   const app = express()
 
   // Create thrift client
-  // Using Request
-  const requestClient: RequestInstance = request.defaults({})
-  const connection: RequestConnection =
-    fromRequest(requestClient, {
-      hostName: SERVER_CONFIG.host,
-      port: SERVER_CONFIG.port
-    })
-  const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
-
-  // Using Axios
-  // const requestClient: AxiosInstance = axios.create()
-  // const connection: AxiosConnection = fromAxios(requestClient, config)
-  // const thriftClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(connection)
+  const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+    hostName: SERVER_CONFIG.host,
+    port: SERVER_CONFIG.port
+  })
 
   function symbolToOperation(sym: string): Operation {
     switch (sym) {

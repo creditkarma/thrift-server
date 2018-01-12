@@ -11,41 +11,26 @@ $ npm start
 
 This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
 
-The sample app can switch between using a Request client or an Axios client by commenting these lines in example/client.ts. Using Request is the perferred method.
-
-```typescript
-// Create thrift client
-// Using Request
-const requestClient: RequestInstance = request.defaults({})
-const connection: RequestConnection = fromRequest(requestClient, config)
-const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
-
-// Using Axios
-const requestClient: AxiosInstance = axios.create()
-const connection: AxiosConnection = fromAxios(requestClient, config)
-const thriftClient: Calculator.Client<AxiosRequestConfig> = new Calculator.Client(connection)
-```
-
 ## Usage
 
-Functions are available to wrap either Request or Axios instances for making requests to a Thrift service.
+We're going to go through this step-by-step.
 
-### Codegen
+* Install dependencies
+* Define our service
+* Run codegen on our Thrift IDL
+* Create a client
+* Make service calls with our client
 
-Requires @creditkarma/thrift-typescript >= v1.0.2
+### Install
 
-The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
+All Thrift Server libraries defined most things as peer dependencies to avoid type collisions.
 
 ```sh
-npm install --save-dev @creditkarma/thrift-typescript
-```
-
-Add a script to your package.json to codegen. The 'target' option is important to make thrift-typescript generate for this library instead of the Apache libraries.
-
-```json
-"scripts": {
-  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
-}
+$ npm install --save-dev @creditkarma/thrift-typescript
+$ npm install --save @creditkarma/thrift-server-core
+$ npm install --save @creditkarma/thrift-client
+$ npm install --save request
+$ npm install --save @types/request
 ```
 
 ### Example Service
@@ -57,20 +42,78 @@ service Calculator {
 }
 ```
 
-### Install
+### Codegen
+
+Add a script to your package.json to codegen. The 'target' option is important to make thrift-typescript generate for this library instead of the Apache libraries.
+
+```json
+"scripts": {
+  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
+}
+```
+
+Then you can run codegen:
 
 ```sh
-$ npm install --save thrift
-$ npm install --save @types/thrift
-$ npm install --save @creditkarma/thrift-client
-$ npm install --save axios
+$ npm run codegen
 ```
 
 ### Creating a Client
 
-In this example we will use Request to create our service client. Using the Axios library is very similar.
+There are two ways to create clients with the public API.
 
-Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request or Axios respectively. These options will be deep merged with any default options before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
+* Use the `createClient` factory function.
+* Manually create your own `HttpConnection` object
+
+#### `createClient`
+
+Using the `createClient` function you pass in two arguments, the first is your Thrift service client class and the second is a map of options to configure the underlying HTTP connection.
+
+When creating a client using this method Thrift Client uses the [Request library](https://github.com/request/request) for making HTTP requests.
+
+```typescript
+import {
+  createClient
+} from '@creditkaram/thrift-client'
+import { CoreOptions } from 'request'
+
+import { Calculator } from './codegen/calculator'
+
+// Create Thrift client
+const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+  hostName: 'localhost',
+  port: 8080,
+  requestOptions: {} // CoreOptions to pass to Request
+})
+```
+
+##### Options
+
+The available options are:
+
+* hostName (required): The name of the host to connect to.
+* port (required): The port number to attach to on the host.
+* path (optional): The path on which the Thrift service is listening. Defaults to '/'.
+* https (optional): Boolean value indicating whether to use https. Defaults to false.
+* transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
+* protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
+* requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
+
+Currently `@creditkarma/thrift-server-core` only supports buffered transport and binary protocol. Framed transport along with compact and JSON protocol will be added soon.
+
+```typescript
+type TransportType = 'buffered'
+```
+
+The possible protocol types are:
+
+```typescript
+type ProtocolType = 'binary'
+```
+
+#### Manual Creation
+
+Manually creating your Thrift client allows you to choose the use of another HTTP client library or to reuse a previously created instance of Request.
 
 ```typescript
 import {
@@ -81,12 +124,9 @@ import {
 } from '@creditkaram/thrift-client'
 
 import * as request from 'request'
-import * as express from 'express'
+import { CoreOptions } from 'request'
 import { Calculator } from './codegen/calculator'
 
-const app = express()
-
-// 'transport', 'protocol' and 'path' are optional and will default to these values
 const clientConfig: IHttpConnectionOptions = {
   hostName: 'localhost',
   port: 3000,
@@ -100,18 +140,48 @@ const serverConfig = {
   port: 8080,
 }
 
-// Create thrift client
+// Create Thrift client
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
   fromRequest(requestClient, clientConfig)
 
-const thriftClient: Calculator.Client = new Calculator.Client(connection)
+const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
+```
+
+Here `RequestConnection` is a class that extends the `HttpConnection` abstract class. Later we will look closer at creating this class.
+
+Also of note here is that the type `IHttpConnectionOptions` does not accept the `requestOptions` parameter. Options to Request here would be passed directly to the call to `request.defaults({})`.
+
+### Making Service Calls with our Client
+
+However we chose to make our client, we use them in the same way.
+
+Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request library (CoreOptions). These options will be deep merged with any default options (passed in on instantiation) before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
+
+Related to context you will notice that our Thrift service client is a generic `Calculator.Client<CoreOptions>`. This type parameter refers to the type of the context, here the `CoreOptions` interface from the Request library.
+
+```typescript
+import {
+  createClient
+} from '@creditkaram/thrift-client'
+
+import { CoreOptions } from 'request'
+import * as express from 'express'
+
+import { Calculator } from './codegen/calculator'
+
+// Create Thrift client
+const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+  hostName: 'localhost',
+  port: 8080,
+  requestOptions: {} // CoreOptions to pass to Request
+})
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
   // Request contexts allow you to do tracing and auth
-  const context: AxiosRequestConfig = {
+  const context: CoreOptions = {
     headers: {
       'X-Trace-Id': 'my-trace-id'
     }
@@ -130,43 +200,9 @@ app.listen(serverConfig.port, () => {
 })
 ```
 
-#### Options
-
-The possible transport types are:
-
-```typescript
-type TransportType = 'buffered' | 'framed'
-```
-
-The possible protocol types are:
-
-```typescript
-type ProtocolType = 'binary' | 'compact' | 'json'
-```
-
-#### `createClient`
-
-It may seem unnecessary to have to create a Request/Axios instance and a connection before finally making a client. We include this to allow maximum customization. Usually you will want to use the `createClient` function that will do this wiring for you.
-
-```typescript
-import {
-  createClient
-} from '@creditkaram/thrift-client'
-
-import { Calculator } from './codegen/calculator'
-
-const thriftClient: Calculator.Client = createClient(Calculator.Client, {
-  hostName: 'localhost',
-  port: 8080,
-  requestOptions: {} // CoreOptions to pass to Request
-})
-```
-
-The options here extend `IHttpConnectionOptions`, so you can pass all the same options. The service client created by `createClient` uses the Request library for its underlying connection. As such, the `requestOptions` here will be of type `CoreOptions`.
-
 ### Middleware
 
-Sometimes you'll want to universally filter or modify response, or you'll want to universally add certain headers to outgoing client requests. You can do these things with middleware.
+Sometimes you'll want to universally filter or modify responses, or you'll want to universally add certain headers to outgoing client requests. You can do these things with middleware.
 
 A middleware is an object that consists of a handler function, the type of middleware and an optional list of client method names to apply the middleware to.
 
@@ -215,7 +251,7 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 #### Outgoing Middleware
 
-`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request and type `AxiosRequestConfig` when using Axios. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
+`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
 
 Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
@@ -228,7 +264,7 @@ const connection: RequestConnection =
 
 connection.register({
   type: 'outgoing',
-  handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+  handler(context: CoreOptions): Promise<CoreOptions> {
     return Promise.resolve(Object.assign({}, context, {
       headers: {
         'X-Fake-Token': 'fake-token',
@@ -256,7 +292,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
   port: 8080,
   register: [{
     type: 'outgoing',
-    handler(context: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+    handler(context: CoreOptions): Promise<CoreOptions> {
       return Promise.resolve(Object.assign({}, context, {
         headers: {
           'X-Fake-Token': 'fake-token',
@@ -271,7 +307,7 @@ The optional `register` option takes an array of middleware to apply. Unsurprisi
 
 ## Creating Custom Connections
 
-While Thrift Client includes support for Axios and Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
+While Thrift Client includes support Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
 
 As an example look at the RequestConnection:
 
