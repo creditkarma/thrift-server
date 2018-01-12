@@ -121,9 +121,9 @@ import {
   RequestConnection,
   IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
-
 import * as request from 'request'
 import { CoreOptions } from 'request'
+
 import { Calculator } from './codegen/calculator'
 
 const clientConfig: IHttpConnectionOptions = {
@@ -132,11 +132,6 @@ const clientConfig: IHttpConnectionOptions = {
   path: '/',
   transport: 'buffered',
   protocol: 'binary',
-}
-
-const serverConfig = {
-  hostName: 'localhost',
-  port: 8080,
 }
 
 // Create Thrift client
@@ -169,6 +164,11 @@ import { CoreOptions } from 'request'
 import * as express from 'express'
 
 import { Calculator } from './codegen/calculator'
+
+const serverConfig = {
+  hostName: 'localhost',
+  port: 8080,
+}
 
 // Create Thrift client
 const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
@@ -228,24 +228,26 @@ interface IOutgoingMiddleware<Context> {
 `incoming` is the default middleware, so if the `type` property is ommited the middleware will be assumed to be incoming.
 
 ```typescript
-// Create thrift client
-const requestClient: RequestInstance = request.defaults({})
+import {
+  createClient
+} from '@creditkaram/thrift-client'
 
-const connection: RequestConnection =
-  new RequestConnection(requestClient, clientConfig)
+import { Calculator } from './codegen/calculator'
 
-connection.register({
-  type: 'incoming',
-  handler(data: Buffer): Promise<Buffer> {
-    if (validatePayload(data)) {
-      return Promise.resolve(data)
-    } else {
-      return Promise.reject(new Error('Payload of thrift response is invalid'))
-    }
-  }
+const thriftClient: Calculator.Client = createClient(Calculator.Client, {
+  hostName: 'localhost',
+  port: 8080,
+  register: [{
+    type: 'incoming',
+    handler(data: Buffer): Promise<Buffer> {
+      if (validatePayload(data)) {
+        return Promise.resolve(data)
+      } else {
+        return Promise.reject(new Error('Payload of thrift response is invalid'))
+      }
+    },
+  }]
 })
-
-const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
 #### Outgoing Middleware
@@ -253,31 +255,6 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 `outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
 
 Here, the `X-Fake-Token` will be added to every outgoing client method call:
-
-```typescript
-// Create thrift client
-const requestClient: RequestInstance = request.defaults({})
-
-const connection: RequestConnection =
-  new RequestConnection(requestClient, clientConfig)
-
-connection.register({
-  type: 'outgoing',
-  handler(context: CoreOptions): Promise<CoreOptions> {
-    return Promise.resolve(Object.assign({}, context, {
-      headers: {
-        'X-Fake-Token': 'fake-token',
-      },
-    }))
-  },
-})
-
-const thriftClient: Calculator.Client = new Calculator.Client(connection)
-```
-
-#### `createClient`
-
-When using middleware with `createClient` you can pass middleware in as an option.
 
 ```typescript
 import {
@@ -300,6 +277,31 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
     },
   }]
 })
+```
+
+#### Adding Middleware to HttpConnection Object
+
+When you're not using `createClient` you can add middleware directly to the connection instance.
+
+```typescript
+// Create thrift client
+const requestClient: RequestInstance = request.defaults({})
+
+const connection: RequestConnection =
+  new RequestConnection(requestClient, clientConfig)
+
+connection.register({
+  type: 'outgoing',
+  handler(context: CoreOptions): Promise<CoreOptions> {
+    return Promise.resolve(Object.assign({}, context, {
+      headers: {
+        'X-Fake-Token': 'fake-token',
+      },
+    }))
+  },
+})
+
+const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
 The optional `register` option takes an array of middleware to apply. Unsurprisingly they are applied in the order you pass them in.
