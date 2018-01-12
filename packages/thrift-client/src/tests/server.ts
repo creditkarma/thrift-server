@@ -1,4 +1,4 @@
-import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
+import { createPlugin } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
 import {
@@ -27,7 +27,7 @@ server.connection({ port: SERVER_CONFIG.port })
  * They behave like any other HTTP route handler, so you can mix and match
  * thrift / REST endpoints on the same server instance.
  */
-server.register(ThriftPlugin, (err: any) => {
+server.register(createPlugin<Calculator.Processor<Hapi.Request>>(), (err: any) => {
   if (err) {
     throw err
   }
