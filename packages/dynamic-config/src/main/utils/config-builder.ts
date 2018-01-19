@@ -34,7 +34,7 @@ export function buildBaseConfigValue(sourceName: string, sourceType: SourceType,
       },
       resolved: false,
       type: 'placeholder',
-      value: ConfigUtils.formatConfigPlaceholder(obj),
+      value: obj,
       watchers: [],
     }
 

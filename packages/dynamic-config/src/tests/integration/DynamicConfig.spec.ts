@@ -87,7 +87,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('fake.path').then((actual: object) => {
           throw new Error('Should reject for missing key')
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to find value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key[fake.path]')
         })
       })
     })
@@ -103,7 +103,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.getAll('database.username', 'database.fake').then((val: any) => {
           throw new Error('Promise should reject')
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to find value for key: database.fake')
+          expect(err.message).to.equal('Unable to find value for key[database.fake]')
         })
       })
     })
@@ -133,9 +133,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.getSecretValue<string>('missing-secret').then((actual: string) => {
           throw new Error('Should reject for missing secret')
         }, (err: any) => {
-          expect(err.message).to.equal(
-            'Unable to find value for key: missing-secret',
-          )
+          expect(err.message).to.equal('Unable to find value for key[missing-secret]')
         })
       })
     })
@@ -219,7 +217,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('fake.path').then((actual: object) => {
           throw new Error('Should reject for missing key')
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to find value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key[fake.path]')
         })
       })
     })
@@ -229,9 +227,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
           throw new Error('Should reject when Vault not configured')
         }, (err: any) => {
-          expect(err.message).to.equal(
-            'Unable to find value for key: test-secret',
-          )
+          expect(err.message).to.equal('Unable to find value for key[test-secret]')
         })
       })
     })
@@ -307,7 +303,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('fake.path').then((actual: object) => {
           throw new Error('Should reject for missing key')
         }, (err: any) => {
-          expect(err.message).to.equal('Unable to find value for key: fake.path')
+          expect(err.message).to.equal('Unable to find value for key[fake.path]')
         })
       })
     })
@@ -315,11 +311,9 @@ describe('DynamicConfig', () => {
     describe('getSecretValue', () => {
       it('should reject when Vault not configured', async () => {
         return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
-          throw new Error(`Unable to retrieve key: 'test-secret'. Should reject when Vault not configured`)
+          throw new Error(`Unable to retrieve key[test-secret]. Should reject when Vault not configured`)
         }, (err: any) => {
-          expect(err.message).to.equal(
-            'Unable to retrieve key: test-secret. No resolver found',
-          )
+          expect(err.message).to.equal('Unable to retrieve key[test-secret]. No resolver found.')
         })
       })
     })

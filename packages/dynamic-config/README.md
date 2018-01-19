@@ -207,7 +207,7 @@ Remote configuration allows you to deploy configuration independent from your ap
 
 Registering a remote resolver is fairly straight-forward. You use the `register` method on your config instance.
 
-Note: You can only register remote resolvers util your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
+Note: You can only register remote resolvers until your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
 
 ```typescript
 import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config'
@@ -338,23 +338,32 @@ A config placeholder is a place in the configuration that you call out that some
 "database": {
   "username": "root",
   "password": {
-    "key": "vault!/my-service/password"
+    "_source": "vault",
+    "_key": "my-service/password"
   }
 }
 ```
 
-Okay, so a config place holder is an object with one required parameter `key` and one optional parameter `default`.
+Okay, so a config place holder is an object with two required parameters `_source` and `_key` and one optional parameter `_default`.
 
 ```typescript
 interface IConfigPlaceholder {
-  key: string
-  default?: any
+  _source: string
+  _key: string
+  _type?: 'string' | 'number' | 'object' | 'array' | 'boolean'
+  _default?: any
 }
 ```
 
-The `default` property is ignored for `secret` resolvers.
+The `_source` property is the name of the remote to resolve this key from.
 
-The `key` is the more interesting bit now. It it divided into two parts, the header and the body. The header is the part before `!/`. This refers to the name of remote to resolve this key. This example will use the remote registered as `vault` and will request the value for the key `'my-service/password'`. Since we are searching for a secret, if it cannot be found an error is raised.
+The `_key` property is a string to search the remote for.
+
+The `_type` property indicates how to try to parse this value. If no type is provided then the raw value returned from the source is used. This value is given to the underlying resolver to make decisions. Some resolvers (Consul and Vault) do not use the `_type` property.
+
+The `_default` property is ignored for `secret` resolvers. If no default an exception is raised for missing keys.
+
+In example above, using the default configuration for Vault, the database password will be requested from `http://localhost:8200/secret/my-service/password`.
 
 If we're looking for a key in a remote registered simply as type `remote` we can provide a default value.
 
@@ -362,8 +371,9 @@ If we're looking for a key in a remote registered simply as type `remote` we can
 {
   "server": {
     "host": {
-      "key": "consul!/my-service/host",
-      "default": "localhost"
+      "_source": "consul",
+      "_key": "my-service/host",
+      "_default": "localhost"
     },
     "port": 8080
   }
@@ -372,16 +382,51 @@ If we're looking for a key in a remote registered simply as type `remote` we can
 
 In this case if the key `my-service/host` can't be found in Consul, or if Consul just isn't configured, then the default value `'localhost'` is returned.
 
-If you do not wish to provide a default you can use the shorthand notation of just using the remote key in place of the desired value:
+#### Evnironment Placeholders
+
+Environment placeholders are used to override config values with envirnoment variables. Environment placeholders are resolved with a special internal resolver similar to what we have already seen.
+
+An envirnoment place holder is called out by having your placeholder `_source` property set to `'env'`.
 
 ```json
-{
-  "server": {
-    "host": "consul!/my-service/host",
-    "port": 8080
-  }
+"server": {
+  "host": {
+    "_source": "env",
+    "_key": "HOSTNAME",
+    "_default": "localhost"
+  },
+  "port": 8080
 }
 ```
+
+Here `_key` is the name of the environment variable to look for. You can use `_default` for environment placeholders.
+
+#### Process Placeholders
+
+Similar to environment placeholders, process placeholders allow you to override config values with values passed in on the command line.
+
+A process place holder is called out by having your placeholder `_source` property set to `'process'`.
+
+```json
+"server": {
+  "host": {
+    "_source": "process",
+    "_key": "HOSTNAME",
+    "_default": "localhost"
+  },
+  "port": 8080
+}
+```
+
+Then when you start your application you can pass ine `HOSTNAME` as a command line option.
+
+```sh
+$ node my-app.js HOSTNAME=localhost
+```
+
+Process placeholders must be of this form `<name>=<value>`. The equal sign (`=`) is required.
+
+Here `_key` is the name of the environment variable to look for. You can use `_default` for process placeholders.
 
 ## Consul Configs
 
@@ -427,6 +472,14 @@ $ export CONSUL_ADDRESS=http://localhost:8500
 $ export CONSUL_KV_DC=dc1
 $ export CONSUL_KEYS=production-config,production-east-config
 $ export CONFIG_PATH=config
+```
+
+### Command Line Options
+
+All of the above options can also be passed on the command line when starting your application:
+
+```sh
+$ node my-app.js CONSUL_ADDRESS=http://localhost:8500 CONSUL_KV_DC=dc1 CONSUL_KEYS=production-config,production-east-config CONFIG_PATH=config
 ```
 
 ### Constructor Options

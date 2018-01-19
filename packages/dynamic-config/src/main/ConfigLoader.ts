@@ -45,6 +45,7 @@ function getConfigPath(sourceDir: string): string {
   const firstPath: string = path.resolve(process.cwd(), sourceDir)
   if (fs.existsSync(firstPath) && fs.statSync(firstPath).isDirectory) {
     return firstPath
+
   } else {
     for (const next of CONFIG_SEARCH_PATHS) {
       const nextPath: string = path.resolve(process.cwd(), next, sourceDir)

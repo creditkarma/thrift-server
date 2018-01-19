@@ -44,35 +44,40 @@ export interface IRemoteResolver {
   type: 'remote'
   name: string
   init: IRemoteInitializer
-  get<T>(key: string): Promise<T>
+  get<T>(key: string, type?: ObjectType): Promise<T>
 }
 
 export interface ISecretResolver {
   type: 'secret'
   name: string
   init: IRemoteInitializer
-  get<T>(key: string): Promise<T>
+  get<T>(key: string, type?: ObjectType): Promise<T>
 }
 
 // CONFIG TYPES
 
 export type SourceType =
-  'local' | 'remote' | 'secret'
+  'local' | 'remote' | 'secret' | 'env' | 'process'
 
 export interface ISource {
   type: SourceType
   name: string
 }
 
+export type ConfigType =
+  'root' | ObjectType | DeferredType
+
 export type ObjectType =
-  'root' | 'object' | 'array' | 'string' |
-  'number' | 'boolean' | 'promise' | 'placeholder'
+  'object' | 'array' | 'string' | 'number' | 'boolean'
+
+export type DeferredType =
+  'promise' | 'placeholder'
 
 export type WatchFunction =
   (val: any) => void
 
 export interface IConfigValue {
-  type: ObjectType
+  type: ConfigType
 }
 
 export interface IBaseConfigValue extends IConfigValue {
@@ -128,15 +133,33 @@ export interface IPlaceholderConfigValue extends IBaseConfigValue {
 export type ResolverType =
   'remote' | 'secret'
 
-export interface IConfigPlaceholder {
-  key: string
-  default?: any
+export interface IResolver {
+  name: string
+  type: ResolverType
 }
 
+/**
+ * Config placeholder as it appears in the raw config
+ */
+export interface IConfigPlaceholder {
+  _source: string
+  _key: string
+  _type?: ObjectType
+  _default?: any
+}
+
+/**
+ * Config placeholder as is resolved after all resolvers have been registered.
+ *
+ * name - name of remote resolver
+ * key - key to fetch from resolver
+ * type - type of resolver
+ * default - default value if fetching fails
+ */
 export interface IResolvedPlaceholder {
-  name: string
+  resolver: IResolver
   key: string
-  type: ResolverType
+  type: ObjectType
   default?: any
 }
 
@@ -161,36 +184,30 @@ export type ISchema =
 export interface IArraySchema {
   type: 'array'
   items: ISchema
-  required?: boolean
 }
 
 export interface IObjectSchema {
   type: 'object'
   properties: ISchemaMap
-  required?: boolean
+  required?: Array<string>
 }
 
 export interface IStringSchema {
   type: 'string'
-  required?: boolean
 }
 
 export interface INumberSchema {
   type: 'number'
-  required?: boolean
 }
 
 export interface IBooleanSchema {
   type: 'boolean'
-  required?: boolean
 }
 
 export interface IAnySchema {
   type: 'any'
-  required?: boolean
 }
 
 export interface IUndefinedSchema {
   type: 'undefined'
-  required?: boolean
 }

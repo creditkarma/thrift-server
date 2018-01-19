@@ -191,12 +191,15 @@ export class DynamicConfig implements IDynamicConfig {
   }
 
   private resolvePlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
-    switch (placeholder.type) {
+    switch (placeholder.resolver.type) {
       case 'remote':
         return this.getRemotePlaceholder(placeholder)
 
       case 'secret':
         return this.getSecretPlaceholder(placeholder)
+
+      default:
+        return Promise.reject(new Error(`Unrecognized placeholder type[${placeholder.resolver.type}]`))
     }
   }
 
@@ -215,8 +218,8 @@ export class DynamicConfig implements IDynamicConfig {
 
       updates.push([ path, this.resolvePlaceholder(resolvedPlaceholder).then((value: any) => {
         return ConfigBuilder.buildBaseConfigValue(
-          resolvedPlaceholder.name,
-          resolvedPlaceholder.type,
+          resolvedPlaceholder.resolver.name,
+          resolvedPlaceholder.resolver.type,
           value,
         )
       }) ])

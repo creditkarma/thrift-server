@@ -28,9 +28,8 @@ import {
 
 import * as logger from '../logger'
 
-export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverrides {
-  const temp = str.replace(`${remoteName}!/`, '')
-  const [ key, ...tail ] = temp.split('?')
+export function toRemoteOptionMap(str: string): IRemoteOverrides {
+  const [ key, ...tail ] = str.split('?')
   const result: IRemoteOverrides = { key }
 
   if (tail.length > 0) {
@@ -100,7 +99,7 @@ export function defaultConsulResolver(): IRemoteResolver {
 
     get<T = any>(key: string): Promise<T> {
       return getConsulClient().fork((client: KvStore) => {
-        const remoteOptions: IRemoteOverrides = toRemoteOptionMap(key, 'consul')
+        const remoteOptions: IRemoteOverrides = toRemoteOptionMap(key)
         return client.get({ path: remoteOptions.key, dc: remoteOptions.dc }).then((val: any) => {
           return val
         }, (err: any) => {

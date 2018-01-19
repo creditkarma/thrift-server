@@ -57,22 +57,29 @@ setTimeout(() => {
       consulClient.set({ path: 'test-config-one' }, {
         database: {
           username: 'testUser',
-          password: 'consul!/password',
+          password: {
+            '_source': 'consul',
+            '_key': 'password',
+          },
         },
       }),
       consulClient.set({ path: 'test-config-two' }, {
         database: {
           username: 'fakeUser',
           password: {
-            key: 'consul!/missing-password',
-            default: 'NotSoSecret',
+            '_source': 'consul',
+            '_key': 'missing-password',
+            '_default': 'NotSoSecret',
           },
         },
       }),
       consulClient.set({ path: 'password' }, 'Sup3rS3cr3t'),
       consulClient.set({ path: 'with-vault' }, {
         database: {
-          password: 'vault!/password',
+          password: {
+            '_source': 'vault',
+            '_key': 'password',
+          },
         },
         'hashicorp-vault': {
           apiVersion: 'v1',
