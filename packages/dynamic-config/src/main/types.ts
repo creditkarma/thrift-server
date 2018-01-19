@@ -6,6 +6,7 @@ export interface IConfigOptions {
   configPath?: string
   configEnv?: string
   remoteOptions?: IRemoteOptions
+  resolvers?: Array<ConfigResolver>
 }
 
 export interface IConsulOptions {

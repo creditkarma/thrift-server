@@ -4,7 +4,12 @@ import {
   IConfigOptions,
 } from './types'
 
-import { defaultConsulResolver, defaultVaultResolver } from './resolvers'
+import {
+  defaultConsulResolver,
+  defaultVaultResolver,
+  environmentResolver,
+  processResolver,
+} from './resolvers'
 
 export * from './ConfigLoader'
 export { DynamicConfig } from './DynamicConfig'
@@ -22,6 +27,8 @@ export function config(options: IConfigOptions = {}): DynamicConfig {
     configInstance.register(
       defaultConsulResolver(),
       defaultVaultResolver(),
+      environmentResolver(),
+      processResolver(),
     )
   }
 

@@ -56,6 +56,7 @@ export class DynamicConfig implements IDynamicConfig {
     configPath = process.env[CONFIG_PATH],
     configEnv = process.env.NODE_ENV,
     remoteOptions = {},
+    resolvers = [],
   }: IConfigOptions = {}) {
     this.configState = 'startup'
     this.configLoader = new ConfigLoader({ configPath, configEnv })
@@ -64,6 +65,7 @@ export class DynamicConfig implements IDynamicConfig {
       names: new Set<string>(),
       all: new Map(),
     }
+    this.register(...resolvers)
   }
 
   public register(...resolvers: Array<ConfigResolver>): void {
