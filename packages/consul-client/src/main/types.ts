@@ -1,6 +1,7 @@
 export const enum RequestType {
   GetRequest = 'GetRequest',
   UpdateRequest = 'UpdateRequest',
+  DeleteRequest = 'DeleteRequest',
 }
 
 export interface IQueryMap {
@@ -33,8 +34,13 @@ export interface IConsulUpdateRequest<T = any> extends IConsulRequest {
   value: T
 }
 
+export interface IConsulDeleteRequest extends IConsulRequest {
+  type: RequestType.DeleteRequest
+  section: 'kv'
+}
+
 export type ConsulRequest<T = any> =
-  IConsulGetRequest | IConsulUpdateRequest<T>
+  IConsulGetRequest | IConsulUpdateRequest<T> | IConsulDeleteRequest
 
 export interface IConsulMetadata {
   CreateIndex: number

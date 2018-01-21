@@ -1,4 +1,5 @@
 import {
+  IConsulDeleteRequest,
   IConsulGetRequest,
   IConsulUpdateRequest,
   RequestType,
@@ -30,4 +31,17 @@ export const DEFAULT_UPDATE_REQUEST: IConsulUpdateRequest = {
 
 export function updateRequest(options: Partial<IConsulUpdateRequest>): IConsulUpdateRequest {
   return Object.assign(DEFAULT_UPDATE_REQUEST, options)
+}
+
+export const DEFAULT_DELETE_REQUEST: IConsulDeleteRequest = {
+  type: RequestType.DeleteRequest,
+  apiVersion: 'v1',
+  section: 'kv',
+  subsection: undefined,
+  index: 0,
+  key: { path: '' },
+}
+
+export function deleteRequest(options: Partial<IConsulDeleteRequest>): IConsulDeleteRequest {
+  return Object.assign(DEFAULT_DELETE_REQUEST, options)
 }

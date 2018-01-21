@@ -3,6 +3,7 @@ import { CoreOptions, RequestResponse } from 'request'
 import { ConsulClient } from './ConsulClient'
 
 import {
+  deleteRequest,
   getRequest,
   updateRequest,
 } from './request'
@@ -78,6 +79,24 @@ export class KvStore {
     return this.client.send(updateRequest({
       key,
       value: data,
+    }), extendedOptions).then((res: RequestResponse) => {
+      switch (res.statusCode) {
+        case 200:
+          return Promise.resolve(res.body as boolean)
+
+        case 404:
+          return Promise.resolve(false)
+
+        default:
+          return Promise.reject(new Error(res.statusMessage))
+      }
+    })
+  }
+
+  public delete(key: IKey, requestOptions: CoreOptions = {}): Promise<boolean> {
+    const extendedOptions = deepMerge(this.baseOptions, requestOptions)
+    return this.client.send(deleteRequest({
+      key,
     }), extendedOptions).then((res: RequestResponse) => {
       switch (res.statusCode) {
         case 200:

@@ -63,7 +63,7 @@ export class ConsulClient {
     switch (req.type) {
       case RequestType.GetRequest:
         return request(deepMerge(options, {
-          uri: `${this.destination}/${requestToPath(req)}`,
+          uri: this.uriForRequest(req),
           method: 'GET',
           headers: headersForRequest(req),
           qs: cleanQueryParams({
@@ -74,9 +74,19 @@ export class ConsulClient {
 
       case RequestType.UpdateRequest:
         return request(deepMerge(options, {
-          uri: `${this.destination}/${requestToPath(req)}`,
+          uri: this.uriForRequest(req),
           body: req.value,
           method: 'PUT',
+          headers: headersForRequest(req),
+          qs: cleanQueryParams({
+            dc: req.key.dc,
+          }),
+        }))
+
+      case RequestType.DeleteRequest:
+        return request(deepMerge(options, {
+          uri: this.uriForRequest(req),
+          method: 'DELETE',
           headers: headersForRequest(req),
           qs: cleanQueryParams({
             dc: req.key.dc,
@@ -87,5 +97,9 @@ export class ConsulClient {
         const msg: never = req
         return Promise.reject(new Error(`Unsupported request type: ${msg}`))
     }
+  }
+
+  private uriForRequest(req: ConsulRequest): string {
+    return `${this.destination}/${requestToPath(req)}`
   }
 }
