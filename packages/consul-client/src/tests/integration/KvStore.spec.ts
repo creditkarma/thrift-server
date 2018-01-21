@@ -15,95 +15,103 @@ describe('KvStore', () => {
   const mockBool = true
 
   describe('write', () => {
-    it('should write a string to consul', (done) => {
-      client.set({ path: 'str' }, mockStr).then((val: any) => {
+    it('should write a string to consul', async () => {
+      return client.set({ path: 'str' }, mockStr).then((val: any) => {
         expect(val).to.equal(true)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should write a number to consul', (done) => {
-      client.set({ path: 'num' }, mockNum).then((val: any) => {
+    it('should write a number to consul', async () => {
+      return client.set({ path: 'num' }, mockNum).then((val: any) => {
         expect(val).to.equal(true)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should write a boolean to consul', (done) => {
-      client.set({ path: 'bool' }, mockBool).then((val: any) => {
+    it('should write a boolean to consul', async () => {
+      return client.set({ path: 'bool' }, mockBool).then((val: any) => {
         expect(val).to.equal(true)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should write an object to consul', (done) => {
-      client.set({ path: 'obj' }, mockObj).then((val: any) => {
+    it('should write an object to consul', async () => {
+      return client.set({ path: 'obj' }, mockObj).then((val: any) => {
         expect(val).to.equal(true)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
   })
 
   describe('read', () => {
-    it('should read a string from consul', (done) => {
+    it('should read a string from consul', async () => {
       client.get({ path: 'str' }).then((val: any) => {
         expect(val).to.equal(mockStr)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should read a number from consul', (done) => {
+    it('should read a number from consul', async () => {
       client.get({ path: 'num' }).then((val: any) => {
         expect(val).to.equal(mockNum)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should read a boolean from consul', (done) => {
-      client.get({ path: 'bool' }).then((val: any) => {
+    it('should read a boolean from consul', async () => {
+      return client.get({ path: 'bool' }).then((val: any) => {
         expect(val).to.equal(mockBool)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should read an object from consul', (done) => {
-      client.get({ path: 'obj' }).then((val: any) => {
+    it('should read an object from consul', async () => {
+      return client.get({ path: 'obj' }).then((val: any) => {
         expect(val).to.equal(mockObj)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
       })
     })
 
-    it('should return null for a missing key', (done) => {
-      client.get({ path: 'missing' }).then((val: any) => {
+    it('should return null for a missing key', async () => {
+      return client.get({ path: 'missing' }).then((val: any) => {
         expect(val).to.equal(null)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
+      })
+    })
+  })
+
+  describe('delete', () => {
+    it('should delete a string from consul', async () => {
+      return client.delete({ path: 'str' }).then((result: any) => {
+        expect(result).to.equal(true)
+        return client.get({ path: 'str' }).then((val: any) => {
+          expect(val).to.equal(null)
+        })
+      })
+    })
+
+    it('should delete a number from consul', async () => {
+      return client.delete({ path: 'num' }).then((result: any) => {
+        expect(result).to.equal(true)
+        return client.get({ path: 'num' }).then((val: any) => {
+          expect(val).to.equal(null)
+        })
+      })
+    })
+
+    it('should delete a boolean from consul', async () => {
+      return client.delete({ path: 'bool' }).then((result: any) => {
+        expect(result).to.equal(true)
+        return client.get({ path: 'bool' }).then((val: any) => {
+          expect(val).to.equal(null)
+        })
+      })
+    })
+
+    it('should delete an object from consul', async () => {
+      return client.delete({ path: 'obj' }).then((result: any) => {
+        expect(result).to.equal(true)
+        return client.get({ path: 'obj' }).then((val: any) => {
+          expect(val).to.equal(null)
+        })
+      })
+    })
+
+    it('should return true for a missing key', async () => {
+      return client.delete({ path: 'missing' }).then((result: any) => {
+        expect(result).to.equal(true)
       })
     })
   })

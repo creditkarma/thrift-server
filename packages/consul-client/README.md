@@ -23,7 +23,7 @@ const kvStore: KvStore = new KvStore('http://localhost:8500')
 
 ### IKey
 
-The KvStore reads and writes to Consul based on IKey objects. These are objects with one required property and one optional property. The required property is `path`. The path is the key name to look up. The optional property is `dc`. The dc is the datacenter to read from. Per the Consul docs this will default to the datacenter of the agent being queried, specified by the host address.
+The KvStore reads, writes and deletes values with Consul based on `IKey` objects. These are objects with one required property and one optional property. The required property is `path`. The path is the key name to look up. The optional property is `dc`. The dc is the datacenter to read from. Per the Consul docs this will default to the datacenter of the agent being queried, specified by the host address.
 
 ```typescript
 kvStore.set({ path: 'key', dc: 'dc1' }, 'test').then((success: boolean) => {
@@ -34,6 +34,12 @@ kvStore.set({ path: 'key', dc: 'dc1' }, 'test').then((success: boolean) => {
 
 kvStore.get({ path: 'key', dc: 'dc1' }).then((val: string) => {
   // val === 'test'
+})
+
+kvStore.delete({ path: 'key', dc: 'dc1' }).then((success: boolean) => {
+  if (success) {
+    // delete was successful
+  }
 })
 ```
 
