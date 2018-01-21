@@ -2,7 +2,7 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
-DynamicConfig supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.(json|js|ts)`) is required.
+Dynamic Config supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.(json|js|ts)`) is required.
 
 ## Install
 
@@ -12,7 +12,7 @@ $ npm install @creditkarma/dynamic-config
 
 ## Usage
 
-The most common usage of DynamicConfig is through a singleton instance. The singleton instance is lazily created through the exported function `config`. Subsequent calls to this function will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
+The most common usage of Dynamic Config is through a singleton instance. The singleton instance is lazily created through the exported function `config`. Subsequent calls to this function will return the same instance. Configuration can be passed to the function or set on environment variables. We'll see more of that below.
 
 ### Promise-based
 
@@ -34,7 +34,7 @@ export async function createHttpClient(): Promise<Client> {
 
 #### Class Constructor
 
-You can also construct your own instance by importing the underlying DynamicConfig class. The underlying class has no remote resolvers registered. Out-of-the-box it will only pull from local files.
+You can also construct your own instance by importing the underlying `DynamicConfig` class. The underlying class has no remote resolvers registered. Out-of-the-box it will only pull from local files.
 
 ```typescript
 import { DynamicConfig } from '@creditkarma/dynamic-config'
@@ -169,7 +169,7 @@ Promises can also be nested, meaning keys within your returned config object can
 
 This API can be used for loading config values from sources that don't neatly fit with the rest of the API. It does however make configs more messy and should ideally be used sparingly. We'll cover how to get values from remote sources in a more organized fashion shortly.
 
-Note: If a nested Promise rejects the wrapping Promise also rejects and all values within the wrapping Promise are ignored.
+*Note: If a nested Promise rejects the wrapping Promise also rejects and all values within the wrapping Promise are ignored.*
 
 ### Config Schema
 
@@ -181,7 +181,7 @@ You can override the values from the default config in a variety of ways, but th
 
 ### Configuration Path
 
-The path to the config files is configurable when instantiating the DynamicConfig object. The option can either be an absolute path or a path relative to `process.cwd()`. The option can be defined both when constructing an instance or through an environment variable.
+The path to the config files is configurable when instantiating the `DynamicConfig` object. The option can either be an absolute path or a path relative to `process.cwd()`. The option can be defined both when constructing an instance or through an environment variable.
 
 In TypeScript:
 
@@ -207,7 +207,7 @@ Remote configuration allows you to deploy configuration independent from your ap
 
 Registering a remote resolver is fairly straight-forward. You use the `register` method on your config instance.
 
-Note: You can only register remote resolvers until your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.
+*Note: You can only register remote resolvers until your first call to `config.get()`. After this any attempt to register a resolver will raise an exception.*
 
 ```typescript
 import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config'
@@ -249,7 +249,7 @@ The name for this remote. This is used to lookup config placeholders. We'll get 
 
 The init method is called and resolved before any request to `get` can be completed. The init method returns a Promise. The resolved value of this Promise is deeply merged with the local config files. This is where you load remote configuration that should be available on application startup.
 
-The init method receives an instance of the DynamicConfig object it is being registered on and any optional parameters that we defined on the DynamicConfig instance.
+The init method receives an instance of the `DynamicConfig` object it is being registered on and any optional parameters that we defined on the `DynamicConfig` instance.
 
 To define `IRemoteOptions` for a given remote resolver we use the `remoteOptions` parameter on the constructor config object:
 
@@ -344,7 +344,9 @@ A config placeholder is a place in the configuration that you call out that some
 }
 ```
 
-Okay, so a config place holder is an object with two required parameters `_source` and `_key` and one optional parameter `_default`.
+Okay, so a config place holder is an object with two required parameters `_source` and `_key` and two optional parameters `_type` and `_default`.
+
+The interface:
 
 ```typescript
 interface IConfigPlaceholder {
@@ -355,15 +357,12 @@ interface IConfigPlaceholder {
 }
 ```
 
-The `_source` property is the name of the remote to resolve this key from.
+* `_source` - The name of the remote to resolve this key from.
+* `_key` - A string to search the remote for.
+* `_type` - Indicates how to try to parse this value. If no type is provided then the raw value returned from the source is used (usually a string). This value is given to the underlying resolver to make decisions. Some resolvers (as is the case with Consul and Vault) may choose to ignore the `_type` property.
+* `_default` - A default value for the case that placeholder resolution fails. This property is ignored for `secret` resolvers. If no default an exception is raised for missing keys.
 
-The `_key` property is a string to search the remote for.
-
-The `_type` property indicates how to try to parse this value. If no type is provided then the raw value returned from the source is used. This value is given to the underlying resolver to make decisions. Some resolvers (Consul and Vault) do not use the `_type` property.
-
-The `_default` property is ignored for `secret` resolvers. If no default an exception is raised for missing keys.
-
-In example above, using the default configuration for Vault, the database password will be requested from `http://localhost:8200/secret/my-service/password`.
+In the example above, using the default configuration for Vault, the database password will be requested from `http://localhost:8200/secret/my-service/password`.
 
 If we're looking for a key in a remote registered simply as type `remote` we can provide a default value.
 
@@ -430,7 +429,7 @@ Here `_key` is the name of the environment variable to look for. You can use `_d
 
 ## Consul Configs
 
-DynamicConfig ships with support for Consul. Now we're going to explore some of the specifics of using the included Consul resolver. The underlying Consul client comes from: [@creditkarma/consul-client](https://github.com/creditkarma/thrift-server/tree/dynamic-config/packages/consul-client).
+Dynamic Config ships with support for Consul. Now we're going to explore some of the specifics of using the included Consul resolver. The underlying Consul client comes from: [@creditkarma/consul-client](https://github.com/creditkarma/thrift-server/tree/dynamic-config/packages/consul-client).
 
 Values stored in Consul are assumed to be JSON structures that can be deeply merged with local configuration files. As such configuration from Consul is merged on top of local configuration, overwriting local configuration in the resulting config object.
 

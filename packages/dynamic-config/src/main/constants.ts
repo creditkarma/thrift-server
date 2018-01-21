@@ -19,6 +19,11 @@ export const CONSUL_KEYS: string = 'CONSUL_KEYS'
 export const CONFIG_PATH: string = 'CONFIG_PATH'
 
 /**
+ * Backup environment variable to use for config environment
+ */
+export const CONFIG_ENV: string = 'CONFIG_ENV'
+
+/**
  * The key in the config where we find Vault configuration
  */
 export const HVAULT_CONFIG_KEY: string = 'hashicorp-vault'

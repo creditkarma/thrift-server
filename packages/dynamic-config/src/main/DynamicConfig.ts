@@ -3,6 +3,7 @@ import {
 } from './ConfigLoader'
 
 import {
+  CONFIG_ENV,
   CONFIG_PATH,
 } from './constants'
 
@@ -13,6 +14,7 @@ import {
   ObjectUtils,
   PromiseUtils,
   SchemaUtils,
+  Utils,
 } from './utils'
 
 import {
@@ -53,8 +55,8 @@ export class DynamicConfig implements IDynamicConfig {
   private resolvers: IResolverMap
 
   constructor({
-    configPath = process.env[CONFIG_PATH],
-    configEnv = process.env.NODE_ENV,
+    configPath = Utils.readFromEnvOrProcess(CONFIG_PATH),
+    configEnv = Utils.readFirstMatch(CONFIG_ENV, 'NODE_ENV'),
     remoteOptions = {},
     resolvers = [],
   }: IConfigOptions = {}) {

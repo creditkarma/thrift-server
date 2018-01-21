@@ -58,7 +58,7 @@ export function defaultConsulResolver(): IRemoteResolver {
         logger.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
         consulClient = new Nothing<KvStore>()
       } else if (consulKvDc.isNothing()) {
-        logger.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
+        logger.warn('Could not create a Consul client: Consul Data Center (CONSUL_KV_DC) is not defined')
         consulClient = new Nothing<KvStore>()
       } else {
         consulClient = new Just(new KvStore(consulAddress.get()))

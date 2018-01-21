@@ -12,27 +12,10 @@ import {
 
 import {
   ConfigUtils,
+  Utils,
 } from '../utils'
 
 import * as logger from '../logger'
-
-const MALFORMED_ARGUMENT = '<Error[malformed argument]>'
-
-export function readValueFromArgs(key: string, args: Array<string>): string | undefined {
-  return args.filter((next: string) => {
-    return next.startsWith(key)
-  }).map((match: string) => {
-    const parts = match.split('=')
-    if (parts.length === 2) {
-      return parts[1]
-
-    } else {
-      return MALFORMED_ARGUMENT
-    }
-  }).filter((next: string) => {
-    return next !== MALFORMED_ARGUMENT
-  })[0]
-}
 
 export function processResolver(): IRemoteResolver {
   return {
@@ -42,7 +25,7 @@ export function processResolver(): IRemoteResolver {
       return Promise.resolve({})
     },
     get<T = any>(key: string, type?: ObjectType): Promise<T> {
-      const value = readValueFromArgs(key, process.argv)
+      const value = Utils.readValueFromArgs(key, process.argv)
       if (value !== undefined) {
         if (type !== undefined) {
           return ConfigUtils.readValueForType(value, type)
