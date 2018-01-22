@@ -243,12 +243,11 @@ describe('DynamicConfig', () => {
           consulKvDc: 'dc1',
         },
       },
+      resolvers: [
+        consulResolver(),
+        vaultResolver(),
+      ]
     })
-
-    dynamicConfig.register(
-      consulResolver(),
-      vaultResolver(),
-    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', async () => {
