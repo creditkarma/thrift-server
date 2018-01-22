@@ -69,7 +69,7 @@ export function normalizeConfigPlaceholder(
     }
   }
 
-  throw new Error(`No resolver found for remote[${name}]`)
+  throw new Error(`No resolver found for remote[${source}]`)
 }
 
 export function isValidRemote(name: string, resolvers: Set<string>): boolean {

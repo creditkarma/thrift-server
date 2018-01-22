@@ -3,9 +3,10 @@ import * as Lab from 'lab'
 import * as path from 'path'
 
 import {
-  defaultConsulResolver,
-  defaultVaultResolver,
+  consulResolver,
   DynamicConfig,
+  environmentResolver,
+  vaultResolver,
 } from '../../main/'
 
 export const lab = Lab.script()
@@ -31,12 +32,11 @@ describe('DynamicConfig', () => {
           consulKvDc: 'dc1',
         },
       },
+      resolvers: [
+        consulResolver(),
+        vaultResolver(),
+      ],
     })
-
-    dynamicConfig.register(
-      defaultConsulResolver(),
-      defaultVaultResolver(),
-    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', async () => {
@@ -150,12 +150,11 @@ describe('DynamicConfig', () => {
           consulKvDc: 'dc1',
         },
       },
+      resolvers: [
+        consulResolver(),
+        vaultResolver(),
+      ],
     })
-
-    dynamicConfig.register(
-      defaultConsulResolver(),
-      defaultVaultResolver(),
-    )
 
     describe('get', () => {
       it('should return full config when making empty call to get', async () => {
@@ -247,8 +246,8 @@ describe('DynamicConfig', () => {
     })
 
     dynamicConfig.register(
-      defaultConsulResolver(),
-      defaultVaultResolver(),
+      consulResolver(),
+      vaultResolver(),
     )
 
     describe('get', () => {
@@ -295,6 +294,57 @@ describe('DynamicConfig', () => {
           expect(actual).to.equal({
             control: '/javascript',
             response: 'DELAYED',
+          })
+        })
+      })
+
+      it('should reject for a missing key', async () => {
+        return dynamicConfig.get<object>('fake.path').then((actual: object) => {
+          throw new Error('Should reject for missing key')
+        }, (err: any) => {
+          expect(err.message).to.equal('Unable to find value for key[fake.path]')
+        })
+      })
+    })
+
+    describe('getSecretValue', () => {
+      it('should reject when Vault not configured', async () => {
+        return dynamicConfig.getSecretValue<string>('test-secret').then((actual: string) => {
+          throw new Error(`Unable to retrieve key[test-secret]. Should reject when Vault not configured`)
+        }, (err: any) => {
+          expect(err.message).to.equal('Unable to retrieve key[test-secret]. No resolver found.')
+        })
+      })
+    })
+  })
+
+  describe('When Using Environment Variables', () => {
+    const dynamicConfig: DynamicConfig = new DynamicConfig({
+      configEnv: 'production',
+      configPath: path.resolve(__dirname, './config'),
+      resolvers: [ environmentResolver() ],
+    })
+
+    process.env.TEST_USERNAME = 'foobarwilly'
+
+    describe('get', () => {
+      it('should return value stored in environment variable', async () => {
+        return dynamicConfig.get<string>('database.username').then((actual: string) => {
+          expect(actual).to.equal('foobarwilly')
+        })
+      })
+
+      it('should return the default for value missing in environment', async () => {
+        return dynamicConfig.get<string>('database.password').then((actual: string) => {
+          expect(actual).to.equal('monkey')
+        })
+      })
+
+      it('should fallback to returning from local config', async () => {
+        return dynamicConfig.get<object>('project.health').then((actual: object) => {
+          expect(actual).to.equal({
+            control: '/typescript',
+            response: 'PASS',
           })
         })
       })

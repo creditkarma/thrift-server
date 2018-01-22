@@ -427,7 +427,41 @@ Process placeholders must be of this form `<name>=<value>`. The equal sign (`=`)
 
 Here `_key` is the name of the environment variable to look for. You can use `_default` for process placeholders.
 
-## Consul Configs
+## Supplied Resolvers
+
+As mentioned, config data sources are added as `IRemoteResolver` objects. These can be used to load full JSON config objects, partial objects or single values. The API for adding custom resolvers is hopefully straight-forward.
+
+This library includes a few resolvers, all of which are registered when using the singleton instance.
+
+Those are:
+
+- *Environment* - Reads values from environment variables.
+- *Process* - Reads values passed in on command line `process.argv`.
+- *Consul* - Reads remote configuration stored in Consul.
+- *Vault* - Reads remote configuration stored in Vault.
+
+When building your own instance of `DynamicConfig` you can pick and choose which of these to use.
+
+```typescript
+import {
+  environmentResolver,
+  processResolver,
+  consulResolver,
+  vaultResolver,
+  DynamicConfig,
+} from '@creditkarma/dynamic-config'
+
+const config = new DynamicConfig({
+  resolvers: [
+    consulResolver(),
+    vaultResolver(),
+    environmentResolver(),
+    processResolver(),
+  ]
+})
+```
+
+### Consul Configs
 
 Dynamic Config ships with support for Consul. Now we're going to explore some of the specifics of using the included Consul resolver. The underlying Consul client comes from: [@creditkarma/consul-client](https://github.com/creditkarma/thrift-server/tree/dynamic-config/packages/consul-client).
 
@@ -453,7 +487,7 @@ Through environment:
 $ export CONSUL_KEYS=production-config,production-east-config
 ```
 
-### Available Options
+#### Available Options
 
 Here are the available options for DynamicConfig:
 
@@ -462,7 +496,7 @@ Here are the available options for DynamicConfig:
 * `CONSUL_KEYS` - Comma-separated list of keys pointing to configs stored in Consul. They are merged in left -> right order, meaning the rightmost key has highest priority.
 * `CONFIG_PATH` - Path to local configuration files.
 
-### Environment Variables
+#### Environment Variables
 
 All options can be set through the environment.
 
@@ -473,7 +507,7 @@ $ export CONSUL_KEYS=production-config,production-east-config
 $ export CONFIG_PATH=config
 ```
 
-### Command Line Options
+#### Command Line Options
 
 All of the above options can also be passed on the command line when starting your application:
 
@@ -481,7 +515,7 @@ All of the above options can also be passed on the command line when starting yo
 $ node my-app.js CONSUL_ADDRESS=http://localhost:8500 CONSUL_KV_DC=dc1 CONSUL_KEYS=production-config,production-east-config CONFIG_PATH=config
 ```
 
-### Constructor Options
+#### Constructor Options
 
 They can also be set on the DynamicConfig constructor.
 
@@ -499,7 +533,7 @@ const config: DynamicConfig = new DynamicConfig({
 })
 ```
 
-## Vault Configuration
+### Vault Configuration
 
 The configuration for Vault needs to be available somewhere in the config path, either in a local config or in Consul (or some other registered remote). This configuration mush be available under the key name `'hashicorp-vault'`.
 
@@ -518,11 +552,11 @@ The configuration must conform to what is expected from [@creditkarma/vault-clie
 }
 ```
 
-### Getting a Secret from Vault
+#### Getting a Secret from Vault
 
 Getting a secret from Vault is similar to getting a value from local config or Consul.
 
-#### `getSecretValue`
+##### `getSecretValue`
 
 Will try to get a key from whatever remote is registered as a `secret` store.
 
@@ -534,7 +568,7 @@ client.getSecretValue<string>('username').then((val: string) => {
 })
 ```
 
-### Config Placeholders
+#### Config Placeholders
 
 As mentioned config placeholders can also be used for `secret` stores. Review above for more information.
 

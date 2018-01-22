@@ -5,10 +5,10 @@ import {
 } from './types'
 
 import {
-  defaultConsulResolver,
-  defaultVaultResolver,
+  consulResolver,
   environmentResolver,
   processResolver,
+  vaultResolver,
 } from './resolvers'
 
 export * from './ConfigLoader'
@@ -25,8 +25,8 @@ export function config(options: IConfigOptions = {}): DynamicConfig {
   if (configInstance === undefined) {
     configInstance = new DynamicConfig(options)
     configInstance.register(
-      defaultConsulResolver(),
-      defaultVaultResolver(),
+      consulResolver(),
+      vaultResolver(),
       environmentResolver(),
       processResolver(),
     )

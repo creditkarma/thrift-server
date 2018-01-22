@@ -44,7 +44,7 @@ export function toRemoteOptionMap(str: string): IRemoteOverrides {
   return result
 }
 
-export function defaultConsulResolver(): IRemoteResolver {
+export function consulResolver(): IRemoteResolver {
   let consulClient: Maybe<KvStore>
   let consulAddress: Maybe<string> = new Nothing()
   let consulKvDc: Maybe<string> = new Nothing()
