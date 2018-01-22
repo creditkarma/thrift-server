@@ -48,6 +48,24 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
+##### Options
+
+Available options for the `DynamicConfig` constructor are:
+
+```typescript
+interface IConfigOptions {
+  configPath?: string
+  configEnv?: string
+  remoteOptions?: IRemoteOptions
+  resolvers?: Array<ConfigResolver>
+}
+```
+
+* configPath - Path to local configuration files. Defaults to '.'.
+* configEnv - Override for `NODE_ENV`. Defaults to 'development'.
+* remoteOptions - Options to pass to remote resolvers (more on this later).
+* resolvers - Resolvers to register on this instance (more on this later).
+
 #### `getWithDefault`
 
 You can also assign a default value in the event that the key cannot be found.
@@ -226,7 +244,9 @@ config.register({
 })
 ```
 
-The `register` method will accept a comma-separated of resolver objects. For additional clarity, the resolver objects have the following TypeScript interface:
+The `register` method will accept a comma-separated of resolver objects.
+
+For additional clarity, the resolver objects have the following TypeScript interface:
 
 ```typescript
 interface IRemoteResolver {
@@ -235,6 +255,25 @@ interface IRemoteResolver {
   init(dynamicConfig: DynamicConfig, remoteOptions?: IRemoteOptions): Promise<any>
   get<T>(key: string): Promise<T>
 }
+```
+
+You can also pass resolvers on the options object passed directly to the constructor:
+
+```typescript
+import { DynamicConfig, IRemoteOptions } from '@creditkarma/dynamic-config'
+
+const config: DynamicConfig = new DynamicConfig({
+  resolvers: [{
+    type: 'remote'
+    name: 'consul',
+    init(instance: DynamicConfig, options: IRemoteOptions): Promise<any> {
+      // Do set up and load any initial remote configuration
+    },
+    get<T>(key: string): Promise<T> {
+      // Fetch your key
+    }
+  }]
+})
 ```
 
 #### `type`
