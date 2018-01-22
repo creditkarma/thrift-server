@@ -66,7 +66,25 @@ interface IConfigOptions {
 * remoteOptions - Options to pass to remote resolvers (more on this later).
 * resolvers - Resolvers to register on this instance (more on this later).
 
-#### `getWithDefault`
+#### Methods
+
+The availabe methods on a config instance are as follows:
+
+##### `get`
+
+Gets the value for a specified key. If the key cannot be found the Promise is rejected with an `Error` describing what went wrong.
+
+```typescript
+import { config } from '@creditkarma/dynamic-config'
+
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await config().get<string>('hostName')
+  const port: number = await config().get<number>('port')
+  return new Client(host, port)
+}
+```
+
+##### `getWithDefault`
 
 You can also assign a default value in the event that the key cannot be found.
 
@@ -80,7 +98,7 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-#### `getAll`
+##### `getAll`
 
 Additionally, you can batch get config values. The promise here will only resolve if all of the keys can be retrieved.
 
@@ -96,8 +114,6 @@ export async function createHttpClient(): Promise<Client> {
 ## Local Configs
 
 Local configuration files are stored localally with your application source, typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
-
-Currently, DynamicConfig only support confing in the form of JSON. Support for JS/TS files will be added.
 
 ### Default Configuration
 
