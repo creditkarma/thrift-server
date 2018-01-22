@@ -23,6 +23,6 @@ function exit(code: number) {
 }
 
 process.on('SIGINT', () => {
-  console.log("Caught interrupt signal");
+  console.log('Caught interrupt signal')
   exit(0);
-});
+})

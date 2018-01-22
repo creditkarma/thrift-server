@@ -30,32 +30,27 @@ describe('SchemaUtils', () => {
         properties: {
           one: {
             type: 'string',
-            required: true,
           },
           two: {
             type: 'number',
-            required: true,
           },
           three: {
             type: 'object',
             properties: {
               type: {
                 type: 'string',
-                required: true,
               },
               values: {
                 type: 'array',
                 items: {
                   type: 'string',
-                  required: true,
                 },
-                required: true,
               },
             },
-            required: true,
+            required: [ 'type', 'values' ],
           },
         },
-        required: true,
+        required: [ 'one', 'two', 'three' ],
       }
 
       expect(actual).to.equal(expected)
@@ -67,9 +62,7 @@ describe('SchemaUtils', () => {
         type: 'array',
         items: {
           type: 'undefined',
-          required: false,
         },
-        required: true,
       }
 
       expect(actual).to.equal(expected)
@@ -79,7 +72,6 @@ describe('SchemaUtils', () => {
       const actual: ISchema = SchemaUtils.objectAsSimpleSchema(3)
       const expected: ISchema = {
         type: 'number',
-        required: true,
       }
 
       expect(actual).to.equal(expected)
@@ -90,7 +82,7 @@ describe('SchemaUtils', () => {
       const expected: ISchema = {
         type: 'object',
         properties: {},
-        required: true,
+        required: [],
       }
 
       expect(actual).to.equal(expected)
@@ -103,14 +95,12 @@ describe('SchemaUtils', () => {
       properties: {
         one: {
           type: 'string',
-          required: true,
         },
         two: {
           type: 'number',
-          required: true,
         },
       },
-      required: true,
+      required: [ 'one', 'two' ],
     }
 
     const strSchema: ISchema = {
@@ -122,13 +112,12 @@ describe('SchemaUtils', () => {
       properties: {
         one: {
           type: 'string',
-          required: true,
         },
         two: {
           type: 'number',
         },
       },
-      required: true,
+      required: [ 'one' ],
     }
 
     const anySchema: ISchema = {
@@ -136,10 +125,9 @@ describe('SchemaUtils', () => {
       properties: {
         one: {
           type: 'any',
-          required: true,
         },
       },
-      required: true,
+      required: [ 'one' ],
     }
 
     it('should return true if object matches given schema', async () => {
@@ -257,28 +245,24 @@ describe('SchemaUtils', () => {
         properties: {
           name: {
             type: 'string',
-            required: true,
           },
           age: {
             type: 'number',
-            required: true,
           },
           location: {
             type: 'object',
             properties: {
               state: {
                 type: 'string',
-                required: true,
               },
               city: {
                 type: 'string',
-                required: true,
               },
             },
-            required: true,
+            required: [ 'state', 'city' ],
           },
         },
-        required: true,
+        required: [ 'name', 'age', 'location' ],
       }
 
       expect(actual.get()).to.equal(expected)
@@ -293,28 +277,22 @@ describe('SchemaUtils', () => {
           properties: {
             title: {
               type: 'string',
-              required: true,
             },
             date: {
               type: 'string',
-              required: true,
             },
             body: {
               type: 'string',
-              required: true,
             },
             tags: {
               type: 'array',
               items: {
                 type: 'string',
-                required: true,
               },
-              required: true,
             },
           },
-          required: true,
+          required: [ 'title', 'date', 'body', 'tags' ],
         },
-        required: true,
       }
 
       expect(actual.get()).to.equal(expected)

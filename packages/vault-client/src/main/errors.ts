@@ -8,7 +8,7 @@ export class HVInvalidResponse extends Error {
 
 export class HVMissingResource extends Error {
   constructor(location: string | url.Url) {
-    super(`Unable to locate vault resource at: ${location}`)
+    super(`Unable to locate vault resource[${location}]`)
   }
 }
 

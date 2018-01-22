@@ -17,20 +17,37 @@ import {
   IResolvedPlaceholder,
   IResolverMap,
   IRootConfigValue,
+  ObjectType,
 } from '../types'
 
 import * as logger from '../logger'
 
-export function formatConfigPlaceholder(
-  placeholder: string | IConfigPlaceholder,
-): IConfigPlaceholder {
-  if (typeof placeholder === 'string') {
-    return {
-      key: placeholder,
-    }
+export function readValueForType(raw: string, type: ObjectType): Promise<any> {
+  const rawType: string = typeof raw
 
+  if (rawType === 'string') {
+    try {
+      switch (type) {
+        case 'object':
+        case 'array':
+          return Promise.resolve(JSON.parse(raw))
+
+        case 'number':
+          return Promise.resolve(parseFloat(raw))
+
+        case 'boolean':
+          return Promise.resolve(raw === 'true')
+
+        default:
+          return Promise.resolve(raw)
+      }
+    } catch (err) {
+      logger.error(`Unable to parse value as type[${type}]`)
+      return Promise.reject(new Error(`Unable to parse value as type[${type}]`))
+    }
   } else {
-    return placeholder
+    logger.log(`Raw value of type[${rawType}] being returned as is`)
+    return Promise.resolve(raw)
   }
 }
 
@@ -38,55 +55,46 @@ export function normalizeConfigPlaceholder(
   placeholder: IConfigPlaceholder,
   resolvers: IResolverMap,
 ): IResolvedPlaceholder {
-  const [ name, key ]: Array<string> = placeholder.key.split('!/')
-  const resolver = resolvers.all.get(name)
+  const source: string = placeholder._source
+  const resolver = resolvers.all.get(source)
   if (resolver !== undefined) {
     return {
-      key,
-      name,
-      type: resolver.type,
-      default: placeholder.default,
+      key: placeholder._key,
+      resolver: {
+        name: source,
+        type: resolver.type,
+      },
+      type: (placeholder._type || 'string'),
+      default: placeholder._default,
     }
   }
 
-  throw new Error(`No resolver found for remote: ${name}`)
+  throw new Error(`No resolver found for remote[${source}]`)
 }
 
 export function isValidRemote(name: string, resolvers: Set<string>): boolean {
   return resolvers.has(name)
 }
 
-function isPlaceholderKey(key: string): boolean {
-  const parts: Array<string> = key.split('!/')
-  return (parts.length === 2)
-}
-
-function matchesPlaceholderSchema(obj: any): obj is IConfigPlaceholder {
+export function isConfigPlaceholder(obj: any): obj is IConfigPlaceholder {
   return objectMatchesSchema({
     type: 'object',
     properties: {
-      default: {
+      '_key': {
+        type: 'string',
+      },
+      '_source': {
+        type: 'string',
+      },
+      '_type': {
+        type: 'string',
+      },
+      '_default': {
         type: 'any',
       },
-      key: {
-        type: 'string',
-        required: true,
-      },
     },
-    required: true,
+    required: [ '_key', '_source' ],
   }, obj)
-}
-
-export function isConfigPlaceholder(obj: any): obj is string | IConfigPlaceholder {
-  if (typeof obj === 'string') {
-    return isPlaceholderKey(obj)
-
-  } else {
-    return (
-      matchesPlaceholderSchema(obj) &&
-      isPlaceholderKey(obj.key)
-    )
-  }
 }
 
 function setObjectPropertyValue(key: string, value: BaseConfigValue, configObject: BaseConfigValue): BaseConfigValue {

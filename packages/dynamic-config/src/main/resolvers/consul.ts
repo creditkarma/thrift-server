@@ -28,9 +28,8 @@ import {
 
 import * as logger from '../logger'
 
-export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverrides {
-  const temp = str.replace(`${remoteName}!/`, '')
-  const [ key, ...tail ] = temp.split('?')
+export function toRemoteOptionMap(str: string): IRemoteOverrides {
+  const [ key, ...tail ] = str.split('?')
   const result: IRemoteOverrides = { key }
 
   if (tail.length > 0) {
@@ -45,7 +44,7 @@ export function toRemoteOptionMap(str: string, remoteName: string): IRemoteOverr
   return result
 }
 
-export function defaultConsulResolver(): IRemoteResolver {
+export function consulResolver(): IRemoteResolver {
   let consulClient: Maybe<KvStore>
   let consulAddress: Maybe<string> = new Nothing()
   let consulKvDc: Maybe<string> = new Nothing()
@@ -59,7 +58,7 @@ export function defaultConsulResolver(): IRemoteResolver {
         logger.warn('Could not create a Consul client: Consul Address (CONSUL_ADDRESS) is not defined')
         consulClient = new Nothing<KvStore>()
       } else if (consulKvDc.isNothing()) {
-        logger.warn('Could not create a Consul client: Consul Data Centre (CONSUL_KV_DC) is not defined')
+        logger.warn('Could not create a Consul client: Consul Data Center (CONSUL_KV_DC) is not defined')
         consulClient = new Nothing<KvStore>()
       } else {
         consulClient = new Just(new KvStore(consulAddress.get()))
@@ -100,7 +99,7 @@ export function defaultConsulResolver(): IRemoteResolver {
 
     get<T = any>(key: string): Promise<T> {
       return getConsulClient().fork((client: KvStore) => {
-        const remoteOptions: IRemoteOverrides = toRemoteOptionMap(key, 'consul')
+        const remoteOptions: IRemoteOverrides = toRemoteOptionMap(key)
         return client.get({ path: remoteOptions.key, dc: remoteOptions.dc }).then((val: any) => {
           return val
         }, (err: any) => {

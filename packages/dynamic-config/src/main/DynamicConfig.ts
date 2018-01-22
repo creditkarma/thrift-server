@@ -3,6 +3,7 @@ import {
 } from './ConfigLoader'
 
 import {
+  CONFIG_ENV,
   CONFIG_PATH,
 } from './constants'
 
@@ -13,6 +14,7 @@ import {
   ObjectUtils,
   PromiseUtils,
   SchemaUtils,
+  Utils,
 } from './utils'
 
 import {
@@ -53,9 +55,10 @@ export class DynamicConfig implements IDynamicConfig {
   private resolvers: IResolverMap
 
   constructor({
-    configPath = process.env[CONFIG_PATH],
-    configEnv = process.env.NODE_ENV,
+    configPath = Utils.readFromEnvOrProcess(CONFIG_PATH),
+    configEnv = Utils.readFirstMatch(CONFIG_ENV, 'NODE_ENV'),
     remoteOptions = {},
+    resolvers = [],
   }: IConfigOptions = {}) {
     this.configState = 'startup'
     this.configLoader = new ConfigLoader({ configPath, configEnv })
@@ -64,6 +67,7 @@ export class DynamicConfig implements IDynamicConfig {
       names: new Set<string>(),
       all: new Map(),
     }
+    this.register(...resolvers)
   }
 
   public register(...resolvers: Array<ConfigResolver>): void {
@@ -108,7 +112,7 @@ export class DynamicConfig implements IDynamicConfig {
 
             return SchemaUtils.findSchemaForKey(this.configSchema, key).fork((schemaForKey: ISchema) => {
               if (SchemaUtils.objectMatchesSchema(schemaForKey, baseValue)) {
-                this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, baseValue, this.resolvedConfig)
+                this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, resolvedValue, this.resolvedConfig)
                 return Promise.resolve(baseValue)
               } else {
                 logger.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
@@ -116,7 +120,7 @@ export class DynamicConfig implements IDynamicConfig {
               }
             }, () => {
               logger.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
-              this.resolvedConfig = ObjectUtils.setValueForKey(key, baseValue, this.resolvedConfig)
+              this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, resolvedValue, this.resolvedConfig)
               return Promise.resolve(baseValue)
             })
           })
@@ -191,12 +195,15 @@ export class DynamicConfig implements IDynamicConfig {
   }
 
   private resolvePlaceholder(placeholder: IResolvedPlaceholder): Promise<any> {
-    switch (placeholder.type) {
+    switch (placeholder.resolver.type) {
       case 'remote':
         return this.getRemotePlaceholder(placeholder)
 
       case 'secret':
         return this.getSecretPlaceholder(placeholder)
+
+      default:
+        return Promise.reject(new Error(`Unrecognized placeholder type[${placeholder.resolver.type}]`))
     }
   }
 
@@ -215,8 +222,8 @@ export class DynamicConfig implements IDynamicConfig {
 
       updates.push([ path, this.resolvePlaceholder(resolvedPlaceholder).then((value: any) => {
         return ConfigBuilder.buildBaseConfigValue(
-          resolvedPlaceholder.name,
-          resolvedPlaceholder.type,
+          resolvedPlaceholder.resolver.name,
+          resolvedPlaceholder.resolver.type,
           value,
         )
       }) ])
@@ -253,9 +260,16 @@ export class DynamicConfig implements IDynamicConfig {
    */
   private async replaceConfigPlaceholders(configValue: ConfigValue): Promise<ConfigValue> {
     if (configValue.type === 'placeholder') {
-      return this.resolvePlaceholder(
-        ConfigUtils.normalizeConfigPlaceholder(configValue.value, this.resolvers),
-      )
+      const resolvedPlaceholder: IResolvedPlaceholder =
+        ConfigUtils.normalizeConfigPlaceholder(configValue.value, this.resolvers)
+
+      return this.resolvePlaceholder(resolvedPlaceholder).then((value: any) => {
+        return ConfigBuilder.buildBaseConfigValue(
+          resolvedPlaceholder.resolver.name,
+          resolvedPlaceholder.resolver.type,
+          value,
+        )
+      })
 
     } else if (configValue.type === 'object' || configValue.type === 'root') {
       const unresolved: Array<PromisedUpdate> = this.collectConfigPlaceholders(configValue, [], [])

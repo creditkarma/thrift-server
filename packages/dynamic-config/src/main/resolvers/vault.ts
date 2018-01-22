@@ -21,7 +21,7 @@ import {
 
 import * as logger from '../logger'
 
-export function defaultVaultResolver(): ISecretResolver {
+export function vaultResolver(): ISecretResolver {
   let vaultClient: Promise<Maybe<VaultClient>>
   let dynamicConfig: DynamicConfig
 

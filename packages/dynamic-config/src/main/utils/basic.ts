@@ -1,3 +1,39 @@
+const MALFORMED_ARGUMENT = '<Error[malformed argument]>'
+
+export function readValueFromArgs(key: string, args: Array<string>): string | undefined {
+  return args.filter((next: string) => {
+    return next.startsWith(key)
+  }).map((match: string) => {
+    const parts = match.split('=')
+    if (parts.length === 2) {
+      return parts[1]
+
+    } else {
+      return MALFORMED_ARGUMENT
+    }
+  }).filter((next: string) => {
+    return next !== MALFORMED_ARGUMENT
+  })[0]
+}
+
+export function readFromEnvOrProcess(key: string): string | undefined {
+  return readValueFromArgs(key, process.argv) || process.env[key]
+}
+
+export function readFirstMatch(...keys: Array<string>): string | undefined {
+  if (keys.length === 0) {
+    return undefined
+  } else {
+    const [ head, ...tail ] = keys
+    const value: string | undefined = readFromEnvOrProcess(head)
+    if (value === undefined) {
+      return readFirstMatch(...tail)
+    } else {
+      return value
+    }
+  }
+}
+
 export function isPrimitiveType(type: string): type is 'string' | 'number' | 'boolean' {
   return (
     type === 'number' ||

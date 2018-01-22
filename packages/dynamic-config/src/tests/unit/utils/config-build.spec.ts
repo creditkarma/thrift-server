@@ -209,10 +209,14 @@ describe('ConfigBuilder', () => {
         'local',
         {
           server: {
-            host: 'consul!/host-name',
+            host: {
+              _source: 'consul',
+              _key: 'host-name',
+            },
             port: {
-              key: 'consul!/port-number',
-              default: 8080,
+              _source: 'consul',
+              _key: 'port-number',
+              _default: 8080,
             },
           },
         },
@@ -237,7 +241,8 @@ describe('ConfigBuilder', () => {
                 resolved: false,
                 type: 'placeholder',
                 value: {
-                  key: 'consul!/host-name',
+                  _source: 'consul',
+                  _key: 'host-name',
                 },
                 watchers: [],
               },
@@ -249,8 +254,9 @@ describe('ConfigBuilder', () => {
                 resolved: false,
                 type: 'placeholder',
                 value: {
-                  key: 'consul!/port-number',
-                  default: 8080,
+                  _source: 'consul',
+                  _key: 'port-number',
+                  _default: 8080,
                 },
                 watchers: [],
               },
