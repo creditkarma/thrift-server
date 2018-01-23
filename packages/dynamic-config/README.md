@@ -2,6 +2,8 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
+### Plugable
+
 Dynamic Config has plugable support for remote config sources and local file types. The library ships with plugins for some common use cases. The supported file types are `.js`, `.ts` and `.json`. It also ships with resolvers for pulling configs from environment variables, command line arguments and remote config values stored in Hashicorp Consul and Vault.
 
 The use of remote configuration is optional. At least one local configuration file (`default.(json|js|ts...)`) is required.
@@ -22,7 +24,7 @@ When requesting a value from Dynamic Config a Promise of the expected result is 
 
 #### Singleton
 
-The singleton instance registers resolvers for Consul and Vault. We'll see more documentation for these default implementations below.
+The singleton instance registers resolvers for Consul and Vault. It also registers file support for `json`, `js` and `ts` files. We'll see more documentation for these default implementations below.
 
 ```typescript
 import { config } from '@creditkarma/dynamic-config'
@@ -56,9 +58,9 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-##### Options
+#### Options
 
-Available options for the `DynamicConfig` constructor are:
+Available options are:
 
 ```typescript
 interface IConfigOptions {
@@ -76,7 +78,7 @@ interface IConfigOptions {
 * resolvers - Resolvers to register on this instance (more on this later).
 * loaders - Loaders to read local config files (more on this later).
 
-You can also change options when using the singleton instance. On your first call to the `config` function you have the option to pass in `IConfigOptions` to configure the singleton instance. Any resolvers and loaders you add will be in addition to the ones loaded by default.
+This options object can be passed to the `DynamicConfig` constructor or to your first call to get the singleton instace with `config`. When passing options to the singleton instance resolvers and loaders are appended to the ones loaded by default.
 
 ```typescript
 import { DynamicConfig, config } from '@creditkarma/dynamic-config'
@@ -137,7 +139,7 @@ export async function createHttpClient(): Promise<Client> {
 
 ## Local Configs
 
-Local configuration files are stored localally with your application source, typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
+Local configuration files are stored localally with your application source, typically at the project root in a directory named `config/`. By default the library will also look for configs in `src/config/`, `lib/config/`, `app/config/` and `dist/config/`. The config path can be set as an option if you do not wish to use the default resolution.
 
 ### File Loaders
 
@@ -171,7 +173,7 @@ const jsLoader: IFileLoader = {
 }
 ```
 
-By the time a loader is called with a `filePath` the path is gauranteed to exist.
+By the time a loader is called with a `filePath` the path is gauranteed to exist. The `filePath` is absolute.
 
 Loaders are given priority in the order in which they are added. Meaning the most recently added loader has the highest priority. With the config singleton this order is json, js then ts. Therefore, TypeScript files have the highest priority. If there is both a `default.json` file and a `default.ts` file the values from the `default.ts` file will have presidence.
 
