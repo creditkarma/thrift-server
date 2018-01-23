@@ -64,7 +64,7 @@ export function objectAsSimpleSchema(obj: any): ISchema {
       } as ISchema
 
     } else {
-      throw new Error(`Type ${objType} cannot be encoded to JSON`)
+      throw new Error(`Type[${objType}] cannot be encoded to JSON`)
     }
   }
 }

@@ -104,7 +104,7 @@ export function consulResolver(): IRemoteResolver {
         return client.get({ path: remoteOptions.key, dc: remoteOptions.dc }).then((val: any) => {
           return val
         }, (err: any) => {
-          logger.error(`Error retrieving key '${key}' from Consul: `, err)
+          logger.error(`Error retrieving key[${key}] from Consul: `, err)
           return Promise.reject(new ConsulFailed(err.message))
         })
       }, () => {
