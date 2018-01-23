@@ -24,6 +24,7 @@ import {
 
 import {
   ObjectUtils,
+  Utils,
 } from '../utils'
 
 import * as logger from '../logger'
@@ -72,9 +73,9 @@ export function consulResolver(): IRemoteResolver {
     type: 'remote',
     name: 'consul',
     init(configInstance: DynamicConfig, remoteOptions: IConsulOptions = {}): Promise<any> {
-      consulAddress = Maybe.fromNullable(remoteOptions.consulAddress || process.env[CONSUL_ADDRESS])
-      consulKvDc = Maybe.fromNullable(remoteOptions.consulKvDc || process.env[CONSUL_KV_DC])
-      consulKeys = Maybe.fromNullable(remoteOptions.consulKeys || process.env[CONSUL_KEYS])
+      consulAddress = Maybe.fromNullable(remoteOptions.consulAddress || Utils.readFirstMatch(CONSUL_ADDRESS))
+      consulKvDc = Maybe.fromNullable(remoteOptions.consulKvDc || Utils.readFirstMatch(CONSUL_KV_DC))
+      consulKeys = Maybe.fromNullable(remoteOptions.consulKeys || Utils.readFirstMatch(CONSUL_KEYS))
 
       return Maybe.all(
         consulKeys,

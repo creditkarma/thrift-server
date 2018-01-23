@@ -2,7 +2,11 @@
 
 A dynamic configuration library for Node.js written in TypeScript.
 
-Dynamic Config supports local config in the form of JSON, JavaScript or TypeScript files. It also supports pulling configs from remote sources through a simple public API. By default remote configuration is stored in Consul and secret config values are stored in Vault. The use of remote configuration is optional. If these are not configurated only local config will be used. At least one local configuration file (`default.(json|js|ts)`) is required.
+### Plugable
+
+Dynamic Config has plugable support for remote config sources and local file types. The library ships with plugins for some common use cases. The supported file types are `.js`, `.ts` and `.json`. It also ships with resolvers for pulling configs from environment variables, command line arguments and remote config values stored in Hashicorp Consul and Vault.
+
+The use of remote configuration is optional. At least one local configuration file (`default.(json|js|ts...)`) is required.
 
 ## Install
 
@@ -20,7 +24,7 @@ When requesting a value from Dynamic Config a Promise of the expected result is 
 
 #### Singleton
 
-The singleton instance registers resolvers for Consul and Vault. We'll see more documentation for these default implementations below.
+The singleton instance registers resolvers for Consul and Vault. It also registers file support for `json`, `js` and `ts` files. We'll see more documentation for these default implementations below.
 
 ```typescript
 import { config } from '@creditkarma/dynamic-config'
@@ -34,12 +38,18 @@ export async function createHttpClient(): Promise<Client> {
 
 #### Class Constructor
 
-You can also construct your own instance by importing the underlying `DynamicConfig` class. The underlying class has no remote resolvers registered. Out-of-the-box it will only pull from local files.
+You can also construct your own instance by importing the underlying `DynamicConfig` class.
+
+When using the class constructor you have a blank canvas. There are no remote resolvers and there are no file loaders included by default.
+
+In the example will will include the `jsonLoader`.
 
 ```typescript
-import { DynamicConfig } from '@creditkarma/dynamic-config'
+import { DynamicConfig, jsonLoader } from '@creditkarma/dynamic-config'
 
-const config: DynamicConfig = new DynamicConfig()
+const config: DynamicConfig = new DynamicConfig({
+  loaders: [ jsonLoader ]
+})
 
 export async function createHttpClient(): Promise<Client> {
   const host: string = await config.get<string>('hostName')
@@ -48,9 +58,9 @@ export async function createHttpClient(): Promise<Client> {
 }
 ```
 
-##### Options
+#### Options
 
-Available options for the `DynamicConfig` constructor are:
+Available options are:
 
 ```typescript
 interface IConfigOptions {
@@ -58,6 +68,7 @@ interface IConfigOptions {
   configEnv?: string
   remoteOptions?: IRemoteOptions
   resolvers?: Array<ConfigResolver>
+  loaders?: Array<IFileLoader>
 }
 ```
 
@@ -65,6 +76,21 @@ interface IConfigOptions {
 * configEnv - Override for `NODE_ENV`. Defaults to 'development'.
 * remoteOptions - Options to pass to remote resolvers (more on this later).
 * resolvers - Resolvers to register on this instance (more on this later).
+* loaders - Loaders to read local config files (more on this later).
+
+This options object can be passed to the `DynamicConfig` constructor or to your first call to get the singleton instace with `config`. When passing options to the singleton instance resolvers and loaders are appended to the ones loaded by default.
+
+```typescript
+import { DynamicConfig, config } from '@creditkarma/dynamic-config'
+
+const dynamicConfig: DynamicConfig = conifg({ configPath: 'src/main/config' })
+
+export async function createHttpClient(): Promise<Client> {
+  const host: string = await dynamicConfig.get<string>('hostName')
+  const port: number = await dynamicConfig.get<number>('port')
+  return new Client(host, port)
+}
+```
 
 #### Methods
 
@@ -113,11 +139,47 @@ export async function createHttpClient(): Promise<Client> {
 
 ## Local Configs
 
-Local configuration files are stored localally with your application source, typically at the project root in a directory named `config`. By default the library will also look for configs in `src/config`, `lib/config`, `app/config` and `dist/config`. The config path can be set as an option if you do not wish to use the default resolution.
+Local configuration files are stored localally with your application source, typically at the project root in a directory named `config/`. By default the library will also look for configs in `src/config/`, `lib/config/`, `app/config/` and `dist/config/`. The config path can be set as an option if you do not wish to use the default resolution.
+
+### File Loaders
+
+File loaders are plugins that allow Dynamic Config to read local configuration files.
+
+They are defined by this interface:
+
+```typescript
+interface IFileLoader {
+  type: string
+  load(filePath: string): Promise<object>
+}
+```
+
+Here, `type` is the file extension handled by this loader and `load` is the function to load the file. The `load` function is expected to return a promise of the JavaScript Object loaded from the file.
+
+The JavaScript loader is simple. Let's take a look at it as an example.
+
+```typescript
+const jsLoader: IFileLoader = {
+  type: 'js',
+  async load(filePath: string): Promise<object> {
+    const configObj = require(filePath)
+
+    if (typeof configObj.default === 'object') {
+      return configObj.default
+    } else {
+      return configObj
+    }
+  },
+}
+```
+
+By the time a loader is called with a `filePath` the path is gauranteed to exist. The `filePath` is absolute.
+
+Loaders are given priority in the order in which they are added. Meaning the most recently added loader has the highest priority. With the config singleton this order is json, js then ts. Therefore, TypeScript files have the highest priority. If there is both a `default.json` file and a `default.ts` file the values from the `default.ts` file will have presidence.
 
 ### Default Configuration
 
-The default config for your app is loaded from the `config/default.(json|js|ts)` file. The default configuration is required. The default configuration is the contract between you and your application. If there is both a `default.json` file and a `default.js` file the values from the `default.js` file will have presidence.
+The default config for your app is loaded from the `config/default.(json|js|ts...)` file. The default configuration is required. The default configuration is the contract between you and your application.
 
 ### File Types
 
@@ -176,7 +238,7 @@ export async function createHttpClient(): Promise<Client> {
 
 #### Returning Promises
 
-When using `js` or `ts` configs your conifg values can be Promises. Dynamic Config will resolve all Promises while building the ultimate representation of your application config.
+Loaders can return objects that contain Promises as values. Dynamic Config will resolve all Promises while building the ultimate representation of your application config.
 
 As an example, this could be your local `js` config file:
 
@@ -211,7 +273,7 @@ At runtime a schema (a subset of [JSON Schema](http://json-schema.org/)) is buil
 
 ### Local Overrides
 
-You can override the values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.(json|js|ts)`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
+You can override the values from the default config in a variety of ways, but they must follow the schema set by your default configuration file. Overwriting the default values is done by adding additional files corresponding to the value of `NODE_ENV`. For example if `NODE_ENV = 'development'` then the default configuration will be merged with a file named `config/development.(json|js|ts...)`. Using this you could have different configuration files for `NODE_ENV = 'test'` or `NODE_ENV = 'production'`.
 
 ### Configuration Path
 

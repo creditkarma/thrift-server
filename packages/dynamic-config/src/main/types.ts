@@ -7,6 +7,7 @@ export interface IConfigOptions {
   configEnv?: string
   remoteOptions?: IRemoteOptions
   resolvers?: Array<ConfigResolver>
+  loaders?: Array<IFileLoader>
 }
 
 export interface IConsulOptions {
@@ -27,6 +28,13 @@ export interface IDynamicConfig {
   getWithDefault<T = any>(key: string, defaultVal: T): Promise<T>
   getRemoteValue<T>(key: string): Promise<T>
   getSecretValue<T>(key: string): Promise<T>
+}
+
+// FILE LOADER TYPES
+
+export interface IFileLoader {
+  type: string
+  load(filePath: string): Promise<object>
 }
 
 // RESOLVER TYPES

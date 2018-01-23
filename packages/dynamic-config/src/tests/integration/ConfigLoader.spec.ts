@@ -3,6 +3,9 @@ import * as Lab from 'lab'
 import {
   ConfigLoader,
   IRootConfigValue,
+  jsLoader,
+  jsonLoader,
+  tsLoader,
 } from '../../main/'
 
 export const lab = Lab.script()
@@ -32,7 +35,13 @@ describe('ConfigLoader', () => {
 
     it('should return the correct config for development', async () => {
       process.env.NODE_ENV = 'development'
-      const loader: ConfigLoader = new ConfigLoader()
+      const loader: ConfigLoader = new ConfigLoader({
+        loaders: [
+          jsonLoader,
+          jsLoader,
+          tsLoader,
+        ],
+      })
       const expected: IRootConfigValue = {
         type: 'root',
         properties: {
@@ -119,7 +128,13 @@ describe('ConfigLoader', () => {
 
     it('should return the correct config for production', async () => {
       process.env.NODE_ENV = 'production'
-      const loader: ConfigLoader = new ConfigLoader()
+      const loader: ConfigLoader = new ConfigLoader({
+        loaders: [
+          jsonLoader,
+          jsLoader,
+          tsLoader,
+        ],
+      })
       const expected: IRootConfigValue = {
         type: 'root',
         properties: {
@@ -214,7 +229,13 @@ describe('ConfigLoader', () => {
 
     it('should return the correct config for test', async () => {
       process.env.NODE_ENV = 'test'
-      const loader: ConfigLoader = new ConfigLoader()
+      const loader: ConfigLoader = new ConfigLoader({
+        loaders: [
+          jsonLoader,
+          jsLoader,
+          tsLoader,
+        ],
+      })
       const expected: IRootConfigValue = {
         type: 'root',
         properties: {
@@ -301,7 +322,13 @@ describe('ConfigLoader', () => {
 
     it('should only load default config if file for NODE_ENV does not exist', async () => {
       process.env.NODE_ENV = 'integration'
-      const loader: ConfigLoader = new ConfigLoader()
+      const loader: ConfigLoader = new ConfigLoader({
+        loaders: [
+          jsonLoader,
+          jsLoader,
+          tsLoader,
+        ],
+      })
       const expected: IRootConfigValue = {
         type: 'root',
         properties: {
@@ -388,7 +415,13 @@ describe('ConfigLoader', () => {
 
     it('should default to loading development config', async () => {
       process.env.NODE_ENV = ''
-      const loader: ConfigLoader = new ConfigLoader()
+      const loader: ConfigLoader = new ConfigLoader({
+        loaders: [
+          jsonLoader,
+          jsLoader,
+          tsLoader,
+        ],
+      })
       const expected: IRootConfigValue = {
         type: 'root',
         properties: {

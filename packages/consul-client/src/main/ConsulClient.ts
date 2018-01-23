@@ -70,7 +70,7 @@ export class ConsulClient {
             dc: req.key.dc,
             index: req.index,
           }),
-        }))
+        })).promise()
 
       case RequestType.UpdateRequest:
         return request(deepMerge(options, {
@@ -81,7 +81,7 @@ export class ConsulClient {
           qs: cleanQueryParams({
             dc: req.key.dc,
           }),
-        }))
+        })).promise()
 
       case RequestType.DeleteRequest:
         return request(deepMerge(options, {
@@ -91,7 +91,7 @@ export class ConsulClient {
           qs: cleanQueryParams({
             dc: req.key.dc,
           }),
-        }))
+        })).promise()
 
       default:
         const msg: never = req
