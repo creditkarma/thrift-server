@@ -11,6 +11,14 @@ import {
   vaultResolver,
 } from './resolvers'
 
+import {
+  jsLoader,
+  jsonLoader,
+  tsLoader,
+} from './loaders'
+
+import * as logger from './logger'
+
 export * from './ConfigLoader'
 export { DynamicConfig } from './DynamicConfig'
 export * from './constants'
@@ -34,8 +42,14 @@ export function config(options: IConfigOptions = {}): DynamicConfig {
         environmentResolver(),
         processResolver(),
       ]),
-      loaders: options.loaders,
+      loaders: (options.loaders || []).concat([
+        jsonLoader,
+        jsLoader,
+        tsLoader,
+      ]),
     })
+  } else if (Object.keys(options).length > 0) {
+    logger.warn(`Options passed to config after instantiation. Config behavior may be off.`)
   }
 
   return configInstance

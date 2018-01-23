@@ -6,6 +6,9 @@ import {
   consulResolver,
   DynamicConfig,
   environmentResolver,
+  jsLoader,
+  jsonLoader,
+  tsLoader,
   vaultResolver,
 } from '../../main/'
 
@@ -35,6 +38,11 @@ describe('DynamicConfig', () => {
       resolvers: [
         consulResolver(),
         vaultResolver(),
+      ],
+      loaders: [
+        jsonLoader,
+        jsLoader,
+        tsLoader,
       ],
     })
 
@@ -154,6 +162,11 @@ describe('DynamicConfig', () => {
         consulResolver(),
         vaultResolver(),
       ],
+      loaders: [
+        jsonLoader,
+        jsLoader,
+        tsLoader,
+      ],
     })
 
     describe('get', () => {
@@ -247,6 +260,11 @@ describe('DynamicConfig', () => {
         consulResolver(),
         vaultResolver(),
       ],
+      loaders: [
+        jsonLoader,
+        jsLoader,
+        tsLoader,
+      ],
     })
 
     describe('get', () => {
@@ -279,6 +297,11 @@ describe('DynamicConfig', () => {
     const dynamicConfig: DynamicConfig = new DynamicConfig({
       configEnv: 'development',
       configPath: path.resolve(__dirname, './config'),
+      loaders: [
+        jsonLoader,
+        jsLoader,
+        tsLoader,
+      ],
     })
 
     describe('get', () => {
@@ -322,6 +345,11 @@ describe('DynamicConfig', () => {
       configEnv: 'production',
       configPath: path.resolve(__dirname, './config'),
       resolvers: [ environmentResolver() ],
+      loaders: [
+        jsonLoader,
+        jsLoader,
+        tsLoader,
+      ],
     })
 
     process.env.TEST_USERNAME = 'foobarwilly'
