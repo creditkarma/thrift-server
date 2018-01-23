@@ -39,6 +39,12 @@ import {
   ResolverType,
 } from './types'
 
+import {
+  jsLoader,
+  jsonLoader,
+  tsLoader,
+} from './loaders'
+
 import * as logger from './logger'
 
 type ConfigState =
@@ -59,9 +65,14 @@ export class DynamicConfig implements IDynamicConfig {
     configEnv = Utils.readFirstMatch(CONFIG_ENV, 'NODE_ENV'),
     remoteOptions = {},
     resolvers = [],
+    loaders = [
+      jsonLoader,
+      jsLoader,
+      tsLoader,
+    ],
   }: IConfigOptions = {}) {
     this.configState = 'startup'
-    this.configLoader = new ConfigLoader({ configPath, configEnv })
+    this.configLoader = new ConfigLoader({ loaders, configPath, configEnv })
     this.remoteOptions = remoteOptions
     this.resolvers = {
       names: new Set<string>(),

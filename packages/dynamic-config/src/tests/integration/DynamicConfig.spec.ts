@@ -246,7 +246,7 @@ describe('DynamicConfig', () => {
       resolvers: [
         consulResolver(),
         vaultResolver(),
-      ]
+      ],
     })
 
     describe('get', () => {

@@ -5,7 +5,6 @@ import {
   CONFIG_SEARCH_PATHS,
   DEFAULT_CONFIG_PATH,
   DEFAULT_ENVIRONMENT,
-  SUPPORTED_FILE_TYPES,
 } from './constants'
 
 import {
@@ -15,29 +14,19 @@ import {
 } from './utils'
 
 import {
+  IFileLoader,
   IRootConfigValue,
 } from './types'
 
-function readFile(filePath: string): Promise<string> {
+function fileExists(filePath: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    fs.readFile(filePath, (err: any, data: Buffer) => {
-      if (err) {
-        reject(err)
+    fs.exists(filePath, (exists: boolean) => {
+      if (exists) {
+        resolve()
       } else {
-        resolve(data.toString('utf-8'))
+        reject(new Error(`File[${filePath}] doesn't exists`))
       }
     })
-  })
-}
-
-// Should we fail if one file fails?
-function parseContent<T>(content: string): Promise<T> {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(JSON.parse(content))
-    } catch (e) {
-      reject(e)
-    }
   })
 }
 
@@ -58,43 +47,12 @@ function getConfigPath(sourceDir: string): string {
   throw new Error('No local config directory found')
 }
 
-async function loadFileWithName(configPath: string, name: string): Promise<IRootConfigValue> {
-  const configs: Array<object> = await PromiseUtils.valuesForPromises(SUPPORTED_FILE_TYPES.map((ext: string) => {
-    const filePath: string = path.resolve(configPath, `${name}.${ext}`)
-    return readFile(filePath).then((content: string) => {
-      switch (ext) {
-        case 'js': {
-          const configObj = require(filePath)
-
-          if (typeof configObj.default === 'object') {
-            return configObj.default
-          } else {
-            return configObj
-          }
-        }
-
-        case 'ts': {
-          require('ts-node').register({
-            lazy: true,
-            compilerOptions: {
-              allowJs: true,
-              rootDir: '.',
-            },
-          })
-
-          const configObj = require(filePath)
-
-          if (typeof configObj.default === 'object') {
-            return configObj.default
-          } else {
-            return configObj
-          }
-        }
-
-        default:
-          return (parseContent(content) as any)
-      }
-    }, (err: any) => {
+async function loadFileWithName(loaders: Array<IFileLoader>, configPath: string, name: string): Promise<IRootConfigValue> {
+  const configs: Array<object> = await PromiseUtils.valuesForPromises(loaders.map((loader: IFileLoader) => {
+    const filePath: string = path.resolve(configPath, `${name}.${loader.type}`)
+    return fileExists(filePath).then(() => {
+      return loader.load(filePath)
+    }).catch((err: any) => {
       return {}
     })
   }))
@@ -105,16 +63,19 @@ async function loadFileWithName(configPath: string, name: string): Promise<IRoot
 }
 
 export interface ILoaderConfig {
+  loaders?: Array<IFileLoader>
   configPath?: string
   configEnv?: string
 }
 
 export class ConfigLoader {
+  private loaders: Array<IFileLoader>
   private configPath: string
   private configEnv: string
   private savedConfig: IRootConfigValue
 
-  constructor({ configPath = DEFAULT_CONFIG_PATH, configEnv }: ILoaderConfig = {}) {
+  constructor({ loaders = [], configPath = DEFAULT_CONFIG_PATH, configEnv }: ILoaderConfig = {}) {
+    this.loaders = loaders
     this.configPath = getConfigPath(configPath)
     this.configEnv = configEnv || process.env.NODE_ENV || DEFAULT_ENVIRONMENT
   }
@@ -123,14 +84,14 @@ export class ConfigLoader {
    * Loads default JSON config file. This is required.
    */
   public async loadDefault(): Promise<IRootConfigValue> {
-    return loadFileWithName(this.configPath, 'default')
+    return loadFileWithName(this.loaders, this.configPath, 'default')
   }
 
   /**
    * Loads JSON config file based on NODE_ENV.
    */
   public async loadEnvironment(): Promise<IRootConfigValue> {
-    return loadFileWithName(this.configPath, this.configEnv)
+    return loadFileWithName(this.loaders, this.configPath, this.configEnv)
   }
 
   /**
