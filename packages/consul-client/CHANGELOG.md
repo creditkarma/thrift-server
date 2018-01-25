@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/compare/v0.3.6...v0.4.0) (2018-01-25)
+
+
+### Features
+
+* **consul-client:** Add support for KV delete operations ([#44](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/issues/44)) ([a7c9a6e](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/commit/a7c9a6e))
+* **dynamic-config:** Make file loaders plugable ([#45](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/issues/45)) ([fb24887](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/commit/fb24887))
+
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/compare/v0.3.5...v0.3.6) (2018-01-12)
 

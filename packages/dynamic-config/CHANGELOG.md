@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/compare/v0.3.6...v0.4.0) (2018-01-25)
+
+
+### Features
+
+* **dynamic-config:** Add resolvers for env variables and cli args ([#43](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/issues/43)) ([0fc556a](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/commit/0fc556a))
+* **dynamic-config:** Make file loaders plugable ([#45](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/issues/45)) ([fb24887](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/commit/fb24887))
+
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/creditkarma/thrift-server/tree/master/packages/dynamic-config/compare/v0.3.5...v0.3.6) (2018-01-12)
 

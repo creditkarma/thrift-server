@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/compare/v0.3.6...v0.4.0) (2018-01-25)
+
+
+### Features
+
+* **dynamic-config:** Add resolvers for env variables and cli args ([#43](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/issues/43)) ([0fc556a](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/commit/0fc556a))
+
+
+
+
 <a name="0.3.6"></a>
 ## [0.3.6](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/compare/v0.3.5...v0.3.6) (2018-01-12)
 
