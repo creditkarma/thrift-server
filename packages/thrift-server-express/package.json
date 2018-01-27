@@ -50,7 +50,7 @@
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
     "@types/q": "^1.0.5",
-    "@types/request": "^2.0.8",
+    "@types/request": "^2.47.0",
     "@types/rimraf": "0.0.28",
     "body-parser": "^1.17.2",
     "code": "^4.1.0",
