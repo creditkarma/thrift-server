@@ -30,6 +30,11 @@
     "type": "git",
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/vault-client"
   },
+  "peerDependencies": {
+    "@types/node": "^8.0.51",
+    "@types/request": "^2.47.0",
+    "@types/request-promise-native": "^1.0.12"
+  },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/lab": "^11.1.0",
@@ -41,9 +46,6 @@
     "wait-on": "^2.0.2"
   },
   "dependencies": {
-    "@types/node": "^8.0.51",
-    "@types/request": "^2.0.8",
-    "@types/request-promise-native": "^1.0.10",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5"
   }
