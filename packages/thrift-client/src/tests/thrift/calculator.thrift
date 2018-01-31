@@ -140,7 +140,9 @@ service Calculator extends shared.SharedService {
 
    i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
 
-   string echo(1: binary word)
+   string echoBinary(1: binary word)
+
+   string echoString(1: string word)
 
    /**
     * This method has a oneway modifier. That means the client only makes
