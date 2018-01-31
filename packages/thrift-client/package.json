@@ -19,7 +19,6 @@
     "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",
     "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
-    "prepublish": "npm run build",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
     "prebuild:test": "npm run clean && npm run codegen",
