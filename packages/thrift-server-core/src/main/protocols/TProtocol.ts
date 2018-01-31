@@ -1,116 +1,116 @@
 import {
-  TTransport,
+    TTransport,
 } from '../transports'
 
 import {
-  Int64,
-  IThriftField,
-  IThriftList,
-  IThriftMap,
-  IThriftMessage,
-  IThriftSet,
-  IThriftStruct,
-  MessageType,
-  TType,
+    Int64,
+    IThriftField,
+    IThriftList,
+    IThriftMap,
+    IThriftMessage,
+    IThriftSet,
+    IThriftStruct,
+    MessageType,
+    TType,
 } from '../types'
 
 export abstract class TProtocol {
-  protected transport: TTransport
-  protected requestId: number | null
+    protected transport: TTransport
+    protected requestId: number | null
 
-  constructor(trans: TTransport) {
-    this.transport = trans
-  }
+    constructor(trans: TTransport) {
+        this.transport = trans
+    }
 
-  public getTransport(): TTransport {
-    return this.transport
-  }
+    public getTransport(): TTransport {
+        return this.transport
+    }
 
-  public flush(): Buffer {
-    return this.transport.flush()
-  }
+    public flush(): Buffer {
+        return this.transport.flush()
+    }
 
-  public abstract writeMessageBegin(name: string, type: MessageType, seqid: number): void
+    public abstract writeMessageBegin(name: string, type: MessageType, seqid: number): void
 
-  public abstract writeMessageEnd(): void
+    public abstract writeMessageEnd(): void
 
-  public abstract writeStructBegin(name: string): void
+    public abstract writeStructBegin(name: string): void
 
-  public abstract writeStructEnd(): void
+    public abstract writeStructEnd(): void
 
-  public abstract writeFieldBegin(name: string, type: TType, id: number): void
+    public abstract writeFieldBegin(name: string, type: TType, id: number): void
 
-  public abstract writeFieldEnd(): void
+    public abstract writeFieldEnd(): void
 
-  public abstract writeFieldStop(): void
+    public abstract writeFieldStop(): void
 
-  public abstract writeMapBegin(keyType: TType, valueType: TType, size: number): void
+    public abstract writeMapBegin(keyType: TType, valueType: TType, size: number): void
 
-  public abstract writeMapEnd(): void
+    public abstract writeMapEnd(): void
 
-  public abstract writeListBegin(elementType: TType, size: number): void
+    public abstract writeListBegin(elementType: TType, size: number): void
 
-  public abstract writeListEnd(): void
+    public abstract writeListEnd(): void
 
-  public abstract writeSetBegin(elementType: TType, size: number): void
+    public abstract writeSetBegin(elementType: TType, size: number): void
 
-  public abstract writeSetEnd(): void
+    public abstract writeSetEnd(): void
 
-  public abstract writeBool(bool: boolean): void
+    public abstract writeBool(bool: boolean): void
 
-  public abstract writeByte(b: number): void
+    public abstract writeByte(b: number): void
 
-  public abstract writeI16(i16: number): void
+    public abstract writeI16(i16: number): void
 
-  public abstract writeI32(i32: number): void
+    public abstract writeI32(i32: number): void
 
-  public abstract writeI64(i64: Int64): void
+    public abstract writeI64(i64: Int64): void
 
-  public abstract writeDouble(dbl: number): void
+    public abstract writeDouble(dbl: number): void
 
-  public abstract writeString(arg: string): void
+    public abstract writeString(arg: string): void
 
-  public abstract writeBinary(arg: string): void
+    public abstract writeBinary(arg: string | Buffer): void
 
-  public abstract readMessageBegin(): IThriftMessage
+    public abstract readMessageBegin(): IThriftMessage
 
-  public abstract readMessageEnd(): void
+    public abstract readMessageEnd(): void
 
-  public abstract readStructBegin(): IThriftStruct
+    public abstract readStructBegin(): IThriftStruct
 
-  public abstract readStructEnd(): void
+    public abstract readStructEnd(): void
 
-  public abstract readFieldBegin(): IThriftField
+    public abstract readFieldBegin(): IThriftField
 
-  public abstract readFieldEnd(): void
+    public abstract readFieldEnd(): void
 
-  public abstract readMapBegin(): IThriftMap
+    public abstract readMapBegin(): IThriftMap
 
-  public abstract readMapEnd(): void
+    public abstract readMapEnd(): void
 
-  public abstract readListBegin(): IThriftList
+    public abstract readListBegin(): IThriftList
 
-  public abstract readListEnd(): void
+    public abstract readListEnd(): void
 
-  public abstract readSetBegin(): IThriftSet
+    public abstract readSetBegin(): IThriftSet
 
-  public abstract readSetEnd(): void
+    public abstract readSetEnd(): void
 
-  public abstract readBool(): boolean
+    public abstract readBool(): boolean
 
-  public abstract readByte(): number
+    public abstract readByte(): number
 
-  public abstract readI16(): number
+    public abstract readI16(): number
 
-  public abstract readI32(): number
+    public abstract readI32(): number
 
-  public abstract readI64(): Int64
+    public abstract readI64(): Int64
 
-  public abstract readDouble(): number
+    public abstract readDouble(): number
 
-  public abstract readBinary(): Buffer
+    public abstract readBinary(): Buffer
 
-  public abstract readString(): string
+    public abstract readString(): string
 
-  public abstract skip(type: TType): void
+    public abstract skip(type: TType): void
 }

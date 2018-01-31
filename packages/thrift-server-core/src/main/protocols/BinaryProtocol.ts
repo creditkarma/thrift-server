@@ -5,23 +5,27 @@
  * https://github.com/apache/thrift/blob/master/lib/nodejs/lib/thrift/binary_protocol.js
  */
 import * as binary from '../binary'
+
 import {
-  TProtocolException,
-  TProtocolExceptionType,
+    TProtocolException,
+    TProtocolExceptionType,
 } from '../errors'
+
 import * as log from '../log'
 import { TTransport } from '../transports'
+
 import {
-  Int64,
-  IThriftField,
-  IThriftList,
-  IThriftMap,
-  IThriftMessage,
-  IThriftSet,
-  IThriftStruct,
-  MessageType,
-  TType,
+    Int64,
+    IThriftField,
+    IThriftList,
+    IThriftMap,
+    IThriftMessage,
+    IThriftSet,
+    IThriftStruct,
+    MessageType,
+    TType,
 } from '../types'
+
 import { TProtocol } from './TProtocol'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
@@ -33,320 +37,315 @@ const VERSION_1: number = -2147418112  // 0x80010000
 const TYPE_MASK: number = 0x000000ff
 
 export class BinaryProtocol extends TProtocol {
-  constructor(trans: TTransport) {
-    super(trans)
-  }
-
-  public writeMessageBegin(name: string, type: MessageType, requestId: number): void {
-    this.writeI32(VERSION_1 | type)
-    this.writeString(name)
-    this.writeI32(requestId)
-
-    if (this.requestId) {
-      log.warning('RequestId already set', { name })
-    } else {
-      this.requestId = requestId
-    }
-  }
-
-  public writeMessageEnd(): void {
-    if (this.requestId !== null) {
-      this.requestId = null
-    } else {
-      log.warning('No requestId to unset')
-    }
-  }
-
-  public writeStructBegin(name: string): void {
-  }
-
-  public writeStructEnd(): void {
-  }
-
-  public writeFieldBegin(name: string, type: TType, id: number): void {
-    this.writeByte(type)
-    this.writeI16(id)
-  }
-
-  public writeFieldEnd(): void {
-  }
-
-  public writeFieldStop(): void {
-    this.writeByte(TType.STOP)
-  }
-
-  public writeMapBegin(keyType: TType, valueType: TType, size: number): void {
-    this.writeByte(keyType)
-    this.writeByte(valueType)
-    this.writeI32(size)
-  }
-
-  public writeMapEnd(): void {
-  }
-
-  public writeListBegin(elementType: TType, size: number): void {
-    this.writeByte(elementType)
-    this.writeI32(size)
-  }
-
-  public writeListEnd(): void {
-  }
-
-  public writeSetBegin(elementType: TType, size: number): void {
-    this.writeByte(elementType)
-    this.writeI32(size)
-  }
-
-  public writeSetEnd(): void {
-  }
-
-  public writeBool(bool: boolean): void {
-    if (bool) {
-      this.writeByte(1)
-    } else {
-      this.writeByte(0)
-    }
-  }
-
-  public writeByte(b: number): void {
-    this.transport.write(Buffer.from([b]))
-  }
-
-  public writeI16(i16: number): void {
-    this.transport.write(binary.writeI16(Buffer.alloc(2), i16))
-  }
-
-  public writeI32(i32: number): void {
-    this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
-  }
-
-  public writeI64(i64: Int64): void {
-    this.transport.write(i64.buffer)
-  }
-
-  public writeDouble(dub: number): void {
-    this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
-  }
-
-  public writeStringOrBinary(name: string, encoding: string, data: string) {
-    this.writeI32(Buffer.byteLength(data, encoding))
-    this.transport.write(Buffer.from(data, encoding))
-  }
-
-  public writeString(data: string): void {
-    this.writeStringOrBinary('writeString', 'utf8', data)
-  }
-
-  public writeBinary(data: string): void {
-    this.writeStringOrBinary('writeBinary', 'binary', data)
-  }
-
-  public readMessageBegin(): IThriftMessage {
-    const size: number = this.readI32()
-
-    if (size < 0) {
-      const version = size & VERSION_MASK
-      if (version !== VERSION_1) {
-        console.log(`BAD: ${version}`)
-        throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`)
-      }
-      return {
-        fieldName: this.readString(),
-        messageType: (size & TYPE_MASK),
-        requestId: this.readI32(),
-      }
-    } else {
-      // if (this.strictRead) {
-      //   throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, "No protocol version header")
-      // }
-      return {
-        fieldName: this.transport.readString(size),
-        messageType: this.readByte(),
-        requestId: this.readI32(),
-      }
-    }
-  }
-
-  public readMessageEnd(): void {
-  }
-
-  public readStructBegin(): IThriftStruct {
-    return { fieldName: '' }
-  }
-
-  public readStructEnd(): void {
-  }
-
-  public readFieldBegin(): IThriftField {
-    const type: TType = this.readByte()
-    if (type === TType.STOP) {
-      return { fieldName: '', fieldType: type, fieldId: 0 }
-    }
-    const id: number = this.readI16()
-    return { fieldName: '', fieldType: type, fieldId: id }
-  }
-
-  public readFieldEnd(): void {
-  }
-
-  public readMapBegin(): IThriftMap {
-    const keyType: TType = this.readByte()
-    const valueType: TType = this.readByte()
-    const size: number = this.readI32()
-    return { keyType, valueType, size }
-  }
-
-  public readMapEnd(): void {
-  }
-
-  public readListBegin(): IThriftList {
-    const elementType: TType = this.readByte()
-    const size: number = this.readI32()
-    return { elementType, size }
-  }
-
-  public readListEnd(): void {
-  }
-
-  public readSetBegin(): IThriftSet {
-    const elementType: TType = this.readByte()
-    const size: number = this.readI32()
-    return { elementType, size }
-  }
-
-  public readSetEnd(): void {
-  }
-
-  public readBool(): boolean {
-    const byte: number = this.readByte()
-    if (byte === 0) {
-      return false
-    }
-    return true
-  }
-
-  public readByte(): number {
-    return this.transport.readByte()
-  }
-
-  public readI16(): number {
-    return this.transport.readI16()
-  }
-
-  public readI32(): number {
-    return this.transport.readI32()
-  }
-
-  public readI64(): Int64 {
-    const buff = this.transport.read(8)
-    return new Int64(buff)
-  }
-
-  public readDouble(): number {
-    return this.transport.readDouble()
-  }
-
-  public readBinary(): Buffer {
-    const len: number = this.readI32()
-    if (len === 0) {
-      return Buffer.alloc(0)
+    constructor(trans: TTransport) {
+        super(trans)
     }
 
-    if (len < 0) {
-      throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
-    }
-    return this.transport.read(len)
-  }
+    public writeMessageBegin(name: string, type: MessageType, requestId: number): void {
+        this.writeI32(VERSION_1 | type)
+        this.writeString(name)
+        this.writeI32(requestId)
 
-  public readString(): string {
-    const len: number = this.readI32()
-    if (len === 0) {
-      return ''
-    }
-
-    if (len < 0) {
-      throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative string size')
-    }
-    return this.transport.readString(len)
-  }
-
-  public getTransport(): TTransport {
-    return this.transport
-  }
-
-  public skip(type: TType): void {
-    switch (type) {
-      case TType.STOP:
-        return
-
-      case TType.BOOL:
-        this.readBool()
-        break
-
-      case TType.BYTE:
-        this.readByte()
-        break
-
-      case TType.I16:
-        this.readI16()
-        break
-
-      case TType.I32:
-        this.readI32()
-        break
-
-      case TType.I64:
-        this.readI64()
-        break
-
-      case TType.DOUBLE:
-        this.readDouble()
-        break
-
-      case TType.STRING:
-        this.readString()
-        break
-
-      case TType.STRUCT:
-        this.readStructBegin()
-        while (true) {
-          const fieldBegin: IThriftField = this.readFieldBegin()
-          if (fieldBegin.fieldType === TType.STOP) {
-            break
-          }
-          this.skip(fieldBegin.fieldType)
-          this.readFieldEnd()
+        if (this.requestId) {
+            log.warning('RequestId already set', { name })
+        } else {
+            this.requestId = requestId
         }
-        this.readStructEnd()
-        break
-
-      case TType.MAP:
-        const mapBegin: IThriftMap = this.readMapBegin()
-        for (let i = 0; i < mapBegin.size; ++i) {
-          this.skip(mapBegin.keyType)
-          this.skip(mapBegin.valueType)
-        }
-        this.readMapEnd()
-        break
-
-      case TType.SET:
-        const setBegin: IThriftSet = this.readSetBegin()
-        for (let i2 = 0; i2 < setBegin.size; ++i2) {
-          this.skip(setBegin.elementType)
-        }
-        this.readSetEnd()
-        break
-
-      case TType.LIST:
-        const listBegin: IThriftList = this.readListBegin()
-        for (let i3 = 0; i3 < listBegin.size; ++i3) {
-          this.skip(listBegin.elementType)
-        }
-        this.readListEnd()
-        break
-
-      default:
-        throw new  Error('Invalid type: ' + type)
     }
-  }
+
+    public writeMessageEnd(): void {
+        if (this.requestId !== null) {
+            this.requestId = null
+        } else {
+            log.warning('No requestId to unset')
+        }
+    }
+
+    public writeStructBegin(name: string): void {}
+
+    public writeStructEnd(): void {}
+
+    public writeFieldBegin(name: string, type: TType, id: number): void {
+        this.writeByte(type)
+        this.writeI16(id)
+    }
+
+    public writeFieldEnd(): void {}
+
+    public writeFieldStop(): void {
+        this.writeByte(TType.STOP)
+    }
+
+    public writeMapBegin(keyType: TType, valueType: TType, size: number): void {
+        this.writeByte(keyType)
+        this.writeByte(valueType)
+        this.writeI32(size)
+    }
+
+    public writeMapEnd(): void {}
+
+    public writeListBegin(elementType: TType, size: number): void {
+        this.writeByte(elementType)
+        this.writeI32(size)
+    }
+
+    public writeListEnd(): void {}
+
+    public writeSetBegin(elementType: TType, size: number): void {
+        this.writeByte(elementType)
+        this.writeI32(size)
+    }
+
+    public writeSetEnd(): void {}
+
+    public writeBool(bool: boolean): void {
+        if (bool) {
+            this.writeByte(1)
+        } else {
+            this.writeByte(0)
+        }
+    }
+
+    public writeByte(b: number): void {
+        this.transport.write(Buffer.from([b]))
+    }
+
+    public writeI16(i16: number): void {
+        this.transport.write(binary.writeI16(Buffer.alloc(2), i16))
+    }
+
+    public writeI32(i32: number): void {
+        this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
+    }
+
+    public writeI64(i64: Int64): void {
+        this.transport.write(i64.buffer)
+    }
+
+    public writeDouble(dub: number): void {
+        this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
+    }
+
+    public writeStringOrBinary(name: string, encoding: string, data: string | Buffer) {
+        if (typeof data === 'string') {
+            this.writeI32(Buffer.byteLength(data, encoding))
+            this.transport.write(Buffer.from(data, encoding))
+        } else {
+            this.writeI32(data.length)
+            this.transport.write(data)
+        }
+    }
+
+    public writeString(data: string): void {
+        this.writeStringOrBinary('writeString', 'utf8', data)
+    }
+
+    public writeBinary(data: string | Buffer): void {
+        this.writeStringOrBinary('writeBinary', 'binary', data)
+    }
+
+    public readMessageBegin(): IThriftMessage {
+        const size: number = this.readI32()
+
+        if (size < 0) {
+            const version = size & VERSION_MASK
+            if (version !== VERSION_1) {
+                console.log(`BAD: ${version}`)
+                throw new TProtocolException(
+                    TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
+                )
+            }
+            return {
+                fieldName: this.readString(),
+                messageType: (size & TYPE_MASK),
+                requestId: this.readI32(),
+            }
+        } else {
+            // if (this.strictRead) {
+            //   throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, "No protocol version header")
+            // }
+            return {
+                fieldName: this.transport.readString(size),
+                messageType: this.readByte(),
+                requestId: this.readI32(),
+            }
+        }
+    }
+
+    public readMessageEnd(): void {}
+
+    public readStructBegin(): IThriftStruct {
+        return { fieldName: '' }
+    }
+
+    public readStructEnd(): void {}
+
+    public readFieldBegin(): IThriftField {
+        const type: TType = this.readByte()
+        if (type === TType.STOP) {
+            return { fieldName: '', fieldType: type, fieldId: 0 }
+        }
+        const id: number = this.readI16()
+        return { fieldName: '', fieldType: type, fieldId: id }
+    }
+
+    public readFieldEnd(): void {}
+
+    public readMapBegin(): IThriftMap {
+        const keyType: TType = this.readByte()
+        const valueType: TType = this.readByte()
+        const size: number = this.readI32()
+        return { keyType, valueType, size }
+    }
+
+    public readMapEnd(): void {}
+
+    public readListBegin(): IThriftList {
+        const elementType: TType = this.readByte()
+        const size: number = this.readI32()
+        return { elementType, size }
+    }
+
+    public readListEnd(): void {}
+
+    public readSetBegin(): IThriftSet {
+        const elementType: TType = this.readByte()
+        const size: number = this.readI32()
+        return { elementType, size }
+    }
+
+    public readSetEnd(): void {}
+
+    public readBool(): boolean {
+        const byte: number = this.readByte()
+        if (byte === 0) {
+            return false
+        }
+        return true
+    }
+
+    public readByte(): number {
+        return this.transport.readByte()
+    }
+
+    public readI16(): number {
+        return this.transport.readI16()
+    }
+
+    public readI32(): number {
+        return this.transport.readI32()
+    }
+
+    public readI64(): Int64 {
+        const buff = this.transport.read(8)
+        return new Int64(buff)
+    }
+
+    public readDouble(): number {
+        return this.transport.readDouble()
+    }
+
+    public readBinary(): Buffer {
+        const len: number = this.readI32()
+        if (len === 0) {
+            return Buffer.alloc(0)
+        }
+
+        if (len < 0) {
+            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
+        }
+        return this.transport.read(len)
+    }
+
+    public readString(): string {
+        const len: number = this.readI32()
+        if (len === 0) {
+            return ''
+        }
+
+        if (len < 0) {
+            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative string size')
+        }
+        return this.transport.readString(len)
+    }
+
+    public getTransport(): TTransport {
+        return this.transport
+    }
+
+    public skip(type: TType): void {
+        switch (type) {
+            case TType.STOP:
+                return
+
+            case TType.BOOL:
+                this.readBool()
+                break
+
+            case TType.BYTE:
+                this.readByte()
+                break
+
+            case TType.I16:
+                this.readI16()
+                break
+
+            case TType.I32:
+                this.readI32()
+                break
+
+            case TType.I64:
+                this.readI64()
+                break
+
+            case TType.DOUBLE:
+                this.readDouble()
+                break
+
+            case TType.STRING:
+                this.readString()
+                break
+
+            case TType.STRUCT:
+                this.readStructBegin()
+                while (true) {
+                    const fieldBegin: IThriftField = this.readFieldBegin()
+                    if (fieldBegin.fieldType === TType.STOP) {
+                        break
+                    }
+                    this.skip(fieldBegin.fieldType)
+                    this.readFieldEnd()
+                }
+                this.readStructEnd()
+                break
+
+            case TType.MAP:
+                const mapBegin: IThriftMap = this.readMapBegin()
+                for (let i = 0; i < mapBegin.size; ++i) {
+                    this.skip(mapBegin.keyType)
+                    this.skip(mapBegin.valueType)
+                }
+                this.readMapEnd()
+                break
+
+            case TType.SET:
+                const setBegin: IThriftSet = this.readSetBegin()
+                for (let i2 = 0; i2 < setBegin.size; ++i2) {
+                    this.skip(setBegin.elementType)
+                }
+                this.readSetEnd()
+                break
+
+            case TType.LIST:
+                const listBegin: IThriftList = this.readListBegin()
+                for (let i3 = 0; i3 < listBegin.size; ++i3) {
+                    this.skip(listBegin.elementType)
+                }
+                this.readListEnd()
+                break
+
+            default:
+                throw new  Error('Invalid type: ' + type)
+        }
+    }
 }

@@ -57,6 +57,14 @@ describe('createClient', () => {
         })
     })
 
+    it('should corrently handle a binary data', async () => {
+        const word: Buffer = Buffer.from('test_data', 'utf-8')
+        return client.echo(word)
+          .then((response: string) => {
+            expect(response).to.equal('test_data')
+          })
+      })
+
     it('should corrently handle a service client request that returns a struct', async () => {
       return client.getStruct(5)
         .then((response: { key: number, value: string }) => {
