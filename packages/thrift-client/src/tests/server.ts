@@ -82,8 +82,11 @@ const impl = new Calculator.Processor<Hapi.Request>({
       return SharedUnion.fromOption2('bar')
     }
   },
-  echo(word: Buffer): string {
+  echoBinary(word: Buffer): string {
       return word.toString('utf-8')
+  },
+  echoString(word: string): string {
+      return word
   },
 })
 
