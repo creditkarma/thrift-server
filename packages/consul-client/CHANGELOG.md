@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/compare/v0.4.0...v0.4.1) (2018-01-31)
+
+
+### Bug Fixes
+
+* Update [@types](https://github.com/types) version for request ([87863fc](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/commit/87863fc))
+* **thrift-server-core:** Fix type mismatch for binary types ([3232b21](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/commit/3232b21))
+
+
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/creditkarma/thrift-server/tree/master/packages/consul-client/compare/v0.3.6...v0.4.0) (2018-01-25)
 

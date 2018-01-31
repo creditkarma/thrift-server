@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.4.0...v0.4.1) (2018-01-31)
+
+
+### Bug Fixes
+
+* Update [@types](https://github.com/types) version for request ([87863fc](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/commit/87863fc))
+
+
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.3.6...v0.4.0) (2018-01-25)
 
