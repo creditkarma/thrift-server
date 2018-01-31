@@ -15,7 +15,6 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
-    "prepublish": "npm run build",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc",
     "watch": "tsc --watch",
