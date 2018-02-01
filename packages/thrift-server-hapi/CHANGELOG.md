@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.2"></a>
+## [0.4.2](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.4.1...v0.4.2) (2018-02-01)
+
+
+### Bug Fixes
+
+* Update for TypeScript 2.7 ([#47](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/issues/47)) ([d42061f](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/commit/d42061f))
+
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.4.0...v0.4.1) (2018-01-31)
 
