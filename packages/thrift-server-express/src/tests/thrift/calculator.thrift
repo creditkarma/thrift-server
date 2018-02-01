@@ -105,9 +105,9 @@ enum Operation {
  * manual management in some languages.
  */
 struct Work {
-  1: i32 num1 = 0,
-  2: i32 num2,
-  3: Operation op,
+  1: required i32 num1 = 0,
+  2: required i32 num2,
+  3: required Operation op,
   4: optional string comment,
 }
 
