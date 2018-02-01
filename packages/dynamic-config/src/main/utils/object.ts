@@ -146,12 +146,6 @@ export function overlay<Base, Update>(base: Base, update: Update): Base & Update
   return newObj
 }
 
-export function overlayObjects<A, B, C, D, E>(one: A, two: B, three: C, four: D, five: E): A & B & C & D & E
-export function overlayObjects<A, B, C, D>(one: A, two: B, three: C, four: D): A & B & C & D
-export function overlayObjects<A, B, C>(one: A, two: B, three: C): A & B & C
-export function overlayObjects<A, B>(one: A, two: B): A & B
-export function overlayObjects<A>(one: A): A
-export function overlayObjects(): {}
 export function overlayObjects(...configs: Array<any>): any {
   return configs.reduce((acc: any, next: any) => {
     return overlay(acc, next)

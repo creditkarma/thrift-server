@@ -62,6 +62,15 @@ export class DynamicConfig implements IDynamicConfig {
     loaders = [],
   }: IConfigOptions = {}) {
     this.configState = 'startup'
+    this.configSchema = {
+        type: 'object',
+        properties: {},
+        required: [],
+    }
+    this.resolvedConfig = {
+        type: 'root',
+        properties: {},
+    }
     this.configLoader = new ConfigLoader({ loaders, configPath, configEnv })
     this.remoteOptions = remoteOptions
     this.resolvers = {
@@ -97,7 +106,7 @@ export class DynamicConfig implements IDynamicConfig {
             this.resolvedConfig = ObjectUtils.overlayObjects(this.resolvedConfig, resolvedValue)
             this.validateConfigSchema()
             return Promise.resolve(
-              ConfigUtils.readConfigValue(this.resolvedConfig),
+                ConfigUtils.readConfigValue(this.resolvedConfig),
             )
           },
         )
@@ -112,17 +121,17 @@ export class DynamicConfig implements IDynamicConfig {
             const baseValue = ConfigUtils.readConfigValue(resolvedValue)
 
             return SchemaUtils.findSchemaForKey(this.configSchema, key).fork((schemaForKey: ISchema) => {
-              if (SchemaUtils.objectMatchesSchema(schemaForKey, baseValue)) {
+                if (SchemaUtils.objectMatchesSchema(schemaForKey, baseValue)) {
+                    this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, resolvedValue, this.resolvedConfig)
+                    return Promise.resolve(baseValue)
+                } else {
+                    logger.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
+                    return Promise.reject(new DynamicConfigInvalidObject(key))
+                }
+                }, () => {
+                logger.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
                 this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, resolvedValue, this.resolvedConfig)
                 return Promise.resolve(baseValue)
-              } else {
-                logger.error(`Value for key[${key}] from remote[${resolvedValue}] does not match expected schema`)
-                return Promise.reject(new DynamicConfigInvalidObject(key))
-              }
-            }, () => {
-              logger.warn(`Unable to find schema for key[${key}]. Object may be invalid.`)
-              this.resolvedConfig = ConfigUtils.setRootConfigValueForKey(key, resolvedValue, this.resolvedConfig)
-              return Promise.resolve(baseValue)
             })
           })
 
@@ -289,7 +298,7 @@ export class DynamicConfig implements IDynamicConfig {
   }
 
   private async getConfig(): Promise<IRootConfigValue> {
-    if (this.resolvedConfig === undefined) {
+    if (Object.keys(this.resolvedConfig.properties).length === 0) {
       this.configState = 'init'
       const defaultConfig: IRootConfigValue = await this.configLoader.loadDefault()
       const envConfig: IRootConfigValue = await this.configLoader.loadEnvironment()

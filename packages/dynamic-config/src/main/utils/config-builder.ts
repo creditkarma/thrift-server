@@ -13,73 +13,74 @@ import {
 import * as ConfigUtils from './config'
 
 export function buildBaseConfigValue(sourceName: string, sourceType: SourceType, obj: any): BaseConfigValue {
-  const objType = typeof obj
-  if (obj instanceof Promise) {
-    return {
-      source: {
-        type: sourceType,
-        name: sourceName,
-      },
-      resolved: false,
-      type: 'promise',
-      value: obj,
-      watchers: [],
-    }
+    const objType = typeof obj
 
-  } else if (ConfigUtils.isConfigPlaceholder(obj)) {
-    return {
-      source: {
-        type: sourceType,
-        name: sourceName,
-      },
-      resolved: false,
-      type: 'placeholder',
-      value: obj,
-      watchers: [],
-    }
+    if (obj instanceof Promise) {
+        return {
+            source: {
+                type: sourceType,
+                name: sourceName,
+            },
+            resolved: false,
+            type: 'promise',
+            value: obj,
+            watchers: [],
+        }
 
-  } else if (Array.isArray(obj)) {
-    return {
-      source: {
-        type: sourceType,
-        name: sourceName,
-      },
-      resolved: true,
-      type: 'array',
-      items: obj,
-      watchers: [],
-    }
+    } else if (ConfigUtils.isConfigPlaceholder(obj)) {
+        return {
+            source: {
+                type: sourceType,
+                name: sourceName,
+            },
+            resolved: false,
+            type: 'placeholder',
+            value: obj,
+            watchers: [],
+        }
 
-  } else if (isObject(obj)) {
-    return {
-      source: {
-        type: sourceType,
-        name: sourceName,
-      },
-      resolved: true,
-      type: 'object',
-      properties: Object.keys(obj).reduce((acc: IConfigProperties, next: string) => {
-        acc[next] = buildBaseConfigValue(sourceName, sourceType, obj[next])
-        return acc
-      }, {}),
-      watchers: [],
-    }
+    } else if (Array.isArray(obj)) {
+        return {
+            source: {
+                type: sourceType,
+                name: sourceName,
+            },
+            resolved: true,
+            type: 'array',
+            items: obj,
+            watchers: [],
+        }
 
-  } else if (isPrimitiveType(objType)) {
-    return {
-      source: {
-        type: sourceType,
-        name: sourceName,
-      },
-      resolved: true,
-      type: objType,
-      value: obj,
-      watchers: [],
-    }
+    } else if (isObject(obj)) {
+        return {
+            source: {
+                type: sourceType,
+                name: sourceName,
+            },
+            resolved: true,
+            type: 'object',
+            properties: Object.keys(obj).reduce((acc: IConfigProperties, next: string) => {
+                acc[next] = buildBaseConfigValue(sourceName, sourceType, obj[next])
+                return acc
+            }, {}),
+            watchers: [],
+        }
 
-  } else {
-    throw new TypeError(`Cannot build config from with object of type[${objType}]`)
-  }
+    } else if (isPrimitiveType(objType)) {
+        return {
+            source: {
+                type: sourceType,
+                name: sourceName,
+            },
+            resolved: true,
+            type: objType,
+            value: obj,
+            watchers: [],
+        }
+
+    } else {
+        throw new TypeError(`Cannot build config from with object of type[${objType}]`)
+    }
 }
 
 export function createConfigObject(

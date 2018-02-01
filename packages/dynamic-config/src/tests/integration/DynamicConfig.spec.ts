@@ -57,7 +57,7 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'DELAYED',
+                response: 'BOOYA',
               },
             },
             'hashicorp-vault': {
@@ -86,7 +86,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'DELAYED',
+            response: 'BOOYA',
           })
         })
       })
@@ -180,7 +180,7 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'DELAYED',
+                response: 'BOOYA',
               },
             },
           })
@@ -209,7 +209,7 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'DELAYED',
+                response: 'BOOYA',
               },
             },
           })
@@ -220,7 +220,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'DELAYED',
+            response: 'BOOYA',
           })
         })
       })
@@ -278,7 +278,7 @@ describe('DynamicConfig', () => {
             project: {
               health: {
                 control: '/javascript',
-                response: 'DELAYED',
+                response: 'BOOYA',
               },
             },
           })
@@ -315,7 +315,7 @@ describe('DynamicConfig', () => {
         return dynamicConfig.get<object>('project.health').then((actual: object) => {
           expect(actual).to.equal({
             control: '/javascript',
-            response: 'DELAYED',
+            response: 'BOOYA',
           })
         })
       })

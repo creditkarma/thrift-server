@@ -72,7 +72,7 @@ export class ConfigLoader {
   private loaders: Array<IFileLoader>
   private configPath: string
   private configEnv: string
-  private savedConfig: IRootConfigValue
+  private savedConfig: IRootConfigValue | undefined
 
   constructor({ loaders = [], configPath = DEFAULT_CONFIG_PATH, configEnv }: ILoaderConfig = {}) {
     this.loaders = loaders
@@ -104,7 +104,11 @@ export class ConfigLoader {
       const defaultConfig: any = await this.loadDefault()
       const envConfig: any = await this.loadEnvironment()
       this.savedConfig = ObjectUtils.overlayObjects(defaultConfig, envConfig)
-      return this.savedConfig
+      if (this.savedConfig !== undefined) {
+        return this.savedConfig
+      } else {
+        throw new Error(`Unable to resolve local configs`)
+      }
     }
   }
 }
