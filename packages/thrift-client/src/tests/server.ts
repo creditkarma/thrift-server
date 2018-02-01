@@ -2,18 +2,19 @@ import { createPlugin } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
 import {
-  SharedStruct,
-  SharedUnion,
+    SharedStruct,
+    SharedUnion,
 } from './generated/shared/shared'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from './config'
 
 import {
-  Calculator,
-  Operation,
-  Work,
+    Calculator,
+    Choice,
+    Operation,
+    Work,
 } from './generated/calculator/calculator'
 
 const server = new Hapi.Server({ debug: { request: [ 'error' ] } })
@@ -28,9 +29,9 @@ server.connection({ port: SERVER_CONFIG.port })
  * thrift / REST endpoints on the same server instance.
  */
 server.register(createPlugin<Calculator.Processor<Hapi.Request>>(), (err: any) => {
-  if (err) {
-    throw err
-  }
+    if (err) {
+        throw err
+    }
 })
 
 /**
@@ -41,53 +42,62 @@ server.register(createPlugin<Calculator.Processor<Hapi.Request>>(), (err: any) =
  * all HTTP request data from within your service implementation.
  */
 const impl = new Calculator.Processor<Hapi.Request>({
-  ping(): void {
-    return
-  },
-  add(a: number, b: number): number {
-    return a + b
-  },
-  addWithContext(a: number, b: number, context?: Hapi.Request): number {
-    if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
-      return a + b
-    } else {
-      throw new Error('Unauthorized')
-    }
-  },
-  calculate(logId: number, work: Work): number {
-    switch (work.op) {
-      case Operation.ADD:
-        return work.num1 + work.num2
-      case Operation.SUBTRACT:
-        return work.num1 - work.num2
-      case Operation.DIVIDE:
-        return work.num1 / work.num2
-      case Operation.MULTIPLY:
-        return work.num1 * work.num2
-    }
-  },
-  zip(): void {
-    return
-  },
-  getStruct(): SharedStruct {
-    return new SharedStruct({
-      key: 0,
-      value: 'test',
-    })
-  },
-  getUnion(index: number): SharedUnion {
-    if (index === 1) {
-      return SharedUnion.fromOption1('foo')
-    } else {
-      return SharedUnion.fromOption2('bar')
-    }
-  },
-  echoBinary(word: Buffer): string {
-      return word.toString('utf-8')
-  },
-  echoString(word: string): string {
-      return word
-  },
+    ping(): void {
+        return
+    },
+    add(a: number, b: number): number {
+        return a + b
+    },
+    addWithContext(a: number, b: number, context?: Hapi.Request): number {
+        if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
+            return a + b
+        } else {
+            throw new Error('Unauthorized')
+        }
+    },
+    calculate(logId: number, work: Work): number {
+        switch (work.op) {
+            case Operation.ADD:
+                return work.num1 + work.num2
+            case Operation.SUBTRACT:
+                return work.num1 - work.num2
+            case Operation.DIVIDE:
+                return work.num1 / work.num2
+            case Operation.MULTIPLY:
+                return work.num1 * work.num2
+        }
+    },
+    zip(): void {
+        return
+    },
+    getStruct(): SharedStruct {
+        return new SharedStruct({
+            key: 0,
+            value: 'test',
+        })
+    },
+    getUnion(index: number): SharedUnion {
+        if (index === 1) {
+            return SharedUnion.fromOption1('foo')
+        } else {
+            return SharedUnion.fromOption2('bar')
+        }
+    },
+    echoBinary(word: Buffer): string {
+        return word.toString('utf-8')
+    },
+    echoString(word: string): string {
+        return word
+    },
+    checkName(choice: Choice): string {
+        if (choice.firstName !== undefined) {
+            return `FirstName: ${choice.firstName.name}`
+        } else if (choice.lastName !== undefined) {
+            return `LastName: ${choice.lastName.name}`
+        } else {
+            throw new Error(`Unknown choice`)
+        }
+    },
 })
 
 /**
