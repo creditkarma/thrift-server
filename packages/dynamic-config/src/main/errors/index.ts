@@ -16,6 +16,12 @@ export class DynamicConfigInvalidObject extends Error {
   }
 }
 
+export class UnknownError extends Error {
+    constructor(msg: string) {
+        super(msg)
+    }
+}
+
 export class HVNotConfigured extends Error {
   constructor(key: string) {
     super(`Unable to retrieve key: ${key}. Hashicorp Vault is not configured.`)

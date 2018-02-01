@@ -40,7 +40,7 @@
     "lab": "^14.3.1",
     "rimraf": "^2.6.2",
     "tslint": "^5.8.0",
-    "typescript": "^2.6.2",
+    "typescript": "2.7.x",
     "wait-on": "^2.0.2"
   },
   "dependencies": {

@@ -18,7 +18,14 @@ import * as Lab from 'lab'
 
 import {
   Calculator,
+  Choice,
+  FirstName,
+  LastName,
 } from '../generated/calculator/calculator'
+
+import {
+    SharedStruct,
+} from '../generated/shared/shared'
 
 export const lab = Lab.script()
 
@@ -74,10 +81,23 @@ describe('createClient', () => {
                 })
         })
 
+        it('should call an endpoint with union arguments', async () => {
+            const firstName: Choice = new Choice({ firstName: new FirstName({ name: 'Louis' })})
+            const lastName: Choice = new Choice({ lastName: new LastName({ name: 'Smith' })})
+
+            return Promise.all([
+                client.checkName(firstName),
+                client.checkName(lastName),
+            ]).then((val: string[]) => {
+                expect(val[0]).to.equal('FirstName: Louis')
+                expect(val[1]).to.equal('LastName: Smith')
+            })
+        })
+
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5)
-                .then((response: { key: number, value: string }) => {
-                    expect(response).to.equal({ key: 0, value: 'test' })
+                .then((response: SharedStruct) => {
+                    expect(response).to.equal(new SharedStruct({ key: 0, value: 'test' }))
                 })
         })
 

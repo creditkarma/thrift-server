@@ -20,6 +20,7 @@ export abstract class TProtocol {
 
     constructor(trans: TTransport) {
         this.transport = trans
+        this.requestId = null
     }
 
     public getTransport(): TTransport {

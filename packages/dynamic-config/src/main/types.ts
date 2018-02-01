@@ -1,160 +1,164 @@
 export interface IRemoteOptions {
-  [name: string]: any
+    [name: string]: any
 }
 
 export interface IConfigOptions {
-  configPath?: string
-  configEnv?: string
-  remoteOptions?: IRemoteOptions
-  resolvers?: Array<ConfigResolver>
-  loaders?: Array<IFileLoader>
+    configPath?: string
+    configEnv?: string
+    remoteOptions?: IRemoteOptions
+    resolvers?: Array<ConfigResolver>
+    loaders?: Array<IFileLoader>
 }
 
 export interface IConsulOptions {
-  consulAddress?: string
-  consulKvDc?: string
-  consulKeys?: string
+    consulAddress?: string
+    consulKvDc?: string
+    consulKeys?: string
 }
 
 export interface IRemoteOverrides {
-  key: string
-  [name: string]: string
+    key: string
+    [name: string]: string
 }
 
 export interface IDynamicConfig {
-  register(...resolvers: Array<ConfigResolver>): void
-  get<T = any>(key?: string): Promise<T>
-  getAll(...args: Array<string>): Promise<Array<any>>
-  getWithDefault<T = any>(key: string, defaultVal: T): Promise<T>
-  getRemoteValue<T>(key: string): Promise<T>
-  getSecretValue<T>(key: string): Promise<T>
+    register(...resolvers: Array<ConfigResolver>): void
+    get<T = any>(key?: string): Promise<T>
+    getAll(...args: Array<string>): Promise<Array<any>>
+    getWithDefault<T = any>(key: string, defaultVal: T): Promise<T>
+    getRemoteValue<T>(key: string): Promise<T>
+    getSecretValue<T>(key: string): Promise<T>
 }
 
 // FILE LOADER TYPES
 
 export interface IFileLoader {
-  type: string
-  load(filePath: string): Promise<object>
+    type: string
+    load(filePath: string): Promise<object>
 }
 
 // RESOLVER TYPES
 
 export interface IResolverMap {
-  names: Set<string>
-  all: Map<string, ConfigResolver>
+    names: Set<string>
+    all: Map<string, ConfigResolver>
 }
 
 export type ConfigResolver =
-  IRemoteResolver | ISecretResolver
+    IRemoteResolver | ISecretResolver
 
 export type IRemoteInitializer = (dynamicConfig: IDynamicConfig, remoteOptions?: IRemoteOptions) => Promise<any>
 
 export interface IRemoteResolver {
-  type: 'remote'
-  name: string
-  init: IRemoteInitializer
-  get<T>(key: string, type?: ObjectType): Promise<T>
+    type: 'remote'
+    name: string
+    init: IRemoteInitializer
+    get<T>(key: string, type?: ObjectType): Promise<T>
 }
 
 export interface ISecretResolver {
-  type: 'secret'
-  name: string
-  init: IRemoteInitializer
-  get<T>(key: string, type?: ObjectType): Promise<T>
+    type: 'secret'
+    name: string
+    init: IRemoteInitializer
+    get<T>(key: string, type?: ObjectType): Promise<T>
 }
 
 // CONFIG TYPES
 
 export type SourceType =
-  'local' | 'remote' | 'secret' | 'env' | 'process'
+    'local' | 'remote' | 'secret' | 'env' | 'process'
 
 export interface ISource {
-  type: SourceType
-  name: string
+    type: SourceType
+    name: string
 }
 
 export type ConfigType =
-  'root' | ObjectType | DeferredType
+    'root' | ObjectType | DeferredType
 
 export type ObjectType =
-  'object' | 'array' | 'string' | 'number' | 'boolean'
+    'object' | 'array' | 'string' | 'number' | 'boolean'
 
 export type DeferredType =
-  'promise' | 'placeholder'
+    'promise' | 'placeholder'
 
 export type WatchFunction =
-  (val: any) => void
+    (val: any) => void
 
 export interface IConfigValue {
-  type: ConfigType
+    type: ConfigType
 }
 
 export interface IBaseConfigValue extends IConfigValue {
-  source: ISource
-  resolved: boolean
-  watchers: Array<WatchFunction>
+    source: ISource
+    resolved: boolean
+    watchers: Array<WatchFunction>
 }
 
 export type ConfigValue =
-  IRootConfigValue | BaseConfigValue
+    IRootConfigValue | BaseConfigValue
 
 export type BaseConfigValue =
-  IObjectConfigValue | IArrayConfigValue | IPrimitiveConfigValue |
-  IPromisedConfigValue | IPlaceholderConfigValue
+    IObjectConfigValue | IArrayConfigValue | IPrimitiveConfigValue |
+    IPromisedConfigValue | IPlaceholderConfigValue
 
 export interface IConfigProperties {
-  [name: string]: BaseConfigValue
+    [name: string]: BaseConfigValue
 }
 
 export interface IRootConfigValue extends IConfigValue {
-  type: 'root'
-  properties: IConfigProperties
+    type: 'root'
+    properties: IConfigProperties
+}
+
+export interface IRootConfigValue extends IConfigValue {
+    type: 'root'
+    properties: IConfigProperties
 }
 
 export interface IObjectConfigValue extends IBaseConfigValue {
-  type: 'object'
-  properties: IConfigProperties
+    type: 'object'
+    properties: IConfigProperties
 }
 
 export interface IArrayConfigValue extends IBaseConfigValue {
-  type: 'array'
-  items: Array<any>
+    type: 'array'
+    items: Array<any>
 }
 
 export interface IPrimitiveConfigValue extends IBaseConfigValue {
-  type: 'string' | 'number' | 'boolean'
-  value: string | number | boolean
+    type: 'string' | 'number' | 'boolean'
+    value: string | number | boolean
 }
 
 export interface IPromisedConfigValue extends IBaseConfigValue {
-  type: 'promise'
-  resolved: false
-  value: Promise<any>
+    type: 'promise'
+    value: Promise<any>
 }
 
 export interface IPlaceholderConfigValue extends IBaseConfigValue {
-  type: 'placeholder'
-  value: IConfigPlaceholder
+    type: 'placeholder'
+    value: IConfigPlaceholder
 }
 
 // CONFIG PLACEHOLDER TYPES
 
 export type ResolverType =
-  'remote' | 'secret'
+    'remote' | 'secret'
 
 export interface IResolver {
-  name: string
-  type: ResolverType
+    name: string
+    type: ResolverType
 }
 
 /**
  * Config placeholder as it appears in the raw config
  */
 export interface IConfigPlaceholder {
-  _source: string
-  _key: string
-  _type?: ObjectType
-  _default?: any
+    _source: string
+    _key: string
+    _type?: ObjectType
+    _default?: any
 }
 
 /**
@@ -166,57 +170,57 @@ export interface IConfigPlaceholder {
  * default - default value if fetching fails
  */
 export interface IResolvedPlaceholder {
-  resolver: IResolver
-  key: string
-  type: ObjectType
-  default?: any
+    resolver: IResolver
+    key: string
+    type: ObjectType
+    default?: any
 }
 
 // UTILITY TYPES
 
 export type ObjectUpdate =
-  [ Array<string>, Promise<any> ]
+    [ Array<string>, Promise<any> ]
 
 export type PromisedUpdate =
-  [ Array<string>, Promise<BaseConfigValue> ]
+    [ Array<string>, Promise<BaseConfigValue> ]
 
 // SCHEMA TYPES
 
 export interface ISchemaMap {
-  [key: string]: ISchema
+    [key: string]: ISchema
 }
 
 export type ISchema =
-  IArraySchema | IObjectSchema | IStringSchema | INumberSchema |
-  IBooleanSchema | IAnySchema | IUndefinedSchema
+    IArraySchema | IObjectSchema | IStringSchema | INumberSchema |
+    IBooleanSchema | IAnySchema | IUndefinedSchema
 
 export interface IArraySchema {
-  type: 'array'
-  items: ISchema
+    type: 'array'
+    items: ISchema
 }
 
 export interface IObjectSchema {
-  type: 'object'
-  properties: ISchemaMap
-  required?: Array<string>
+    type: 'object'
+    properties: ISchemaMap
+    required?: Array<string>
 }
 
 export interface IStringSchema {
-  type: 'string'
+    type: 'string'
 }
 
 export interface INumberSchema {
-  type: 'number'
+    type: 'number'
 }
 
 export interface IBooleanSchema {
-  type: 'boolean'
+    type: 'boolean'
 }
 
 export interface IAnySchema {
-  type: 'any'
+    type: 'any'
 }
 
 export interface IUndefinedSchema {
-  type: 'undefined'
+    type: 'undefined'
 }

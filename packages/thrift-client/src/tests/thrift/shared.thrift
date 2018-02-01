@@ -32,8 +32,8 @@ namespace haxe shared
 namespace netcore shared
 
 struct SharedStruct {
-  1: i32 key
-  2: string value
+  1: required i32 key
+  2: required string value
 }
 
 union SharedUnion {

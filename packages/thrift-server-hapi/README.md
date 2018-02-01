@@ -4,7 +4,7 @@ Hapi plugin for processing Thrift requests.
 
 ## Usage
 
-Requires @creditkarma/thrift-typescript >= v1.0.2
+Requires @creditkarma/thrift-typescript >= v1.1.0
 
 The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
 
