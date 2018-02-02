@@ -98,6 +98,13 @@ const impl = new Calculator.Processor<Hapi.Request>({
             throw new Error(`Unknown choice`)
         }
     },
+    checkOptional(type?: string): string {
+        if (type === undefined) {
+            return 'undefined'
+        } else {
+            return type
+        }
+    },
 })
 
 /**

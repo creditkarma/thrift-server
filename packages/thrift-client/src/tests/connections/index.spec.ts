@@ -94,6 +94,16 @@ describe('createClient', () => {
             })
         })
 
+        it('should call an endpoint with optional parameters', async () => {
+            return Promise.all([
+                client.checkOptional('test_first'),
+                client.checkOptional(),
+            ]).then((val: string[]) => {
+                expect(val[0]).to.equal('test_first')
+                expect(val[1]).to.equal('undefined')
+            })
+        })
+
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5)
                 .then((response: SharedStruct) => {

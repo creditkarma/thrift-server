@@ -41,7 +41,7 @@
   "devDependencies": {
     "@creditkarma/thrift-client": "^0.4.2",
     "@creditkarma/thrift-server-core": "^0.4.2",
-    "@creditkarma/thrift-typescript": "^1.1.0",
+    "@creditkarma/thrift-typescript": "^1.1.4",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
