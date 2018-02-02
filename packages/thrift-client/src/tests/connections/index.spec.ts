@@ -106,8 +106,10 @@ describe('createClient', () => {
         })
 
         it('should correctly call endpoint that returns a map', async () => {
-            return client.listToMap([['key_1','value_1'], ['key_2','value_2']]).then((response: Map<string,string>) => {
-                expect(response).to.equal(new Map([['key_1','value_1'], ['key_2','value_2']]))
+            return client.listToMap(
+                [['key_1', 'value_1'], ['key_2', 'value_2']],
+            ).then((response: Map<string, string>) => {
+                expect(response).to.equal(new Map([['key_1', 'value_1'], ['key_2', 'value_2']]))
             })
         })
 

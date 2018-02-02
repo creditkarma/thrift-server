@@ -112,8 +112,8 @@ export function createServer(): Hapi.Server {
         mapValues(map: Map<string, number>): number[] {
             return Array.from(map.values())
         },
-        listToMap(list: Array<Array<string>>): Map<string,string> {
-            return list.reduce((acc: Map<string,string>, next: Array<string>) => {
+        listToMap(list: string[][]): Map<string, string> {
+            return list.reduce((acc: Map<string, string>, next: string[]) => {
                 acc.set(next[0], next[1])
                 return acc
             }, new Map())
