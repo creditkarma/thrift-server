@@ -1,31 +1,36 @@
+import * as Hapi from 'hapi'
+
 import {
-  createClient,
+    createClient,
 } from '../../main'
 
 import { CoreOptions } from 'request'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from '../config'
 
 import {
-  readThriftMethod,
+    readThriftMethod,
 } from '../../main/utils'
 
-import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Lab from 'lab'
 
 import {
-  Calculator,
-  Choice,
-  FirstName,
-  LastName,
+    Calculator,
+    Choice,
+    FirstName,
+    LastName,
 } from '../generated/calculator/calculator'
 
 import {
     SharedStruct,
 } from '../generated/shared/shared'
+
+import {
+    createServer,
+} from '../server'
 
 export const lab = Lab.script()
 
@@ -35,19 +40,26 @@ const before = lab.before
 const after = lab.after
 
 describe('createClient', () => {
-  let server: childProcess.ChildProcess
+    let server: Hapi.Server
 
-  before((done: any) => {
-    server = childProcess.fork('./dist/tests/server.js')
-    server.on('message', (msg: any) => console.log(msg))
-    setTimeout(done, 2000)
-  })
+    before(async () => {
+        server = createServer()
+        return server.start().then(() => {
+            console.log('Thrift server running')
+        })
+    })
 
-  describe('Basic Usage', () => {
+    after(async () => {
+        return server.stop().then(() => {
+            console.log('Thrift server stopped')
+        })
+    })
+
+    describe('Basic Usage', () => {
         let client: Calculator.Client<CoreOptions>
 
         before(async () => {
-        client = createClient(Calculator.Client, SERVER_CONFIG)
+            client = createClient(Calculator.Client, SERVER_CONFIG)
         })
 
         it('should corrently handle a service client request', async () => {
@@ -64,7 +76,7 @@ describe('createClient', () => {
                 })
         })
 
-        it('should corrently handle a binary data', async () => {
+        it('should corrently call endpoint with binary data', async () => {
             const word: string = 'test_binary'
             const data: Buffer = Buffer.from(word, 'utf-8')
             return client.echoBinary(data)
@@ -73,12 +85,30 @@ describe('createClient', () => {
                 })
         })
 
-        it('should corrently handle a string data', async () => {
+        it('should corrently call endpoint that string data', async () => {
             const word: string = 'test_string'
             return client.echoString(word)
                 .then((response: string) => {
                     expect(response).to.equal(word)
                 })
+        })
+
+        it('should correctly call endpoint with lists as parameters', async () => {
+            return client.mapOneList([1, 2, 3, 4]).then((response: number[]) => {
+                expect<number[]>(response).to.equal([2, 3, 4, 5])
+            })
+        })
+
+        it('should correctly call endpoint with maps as parameters', async () => {
+            return client.mapValues(new Map([['key1', 6], ['key2', 5]])).then((response: number[]) => {
+                expect<number[]>(response).to.equal([6, 5])
+            })
+        })
+
+        it('should correctly call endpoint that returns a map', async () => {
+            return client.listToMap([['key_1','value_1'], ['key_2','value_2']]).then((response: Map<string,string>) => {
+                expect(response).to.equal(new Map([['key_1','value_1'], ['key_2','value_2']]))
+            })
         })
 
         it('should call an endpoint with union arguments', async () => {
@@ -96,10 +126,10 @@ describe('createClient', () => {
 
         it('should call an endpoint with optional parameters', async () => {
             return Promise.all([
-                client.checkOptional('test_first'),
+                client.checkOptional('test_\nfirst'),
                 client.checkOptional(),
             ]).then((val: string[]) => {
-                expect(val[0]).to.equal('test_first')
+                expect(val[0]).to.equal('test_\nfirst')
                 expect(val[1]).to.equal('undefined')
             })
         })
@@ -179,7 +209,7 @@ describe('createClient', () => {
         })
     })
 
-  describe('IncomingMiddleware', () => {
+    describe('IncomingMiddleware', () => {
         it('should resolve when middleware allows', async () => {
             const client = createClient(Calculator.Client, {
                 hostName: SERVER_CONFIG.hostName,
@@ -267,7 +297,7 @@ describe('createClient', () => {
         })
     })
 
-  describe('OutgoingMiddleware', () => {
+    describe('OutgoingMiddleware', () => {
         it('should resolve when middleware adds auth token', async () => {
             const client = createClient(Calculator.Client, {
                 hostName: SERVER_CONFIG.hostName,
@@ -348,10 +378,5 @@ describe('createClient', () => {
                     expect(err.message).to.equal('Unauthorized')
                 })
         })
-    })
-
-  after((done: any) => {
-        server.kill('SIGINT')
-        setTimeout(done, 1000)
     })
 })

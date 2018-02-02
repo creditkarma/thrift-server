@@ -1,8 +1,8 @@
 import {
-  IHttpConnectionOptions,
+    IHttpConnectionOptions,
 } from '../main'
 
 export const SERVER_CONFIG: IHttpConnectionOptions = {
-  hostName: 'localhost',
-  port: 8080,
+    hostName: 'localhost',
+    port: 8080,
 }
