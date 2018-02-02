@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.4.3"></a>
+## [0.4.3](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/compare/v0.4.2...v0.4.3) (2018-02-02)
+
+
+### Bug Fixes
+
+* Handling of optional args in thrift service functions ([a5030cf](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/commit/a5030cf))
+
+
+
+
 <a name="0.4.2"></a>
 ## [0.4.2](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client/compare/v0.4.1...v0.4.2) (2018-02-01)
 
