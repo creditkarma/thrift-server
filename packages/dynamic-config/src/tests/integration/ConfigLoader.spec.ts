@@ -50,7 +50,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'development',
             },
-            resolved: true,
             type: 'object',
             properties: {
               health: {
@@ -58,7 +57,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'development',
                 },
-                resolved: true,
                 type: 'object',
                 properties: {
                   control: {
@@ -66,7 +64,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
                     type: 'string',
                     value: '/javascript',
                     watchers: [],
@@ -76,7 +73,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
                     type: 'string',
                     value: 'BOOYA',
                     watchers: [],
@@ -92,7 +88,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'default',
             },
-            resolved: true,
             type: 'object',
             properties: {
               username: {
@@ -100,7 +95,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -110,7 +104,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -143,7 +136,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'production',
             },
-            resolved: true,
             type: 'object',
             properties: {
               health: {
@@ -151,7 +143,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'production',
                 },
-                resolved: true,
                 type: 'object',
                 properties: {
                   control: {
@@ -159,7 +150,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'production',
                     },
-                    resolved: true,
                     type: 'string',
                     value: '/typescript',
                     watchers: [],
@@ -169,7 +159,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'production',
                     },
-                    resolved: true,
                     type: 'string',
                     value: 'PASS',
                     watchers: [],
@@ -185,7 +174,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'production',
             },
-            resolved: true,
             type: 'object',
             properties: {
               username: {
@@ -193,7 +181,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'production',
                 },
-                resolved: false,
                 type: 'placeholder',
                 value: {
                   _source: 'env',
@@ -207,7 +194,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'production',
                 },
-                resolved: false,
                 type: 'placeholder',
                 value: {
                   _source: 'env',
@@ -244,7 +230,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'test',
             },
-            resolved: true,
             type: 'object',
             properties: {
               health: {
@@ -252,7 +237,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'test',
                 },
-                resolved: true,
                 type: 'object',
                 properties: {
                   control: {
@@ -260,7 +244,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'test',
                     },
-                    resolved: true,
                     type: 'string',
                     value: '/test',
                     watchers: [],
@@ -270,7 +253,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'test',
                     },
-                    resolved: true,
                     type: 'string',
                     value: 'PASS',
                     watchers: [],
@@ -286,7 +268,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'default',
             },
-            resolved: true,
             type: 'object',
             properties: {
               username: {
@@ -294,7 +275,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -304,7 +284,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -337,7 +316,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'default',
             },
-            resolved: true,
             type: 'object',
             properties: {
               health: {
@@ -345,7 +323,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'object',
                 properties: {
                   control: {
@@ -353,7 +330,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'default',
                     },
-                    resolved: true,
                     type: 'string',
                     value: '/check',
                     watchers: [],
@@ -363,7 +339,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'default',
                     },
-                    resolved: true,
                     type: 'string',
                     value: 'GOOD',
                     watchers: [],
@@ -379,7 +354,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'default',
             },
-            resolved: true,
             type: 'object',
             properties: {
               username: {
@@ -387,7 +361,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -397,7 +370,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -430,7 +402,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'development',
             },
-            resolved: true,
             type: 'object',
             properties: {
               health: {
@@ -438,7 +409,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'development',
                 },
-                resolved: true,
                 type: 'object',
                 properties: {
                   control: {
@@ -446,7 +416,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
                     type: 'string',
                     value: '/javascript',
                     watchers: [],
@@ -456,7 +425,6 @@ describe('ConfigLoader', () => {
                       type: 'local',
                       name: 'development',
                     },
-                    resolved: true,
                     type: 'string',
                     value: 'BOOYA',
                     watchers: [],
@@ -472,7 +440,6 @@ describe('ConfigLoader', () => {
               type: 'local',
               name: 'default',
             },
-            resolved: true,
             type: 'object',
             properties: {
               username: {
@@ -480,7 +447,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],
@@ -490,7 +456,6 @@ describe('ConfigLoader', () => {
                   type: 'local',
                   name: 'default',
                 },
-                resolved: true,
                 type: 'string',
                 value: 'root',
                 watchers: [],

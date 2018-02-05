@@ -91,7 +91,6 @@ export interface IConfigValue {
 
 export interface IBaseConfigValue extends IConfigValue {
     source: ISource
-    resolved: boolean
     watchers: Array<WatchFunction>
 }
 

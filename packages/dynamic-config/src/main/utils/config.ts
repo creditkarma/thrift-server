@@ -101,7 +101,6 @@ function setObjectPropertyValue(key: string, value: BaseConfigValue, configObjec
     if (configObject.type === 'object') {
         const what: IObjectConfigValue = {
             source: configObject.source,
-            resolved: configObject.resolved,
             type: 'object',
             properties: Object.keys(configObject.properties).reduce((acc: IConfigProperties, next: string) => {
                 if (next === key) {
@@ -139,7 +138,6 @@ export function setBaseConfigValueForKey(key: string, value: BaseConfigValue, ol
             if (oldValue.type === 'object') {
                 return {
                     source: oldValue.source,
-                    resolved: oldValue.resolved,
                     type: 'object',
                     properties: Object.keys(oldValue.properties).reduce((acc: IConfigProperties, next: string) => {
                         if (next === head) {

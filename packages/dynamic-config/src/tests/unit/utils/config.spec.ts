@@ -2,12 +2,12 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 
 import {
-  ConfigUtils,
+    ConfigUtils,
 } from '../../../main/utils'
 
 import {
-  ConfigValue,
-  IRootConfigValue,
+    ConfigValue,
+    IRootConfigValue,
 } from '../../../main'
 
 export const lab = Lab.script()
@@ -16,121 +16,111 @@ const describe = lab.describe
 const it = lab.it
 
 describe('ConfigUtils', () => {
-  describe('getConfigForKey', () => {
-    it('should get specified value from root config', async () => {
-      const mockConfig: IRootConfigValue = {
-        type: 'root',
-        properties: {
-          project: {
-            source: {
-              type: 'local',
-              name: 'development',
-            },
-            resolved: true,
-            type: 'object',
-            properties: {
-              health: {
-                source: {
-                  type: 'local',
-                  name: 'development',
+    describe('getConfigForKey', () => {
+        it('should get specified value from root config', async () => {
+            const mockConfig: IRootConfigValue = {
+                type: 'root',
+                properties: {
+                    project: {
+                        source: {
+                            type: 'local',
+                            name: 'development',
+                        },
+                        type: 'object',
+                        properties: {
+                            health: {
+                                source: {
+                                    type: 'local',
+                                    name: 'development',
+                                },
+                                type: 'object',
+                                properties: {
+                                    control: {
+                                        source: {
+                                            type: 'local',
+                                            name: 'development',
+                                        },
+                                        type: 'string',
+                                        value: '/javascript',
+                                        watchers: [],
+                                    },
+                                    response: {
+                                        source: {
+                                            type: 'local',
+                                            name: 'development',
+                                        },
+                                        type: 'string',
+                                        value: 'PASS',
+                                        watchers: [],
+                                    },
+                                },
+                                watchers: [],
+                            },
+                        },
+                        watchers: [],
+                    },
+                    database: {
+                        source: {
+                            type: 'local',
+                            name: 'default',
+                        },
+                        type: 'object',
+                        properties: {
+                            username: {
+                                source: {
+                                    type: 'local',
+                                    name: 'default',
+                                },
+                                type: 'string',
+                                value: 'root',
+                                watchers: [],
+                            },
+                            password: {
+                                source: {
+                                    type: 'local',
+                                    name: 'default',
+                                },
+                                type: 'string',
+                                value: 'root',
+                                watchers: [],
+                            },
+                        },
+                        watchers: [],
+                    },
                 },
-                resolved: true,
+            }
+
+            const actual: ConfigValue | null = ConfigUtils.getConfigForKey('project.health', mockConfig)
+            const expected: any = {
+                source: {
+                    type: 'local',
+                    name: 'development',
+                },
                 type: 'object',
                 properties: {
-                  control: {
-                    source: {
-                      type: 'local',
-                      name: 'development',
+                    control: {
+                        source: {
+                            type: 'local',
+                            name: 'development',
+                        },
+                        type: 'string',
+                        value: '/javascript',
+                        watchers: [],
                     },
-                    resolved: true,
-                    type: 'string',
-                    value: '/javascript',
-                    watchers: [],
-                  },
-                  response: {
-                    source: {
-                      type: 'local',
-                      name: 'development',
+                    response: {
+                        source: {
+                            type: 'local',
+                            name: 'development',
+                        },
+                        type: 'string',
+                        value: 'PASS',
+                        watchers: [],
                     },
-                    resolved: true,
-                    type: 'string',
-                    value: 'PASS',
-                    watchers: [],
-                  },
                 },
                 watchers: [],
-              },
-            },
-            watchers: [],
-          },
-          database: {
-            source: {
-              type: 'local',
-              name: 'default',
-            },
-            resolved: true,
-            type: 'object',
-            properties: {
-              username: {
-                source: {
-                  type: 'local',
-                  name: 'default',
-                },
-                resolved: true,
-                type: 'string',
-                value: 'root',
-                watchers: [],
-              },
-              password: {
-                source: {
-                  type: 'local',
-                  name: 'default',
-                },
-                resolved: true,
-                type: 'string',
-                value: 'root',
-                watchers: [],
-              },
-            },
-            watchers: [],
-          },
-        },
-      }
+            }
 
-      const actual: ConfigValue | null = ConfigUtils.getConfigForKey('project.health', mockConfig)
-      const expected: any = {
-        source: {
-          type: 'local',
-          name: 'development',
-        },
-        resolved: true,
-        type: 'object',
-        properties: {
-          control: {
-            source: {
-              type: 'local',
-              name: 'development',
-            },
-            resolved: true,
-            type: 'string',
-            value: '/javascript',
-            watchers: [],
-          },
-          response: {
-            source: {
-              type: 'local',
-              name: 'development',
-            },
-            resolved: true,
-            type: 'string',
-            value: 'PASS',
-            watchers: [],
-          },
-        },
-        watchers: [],
-      }
-
-      expect(actual).to.equal(expected)
+            expect(actual).to.equal(expected)
+        })
     })
-  })
 })
