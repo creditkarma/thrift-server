@@ -19,7 +19,7 @@ function loadTypeScript(filePath: string): any {
         const contents: Buffer = fs.readFileSync(filePath)
         const source: string = contents.toString()
         const result: ts.TranspileOutput = ts.transpileModule(source, {})
-        const sandbox = {
+        const sandbox = Object.assign({}, global, {
             exports: {},
             require(pathToRequire: string) {
                 if (pathToRequire.startsWith('.') || pathToRequire.startsWith('/')) {
@@ -38,7 +38,7 @@ function loadTypeScript(filePath: string): any {
                     return require(pathToRequire)
                 }
             },
-        }
+        })
 
         vm.createContext(sandbox)
 
