@@ -17,6 +17,10 @@ import {
     Work,
 } from './generated/calculator/calculator'
 
+import {
+    createClient,
+} from '../main/index'
+
 export function createServer(): Hapi.Server {
     /**
      * Implementation of our thrift service.
@@ -55,16 +59,16 @@ export function createServer(): Hapi.Server {
             return
         },
         getStruct(): SharedStruct {
-            return new SharedStruct({
+            return {
                 key: 0,
                 value: 'test',
-            })
+            }
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
         echoBinary(word: Buffer): string {
@@ -89,14 +93,14 @@ export function createServer(): Hapi.Server {
                 return type
             }
         },
-        mapOneList(list: number[]): number[] {
+        mapOneList(list: Array<number>): Array<number> {
             return list.map((next: number) => next + 1)
         },
-        mapValues(map: Map<string, number>): number[] {
+        mapValues(map: Map<string, number>): Array<number> {
             return Array.from(map.values())
         },
-        listToMap(list: string[][]): Map<string, string> {
-            return list.reduce((acc: Map<string, string>, next: string[]) => {
+        listToMap(list: Array<Array<string>>): Map<string, string> {
+            return list.reduce((acc: Map<string, string>, next: Array<string>) => {
                 acc.set(next[0], next[1])
                 return acc
             }, new Map())
@@ -111,6 +115,29 @@ export function createServer(): Hapi.Server {
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
         handler: impl,
+    })
+
+    const client: Calculator.Client = createClient(Calculator.Client, {
+        serviceName: 'calculator-service',
+        hostName: SERVER_CONFIG.hostName,
+        port: SERVER_CONFIG.port,
+        path: SERVER_CONFIG.path,
+    })
+
+    server.route({
+        method: 'GET',
+        path: '/add',
+        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+            const left: number = request.query.left
+            const right: number = request.query.right
+            client.add(left, right)
+                .then((response: number) => {
+                    reply(response)
+                })
+                .catch((err: any) => {
+                    reply(err)
+                })
+        },
     })
 
     /**

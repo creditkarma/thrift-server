@@ -22,10 +22,11 @@ import {
     const app = express()
 
     // Create thrift client
-    const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
-        hostName: SERVER_CONFIG.host,
-        port: SERVER_CONFIG.port
-    })
+    const thriftClient: Calculator.Client<CoreOptions> =
+        createClient(Calculator.Client, {
+            hostName: SERVER_CONFIG.host,
+            port: SERVER_CONFIG.port
+        })
 
     function symbolToOperation(sym: string): Operation {
         switch (sym) {

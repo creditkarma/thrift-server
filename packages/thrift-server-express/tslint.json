@@ -1,9 +1,14 @@
 {
     "extends": "tslint:recommended",
     "rules": {
+        "max-line-length": false,
         "object-literal-sort-keys": false,
         "no-console": false,
         "no-var-requires": false,
+        "array-type": [
+            true,
+            "generic"
+        ],
         "semicolon": [
             true,
             "never"

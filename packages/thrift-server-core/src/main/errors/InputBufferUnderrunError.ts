@@ -1,7 +1,7 @@
 export class InputBufferUnderrunError extends Error {
-  public readonly name: string = 'InputBufferUnderrunError'
+    public readonly name: string = 'InputBufferUnderrunError'
 
-  constructor(message?: string) {
-    super(message)
-  }
+    constructor(message?: string) {
+        super(message)
+    }
 }

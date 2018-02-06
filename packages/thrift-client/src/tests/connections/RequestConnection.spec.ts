@@ -318,14 +318,14 @@ describe('RequestConnection', () => {
                         },
                     }))
                 },
-        })
+            })
 
             return client.addWithContext(5, 7)
-            .then((response: number) => {
-                throw new Error(`Mehtods should fail when middleware rejects`)
-            }, (err: any) => {
-                expect(err.message).to.equal('Unauthorized')
-            })
+                .then((response: number) => {
+                    throw new Error(`Mehtods should fail when middleware rejects`)
+                }, (err: any) => {
+                    expect(err.message).to.equal('Unauthorized')
+                })
         })
     })
 })

@@ -1,11 +1,17 @@
 {
 	"extends": "tslint:recommended",
 	"rules": {
-    "no-empty": false,
-    "no-bitwise": false,
+        "max-classes-per-file": false,
+        "max-line-length": false,
+        "no-empty": false,
+        "no-bitwise": false,
 		"object-literal-sort-keys": false,
 		"no-console": false,
         "no-var-requires": false,
+        "array-type": [
+            true,
+            "generic"
+        ],
         "semicolon": [
             true,
             "never"

@@ -1,11 +1,10 @@
-import * as request from 'request'
 import {
   CoreOptions,
-  OptionalUriUrl,
   Request,
   RequestAPI,
   RequestResponse,
   RequiredUriUrl,
+  UrlOptions,
 } from 'request'
 
 import {
@@ -14,6 +13,7 @@ import {
 
 import {
   IHttpConnectionOptions,
+  IThriftContext,
 } from '../types'
 
 import {
@@ -21,28 +21,27 @@ import {
 } from '../utils'
 
 export type RequestInstance =
-  RequestAPI<Request, CoreOptions, RequiredUriUrl>
+    RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class RequestConnection extends HttpConnection<CoreOptions> {
-    private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
+export class RequestConnection<Context> extends HttpConnection<Context, CoreOptions> {
+    private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-    constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
+    constructor(request: RequestInstance, options: IHttpConnectionOptions) {
         super(options)
-        this.request = requestApi.defaults({
-            // Encoding needs to be explicitly set to null or the response body will be a string
-            encoding: null,
-            url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
-        })
+        this.request = request
     }
 
-    public emptyContext(): CoreOptions {
+    public emptyContext(): IThriftContext<Context, CoreOptions> {
         return {}
     }
 
-    public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
+    public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<Buffer> {
         // Merge user options with required options
-        const requestOptions: request.CoreOptions = deepMerge(context, {
+        const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
+            method: 'POST',
             body: dataToWrite,
+            encoding: null,
+            url: this.url,
             headers: {
                 'content-length': dataToWrite.length,
                 'content-type': 'application/octet-stream',
@@ -50,7 +49,7 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
         })
 
         return new Promise((resolve, reject) => {
-            this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
+            this.request(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
                 if (err !== null) {
                     reject(err)
 

@@ -94,14 +94,14 @@ describe('createClient', () => {
         })
 
         it('should correctly call endpoint with lists as parameters', async () => {
-            return client.mapOneList([1, 2, 3, 4]).then((response: number[]) => {
-                expect<number[]>(response).to.equal([2, 3, 4, 5])
+            return client.mapOneList([1, 2, 3, 4]).then((response: Array<number>) => {
+                expect<Array<number>>(response).to.equal([2, 3, 4, 5])
             })
         })
 
         it('should correctly call endpoint with maps as parameters', async () => {
-            return client.mapValues(new Map([['key1', 6], ['key2', 5]])).then((response: number[]) => {
-                expect<number[]>(response).to.equal([6, 5])
+            return client.mapValues(new Map([['key1', 6], ['key2', 5]])).then((response: Array<number>) => {
+                expect<Array<number>>(response).to.equal([6, 5])
             })
         })
 
@@ -120,7 +120,7 @@ describe('createClient', () => {
             return Promise.all([
                 client.checkName(firstName),
                 client.checkName(lastName),
-            ]).then((val: string[]) => {
+            ]).then((val: Array<string>) => {
                 expect(val[0]).to.equal('FirstName: Louis')
                 expect(val[1]).to.equal('LastName: Smith')
             })
@@ -130,7 +130,7 @@ describe('createClient', () => {
             return Promise.all([
                 client.checkOptional('test_\nfirst'),
                 client.checkOptional(),
-            ]).then((val: string[]) => {
+            ]).then((val: Array<string>) => {
                 expect(val[0]).to.equal('test_\nfirst')
                 expect(val[1]).to.equal('undefined')
             })

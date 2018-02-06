@@ -16,8 +16,8 @@ function isObject(obj: any): boolean {
 
 export function deepMerge<Base, Update>(base: Base, update: Update): Base & Update {
     const newObj: any = {}
-    const baseKeys: string[] = Object.keys(base)
-    const updateKeys: string[] = Object.keys(update)
+    const baseKeys: Array<string> = Object.keys(base)
+    const updateKeys: Array<string> = Object.keys(update)
 
     for (const key of updateKeys) {
         if (baseKeys.indexOf(key) === -1) {
@@ -29,10 +29,13 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
         if (base.hasOwnProperty(key) || update.hasOwnProperty(key)) {
             const baseValue: any = (base as any)[key]
             const updateValue: any = (update as any)[key]
+
             if (isObject(baseValue) && isObject(updateValue)) {
                 newObj[key] = deepMerge(baseValue, updateValue)
+
             } else if (updateValue !== undefined) {
                 newObj[key] = updateValue
+
             } else {
                 newObj[key] = baseValue
             }
