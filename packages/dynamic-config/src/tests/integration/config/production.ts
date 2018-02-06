@@ -1,8 +1,16 @@
-export const project = {
-  health: {
-    control: '/typescript',
-  },
+import { IProjectConfig } from './default'
+import { project } from './foo'
+
+const x: IProjectConfig = {
+    health: {
+        control: '',
+        response: '',
+    },
 }
+
+console.log('x: ', x)
+
+export { project }
 
 export const database = {
   username: {

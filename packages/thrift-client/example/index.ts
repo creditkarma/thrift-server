@@ -1,10 +1,10 @@
 import { fork } from 'child_process'
 import { generate } from '@creditkarma/thrift-typescript'
 
-// process.chdir(__dirname)
+process.chdir(__dirname)
 
 generate({
-    rootDir: './example',
+    rootDir: '.',
     outDir: 'generated',
     sourceDir: 'thrift',
     target: 'thrift-server',
@@ -13,8 +13,8 @@ generate({
     ]
 })
 
-const clientProc = fork('./example/client.ts')
-const serverProc = fork('./example/server.ts')
+const clientProc = fork('./client.ts')
+const serverProc = fork('./server.ts')
 
 function exit(code: number) {
     clientProc.kill()

@@ -6,6 +6,7 @@
 		"object-literal-sort-keys": false,
 		"no-console": false,
         "no-var-requires": false,
+        "only-arrow-functions": false,
         "variable-name": [
             true,
             "check-format",
