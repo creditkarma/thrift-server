@@ -27,7 +27,7 @@ export const tsLoader: IFileLoader = {
                             resolve(sandbox.exports)
                         }
                     } catch (err) {
-                        logger.error(`Error parsing typescript config[${}]: `, err)
+                        logger.error(`Error parsing typescript config[${filePath}]: `, err)
                         resolve({})
                     }
                 }
