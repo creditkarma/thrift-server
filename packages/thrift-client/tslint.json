@@ -3,15 +3,15 @@
 	"rules": {
 		"object-literal-sort-keys": false,
 		"no-console": false,
-    "no-var-requires": false,
-    "semicolon": [
-      true,
-      "never"
-    ],
-    "quotemark": [
-      true,
-      "single",
-      "avoid-escape"
-    ]
+        "no-var-requires": false,
+        "semicolon": [
+            true,
+            "never"
+        ],
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ]
 	}
 }

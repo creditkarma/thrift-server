@@ -37,6 +37,7 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client"
   },
   "peerDependencies": {
+    "@creditkarma/dynamic-config": "^0.4.3",
     "@creditkarma/thrift-server-core": "^0.4.3",
     "@types/request": "^2.47.0",
     "request": "^2.83.0"
@@ -59,7 +60,6 @@
     "lab": "^14.3.1",
     "request": "^2.83.0",
     "ts-node": "^3.3.0",
-    "tslint": "^5.7.0",
-    "typescript": "2.7.x"
+    "tslint": "^5.7.0"
   }
 }

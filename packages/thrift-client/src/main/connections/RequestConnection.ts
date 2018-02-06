@@ -53,8 +53,10 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
             this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
                 if (err !== null) {
                     reject(err)
+
                 } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
                     reject(response)
+
                 } else {
                     resolve(body)
                 }
