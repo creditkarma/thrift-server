@@ -5,24 +5,26 @@
     "max-classes-per-file": false,
 		"object-literal-sort-keys": false,
 		"no-console": false,
-    "no-var-requires": false,
-    "variable-name": [true,
-      "check-format",
-      "allow-leading-underscore"
-    ],
-    "array-type": [
-      true,
-      "generic"
-    ],
-    "semicolon": [
-      true,
-      "never"
-    ],
-    "quotemark": [
-      true,
-      "single",
-      "avoid-escape"
-    ],
-    "object-literal-key-quotes": false
+        "no-var-requires": false,
+        "only-arrow-functions": false,
+        "variable-name": [
+            true,
+            "check-format",
+            "allow-leading-underscore"
+        ],
+        "array-type": [
+            true,
+            "generic"
+        ],
+        "semicolon": [
+            true,
+            "never"
+        ],
+        "quotemark": [
+            true,
+            "single",
+            "avoid-escape"
+        ],
+        "object-literal-key-quotes": false
 	}
 }

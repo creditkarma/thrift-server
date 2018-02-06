@@ -1,6 +1,3 @@
-export * from './HttpConnection'
-export * from './RequestConnection'
-
 import * as request from 'request'
 
 import {
@@ -12,6 +9,9 @@ import {
     IClientConstructor,
     ICreateClientOptions,
 } from '../types'
+
+export * from './HttpConnection'
+export * from './RequestConnection'
 
 export function createClient<TClient>(
     ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
