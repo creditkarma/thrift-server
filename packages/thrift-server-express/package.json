@@ -14,17 +14,16 @@
     "RPC"
   ],
   "scripts": {
-    "clean": "rimraf ./dist ./src/tests/generated ",
-    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
+    "clean": "rimraf ./dist ./src/tests/integration/generated ",
+    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
     "prebuild:test": "npm run clean && npm run codegen",
     "build:test": "tsc -p tsconfig.test.json",
     "watch": "tsc --watch",
     "pretest": "npm run build:test",
-    "test": "npm run test:only --",
-    "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js",
+    "test": "npm run test:integration",
+    "test:integration": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/integration",
     "lint": "tslint --fix './src/**/*.ts'"
   },
   "author": "Credit Karma",
@@ -41,8 +40,8 @@
     "express": "^4.16.0"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.4.3",
-    "@creditkarma/thrift-server-core": "^0.4.3",
+    "@creditkarma/thrift-client": "~0.4.3",
+    "@creditkarma/thrift-server-core": "~0.4.3",
     "@creditkarma/thrift-typescript": "^1.1.4",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
@@ -63,5 +62,8 @@
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "2.7.x"
+  },
+  "dependencies": {
+    "zipkin": "^0.11.2"
   }
 }

@@ -1,16 +1,16 @@
 import {
     getProtocol,
     getTransport,
-    IProtocolConstructor,
-    IThriftConnection,
-    ITransportConstructor,
+    ThriftConnection,
 } from '@creditkarma/thrift-server-core'
 
 import {
     IHttpConnectionOptions,
     IIncomingMiddleware,
     IOutgoingMiddleware,
+    OutgoingHandler,
     ThriftMiddleware,
+    IThriftContext,
 } from '../types'
 
 import {
@@ -20,6 +20,7 @@ import {
 function normalizePath(path: string = '/'): string {
     if (path.startsWith('/')) {
         return path
+
     } else {
         return `/${path}`
     }
@@ -29,7 +30,7 @@ export type HttpProtocol =
     'http' | 'https'
 
 export interface IMiddlewareMap<Context> {
-    incoming: IIncomingMiddleware[]
+    incoming: Array<IIncomingMiddleware>
     outgoing: Array<IOutgoingMiddleware<Context>>
 }
 
@@ -41,33 +42,44 @@ async function reducePromises<T>(
 ): Promise<T> {
     if (promises.length === 0) {
         return initial
+
     } else {
         const [ head, ...tail ] = promises
         const nextValue: T = await head(initial)
         if (tail.length === 0) {
             return nextValue
+
         } else {
             return reducePromises(tail, nextValue)
         }
     }
 }
 
-export abstract class HttpConnection<Context = never> implements IThriftConnection<Context> {
-    public Transport: ITransportConstructor
-    public Protocol: IProtocolConstructor
-    protected port: number
-    protected hostName: string
-    protected path: string
-    protected protocol: HttpProtocol
-    protected middleware: IMiddlewareMap<Context>
+export interface IListenerData {
+    handler: IEventListener
+    oneTime: boolean
+}
+
+export type IEventListener = (...args: Array<any>) => void
+
+export abstract class HttpConnection<Request = never, Options = never> extends ThriftConnection<Context> {
+    protected readonly port: number
+    protected readonly hostName: string
+    protected readonly path: string
+    protected readonly url: string
+    protected readonly protocol: HttpProtocol
+    protected readonly middleware: IMiddlewareMap<Context>
 
     constructor(options: IHttpConnectionOptions) {
+        super(
+            getTransport(options.transport),
+            getProtocol(options.protocol),
+        )
         this.port = options.port
         this.hostName = options.hostName
         this.path = normalizePath(options.path)
-        this.Transport = getTransport(options.transport)
-        this.Protocol = getProtocol(options.protocol)
         this.protocol = ((options.https === true) ? 'https' : 'http')
+        this.url = `${this.protocol}://${this.hostName}:${this.port}${this.path}`
         this.middleware = {
             incoming: [],
             outgoing: [],
@@ -75,12 +87,12 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
     }
 
     // Provides an empty context for outgoing middleware
-    public abstract emptyContext(): Context
+    public abstract emptyContext(): IThriftContext<Request, Options>
 
-    public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
+    public abstract write(dataToWrite: Buffer, options?: Options): Promise<Buffer>
 
-    public register(...middleware: Array<ThriftMiddleware<Context>>): void {
-        middleware.forEach((next: ThriftMiddleware<Context>) => {
+    public register(...middleware: Array<ThriftMiddleware<Options>>): void {
+        middleware.forEach((next: ThriftMiddleware<Options>) => {
             switch (next.type) {
                 case 'outgoing':
                     return this.middleware.outgoing.push({
@@ -99,7 +111,10 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
         })
     }
 
-    public send(dataToSend: Buffer, context: Context = this.emptyContext()): Promise<Buffer> {
+    public send(
+        dataToSend: Buffer,
+        context: IThriftContext<Request, Options> = this.emptyContext(),
+    ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
 
         return reducePromises(this.middleware.outgoing.filter((next: IOutgoingMiddleware<Context>) => {
@@ -107,8 +122,10 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
                 next.methods.length === 0 ||
                 next.methods.indexOf(requestMethod) > -1
             )
-        }).map((next: IOutgoingMiddleware<Context>) => {
+
+        }).map((next: IOutgoingMiddleware<Context>): OutgoingHandler<Context> => {
             return next.handler
+
         }), context).then((resolvedContext: Context | undefined) => {
             return this.write(dataToSend, resolvedContext).then((data: Buffer) => {
                 return this.middleware.incoming.filter((next: IIncomingMiddleware) => {
@@ -116,6 +133,7 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
                         next.methods.length === 0 ||
                         next.methods.indexOf(requestMethod) > -1
                     )
+
                 }).reduce((acc: Promise<Buffer>, next: IIncomingMiddleware): Promise<Buffer> => {
                     return acc.then(next.handler)
                 }, Promise.resolve(data))

@@ -23,7 +23,7 @@ const transports: ITransportMap = {
     // framed: FramedTransport,
 }
 
-export const supportedTransports: string[] = Object.keys(transports)
+export const supportedTransports: Array<string> = Object.keys(transports)
 
 const protocols: IProtocolMap = {
     binary: BinaryProtocol,
@@ -31,7 +31,7 @@ const protocols: IProtocolMap = {
     // json: JSONProtocol,
 }
 
-export const supportedProtocols: string[] = Object.keys(protocols)
+export const supportedProtocols: Array<string> = Object.keys(protocols)
 
 export function getTransport(transport: TransportType = 'buffered'): ITransportConstructor {
     if (!isTransportSupported(transport)) {
