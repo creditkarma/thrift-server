@@ -1,20 +1,12 @@
 import { config } from '@creditkarma/dynamic-config'
-import { createPlugin } from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import Hapi = require('hapi');
 
 import { Operation, Calculator, Work } from './generated/calculator/calculator'
 import { SharedStruct, SharedUnion } from './generated/shared/shared'
 
-async function createServer(): Promise<Hapi.Server> {
+(async function startService(): void {
     const SERVER_CONFIG = await config().get('server')
-    const server: Hapi.Server = new Hapi.Server();
-    server.connection(SERVER_CONFIG);
-
-    server.register(createPlugin<Calculator.Processor>(), (err: any) => {
-        if (err) {
-            throw err;
-        }
-    });
 
     const impl = new Calculator.Processor({
         ping(): void {},
@@ -49,25 +41,12 @@ async function createServer(): Promise<Hapi.Server> {
         },
     })
 
-    server.route({
-        method: 'POST',
-        path: '/',
-        handler: {
-            thrift: {
-                service: impl,
-            },
-        },
-        config: {
-            payload: {
-                parse: false,
-            },
-        },
+    const server: Hapi.Server = createThriftServer({
+        port: SERVER_CONFIG.port,
+        path: SERVER_CONFIG.path,
+        handler: impl,
     })
 
-    return server
-}
-
-createServer().then((server: Hapi.Server) => {
     server.start((err: any) => {
         if (err) {
             throw err
@@ -77,4 +56,4 @@ createServer().then((server: Hapi.Server) => {
             console.log(`Thrift server running at: ${server.info.uri}`)
         }
     })
-})
+}())

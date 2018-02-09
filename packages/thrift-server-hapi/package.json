@@ -25,7 +25,7 @@
     "pretest": "npm run build:test",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --timeout 10000 --verbose -l -S ./dist/**/*.spec.js"
+    "test:only": "lab --timeout 10000 --verbose -l -S -P spec dist/tests"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
@@ -34,13 +34,13 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
   },
   "peerDependencies": {
-    "@creditkarma/thrift-server-core": "^0.4.3",
+    "@creditkarma/thrift-server-core": "~0.4.3",
     "@types/hapi": "^16.1.10",
     "hapi": "^16.6.2"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.4.3",
-    "@creditkarma/thrift-server-core": "^0.4.3",
+    "@creditkarma/thrift-client": "~0.4.3",
+    "@creditkarma/thrift-server-core": "~0.4.3",
     "@creditkarma/thrift-typescript": "^1.1.4",
     "@types/code": "^4.0.3",
     "@types/hapi": "^16.1.10",
@@ -57,5 +57,8 @@
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "2.7.x",
     "watch": "^1.0.2"
+  },
+  "dependencies": {
+    "zipkin": "^0.11.2"
   }
 }
