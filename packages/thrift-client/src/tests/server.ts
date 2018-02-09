@@ -1,4 +1,4 @@
-import { createPlugin } from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
 import {
@@ -18,23 +18,6 @@ import {
 } from './generated/calculator/calculator'
 
 export function createServer(): Hapi.Server {
-    const server = new Hapi.Server({ debug: { request: [ 'error' ] } })
-
-    server.connection({ port: SERVER_CONFIG.port })
-
-    /**
-     * Register the thrift plugin.
-     *
-     * This will allow us to define Hapi routes for our thrift service(s).
-     * They behave like any other HTTP route handler, so you can mix and match
-     * thrift / REST endpoints on the same server instance.
-     */
-    server.register(createPlugin<Calculator.Processor<Hapi.Request>>(), (err: any) => {
-        if (err) {
-            throw err
-        }
-    })
-
     /**
      * Implementation of our thrift service.
      *
@@ -121,24 +104,12 @@ export function createServer(): Hapi.Server {
     })
 
     /**
-     * Route to our thrift service.
-     *
-     * Payload parsing is disabled - the thrift plugin parses the raw request
-     * using whichever protocol is configured (binary, compact, json...)
+     * Creates Hapi server with thrift endpoint.
      */
-    server.route({
-        method: 'POST',
-        path: '/',
-        handler: {
-            thrift: {
-                service: impl,
-            },
-        },
-        config: {
-            payload: {
-                parse: false,
-            },
-        },
+    const server: Hapi.Server = createThriftServer({
+        port: SERVER_CONFIG.port,
+        path: SERVER_CONFIG.path,
+        handler: impl,
     })
 
     /**
