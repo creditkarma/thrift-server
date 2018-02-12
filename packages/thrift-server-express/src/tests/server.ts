@@ -1,6 +1,5 @@
-import * as bodyParser from 'body-parser'
 import * as express from 'express'
-import { thriftExpress } from '../main'
+import { createThriftServer } from '../main'
 
 import {
     SharedStruct,
@@ -12,6 +11,8 @@ import {
     Operation,
     Work,
 } from './generated/calculator/calculator'
+
+import { SERVER_CONFIG } from './config'
 
 const serviceHandlers: Calculator.IHandler<express.Request> = {
     ping(): void {
@@ -57,20 +58,17 @@ const serviceHandlers: Calculator.IHandler<express.Request> = {
     },
 }
 
-const PORT = 8090
-
-const app = express()
-
-app.use(
-  '/thrift',
-  bodyParser.raw(),
-  thriftExpress<Calculator.Processor<express.Request>, Calculator.IHandler>(Calculator.Processor, serviceHandlers),
-)
-
-app.get('/control', (req: express.Request, res: express.Response) => {
-  res.send('PASS')
+const app = createThriftServer({
+    serviceName: 'calculator-service',
+    port: SERVER_CONFIG.port,
+    path: SERVER_CONFIG.path,
+    handler: new Calculator.Processor(serviceHandlers),
 })
 
-app.listen(PORT, () => {
-  console.log(`Express server listening on port: ${PORT}`)
+app.get('/control', (req: express.Request, res: express.Response) => {
+    res.send('PASS')
+})
+
+app.listen(SERVER_CONFIG.port, () => {
+    console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)
 })
