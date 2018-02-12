@@ -107,6 +107,7 @@ export function createServer(): Hapi.Server {
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = createThriftServer({
+        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
         handler: impl,
