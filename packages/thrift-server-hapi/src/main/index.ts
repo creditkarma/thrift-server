@@ -17,6 +17,7 @@ export interface IHandlerOptions<TProcessor> {
 }
 
 export interface IPluginOptions<TProcessor> {
+    serviceName: string
     handler: TProcessor
     path?: string
     transport?: TransportType
@@ -53,6 +54,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
      * thrift / REST endpoints on the same server instance.
      */
     server.register(ThriftPlugin<TProcessor>({
+        serviceName: options.serviceName,
         handler: options.handler,
         path: options.path,
         transport: options.transport,

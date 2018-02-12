@@ -4,9 +4,9 @@ Hapi plugin for processing Thrift requests.
 
 ## Usage
 
-Requires @creditkarma/thrift-typescript >= v1.1.0
+Requires @creditkarma/thrift-typescript >= v1.0.0
 
-The easiest way to get started is to generate your thrift services using @creditkarma/thrift-typescript.
+The easiest way to get started is to generate your Thrift services using @creditkarma/thrift-typescript.
 
 ```sh
 npm install --save-dev @creditkarma/thrift-typescript
@@ -41,6 +41,8 @@ npm install --save @creditkarma/thrift-server-hapi
 
 To get things working you need to register the ThriftPlugin and define handlers for your service methods.
 
+The `ThriftPlugin` create a Hapi route at the given path on which to serve this Thrift service.
+
 ```typescript
 import * as Hapi from 'hapi'
 import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
@@ -49,23 +51,10 @@ import { UserService } from './codegen/user_service'
 const server = new Hapi.Server({ debug: { request: [ 'error' ] } })
 
 /**
- * Register the thrift plugin.
- *
- * This will allow us to define Hapi routes for our thrift service(s).
- * They behave like any other HTTP route handler, so you can mix and match
- * thrift / REST endpoints on the same server instance.
- */
-server.register(ThriftPlugin, err => {
-    if (err) {
-        throw err
-    }
-})
-
-/**
- * Implementation of our thrift service.
+ * Implementation of our Thrift service.
  *
  * Notice the second parameter, "context" - this is the Hapi request object,
- * passed along to our service by the Hapi thrift plugin. Thus, you have access to
+ * passed along to our service by the Hapi Thrift plugin. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
 const handlers: UserService.IHandler<Hapi.Request> = {
@@ -83,24 +72,23 @@ const handlers: UserService.IHandler<Hapi.Request> = {
 const impl: UserService.Processor<Hapi.Request> = new UserService.Processor(handlers)
 
 /**
- * Route to our thrift service.
+ * Register the Thrift plugin.
  *
- * Payload parsing is disabled - the thrift plugin parses the raw request
- * using whichever protocol is configured (binary, compact, json...)
+ * This will allow us to define Hapi routes for our Thrift service(s).
+ * They behave like any other HTTP route handler, so you can mix and match
+ * Thrift / REST endpoints on the same server instance.
+ *
+ * This plugin adds a route to your server for handling Thrift requests. The path
+ * option is the path to attache the route handler to and the handler is the
+ * Thrift service processor instance.
  */
-server.route({
-    method: 'POST',
-    path: '/',
-    handler: {
-        thrift: {
-            service: impl,
-        },
-    },
-    config: {
-        payload: {
-            parse: false,
-        },
-    },
+server.register(ThriftPlugin<UserService.Processor>({
+    path: SERVER_CONFIG.path,
+    handler: new Calculator.Processor(handlers)
+}), err => {
+    if (err) {
+        throw err
+    }
 })
 
 /**

@@ -5,7 +5,7 @@ import Hapi = require('hapi');
 import { Operation, Calculator, Work } from './generated/calculator/calculator'
 import { SharedStruct, SharedUnion } from './generated/shared/shared'
 
-(async function startService(): void {
+(async function startService(): Promise<void> {
     const SERVER_CONFIG = await config().get('server')
 
     const impl = new Calculator.Processor({
@@ -42,6 +42,7 @@ import { SharedStruct, SharedUnion } from './generated/shared/shared'
     })
 
     const server: Hapi.Server = createThriftServer({
+        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
         handler: impl,

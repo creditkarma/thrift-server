@@ -1,8 +1,6 @@
 import {
     getProtocol,
-    getService,
     getTransport,
-    IProcessorConstructor,
     IProtocolConstructor,
     IThriftProcessor,
     ITransportConstructor,
@@ -11,25 +9,50 @@ import {
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
+import * as bodyParser from 'body-parser'
 import * as express from 'express'
 
-export interface IPluginOptions {
+export interface IPluginOptions<TProcessor> {
+    serviceName: string
+    handler: TProcessor
+    path?: string
     transport?: TransportType
     protocol?: ProtocolType
 }
 
-export function thriftExpress<TProcessor extends IThriftProcessor<express.Request>, THandler>(
-    Service: IProcessorConstructor<TProcessor, THandler>,
-    handlers: THandler,
-    options: IPluginOptions = {}): express.RequestHandler {
+export interface IThriftServerOptions<TProcessor> extends IPluginOptions<TProcessor> {
+    port: number
+}
 
-    const Transport: ITransportConstructor = getTransport(options.transport)
-    const Protocol: IProtocolConstructor = getProtocol(options.protocol)
-    const service: TProcessor = getService(Service, handlers)
+export function createThriftServer<TProcessor extends IThriftProcessor<express.Request>>(
+    options: IThriftServerOptions<TProcessor>,
+): express.Application {
+    const app: express.Application = express()
+
+    app.use(
+        '/thrift',
+        bodyParser.raw(),
+        thriftExpress<TProcessor>({
+            serviceName: options.serviceName,
+            handler: options.handler,
+            path: options.path,
+            transport: options.transport,
+            protocol: options.protocol,
+        }),
+    )
+
+    return app
+}
+
+export function thriftExpress<TProcessor extends IThriftProcessor<express.Request>>(
+    pluginOptions: IPluginOptions<TProcessor>,
+): express.RequestHandler {
+    const Transport: ITransportConstructor = getTransport(pluginOptions.transport)
+    const Protocol: IProtocolConstructor = getProtocol(pluginOptions.protocol)
 
     return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
         try {
-            process(service, request.body, Transport, Protocol, request).then((result: any) => {
+            process(pluginOptions.handler, request.body, Transport, Protocol, request).then((result: any) => {
                 response.status(200).end(result)
             }, (err: any) => {
                 next(err)
