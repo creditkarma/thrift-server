@@ -48,7 +48,11 @@ import * as Hapi from 'hapi'
 import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
 import { UserService } from './codegen/user_service'
 
+const PORT: number = 8080
+
 const server = new Hapi.Server({ debug: { request: [ 'error' ] } })
+
+server.connection({ port: PORT })
 
 /**
  * Implementation of our Thrift service.
@@ -69,7 +73,7 @@ const handlers: UserService.IHandler<Hapi.Request> = {
     },
 }
 
-const impl: UserService.Processor<Hapi.Request> = new UserService.Processor(handlers)
+const processor: UserService.Processor<Hapi.Request> = new UserService.Processor(handlers)
 
 /**
  * Register the Thrift plugin.
@@ -83,12 +87,62 @@ const impl: UserService.Processor<Hapi.Request> = new UserService.Processor(hand
  * Thrift service processor instance.
  */
 server.register(ThriftPlugin<UserService.Processor>({
-    path: SERVER_CONFIG.path,
-    handler: new Calculator.Processor(handlers)
+    serviceName: 'user-service',
+    path: '/thrift',
+    handler: processor,
 }), err => {
     if (err) {
         throw err
     }
+})
+
+/**
+ * Start your hapi server
+ */
+server.start((err) => {
+    if (err) {
+        throw err
+    }
+    server.log('info', `Server running on port ${port}`)
+})
+```
+
+#### Options
+
+* serviceName - The name of your service. Used for logging and tracing.
+* handler - The service Processor instance to handle service method calls.
+* path - The path on which to server your Thrift service. Defaults to '/'.
+* transport - The kind of Thrift transport to use. Only 'buffered' is currently supported.
+* protocol - The kind of Thrift protocol to use. Only 'binary' is currently supported.
+
+### Thrift Server Factory
+
+In the event that you will be creating a Hapi server only to serve Thrift, you can use the `createThriftServer` factory function to create a `Hapi.Server` and register the `ThriftPlugin` in one step.
+
+The factory function takes all of the same configuration options as the plugin with the addition of `port`. What port do you want your server to run on?
+
+```typescript
+import * as Hapi from 'hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import { UserService } from './codegen/user_service'
+
+const PORT: number = 8080
+
+const server: Hapi.Server = createThriftServer<UserService.Processor>({
+    serviceName: 'user-service',
+    path: '/thrift',
+    port: PORT,
+    handler: new UserService.Processor({
+        getUser(request: RecommendationsRequest, context?: Hapi.Request) {
+            const userId = request.userId
+
+            if (userId.toNumber() <= 0) {
+                throw new Error('User ID must be greater than zero')
+            }
+
+            return getUserForId(userId)
+        },
+    })
 })
 
 /**
