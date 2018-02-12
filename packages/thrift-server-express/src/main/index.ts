@@ -15,13 +15,13 @@ import * as express from 'express'
 export interface IPluginOptions<TProcessor> {
     serviceName: string
     handler: TProcessor
-    path?: string
     transport?: TransportType
     protocol?: ProtocolType
 }
 
 export interface IThriftServerOptions<TProcessor> extends IPluginOptions<TProcessor> {
     port: number
+    path?: string
 }
 
 export function createThriftServer<TProcessor extends IThriftProcessor<express.Request>>(
@@ -30,12 +30,11 @@ export function createThriftServer<TProcessor extends IThriftProcessor<express.R
     const app: express.Application = express()
 
     app.use(
-        '/thrift',
+        options.path || '/',
         bodyParser.raw(),
         thriftExpress<TProcessor>({
             serviceName: options.serviceName,
             handler: options.handler,
-            path: options.path,
             transport: options.transport,
             protocol: options.protocol,
         }),

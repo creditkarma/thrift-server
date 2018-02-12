@@ -52,6 +52,10 @@ import {
   Calculator,
 } from './codegen/calculator'
 
+const PORT = 8080
+
+const app = express()
+
 /**
  * Implementation of our thrift service.
  *
@@ -60,26 +64,63 @@ import {
  * all HTTP request data from within your service implementation.
  */
 const serviceHandlers: Calculator.IHandler<express.Request> = {
-  add(left: number, right: number, context?: express.Request): number {
-    return left + right
-  },
-  subtract(left: number, right: number, context?: express.Request): number {
-    return left - right
-  },
+    add(left: number, right: number, context?: express.Request): number {
+        return left + right
+    },
+    subtract(left: number, right: number, context?: express.Request): number {
+        return left - right
+    },
 }
 
-const PORT = 8090
-
-const app = express()
-
 app.use(
-  '/thrift',
-  bodyParser.raw(),
-  thriftExpress(Calculator.Processor, serviceHandlers),
+    '/thrift',
+    bodyParser.raw(),
+    thriftExpress<Calculator.Processor>({
+        serviceName: 'calculator-service',
+        handler: new Calculator.Processor(serviceHandlers),
+    }),
 )
 
 app.get('/control', (req: express.Request, res: express.Response) => {
   res.send('PASS')
+})
+
+app.listen(PORT, () => {
+  console.log(`Express server listening on port: ${PORT}`)
+})
+```
+
+#### Options
+
+* serviceName - The name of your service. Used for logging and tracing.
+* handler - The service Processor instance to handle service method calls.
+* transport - The kind of Thrift transport to use. Only 'buffered' is currently supported.
+* protocol - The kind of Thrift protocol to use. Only 'binary' is currently supported.
+
+### Thrift Server Factory
+
+In the event that you will be creating an Express server only to serve Thrift, you can use the `createThriftServer` factory function to create a `Express.Application` and register the `thriftExpress` middleware in one step.
+
+The factory function takes all the same configuration options as the middleware.
+
+```typescript
+import * as express from 'express'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import { Calculator } from './codegen/calculator'
+
+const PORT = 8080
+
+const app: express.Application = createThriftServer<Calculator.Processor>({
+    serviceName: 'calculator-service',
+    path: '/thrift',
+    handler: new Calculator.Processor({
+        add(left: number, right: number, context?: express.Request): number {
+            return left + right
+        },
+        subtract(left: number, right: number, context?: express.Request): number {
+            return left - right
+        },
+    })
 })
 
 app.listen(PORT, () => {
