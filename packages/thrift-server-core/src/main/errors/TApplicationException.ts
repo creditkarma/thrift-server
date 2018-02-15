@@ -1,6 +1,5 @@
 import { TProtocol } from '../protocols'
-import { IThriftField, StructLike, TType } from '../types'
-import { TException } from './TException'
+import { IStructCodec, IThriftField, TType } from '../types'
 
 export enum TApplicationExceptionType {
     UNKNOWN = 0,
@@ -16,8 +15,38 @@ export enum TApplicationExceptionType {
     UNSUPPORTED_CLIENT_TYPE = 10,
 }
 
-export class TApplicationException implements TException, StructLike {
-    public static read(input: TProtocol): TApplicationException {
+export class TApplicationException extends Error {
+    public readonly name: string = 'TApplicationException'
+    public type: TApplicationExceptionType
+    public message: string
+
+    constructor(type: TApplicationExceptionType, message: string) {
+        super(message)
+        this.type = type
+        this.message = message
+    }
+}
+
+export const TApplicationExceptionCodec: IStructCodec<TApplicationException> = {
+    encode(obj: TApplicationException, output: TProtocol): void {
+        output.writeStructBegin('TApplicationException')
+
+        if (obj.message) {
+            output.writeFieldBegin('message', TType.STRING, 1)
+            output.writeString(obj.message)
+            output.writeFieldEnd()
+        }
+
+        if (obj.type) {
+            output.writeFieldBegin('type', TType.I32, 2)
+            output.writeI32(obj.type)
+            output.writeFieldEnd()
+        }
+
+        output.writeFieldStop()
+        output.writeStructEnd()
+    },
+    decode(input: TProtocol): TApplicationException {
         input.readStructBegin()
         const args: any = {}
 
@@ -56,33 +85,5 @@ export class TApplicationException implements TException, StructLike {
         input.readStructEnd()
 
         return new TApplicationException(args.type, args.message)
-    }
-
-    public readonly name: string = 'TApplicationException'
-    public type: TApplicationExceptionType
-    public message: string
-
-    constructor(type: TApplicationExceptionType, message: string) {
-        this.type = type
-        this.message = message
-    }
-
-    public write(output: TProtocol): void {
-        output.writeStructBegin('TApplicationException')
-
-        if (this.message) {
-            output.writeFieldBegin('message', TType.STRING, 1)
-            output.writeString(this.message)
-            output.writeFieldEnd()
-        }
-
-        if (this.type) {
-            output.writeFieldBegin('type', TType.I32, 2)
-            output.writeI32(this.type)
-            output.writeFieldEnd()
-        }
-
-        output.writeFieldStop()
-        output.writeStructEnd()
-    }
+    },
 }

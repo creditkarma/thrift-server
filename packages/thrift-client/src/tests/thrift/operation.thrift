@@ -1,7 +1,3 @@
-/**
- * Thrift files can namespace, package, or prefix their output in various
- * target languages.
- */
 namespace java operation
 namespace js operation
 

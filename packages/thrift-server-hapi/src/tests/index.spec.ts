@@ -60,10 +60,10 @@ describe('Thrift Server Hapi', () => {
     it('should corrently handle a service client request for a struct', async () => {
         return client.getStruct(1)
             .then((response: SharedStruct) => {
-                const expected = new SharedStruct({
+                const expected = {
                     key: 0,
                     value: 'test',
-                })
+                }
                 expect(response).to.equal(expected)
             })
     })
