@@ -20,8 +20,6 @@ import * as Lab from 'lab'
 import {
     Calculator,
     Choice,
-    FirstName,
-    LastName,
 } from '../generated/calculator/calculator'
 
 import {
@@ -114,8 +112,8 @@ describe('createClient', () => {
         })
 
         it('should call an endpoint with union arguments', async () => {
-            const firstName: Choice = new Choice({ firstName: new FirstName({ name: 'Louis' })})
-            const lastName: Choice = new Choice({ lastName: new LastName({ name: 'Smith' })})
+            const firstName: Choice = { firstName: { name: 'Louis' } }
+            const lastName: Choice = { lastName: { name: 'Smith' } }
 
             return Promise.all([
                 client.checkName(firstName),
@@ -139,7 +137,7 @@ describe('createClient', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5)
                 .then((response: SharedStruct) => {
-                    expect(response).to.equal(new SharedStruct({ key: 0, value: 'test' }))
+                    expect(response).to.equal({ key: 0, value: 'test' })
                 })
         })
 
@@ -266,7 +264,7 @@ describe('createClient', () => {
                         if (readThriftMethod(data) === 'nope') {
                             return Promise.resolve(data)
                         } else {
-                            return Promise.reject(new Error(`Unrecognized method name: ${readThriftMethod(data)}`))
+                            throw new Error(`Unrecognized method name: ${readThriftMethod(data)}`)
                         }
                     },
                 }],
