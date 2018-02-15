@@ -79,6 +79,8 @@ namespace netcore calculator
 typedef i32 MyInteger
 typedef operation.Operation Operation
 
+typedef operation.Operation Operation
+
 /**
  * Thrift also lets you define constants for use across languages. Complex
  * types and structs are specified using JSON notation.
@@ -110,17 +112,22 @@ exception InvalidOperation {
   2: string why
 }
 
+exception InvalidResult {
+  1: string message
+  2: shared.Code code
+}
+
 struct FirstName {
-    1: string name
+  1: string name
 }
 
 struct LastName {
-    1: string name
+  1: string name
 }
 
 union Choice {
-    1: FirstName firstName
-    2: LastName lastName
+  1: FirstName firstName
+  2: LastName lastName
 }
 
 /**
@@ -138,13 +145,13 @@ service Calculator extends shared.SharedService {
 
    void ping(),
 
-   i32 add(1: i32 num1, 2: i32 num2),
+   i32 add(1: i32 num1, 2: i32 num2) throws (1: InvalidResult exp),
 
    i64 addInt64(1: i64 num1, 2: i64 num2),
 
    i32 addWithContext(1: i32 num1, 2: i32 num2),
 
-   i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
+   i32 calculate(1:i32 logid, 2:Work w) throws (1: InvalidOperation ouch),
 
    string echoBinary(1: binary word)
 

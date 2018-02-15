@@ -18,8 +18,6 @@ import * as Lab from 'lab'
 import {
     Calculator,
     Choice,
-    FirstName,
-    LastName,
 } from '../generated/calculator/calculator'
 
 import { SharedStruct } from '../generated/shared/shared'
@@ -119,12 +117,8 @@ describe('createHttpClient', () => {
         })
 
         it('should call an endpoint with union arguments', async () => {
-            const firstName: Choice = new Choice({
-                firstName: new FirstName({ name: 'Louis' }),
-            })
-            const lastName: Choice = new Choice({
-                lastName: new LastName({ name: 'Smith' }),
-            })
+            const firstName: Choice = { firstName: { name: 'Louis' } }
+            const lastName: Choice = { lastName: { name: 'Smith' } }
 
             return Promise.all([
                 client.checkName(firstName),
@@ -146,11 +140,10 @@ describe('createHttpClient', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5).then((response: SharedStruct) => {
-                expect(response).to.equal(
-                    new SharedStruct({ key: 0, value: 'test' }),
-                )
-            })
+            return client.getStruct(5)
+                .then((response: SharedStruct) => {
+                    expect(response).to.equal({ key: 0, value: 'test' })
+                })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {

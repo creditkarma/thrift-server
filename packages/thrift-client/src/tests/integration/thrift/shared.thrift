@@ -36,6 +36,10 @@ struct SharedStruct {
   2: required string value
 }
 
+struct Code {
+  1: i32 status
+}
+
 union SharedUnion {
   1: string option1
   2: string option2

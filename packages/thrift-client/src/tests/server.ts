@@ -1,19 +1,21 @@
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
-import { createThriftServer } from '../main/'
 
 import {
-  SharedStruct,
-  SharedUnion,
+    SharedStruct,
+    SharedUnion,
 } from './generated/shared/shared'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from './config'
 
 import {
-  Calculator,
-  Operation,
-  Work,
+    Calculator,
+    Choice,
+    InvalidResult,
+    Operation,
+    Work,
 } from './generated/calculator/calculator'
 
 export function createServer(): Hapi.Server {
@@ -24,12 +26,17 @@ export function createServer(): Hapi.Server {
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const handlers: Calculator.IHandler<Hapi.Request> = {
+    const impl = new Calculator.Processor<Hapi.Request>({
         ping(): void {
             return
         },
         add(a: number, b: number): number {
-            return a + b
+            const result = a + b
+            if (result < 50) {
+                return result
+            } else {
+                throw new InvalidResult({ message: 'Too big', code: { status: 500 } })
+            }
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
@@ -66,15 +73,50 @@ export function createServer(): Hapi.Server {
                 return { option2: 'bar' }
             }
         },
-    }
+        echoBinary(word: Buffer): string {
+            return word.toString('utf-8')
+        },
+        echoString(word: string): string {
+            return word
+        },
+        checkName(choice: Choice): string {
+            if (choice.firstName !== undefined) {
+                return `FirstName: ${choice.firstName.name}`
+            } else if (choice.lastName !== undefined) {
+                return `LastName: ${choice.lastName.name}`
+            } else {
+                throw new Error(`Unknown choice`)
+            }
+        },
+        checkOptional(type?: string): string {
+            if (type === undefined) {
+                return 'undefined'
+            } else {
+                return type
+            }
+        },
+        mapOneList(list: number[]): number[] {
+            return list.map((next: number) => next + 1)
+        },
+        mapValues(map: Map<string, number>): number[] {
+            return Array.from(map.values())
+        },
+        listToMap(list: string[][]): Map<string, string> {
+            return list.reduce((acc: Map<string, string>, next: string[]) => {
+                acc.set(next[0], next[1])
+                return acc
+            }, new Map())
+        },
+    })
 
+    /**
+     * Creates Hapi server with thrift endpoint.
+     */
     const server: Hapi.Server = createThriftServer({
+        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
-        thriftOptions: {
-            serviceName: 'calculator-service',
-            handler: new Calculator.Processor(handlers),
-        },
+        handler: impl,
     })
 
     /**
@@ -86,6 +128,22 @@ export function createServer(): Hapi.Server {
         path: '/control',
         handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
             reply('PASS')
+        },
+    })
+
+    server.route({
+        method: 'POST',
+        path: '/return500',
+        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+            reply('NOPE').code(500)
+        },
+    })
+
+    server.route({
+        method: 'POST',
+        path: '/return400',
+        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+            reply('NOPE').code(400)
         },
     })
 
