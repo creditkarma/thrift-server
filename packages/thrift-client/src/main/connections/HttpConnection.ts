@@ -107,8 +107,10 @@ export abstract class HttpConnection<Context = never> implements IThriftConnecti
                 next.methods.length === 0 ||
                 next.methods.indexOf(requestMethod) > -1
             )
+
         }).map((next: IOutgoingMiddleware<Context>) => {
             return next.handler
+
         }), context).then((resolvedContext: Context | undefined) => {
             return this.write(dataToSend, resolvedContext).then((data: Buffer) => {
                 return this.middleware.incoming.filter((next: IIncomingMiddleware) => {
