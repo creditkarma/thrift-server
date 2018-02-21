@@ -57,6 +57,7 @@
  * prefix. i.e. shared.SharedObject
  */
 include "shared.thrift"
+include "operation.thrift"
 
 /**
  * Thrift files can namespace, package, or prefix their output in various
@@ -77,23 +78,14 @@ namespace netcore calculator
  */
 typedef i32 MyInteger
 
+typedef operation.Operation Operation
+
 /**
  * Thrift also lets you define constants for use across languages. Complex
  * types and structs are specified using JSON notation.
  */
 const i32 INT32CONSTANT = 9853
 const map<string,string> MAPCONSTANT = {'hello':'world', 'goodnight':'moon'}
-
-/**
- * You can define enums, which are just 32 bit integers. Values are optional
- * and start at 1 if not supplied, C style again.
- */
-enum Operation {
-  ADD = 1,
-  SUBTRACT = 2,
-  MULTIPLY = 3,
-  DIVIDE = 4
-}
 
 /**
  * Structs are the basic complex data structures. They are comprised of fields
@@ -119,17 +111,22 @@ exception InvalidOperation {
   2: string why
 }
 
+exception InvalidResult {
+  1: string message
+  2: shared.Code code
+}
+
 struct FirstName {
-    1: string name
+  1: string name
 }
 
 struct LastName {
-    1: string name
+  1: string name
 }
 
 union Choice {
-    1: FirstName firstName
-    2: LastName lastName
+  1: FirstName firstName
+  2: LastName lastName
 }
 
 /**
@@ -147,11 +144,11 @@ service Calculator extends shared.SharedService {
 
    void ping(),
 
-   i32 add(1: i32 num1, 2: i32 num2),
+   i32 add(1: i32 num1, 2: i32 num2) throws (1: InvalidResult exp),
 
    i32 addWithContext(1: i32 num1, 2: i32 num2),
 
-   i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
+   i32 calculate(1:i32 logid, 2:Work w) throws (1: InvalidOperation ouch),
 
    string echoBinary(1: binary word)
 

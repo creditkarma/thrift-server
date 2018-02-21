@@ -52,10 +52,10 @@ describe('Thrift Server Express', () => {
   it('should corrently handle a service client request for a struct', (done: any) => {
     client.getStruct(1)
       .then((response: SharedStruct) => {
-        const expected = new SharedStruct({
+        const expected = {
           key: 0,
           value: 'test',
-        })
+        }
         expect(response).to.equal(expected)
         done()
       }, (err: any) => {

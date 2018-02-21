@@ -13,6 +13,7 @@ import {
 import {
     Calculator,
     Choice,
+    InvalidResult,
     Operation,
     Work,
 } from './generated/calculator/calculator'
@@ -30,7 +31,12 @@ export function createServer(): Hapi.Server {
             return
         },
         add(a: number, b: number): number {
-            return a + b
+            const result = a + b
+            if (result < 50) {
+                return result
+            } else {
+                throw new InvalidResult({ message: 'Too big', code: { status: 500 } })
+            }
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
@@ -55,16 +61,16 @@ export function createServer(): Hapi.Server {
             return
         },
         getStruct(): SharedStruct {
-            return new SharedStruct({
+            return {
                 key: 0,
                 value: 'test',
-            })
+            }
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
         echoBinary(word: Buffer): string {

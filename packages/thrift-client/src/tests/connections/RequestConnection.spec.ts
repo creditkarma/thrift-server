@@ -1,19 +1,19 @@
 import * as Hapi from 'hapi'
 
 import {
-  RequestConnection,
-  RequestInstance,
+    RequestConnection,
+    RequestInstance,
 } from '../../main'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from '../config'
 
 import {
-  readThriftMethod,
+    readThriftMethod,
 } from '../../main/utils'
 
 import { expect } from 'code'
@@ -24,7 +24,8 @@ import {
 } from '../server'
 
 import {
-  Calculator,
+    Calculator,
+    Operation,
 } from '../generated/calculator/calculator'
 
 export const lab = Lab.script()
@@ -71,6 +72,13 @@ describe('RequestConnection', () => {
             return client.ping()
                 .then((response: any) => {
                     expect(response).to.equal(undefined)
+                })
+        })
+
+        it('should corrently handle a service client request that takes a struct', async () => {
+            return client.calculate(5, { num1: 5, num2: 6, op: Operation.MULTIPLY })
+                .then((response: number) => {
+                    expect(response).to.equal(30)
                 })
         })
 
@@ -276,11 +284,11 @@ describe('RequestConnection', () => {
                 type: 'outgoing',
                 methods: [ 'addWithContext' ],
                 handler(context: CoreOptions): Promise<CoreOptions> {
-                return Promise.resolve(Object.assign({}, context, {
-                    headers: {
-                    'X-Fake-Token': 'fake-token',
-                    },
-                }))
+                    return Promise.resolve(Object.assign({}, context, {
+                        headers: {
+                            'X-Fake-Token': 'fake-token',
+                        },
+                    }))
                 },
             })
 
@@ -321,11 +329,11 @@ describe('RequestConnection', () => {
         })
 
             return client.addWithContext(5, 7)
-            .then((response: number) => {
-                throw new Error(`Mehtods should fail when middleware rejects`)
-            }, (err: any) => {
-                expect(err.message).to.equal('Unauthorized')
-            })
+                .then((response: number) => {
+                    throw new Error(`Mehtods should fail when middleware rejects`)
+                }, (err: any) => {
+                    expect(err.message).to.equal('Unauthorized')
+                })
         })
     })
 })

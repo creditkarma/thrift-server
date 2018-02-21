@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-core",
-  "version": "0.4.3",
+  "version": "0.5.0-1",
   "description": "Thrift core library in TypeScript",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -45,7 +45,7 @@
     "express": "^4.16.0",
     "lab": "^14.2.0",
     "lerna": "^2.0.0",
-    "rimraf": "^2.5.4",
+    "rimraf": "^2.6.2",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1",
     "typescript": "2.7.x"
