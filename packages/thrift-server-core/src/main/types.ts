@@ -4,23 +4,58 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
+export type LogFunction = (msg: string, data?: any) => void
+
+/**
+ * Options for any Thrift Server
+ *
+ * serviceName<string> - name of the service
+ * handler<TProcessor> - a service processor instance for handling requests
+ * path<string> - the path on which to server the Thrift API
+ * transport<TransportType> - name of the transport to use
+ * protocol<ProtocolType> - name of the protocol to use
+ */
+export interface IThriftServerOptions<TProcessor> {
+    serviceName: string
+    handler: TProcessor
+    path?: string
+    transport?: TransportType
+    protocol?: ProtocolType
+}
+
+export interface IThriftConnection<Context = never> {
+    Transport: ITransportConstructor
+    Protocol: IProtocolConstructor
+    send(dataToSend: Buffer, context?: Context): Promise<Buffer>
+}
+
+export abstract class ThriftConnection<Context = never> extends EventEmitter implements IThriftConnection<Context> {
+    constructor(
+        public Transport: ITransportConstructor,
+        public Protocol: IProtocolConstructor,
+    ) {
+        super()
+    }
+    public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
+}
+
 export interface IProtocolConstructor {
-    new (trans: TTransport, strictRead?: boolean, strictWrite?: boolean): TProtocol
+    new(trans: TTransport, strictRead?: boolean, strictWrite?: boolean): TProtocol
 }
 
 export interface ITransportConstructor {
-    new (buffer?: Buffer): TTransport
+    new(buffer?: Buffer): TTransport
     receiver(data: Buffer): TTransport
 }
 
 export interface IClientConstructor<TClient, Context> {
-    new (
+    new(
         connection: ThriftConnection<Context>,
     ): TClient
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
-    new (handler: THandler): TProcessor
+    new(handler: THandler): TProcessor
 }
 
 export abstract class StructLike {
@@ -47,22 +82,6 @@ export interface IProtocolMap {
 
 export interface IThriftProcessor<Context> {
     process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
-}
-
-export interface IThriftConnection<Context = never> {
-    Transport: ITransportConstructor
-    Protocol: IProtocolConstructor
-    send(dataToSend: Buffer, context?: Context): Promise<Buffer>
-}
-
-export abstract class ThriftConnection<Context = never> extends EventEmitter implements IThriftConnection<Context> {
-    constructor(
-        public Transport: ITransportConstructor,
-        public Protocol: IProtocolConstructor,
-    ) {
-        super()
-    }
-    public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
 export enum TType {

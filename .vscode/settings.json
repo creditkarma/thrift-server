@@ -1,5 +1,18 @@
+// Place your settings in this file to overwrite default and user settings.
 {
-  "editor.tabSize": 4,
-  "editor.detectIndentation": false,
-  "files.autoSave": "off"
+    "editor.tabSize": 4,
+    "editor.rulers": [120],
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "editor.wordWrapColumn": 120,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/node_modules/": true,
+        "**/dist/": true,
+        "coverage": true,
+        "coverage.lcov": true,
+        "**/*.thrift": true
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
 }

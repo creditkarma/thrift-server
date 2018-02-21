@@ -27,16 +27,16 @@ import { SharedStruct, SharedUnion } from './generated/shared/shared'
         },
         zip(): void {},
         getStruct(): SharedStruct {
-            return {
+            return new SharedStruct({
                 key: 0,
                 value: 'test',
-            }
+            })
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {
-                return { option1: 'foo' }
+                return SharedUnion.fromOption1('foo')
             } else {
-                return { option2: 'bar' }
+                return SharedUnion.fromOption2('bar')
             }
         },
     })
