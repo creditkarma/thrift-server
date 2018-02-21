@@ -1,7 +1,7 @@
 import {
-  ProtocolType,
-  ThriftConnection,
-  TransportType,
+    ProtocolType,
+    ThriftConnection,
+    TransportType,
 } from '@creditkarma/thrift-server-core'
 
 import * as request from 'request'
@@ -20,41 +20,41 @@ export interface IHttpConnectionOptions {
     protocol?: ProtocolType
 }
 
-export interface ICreateClientOptions<Request, Options> extends IHttpConnectionOptions {
+export interface ICreateClientOptions<Context> extends IHttpConnectionOptions {
     serviceName?: string
-    register?: Array<ThriftMiddleware<Request, Options>>
+    register?: Array<ThriftMiddleware<Context>>
     requestOptions?: request.CoreOptions
 }
 
 export interface IClientConstructor<TClient, Context> {
-    new (
+    new(
         connection: ThriftConnection<Context>,
     ): TClient
 }
 
 export type MiddlewareType =
-    'outgoing' | 'incoming'
+    'request' | 'response'
 
-export type ThriftMiddleware<Request, Options> =
-    IIncomingMiddlewareConfig | IOutgoingMiddlewareConfig<Request, Options>
+export type ThriftMiddleware<Context> =
+    IResponseMiddlewareConfig | IRequestMiddlewareConfig<Context>
 
 export interface IThriftMiddlewareConfig {
     type?: MiddlewareType
     methods?: Array<string>
 }
 
-export type IncomingHandler = (data: Buffer) => Promise<Buffer>
+export type ResponseHandler = (data: Buffer) => Promise<Buffer>
 
-export type OutgoingHandler<Request, Options> = (request: Request, options: Options) => Promise<Options>
+export type RequestHandler<Context> = (context: Context) => Promise<Context>
 
-export interface IIncomingMiddlewareConfig extends IThriftMiddlewareConfig {
-    type?: 'incoming'
-    handler: IncomingHandler
+export interface IResponseMiddlewareConfig extends IThriftMiddlewareConfig {
+    type?: 'response'
+    handler: ResponseHandler
 }
 
-export interface IOutgoingMiddlewareConfig<Request, Options> extends IThriftMiddlewareConfig {
-    type: 'outgoing'
-    handler: OutgoingHandler<Request, Options>
+export interface IRequestMiddlewareConfig<Context> extends IThriftMiddlewareConfig {
+    type: 'request'
+    handler: RequestHandler<Context>
 }
 
 export interface IThriftMiddleware {
@@ -62,12 +62,12 @@ export interface IThriftMiddleware {
     methods: Array<string>
 }
 
-export interface IIncomingMiddleware extends IThriftMiddleware {
-    type: 'incoming'
-    handler: IncomingHandler
+export interface IResponseMiddleware extends IThriftMiddleware {
+    type: 'response'
+    handler: ResponseHandler
 }
 
-export interface IOutgoingMiddleware<Request, Options> extends IThriftMiddleware {
-    type: 'outgoing'
-    handler: OutgoingHandler<Request, Options>
+export interface IRequestMiddleware<Context> extends IThriftMiddleware {
+    type: 'request'
+    handler: RequestHandler<Context>
 }

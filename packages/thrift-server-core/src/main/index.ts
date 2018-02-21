@@ -1,77 +1,30 @@
-import { BinaryProtocol } from './protocols'
-import { BufferedTransport } from './transports'
-
 import { InputBufferUnderrunError } from './errors'
 
 import {
-  IProtocolConstructor,
-  IProtocolMap,
-  IThriftProcessor,
-  ITransportConstructor,
-  ITransportMap,
-  ProtocolType,
-  TransportType,
+    IProtocolConstructor,
+    IThriftProcessor,
+    ITransportConstructor,
 } from './types'
 
 export * from './types'
 export * from './protocols'
 export * from './transports'
 export * from './errors'
+export * from './utils'
 
-const transports: ITransportMap = {
-    buffered: BufferedTransport,
-    // framed: FramedTransport,
-}
-
-export const supportedTransports: Array<string> = Object.keys(transports)
-
-const protocols: IProtocolMap = {
-    binary: BinaryProtocol,
-    // compact: CompactProtocol,
-    // json: JSONProtocol,
-}
-
-export const supportedProtocols: Array<string> = Object.keys(protocols)
-
-export function getTransport(transport: TransportType = 'buffered'): ITransportConstructor {
-    if (!isTransportSupported(transport)) {
-        throw new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`)
-    }
-
-    return transports[transport]
-}
-
-export function getProtocol(protocol: ProtocolType = 'binary'): IProtocolConstructor {
-    if (protocol && !isProtocolSupported(protocol)) {
-        throw new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`)
-    }
-
-    return protocols[protocol]
-}
-
-export function isTransportSupported(transport: TransportType): boolean {
-    return supportedTransports.indexOf(transport) !== -1
-}
-
-export function isProtocolSupported(protocol: ProtocolType): boolean {
-    return supportedProtocols.indexOf(protocol) !== -1
-}
-
-export function process<Context>(
+export function process<Context>(args: {
     processor: IThriftProcessor<Context>,
     buffer: Buffer,
     Transport: ITransportConstructor,
     Protocol: IProtocolConstructor,
-    context?: Context,
-): Promise<Buffer> {
-    const transportWithData = new Transport(buffer);
-    (transportWithData as any).writeCursor = buffer.length
+    context: Context,
+}): Promise<Buffer> {
+    const transportWithData = args.Transport.receiver(args.buffer)
+    const input = new args.Protocol(transportWithData)
 
-    const input = new Protocol(transportWithData)
-
-    return new Promise((resolve, reject) => {
-        const output = new Protocol(new Transport())
-        processor.process(input, output, context).then((result: Buffer) => {
+    return new Promise((resolve, reject): void => {
+        const output = new args.Protocol(new args.Transport())
+        args.processor.process(input, output, args.context).then((result: Buffer) => {
             resolve(result)
             transportWithData.commitPosition()
         }, (err: any) => {

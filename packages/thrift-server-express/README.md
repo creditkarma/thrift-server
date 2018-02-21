@@ -94,6 +94,7 @@ app.listen(PORT, () => {
 
 * serviceName - The name of your service. Used for logging and tracing.
 * handler - The service Processor instance to handle service method calls.
+* path - The path on which to server your Thrift service. Defaults to '/thrift'.
 * transport - The kind of Thrift transport to use. Only 'buffered' is currently supported.
 * protocol - The kind of Thrift protocol to use. Only 'binary' is currently supported.
 

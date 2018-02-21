@@ -6,11 +6,10 @@ import {
 
 import {
     IHttpConnectionOptions,
-    IIncomingMiddleware,
-    IOutgoingMiddleware,
-    OutgoingHandler,
+    IRequestMiddleware,
+    IResponseMiddleware,
+    RequestHandler,
     ThriftMiddleware,
-    IThriftContext,
 } from '../types'
 
 import {
@@ -30,8 +29,8 @@ export type HttpProtocol =
     'http' | 'https'
 
 export interface IMiddlewareMap<Context> {
-    incoming: Array<IIncomingMiddleware>
-    outgoing: Array<IOutgoingMiddleware<Context>>
+    response: Array<IResponseMiddleware>
+    request: Array<IRequestMiddleware<Context>>
 }
 
 export type IPromisedFunction<T> = (val: T) => Promise<T>
@@ -44,7 +43,7 @@ async function reducePromises<T>(
         return initial
 
     } else {
-        const [ head, ...tail ] = promises
+        const [head, ...tail] = promises
         const nextValue: T = await head(initial)
         if (tail.length === 0) {
             return nextValue
@@ -62,7 +61,7 @@ export interface IListenerData {
 
 export type IEventListener = (...args: Array<any>) => void
 
-export abstract class HttpConnection<Request = never, Options = never> extends ThriftConnection<Context> {
+export abstract class HttpConnection<Context = never> extends ThriftConnection<Context> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
@@ -77,33 +76,33 @@ export abstract class HttpConnection<Request = never, Options = never> extends T
         )
         this.port = options.port
         this.hostName = options.hostName
-        this.path = normalizePath(options.path)
+        this.path = normalizePath(options.path || '/thrift')
         this.protocol = ((options.https === true) ? 'https' : 'http')
         this.url = `${this.protocol}://${this.hostName}:${this.port}${this.path}`
         this.middleware = {
-            incoming: [],
-            outgoing: [],
+            response: [],
+            request: [],
         }
     }
 
     // Provides an empty context for outgoing middleware
-    public abstract emptyContext(): IThriftContext<Request, Options>
+    public abstract emptyContext(): Context
 
-    public abstract write(dataToWrite: Buffer, options?: Options): Promise<Buffer>
+    public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
 
-    public register(...middleware: Array<ThriftMiddleware<Options>>): void {
-        middleware.forEach((next: ThriftMiddleware<Options>) => {
+    public register(...middleware: Array<ThriftMiddleware<Context>>): void {
+        middleware.forEach((next: ThriftMiddleware<Context>) => {
             switch (next.type) {
-                case 'outgoing':
-                    return this.middleware.outgoing.push({
-                        type: 'outgoing',
+                case 'request':
+                    return this.middleware.request.push({
+                        type: 'request',
                         methods: next.methods || [],
                         handler: next.handler,
                     })
 
                 default:
-                    return this.middleware.incoming.push({
-                        type: 'incoming',
+                    return this.middleware.response.push({
+                        type: 'response',
                         methods: next.methods || [],
                         handler: next.handler,
                     })
@@ -113,28 +112,28 @@ export abstract class HttpConnection<Request = never, Options = never> extends T
 
     public send(
         dataToSend: Buffer,
-        context: IThriftContext<Request, Options> = this.emptyContext(),
+        context: Context = this.emptyContext(),
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
 
-        return reducePromises(this.middleware.outgoing.filter((next: IOutgoingMiddleware<Context>) => {
+        return reducePromises(this.middleware.request.filter((next: IRequestMiddleware<Context>) => {
             return (
                 next.methods.length === 0 ||
                 next.methods.indexOf(requestMethod) > -1
             )
 
-        }).map((next: IOutgoingMiddleware<Context>): OutgoingHandler<Context> => {
+        }).map((next: IRequestMiddleware<Context>): RequestHandler<Context> => {
             return next.handler
 
         }), context).then((resolvedContext: Context | undefined) => {
             return this.write(dataToSend, resolvedContext).then((data: Buffer) => {
-                return this.middleware.incoming.filter((next: IIncomingMiddleware) => {
+                return this.middleware.response.filter((next: IResponseMiddleware) => {
                     return (
                         next.methods.length === 0 ||
                         next.methods.indexOf(requestMethod) > -1
                     )
 
-                }).reduce((acc: Promise<Buffer>, next: IIncomingMiddleware): Promise<Buffer> => {
+                }).reduce((acc: Promise<Buffer>, next: IResponseMiddleware): Promise<Buffer> => {
                     return acc.then(next.handler)
                 }, Promise.resolve(data))
             })

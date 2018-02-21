@@ -1,29 +1,28 @@
 import {
-  CoreOptions,
-  Request,
-  RequestAPI,
-  RequestResponse,
-  RequiredUriUrl,
-  UrlOptions,
+    CoreOptions,
+    Request,
+    RequestAPI,
+    RequestResponse,
+    RequiredUriUrl,
+    UrlOptions,
 } from 'request'
 
 import {
-  HttpConnection,
+    HttpConnection,
 } from './HttpConnection'
 
 import {
-  IHttpConnectionOptions,
-  IThriftContext,
+    IHttpConnectionOptions,
 } from '../types'
 
 import {
-  deepMerge,
+    deepMerge,
 } from '../utils'
 
 export type RequestInstance =
     RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class RequestConnection<Context> extends HttpConnection<Context, CoreOptions> {
+export class RequestConnection extends HttpConnection<CoreOptions> {
     private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
     constructor(request: RequestInstance, options: IHttpConnectionOptions) {
@@ -31,7 +30,7 @@ export class RequestConnection<Context> extends HttpConnection<Context, CoreOpti
         this.request = request
     }
 
-    public emptyContext(): IThriftContext<Context, CoreOptions> {
+    public emptyContext(): CoreOptions {
         return {}
     }
 

@@ -93,7 +93,7 @@ The available options are:
 
 * hostName (required): The name of the host to connect to.
 * port (required): The port number to attach to on the host.
-* path (optional): The path on which the Thrift service is listening. Defaults to '/'.
+* path (optional): The path on which the Thrift service is listening. Defaults to '/thrift'.
 * https (optional): Boolean value indicating whether to use https. Defaults to false.
 * transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
@@ -208,24 +208,24 @@ A middleware is an object that consists of a handler function, the type of middl
 Middleware are applied in the order in which they are registered.
 
 ```typescript
-interface IIncomingMiddleware {
-  type: 'incoming'
+interface IResponseMiddleware {
+  type: 'reqponse'
   methods: Array<string>
   hander(data: Buffer): Promise<Buffer>
 }
 
-interface IOutgoingMiddleware<Context> {
-  type: 'outgoing'
+interface IRequestMiddleware<Context> {
+  type: 'request'
   mthods: Array<string>
   handler(context: Context): Promise<Context>
 }
 ```
 
-#### Incoming Middleware
+#### Response Middleware
 
-`incoming` middleware acts on responses coming into the client. The middleware receives the response before the Thrift processor so the data is a raw `Buffer` object. The middleware returns a `Promise` of data that will continue down the middleware chain to the Thrift processor. If the `Promise` is rejected the chain is broken and the client method call is rejected.
+`response` middleware acts on responses coming into the client. The middleware receives the response before the Thrift processor so the data is a raw `Buffer` object. The middleware returns a `Promise` of data that will continue down the middleware chain to the Thrift processor. If the `Promise` is rejected the chain is broken and the client method call is rejected.
 
-`incoming` is the default middleware, so if the `type` property is ommited the middleware will be assumed to be incoming.
+`response` is the default middleware, so if the `type` property is ommited the middleware will be assumed to be `response`.
 
 ```typescript
 import {
@@ -238,7 +238,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   register: [{
-    type: 'incoming',
+    type: 'response',
     handler(data: Buffer): Promise<Buffer> {
       if (validatePayload(data)) {
         return Promise.resolve(data)
@@ -250,9 +250,9 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
 })
 ```
 
-#### Outgoing Middleware
+#### Request Middleware
 
-`outgoing` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
+`request` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
 
 Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
@@ -267,7 +267,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   register: [{
-    type: 'outgoing',
+    type: 'request',
     handler(context: CoreOptions): Promise<CoreOptions> {
       return Promise.resolve(Object.assign({}, context, {
         headers: {
@@ -291,7 +291,7 @@ const connection: RequestConnection =
   new RequestConnection(requestClient, clientConfig)
 
 connection.register({
-  type: 'outgoing',
+  type: 'request',
   handler(context: CoreOptions): Promise<CoreOptions> {
     return Promise.resolve(Object.assign({}, context, {
       headers: {

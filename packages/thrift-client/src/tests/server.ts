@@ -1,14 +1,9 @@
 import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
-import {
-    SharedStruct,
-    SharedUnion,
-} from './generated/shared/shared'
+import { SharedStruct, SharedUnion } from './generated/shared/shared'
 
-import {
-    SERVER_CONFIG,
-} from './config'
+import { SERVER_CONFIG } from './config'
 
 import {
     Calculator,
@@ -17,9 +12,7 @@ import {
     Work,
 } from './generated/calculator/calculator'
 
-import {
-    createClient,
-} from '../main/index'
+import { createClient } from '../main/index'
 
 export function createServer(): Hapi.Server {
     /**
@@ -37,7 +30,10 @@ export function createServer(): Hapi.Server {
             return a + b
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
-            if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
+            if (
+                context !== undefined &&
+                context.headers['x-fake-token'] === 'fake-token'
+            ) {
                 return a + b
             } else {
                 throw new Error('Unauthorized')
@@ -59,16 +55,16 @@ export function createServer(): Hapi.Server {
             return
         },
         getStruct(): SharedStruct {
-            return {
+            return new SharedStruct({
                 key: 0,
                 value: 'test',
-            }
+            })
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {
-                return { option1: 'foo' }
+                return SharedUnion.fromOption1('foo')
             } else {
-                return { option2: 'bar' }
+                return SharedUnion.fromOption2('bar')
             }
         },
         echoBinary(word: Buffer): string {
@@ -100,10 +96,13 @@ export function createServer(): Hapi.Server {
             return Array.from(map.values())
         },
         listToMap(list: Array<Array<string>>): Map<string, string> {
-            return list.reduce((acc: Map<string, string>, next: Array<string>) => {
-                acc.set(next[0], next[1])
-                return acc
-            }, new Map())
+            return list.reduce(
+                (acc: Map<string, string>, next: Array<string>) => {
+                    acc.set(next[0], next[1])
+                    return acc
+                },
+                new Map(),
+            )
         },
     })
 
@@ -111,10 +110,12 @@ export function createServer(): Hapi.Server {
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = createThriftServer({
-        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
-        handler: impl,
+        thriftOptions: {
+            serviceName: 'calculator-service',
+            handler: impl,
+        },
     })
 
     const client: Calculator.Client = createClient(Calculator.Client, {
@@ -130,7 +131,8 @@ export function createServer(): Hapi.Server {
         handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
             const left: number = request.query.left
             const right: number = request.query.right
-            client.add(left, right)
+            client
+                .add(left, right)
                 .then((response: number) => {
                     reply(response)
                 })

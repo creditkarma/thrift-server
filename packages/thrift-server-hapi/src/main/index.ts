@@ -5,33 +5,44 @@ import {
     getTransport,
     IProtocolConstructor,
     IThriftProcessor,
+    IThriftServerOptions,
     ITransportConstructor,
     process,
-    ProtocolType,
     TProtocol,
-    TransportType,
 } from '@creditkarma/thrift-server-core'
+
+export type HapiOptionsFunction<TProcessor> = (
+    req?: Hapi.Request,
+) => IThriftServerOptions<TProcessor>
 
 export interface IHandlerOptions<TProcessor> {
     service: TProcessor
 }
 
-export interface IPluginOptions<TProcessor> {
-    serviceName: string
-    handler: TProcessor
+export type HapiThriftOptionsFunction<TProcessor> = (
+    request: Hapi.Request,
+    reply: Hapi.ReplyNoContinue,
+) => IThriftServerOptions<TProcessor>
+
+export interface IHapiPluginOptions<TProcessor> {
     path?: string
-    transport?: TransportType
-    protocol?: ProtocolType
+    thriftOptions:
+        | IThriftServerOptions<TProcessor>
+        | HapiOptionsFunction<TProcessor>
 }
 
-export interface IThriftServerOptions<TProcessor> extends IPluginOptions<TProcessor> {
+export interface ICreateHapiServerOptions<TProcessor>
+    extends IHapiPluginOptions<TProcessor> {
     port: number
 }
 
-export type ThriftHapiPlugin =
-    Hapi.PluginRegistrationObject<never>
+export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<never>
 
-function readThriftMethod(buffer: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): string {
+function readThriftMethod(
+    buffer: Buffer,
+    Transport: ITransportConstructor,
+    Protocol: IProtocolConstructor,
+): string {
     const transportWithData = new Transport(buffer)
     const input: TProtocol = new Protocol(transportWithData)
     const { fieldName } = input.readMessageBegin()
@@ -39,9 +50,9 @@ function readThriftMethod(buffer: Buffer, Transport: ITransportConstructor, Prot
     return fieldName
 }
 
-export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    options: IThriftServerOptions<TProcessor>,
-): Hapi.Server {
+export function createThriftServer<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+>(options: ICreateHapiServerOptions<TProcessor>): Hapi.Server {
     const server = new Hapi.Server({ debug: { request: ['error'] } })
 
     server.connection({ port: options.port })
@@ -53,38 +64,73 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
      * They behave like any other HTTP route handler, so you can mix and match
      * thrift / REST endpoints on the same server instance.
      */
-    server.register(ThriftPlugin<TProcessor>({
-        serviceName: options.serviceName,
-        handler: options.handler,
-        path: options.path,
-        transport: options.transport,
-        protocol: options.protocol,
-    }), (err: any) => {
-        if (err) {
-            throw err
-        }
-    })
+    server.register(
+        thirftServerHapi<TProcessor>({
+            path: options.path,
+            thriftOptions: options.thriftOptions,
+        }),
+        (err: any) => {
+            if (err) {
+                throw err
+            }
+        },
+    )
 
     return server
 }
 
-export function ThriftPlugin<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    pluginOptions: IPluginOptions<TProcessor>,
-): ThriftHapiPlugin {
-    const plugin: ThriftHapiPlugin = {
-        register(server: Hapi.Server, nothing: never, next) {
-            const Transport: ITransportConstructor = getTransport(pluginOptions.transport)
-            const Protocol: IProtocolConstructor = getProtocol(pluginOptions.protocol)
-            const pluginPath: string = pluginOptions.path || '/'
+function getPluginOptions<TProcessor>(
+    request: Hapi.Request,
+    options: IHapiPluginOptions<TProcessor>,
+): IThriftServerOptions<TProcessor> {
+    if (typeof options.thriftOptions === 'function') {
+        return options.thriftOptions(request)
+    } else {
+        return options.thriftOptions
+    }
+}
 
+export function thirftServerHapi<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+>(pluginOptions: IHapiPluginOptions<TProcessor>): ThriftHapiPlugin {
+    const hapiThriftPlugin: ThriftHapiPlugin = {
+        register(server: Hapi.Server, nothing: never, next) {
             server.route({
                 method: 'POST',
-                path: pluginPath,
-                handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
+                path: pluginOptions.path || '/thrift',
+                handler: (
+                    request: Hapi.Request,
+                    reply: Hapi.ReplyNoContinue,
+                ) => {
+                    const options: IThriftServerOptions<
+                        TProcessor
+                    > = getPluginOptions(request, pluginOptions)
+                    const Transport: ITransportConstructor = getTransport(
+                        options.transport,
+                    )
+                    const Protocol: IProtocolConstructor = getProtocol(
+                        options.protocol,
+                    )
                     try {
-                        const method: string = readThriftMethod(request.payload, Transport, Protocol)
-                        request.plugins.thrift = Object.assign({}, request.plugins.thrift, { method })
-                        reply(process(pluginOptions.handler, request.payload, Transport, Protocol, request))
+                        const method: string = readThriftMethod(
+                            request.payload,
+                            Transport,
+                            Protocol,
+                        )
+                        request.plugins.thrift = Object.assign(
+                            {},
+                            request.plugins.thrift,
+                            { method },
+                        )
+                        reply(
+                            process({
+                                processor: options.handler,
+                                buffer: request.payload,
+                                Transport,
+                                Protocol,
+                                context: request,
+                            }),
+                        )
                     } catch (err) {
                         reply(err)
                     }
@@ -98,11 +144,14 @@ export function ThriftPlugin<TProcessor extends IThriftProcessor<Hapi.Request>>(
 
             next()
         },
-    };
-
-    (plugin.register as any).attributes = {
-        pkg: require('../../package.json'),
     }
 
-    return plugin
+    hapiThriftPlugin.register.attributes = {
+        pkg: {
+            name: 'thrift-server-hapi',
+            version: require('../../package.json').version,
+        },
+    }
+
+    return hapiThriftPlugin
 }
