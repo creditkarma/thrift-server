@@ -9,7 +9,7 @@ import {
     ITransportConstructor,
     process,
     TProtocol,
-} from '@creditkarma/thrift-server-core'
+} from '@creditkarma/thrift-core'
 
 export type HapiOptionsFunction<TProcessor> = (
     req?: Hapi.Request,

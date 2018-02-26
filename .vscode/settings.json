@@ -6,13 +6,9 @@
     "files.insertFinalNewline": true,
     "editor.wordWrapColumn": 120,
     "files.exclude": {
-        "**/.git": true,
         "**/.DS_Store": true,
-        "**/node_modules/": true,
-        "**/dist/": true,
         "coverage": true,
-        "coverage.lcov": true,
-        "**/*.thrift": true
+        "coverage.lcov": true
     },
     "typescript.tsdk": "node_modules/typescript/lib"
 }
