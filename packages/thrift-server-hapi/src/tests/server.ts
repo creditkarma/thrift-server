@@ -69,10 +69,12 @@ export function createServer(): Hapi.Server {
     }
 
     const server: Hapi.Server = createThriftServer({
-        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
-        handler: new Calculator.Processor(handlers),
+        thriftOptions: {
+            serviceName: 'calculator-service',
+            handler: new Calculator.Processor(handlers),
+        }
     })
 
     /**
