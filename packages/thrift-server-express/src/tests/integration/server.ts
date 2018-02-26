@@ -60,10 +60,11 @@ export function createServer(): express.Application {
     }
 
     const app: express.Application = createThriftServer({
-        serviceName: 'calculator-service',
-        port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
-        handler: new Calculator.Processor(serviceHandlers),
+        thriftOptions: {
+            serviceName: 'calculator-service',
+            handler: new Calculator.Processor(serviceHandlers),
+        }
     })
 
     app.get('/control', (req: express.Request, res: express.Response) => {
