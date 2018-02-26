@@ -64,7 +64,7 @@ export function createServer(): express.Application {
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: new Calculator.Processor(serviceHandlers),
-        }
+        },
     })
 
     app.get('/control', (req: express.Request, res: express.Response) => {

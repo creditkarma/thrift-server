@@ -1,4 +1,4 @@
-# Thrift Server Core
+# Thrift Core
 
 Base package for the other Thrift libraries. This will usually not be used directly. Usually consumers will get everything they need from the consuming libraries:
 
@@ -9,7 +9,7 @@ Base package for the other Thrift libraries. This will usually not be used direc
 ## Usage
 
 ```sh
-$ npm install --save @creditkarma/thrift-server-core
+$ npm install --save @creditkarma/thrift-core
 ```
 
 ### Int64
@@ -21,7 +21,7 @@ For representing 64-bit integers in JavaScript we use the [node-int64 library](h
 Given a string of decimal digits, return a `Int64` object instance.
 
 ```typescript
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { Int64 } from '@creditkarma/thrift-core'
 
 const i64: Int64 = Int64.fromDecimalString("89374875")
 ```
@@ -29,7 +29,7 @@ const i64: Int64 = Int64.fromDecimalString("89374875")
 #### `toDecimalString`
 
 ```typescript
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { Int64 } from '@creditkarma/thrift-core'
 
 const i64: Int64 = Int64.fromDecimalString("89374875")
 const val: string = i64.toDecimalString()

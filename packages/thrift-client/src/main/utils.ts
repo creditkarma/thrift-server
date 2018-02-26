@@ -5,7 +5,7 @@ import {
     ITransportConstructor,
     TProtocol,
     TTransport,
-} from '@creditkarma/thrift-server-core'
+} from '@creditkarma/thrift-core'
 
 function isObject(obj: any): boolean {
     return (

@@ -74,7 +74,7 @@ export function createServer(): Hapi.Server {
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: new Calculator.Processor(handlers),
-        }
+        },
     })
 
     /**

@@ -6,7 +6,7 @@ import {
     IThriftServerOptions,
     ITransportConstructor,
     process,
-} from '@creditkarma/thrift-server-core'
+} from '@creditkarma/thrift-core'
 
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
