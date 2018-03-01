@@ -1,5 +1,5 @@
 {
-  "name": "@creditkarma/thrift-core",
+  "name": "@creditkarma/thrift-server-core",
   "version": "0.4.3",
   "description": "Thrift core library in TypeScript",
   "main": "dist/main/index.js",
@@ -28,7 +28,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-core"
+    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
   "peerDependencies": {
     "@creditkarma/dynamic-config": "~0.4.3"
