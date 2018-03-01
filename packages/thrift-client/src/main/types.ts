@@ -2,7 +2,7 @@ import {
     ProtocolType,
     ThriftConnection,
     TransportType,
-} from '@creditkarma/thrift-core'
+} from '@creditkarma/thrift-server-core'
 
 import * as request from 'request'
 

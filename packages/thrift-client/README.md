@@ -27,7 +27,7 @@ All Thrift Server libraries defined most things as peer dependencies to avoid ty
 
 ```sh
 $ npm install --save-dev @creditkarma/thrift-typescript
-$ npm install --save @creditkarma/thrift-core
+$ npm install --save @creditkarma/thrift-server-core"
 $ npm install --save @creditkarma/thrift-client
 $ npm install --save request
 $ npm install --save @types/request
@@ -99,7 +99,7 @@ The available options are:
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
 * requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
 
-Currently `@creditkarma/thrift-core` only supports buffered transport and binary protocol. Framed transport along with compact and JSON protocol will be added soon.
+Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary protocol. Framed transport along with compact and JSON protocol will be added soon.
 
 ```typescript
 type TransportType = 'buffered'

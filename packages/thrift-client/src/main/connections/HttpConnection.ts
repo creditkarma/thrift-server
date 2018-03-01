@@ -2,7 +2,7 @@ import {
     getProtocol,
     getTransport,
     ThriftConnection,
-} from '@creditkarma/thrift-core'
+} from '@creditkarma/thrift-server-core'
 
 import {
     IHttpConnectionOptions,
