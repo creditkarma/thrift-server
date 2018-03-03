@@ -11,6 +11,8 @@ import {
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 
+export * from './plugins'
+
 export type ExpressOptionsFunction<TProcessor> =
     (req?: express.Request, res?: express.Response) => IThriftServerOptions<TProcessor>
 

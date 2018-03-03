@@ -42,10 +42,12 @@ import { SharedStruct, SharedUnion } from './generated/shared/shared'
     })
 
     const server: Hapi.Server = createThriftServer({
-        serviceName: 'calculator-service',
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
-        handler: impl,
+        thriftOptions: {
+            serviceName: 'calculator-service',
+            handler: impl,
+        }
     })
 
     server.start((err: any) => {

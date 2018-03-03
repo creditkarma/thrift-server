@@ -1,4 +1,44 @@
-import {  } from 'zipkin'
+// import { Tracer, Instrumentation } from 'zipkin'
+import {
+    // getTracerForService
+} from '@creditkarma/thrift-server-core'
+import { CoreOptions } from 'request'
+
+import {
+    IRequestMiddleware,
+    IThriftContext,
+} from '../types'
+
+export interface IZipkinPluginOptions {
+    serviceName: string
+    port?: number
+    debug?: boolean
+    endpoint?: string
+    sampleRate?: number
+}
+
+export function ZipkinTracePlugin({
+    serviceName,
+    port = 0,
+    debug = false,
+    endpoint,
+    sampleRate,
+}: IZipkinPluginOptions): IRequestMiddleware<CoreOptions> {
+    return {
+        type: 'request',
+        methods: [],
+        handler(context: IThriftContext<CoreOptions>): Promise<CoreOptions> {
+            console.log('context: ', context)
+            // const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, sampleRate })
+            // const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName: serviceName })
+            // if (context.headers !== undefined) {
+
+            // }
+
+            return Promise.resolve(context.options || {})
+        },
+    }
+}
 
 /**
  *

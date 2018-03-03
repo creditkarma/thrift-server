@@ -1,46 +1,69 @@
 import {
+    getTracerForService,
+    IZipkinPluginOptions,
+} from '@creditkarma/thrift-server-core'
 
+import {
+    Instrumentation,
+    option,
+    TraceId,
+    Tracer,
 } from 'zipkin'
 
-// const {
-//     option: {Some, None},
-//     Instrumentation
-//   } = require('zipkin');
-//   const url = require('url');
+import * as express from 'express'
+import * as url from 'url'
 
-//   function formatRequestUrl(req) {
-//     const parsed = url.parse(req.originalUrl);
-//     return url.format({
-//       protocol: req.protocol,
-//       host: req.get('host'),
-//       pathname: parsed.pathname,
-//       search: parsed.search
-//     });
-//   }
+function formatRequestUrl(req: express.Request): string {
+    const parsed = url.parse(req.originalUrl)
+    return url.format({
+        protocol: req.protocol,
+        host: req.get('host'),
+        pathname: parsed.pathname,
+        search: parsed.search,
+    })
+}
 
-//   module.exports = function expressMiddleware({tracer, serviceName, port = 0}) {
-//     const instrumentation = new Instrumentation.HttpServer({tracer, serviceName, port});
-//     return function zipkinExpressMiddleware(req, res, next) {
-//       tracer.scoped(() => {
-//         function readHeader(header) {
-//           const val = req.header(header);
-//           if (val != null) {
-//             return new Some(val);
-//           } else {
-//             return None;
-//           }
-//         }
+export function zipkinMiddleware({
+    serviceName,
+    port = 0,
+    debug = false,
+    endpoint,
+    sampleRate,
+}: IZipkinPluginOptions): express.RequestHandler {
+    const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, sampleRate })
+    const instrumentation = new Instrumentation.HttpServer({ tracer, port })
+    return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+        console.log('zipkin request express')
+        tracer.scoped(() => {
+            function readHeader(header: string): option.IOption<string> {
+                const val = req.header(header)
+                console.log('val: ', val)
+                if (val != null) {
+                    return new option.Some(val)
+                } else {
+                    return option.None
+                }
+            }
 
-//         const id =
-//           instrumentation.recordRequest(req.method, formatRequestUrl(req), readHeader);
+            const traceId: TraceId =
+                instrumentation.recordRequest(
+                    req.method,
+                    formatRequestUrl(req),
+                    (readHeader as any),
+                ) as any as TraceId // Nasty but this method is incorectly typed
 
-//         res.on('finish', () => {
-//           tracer.scoped(() => {
-//             instrumentation.recordResponse(id, res.statusCode);
-//           });
-//         });
+            (req as any)._traceId = traceId
 
-//         next();
-//       });
-//     };
-//   };
+            res.on('finish', () => {
+                tracer.scoped(() => {
+                    instrumentation.recordResponse(
+                        (traceId as any as TraceId),
+                        `${res.statusCode}`,
+                    )
+                })
+            })
+
+            next()
+        })
+    }
+}

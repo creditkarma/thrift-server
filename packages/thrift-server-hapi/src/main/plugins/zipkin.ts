@@ -1,6 +1,10 @@
+import {
+    getTracerForService,
+    IZipkinPluginOptions,
+} from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 import * as url from 'url'
-import { Instrumentation, option, Tracer } from 'zipkin'
+import { Instrumentation, option } from 'zipkin'
 
 const pkg: any = require('../../../package.json')
 
@@ -16,21 +20,20 @@ function readStatusCode({ response }: Hapi.Request): number {
     }
 }
 
-export interface IZipkinPluginOptions {
-    tracer: Tracer
-    port: number
-}
-
-export function HapiZipkinPlugin({ tracer, port = 0 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
-    const zipkinPlugin: Hapi.PluginRegistrationObject<never> = {
-        register(server, never, next) {
+export function zipkinPlugin({
+    serviceName,
+    port = 0,
+    debug = false,
+    endpoint,
+    sampleRate,
+}: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
+    const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
+        register(server: Hapi.Server, nothing: never, next) {
+            const tracer = getTracerForService(serviceName, { debug, endpoint, sampleRate })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
-            if (tracer == null) {
-                next(new Error('No tracer specified'))
-                return
-            }
 
             server.ext('onRequest', (request, reply) => {
+                console.log('zipkin request hapi')
                 const { headers } = request
                 const plugins = request.plugins
 
@@ -47,8 +50,6 @@ export function HapiZipkinPlugin({ tracer, port = 0 }: IZipkinPluginOptions): Ha
                             }
                         },
                     )
-
-                    console.log('traceId: ', traceId)
 
                     plugins.zipkin = { traceId }
 
@@ -70,7 +71,10 @@ export function HapiZipkinPlugin({ tracer, port = 0 }: IZipkinPluginOptions): Ha
         },
     }
 
-    zipkinPlugin.register.attributes = pkg
+    hapiZipkinPlugin.register.attributes = {
+        name: 'hapi-zipkin-plugin',
+        version: pkg.version,
+    }
 
-    return zipkinPlugin
+    return hapiZipkinPlugin
 }

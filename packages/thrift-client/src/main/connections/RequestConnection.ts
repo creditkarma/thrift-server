@@ -13,6 +13,7 @@ import {
 
 import {
     IHttpConnectionOptions,
+    IRequestResponse,
 } from '../types'
 
 import {
@@ -34,12 +35,12 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
         return {}
     }
 
-    public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<Buffer> {
+    public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<IRequestResponse> {
         // Merge user options with required options
         const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
             method: 'POST',
             body: dataToWrite,
-            encoding: null,
+            encoding: null, // Needs to be explicitly set to null to get Buffer in response body
             url: this.url,
             headers: {
                 'content-length': dataToWrite.length,
@@ -56,7 +57,11 @@ export class RequestConnection extends HttpConnection<CoreOptions> {
                     reject(response)
 
                 } else {
-                    resolve(body)
+                    resolve({
+                        statusCode: response.statusCode,
+                        headers: response.headers,
+                        body,
+                    })
                 }
             })
         })

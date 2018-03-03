@@ -8,8 +8,10 @@ import {
     IThriftServerOptions,
     ITransportConstructor,
     process,
-    TProtocol,
+    readThriftMethod,
 } from '@creditkarma/thrift-server-core'
+
+export * from './plugins'
 
 export type HapiOptionsFunction<TProcessor> = (
     req?: Hapi.Request,
@@ -38,21 +40,14 @@ export interface ICreateHapiServerOptions<TProcessor>
 
 export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<never>
 
-function readThriftMethod(
-    buffer: Buffer,
-    Transport: ITransportConstructor,
-    Protocol: IProtocolConstructor,
-): string {
-    const transportWithData = new Transport(buffer)
-    const input: TProtocol = new Protocol(transportWithData)
-    const { fieldName } = input.readMessageBegin()
-
-    return fieldName
-}
-
-export function createThriftServer<
-    TProcessor extends IThriftProcessor<Hapi.Request>
->(options: ICreateHapiServerOptions<TProcessor>): Hapi.Server {
+/**
+ * Creates and returns a Hapi server with the thrift plugin registered.
+ *
+ * @param options
+ */
+export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
+    options: ICreateHapiServerOptions<TProcessor>,
+): Hapi.Server {
     const server = new Hapi.Server({ debug: { request: ['error'] } })
 
     server.connection({ port: options.port })
@@ -71,6 +66,7 @@ export function createThriftServer<
         }),
         (err: any) => {
             if (err) {
+                console.log('error 2: ', err)
                 throw err
             }
         },
@@ -90,9 +86,14 @@ function getPluginOptions<TProcessor>(
     }
 }
 
-export function thirftServerHapi<
-    TProcessor extends IThriftProcessor<Hapi.Request>
->(pluginOptions: IHapiPluginOptions<TProcessor>): ThriftHapiPlugin {
+/**
+ * Create the thrift plugin for Hapi
+ *
+ * @param pluginOptions
+ */
+export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
+    pluginOptions: IHapiPluginOptions<TProcessor>,
+): ThriftHapiPlugin {
     const hapiThriftPlugin: ThriftHapiPlugin = {
         register(server: Hapi.Server, nothing: never, next) {
             server.route({
@@ -102,15 +103,17 @@ export function thirftServerHapi<
                     request: Hapi.Request,
                     reply: Hapi.ReplyNoContinue,
                 ) => {
-                    const options: IThriftServerOptions<
-                        TProcessor
-                    > = getPluginOptions(request, pluginOptions)
+                    const options: IThriftServerOptions<TProcessor> =
+                        getPluginOptions(request, pluginOptions)
+
                     const Transport: ITransportConstructor = getTransport(
                         options.transport,
                     )
+
                     const Protocol: IProtocolConstructor = getProtocol(
                         options.protocol,
                     )
+
                     try {
                         const method: string = readThriftMethod(
                             request.payload,

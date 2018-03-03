@@ -1,12 +1,3 @@
-import {
-    BinaryProtocol,
-    BufferedTransport,
-    IProtocolConstructor,
-    ITransportConstructor,
-    TProtocol,
-    TTransport,
-} from '@creditkarma/thrift-server-core'
-
 function isObject(obj: any): boolean {
     return (
         obj !== null &&
@@ -43,16 +34,4 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
     }
 
     return (newObj as Base & Update)
-}
-
-export function readThriftMethod(
-    buffer: Buffer,
-    Transport: ITransportConstructor = BufferedTransport,
-    Protocol: IProtocolConstructor = BinaryProtocol,
-): string {
-    const transportWithData: TTransport = new Transport(buffer)
-    const input: TProtocol = new Protocol(transportWithData)
-    const { fieldName } = input.readMessageBegin()
-
-    return fieldName
 }

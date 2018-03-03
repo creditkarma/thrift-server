@@ -1,3 +1,4 @@
+import { readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import { createClient } from '../../main'
@@ -5,8 +6,6 @@ import { createClient } from '../../main'
 import { CoreOptions } from 'request'
 
 import { SERVER_CONFIG } from '../config'
-
-import { readThriftMethod } from '../../main/utils'
 
 import { expect } from 'code'
 import * as Lab from 'lab'

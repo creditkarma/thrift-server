@@ -1,0 +1,1 @@
+export { ZipkinTracePlugin } from './zipkin'

@@ -1,14 +1,26 @@
 import {
     ProtocolType,
-    ThriftConnection,
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
+import { TraceId } from 'zipkin'
+
 import * as request from 'request'
 
-export interface IThriftContext<Request, Options> {
-    request?: Request
+export interface IRequestHeaders {
+    [name: string]: any
+}
+
+export interface IRequestResponse {
+    statusCode: number
+    headers: IRequestHeaders
+    body: Buffer
+}
+
+export interface IThriftContext<Options> {
     options?: Options
+    traceId?: TraceId
+    headers?: IRequestHeaders
 }
 
 export interface IHttpConnectionOptions {
@@ -26,12 +38,6 @@ export interface ICreateClientOptions<Context> extends IHttpConnectionOptions {
     requestOptions?: request.CoreOptions
 }
 
-export interface IClientConstructor<TClient, Context> {
-    new(
-        connection: ThriftConnection<Context>,
-    ): TClient
-}
-
 export type MiddlewareType =
     'request' | 'response'
 
@@ -45,7 +51,7 @@ export interface IThriftMiddlewareConfig {
 
 export type ResponseHandler = (data: Buffer) => Promise<Buffer>
 
-export type RequestHandler<Context> = (context: Context) => Promise<Context>
+export type RequestHandler<Context> = (context: IThriftContext<Context>) => Promise<Context>
 
 export interface IResponseMiddlewareConfig extends IThriftMiddlewareConfig {
     type?: 'response'

@@ -1,4 +1,8 @@
-import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import { Int64 } from '@creditkarma/thrift-server-core'
+import {
+    createThriftServer,
+    zipkinPlugin,
+} from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
 import { SharedStruct, SharedUnion } from './generated/shared/shared'
@@ -28,6 +32,9 @@ export function createServer(): Hapi.Server {
         },
         add(a: number, b: number): number {
             return a + b
+        },
+        addInt64(a: Int64, b: Int64, context?: Hapi.Request): Int64 {
+            return new Int64(a.toNumber() + b.toNumber())
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (
@@ -117,6 +124,19 @@ export function createServer(): Hapi.Server {
             handler: impl,
         },
     })
+
+    server.register(
+        zipkinPlugin({
+            serviceName: 'calculator-service',
+            sampleRate: 1,
+        }),
+        (err: any) => {
+            if (err) {
+                console.log('error: ', err)
+                throw err
+            }
+        },
+    )
 
     const client: Calculator.Client = createClient(Calculator.Client, {
         serviceName: 'calculator-service',

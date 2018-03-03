@@ -1,5 +1,5 @@
-import { BinaryProtocol } from './protocols'
-import { BufferedTransport } from './transports'
+import { BinaryProtocol, TProtocol } from './protocols'
+import { BufferedTransport, TTransport } from './transports'
 
 import {
     IProtocolConstructor,
@@ -9,6 +9,18 @@ import {
     ProtocolType,
     TransportType,
 } from './types'
+
+export function readThriftMethod(
+    buffer: Buffer,
+    Transport: ITransportConstructor = BufferedTransport,
+    Protocol: IProtocolConstructor = BinaryProtocol,
+): string {
+    const transportWithData: TTransport = new Transport(buffer)
+    const input: TProtocol = new Protocol(transportWithData)
+    const { fieldName } = input.readMessageBegin()
+
+    return fieldName
+}
 
 const transports: ITransportMap = {
     buffered: BufferedTransport,

@@ -62,25 +62,25 @@ $ npm run codegen
 
 There are two ways to create clients with the public API.
 
-* Use the `createClient` factory function.
+* Use the `createHttpClient` factory function.
 * Manually create your own `HttpConnection` object
 
-#### `createClient`
+#### `createHttpClient`
 
-Using the `createClient` function you pass in two arguments, the first is your Thrift service client class and the second is a map of options to configure the underlying HTTP connection.
+Using the `createHttpClient` function you pass in two arguments, the first is your Thrift service client class and the second is a map of options to configure the underlying HTTP connection.
 
 When creating a client using this method Thrift Client uses the [Request library](https://github.com/request/request) for making HTTP requests.
 
 ```typescript
 import {
-  createClient
+  createHttpClient
 } from '@creditkaram/thrift-client'
 import { CoreOptions } from 'request'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   requestOptions: {} // CoreOptions to pass to Request
@@ -157,7 +157,7 @@ Related to context you will notice that our Thrift service client is a generic `
 
 ```typescript
 import {
-  createClient
+  createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { CoreOptions } from 'request'
@@ -171,7 +171,7 @@ const serverConfig = {
 }
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   requestOptions: {} // CoreOptions to pass to Request
@@ -229,12 +229,12 @@ interface IRequestMiddleware<Context> {
 
 ```typescript
 import {
-  createClient
+  createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
-const thriftClient: Calculator.Client = createClient(Calculator.Client, {
+const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   register: [{
@@ -258,12 +258,12 @@ Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
 ```typescript
 import {
-  createClient
+  createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
-const thriftClient: Calculator.Client = createClient(Calculator.Client, {
+const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
   hostName: 'localhost',
   port: 8080,
   register: [{
@@ -281,7 +281,7 @@ const thriftClient: Calculator.Client = createClient(Calculator.Client, {
 
 #### Adding Middleware to HttpConnection Object
 
-When you're not using `createClient` you can add middleware directly to the connection instance.
+When you're not using `createHttpClient` you can add middleware directly to the connection instance.
 
 ```typescript
 // Create thrift client

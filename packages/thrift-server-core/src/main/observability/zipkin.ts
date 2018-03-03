@@ -17,6 +17,14 @@ const TRACER_CACHE: Map<string, Tracer> = new Map()
  * `http://localhost:9411/api/v1/spans`
  */
 
+export interface IZipkinPluginOptions {
+    serviceName: string
+    port?: number
+    debug?: boolean
+    endpoint?: string
+    sampleRate?: number
+}
+
 export interface IZipkinConfig {
     debug?: boolean
     endpoint?: string
