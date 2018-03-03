@@ -1,20 +1,19 @@
 import {
     getProtocol,
     getTransport,
+    readThriftMethod,
     ThriftConnection,
 } from '@creditkarma/thrift-server-core'
 
 import {
     IHttpConnectionOptions,
     IRequestMiddleware,
+    IRequestResponse,
     IResponseMiddleware,
+    IThriftMiddleware,
     RequestHandler,
     ThriftMiddleware,
 } from '../types'
-
-import {
-    readThriftMethod,
-} from '../utils'
 
 function normalizePath(path: string = '/'): string {
     if (path.startsWith('/')) {
@@ -54,12 +53,18 @@ async function reducePromises<T>(
     }
 }
 
-export interface IListenerData {
-    handler: IEventListener
-    oneTime: boolean
+function filterByMethod(method: string): (middleware: IThriftMiddleware) => boolean {
+    return (middleware: IThriftMiddleware): boolean => {
+        return (
+            middleware.methods.length === 0 ||
+            middleware.methods.indexOf(method) > -1
+        )
+    }
 }
 
-export type IEventListener = (...args: Array<any>) => void
+function getHandler<Context>(middleware: IRequestMiddleware<Context>): RequestHandler<Context> {
+    return middleware.handler
+}
 
 export abstract class HttpConnection<Context = never> extends ThriftConnection<Context> {
     protected readonly port: number
@@ -88,7 +93,7 @@ export abstract class HttpConnection<Context = never> extends ThriftConnection<C
     // Provides an empty context for outgoing middleware
     public abstract emptyContext(): Context
 
-    public abstract write(dataToWrite: Buffer, context?: Context): Promise<Buffer>
+    public abstract write(dataToWrite: Buffer, context?: Context): Promise<IRequestResponse>
 
     public register(...middleware: Array<ThriftMiddleware<Context>>): void {
         middleware.forEach((next: ThriftMiddleware<Context>) => {
@@ -116,27 +121,35 @@ export abstract class HttpConnection<Context = never> extends ThriftConnection<C
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
 
-        return reducePromises(this.middleware.request.filter((next: IRequestMiddleware<Context>) => {
-            return (
-                next.methods.length === 0 ||
-                next.methods.indexOf(requestMethod) > -1
-            )
-
-        }).map((next: IRequestMiddleware<Context>): RequestHandler<Context> => {
-            return next.handler
-
-        }), context).then((resolvedContext: Context | undefined) => {
-            return this.write(dataToSend, resolvedContext).then((data: Buffer) => {
-                return this.middleware.response.filter((next: IResponseMiddleware) => {
-                    return (
-                        next.methods.length === 0 ||
-                        next.methods.indexOf(requestMethod) > -1
-                    )
-
-                }).reduce((acc: Promise<Buffer>, next: IResponseMiddleware): Promise<Buffer> => {
-                    return acc.then(next.handler)
-                }, Promise.resolve(data))
+        return reducePromises(
+            this.handlersForMethod(requestMethod),
+            context,
+        ).then((resolvedContext: Context | undefined) => {
+            return this.write(dataToSend, resolvedContext).then((res: IRequestResponse) => {
+                return this.middleware.response
+                    .filter(filterByMethod(requestMethod))
+                    .reduce((acc: Promise<Buffer>, next: IResponseMiddleware): Promise<Buffer> => {
+                        return acc.then(next.handler)
+                    }, Promise.resolve(res.body))
             })
         })
     }
+
+    private handlersForMethod(name: string): Array<IPromisedFunction<Context>> {
+        return this.middleware.request
+            .filter(filterByMethod(name))
+            .map(getHandler)
+    }
 }
+
+/**
+ * interface NextFunction<Context> {
+ *     (data?: Buffer, context?: IThriftContext<Context>): Promise<Buffer>
+ * }
+ *
+ * interface RequestHandler<Context> {
+ *     (data: Buffer, context: IThriftContext<Context>, next: NextFunction<Context>): Promise<Buffer>
+ * }
+ *
+ *
+ */

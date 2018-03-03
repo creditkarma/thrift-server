@@ -11,14 +11,12 @@ export type LogFunction = (msg: string, data?: any) => void
  *
  * serviceName<string> - name of the service
  * handler<TProcessor> - a service processor instance for handling requests
- * path<string> - the path on which to server the Thrift API
  * transport<TransportType> - name of the transport to use
  * protocol<ProtocolType> - name of the protocol to use
  */
 export interface IThriftServerOptions<TProcessor> {
     serviceName: string
     handler: TProcessor
-    path?: string
     transport?: TransportType
     protocol?: ProtocolType
 }

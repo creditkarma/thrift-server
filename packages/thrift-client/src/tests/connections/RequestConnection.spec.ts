@@ -1,3 +1,4 @@
+import { readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import { RequestConnection, RequestInstance } from '../../main'
@@ -6,8 +7,6 @@ import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import { SERVER_CONFIG } from '../config'
-
-import { readThriftMethod } from '../../main/utils'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
@@ -130,9 +129,8 @@ describe('RequestConnection', () => {
                     path: '/return400',
                 },
             )
-            const badClient: Calculator.Client<
-                CoreOptions
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<CoreOptions> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -155,9 +153,8 @@ describe('RequestConnection', () => {
                     port: 8080,
                 },
             )
-            const badClient: Calculator.Client<
-                CoreOptions
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<CoreOptions> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -179,7 +176,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 handler(data: Buffer): Promise<Buffer> {
@@ -208,7 +205,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 methods: ['add'],
@@ -238,7 +235,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 handler(data: Buffer): Promise<Buffer> {
@@ -276,7 +273,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 methods: ['nope'],
@@ -304,7 +301,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 type: 'request',
@@ -330,7 +327,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 type: 'request',
@@ -357,7 +354,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -377,7 +374,7 @@ describe('RequestConnection', () => {
                 requestClient,
                 SERVER_CONFIG,
             )
-            const client = new Calculator.Client(connection)
+            const client = new Calculator.Client<CoreOptions>(connection)
 
             connection.register({
                 type: 'request',

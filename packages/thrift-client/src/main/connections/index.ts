@@ -1,3 +1,4 @@
+import { IClientConstructor } from '@creditkarma/thrift-server-core'
 import * as request from 'request'
 
 import {
@@ -6,7 +7,6 @@ import {
 } from './RequestConnection'
 
 import {
-    IClientConstructor,
     ICreateClientOptions,
 } from '../types'
 
@@ -27,4 +27,11 @@ export function createClient<TClient>(
     connection.register(...(options.register || []))
 
     return new ServiceClient(connection)
+}
+
+export function createHttpClient<TClient>(
+    ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
+    options: ICreateClientOptions<request.CoreOptions>,
+): TClient {
+    return createClient<TClient>(ServiceClient, options)
 }

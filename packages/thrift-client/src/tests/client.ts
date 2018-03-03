@@ -1,34 +1,46 @@
-import { config } from '@creditkarma/dynamic-config'
-import {
-
-} from '@creditkarma/thrift-server-express'
+import { zipkinMiddleware } from '@creditkarma/thrift-server-express'
 
 import {
     createClient,
-} from '../src/main/'
+    IThriftContext,
+    ZipkinTracePlugin,
+} from '../main/'
 
+import * as express from 'express'
+import * as net from 'net'
 import * as path from 'path'
 import { CoreOptions } from 'request'
-import * as express from 'express'
 
 import {
-    Work,
-    Operation,
     Calculator,
+    Operation,
+    Work,
 } from './generated/calculator/calculator'
 
-(async function() {
-    const SERVER_CONFIG = await config().get('server')
-    const CLIENT_CONFIG = await config().get('client')
+import {
+    CLIENT_CONFIG,
+    SERVER_CONFIG,
+} from './config'
 
+export function createClientServer(): Promise<net.Server> {
     // Get express instance
     const app = express()
 
+    app.use(zipkinMiddleware({
+        serviceName: 'calculator-client',
+        sampleRate: 1,
+    }))
+
     // Create thrift client
-    const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
-        hostName: SERVER_CONFIG.host,
-        port: SERVER_CONFIG.port,
-    })
+    const thriftClient: Calculator.Client<IThriftContext<CoreOptions>> =
+        createClient(Calculator.Client, {
+            hostName: SERVER_CONFIG.hostName,
+            port: SERVER_CONFIG.port,
+            register: [ ZipkinTracePlugin({
+                serviceName: 'calculator-service',
+                sampleRate: 1,
+            }) ],
+        })
 
     function symbolToOperation(sym: string): Operation {
         switch (sym) {
@@ -62,7 +74,7 @@ import {
         const work: Work = new Work({
             num1: req.query.left,
             num2: req.query.right,
-            op: symbolToOperation(req.query.op)
+            op: symbolToOperation(req.query.op),
         })
 
         thriftClient.calculate(1, work).then((val: number) => {
@@ -72,7 +84,10 @@ import {
         })
     })
 
-    app.listen(CLIENT_CONFIG.port, () => {
-        console.log(`Web server listening at http://${CLIENT_CONFIG.host}:${CLIENT_CONFIG.port}`)
+    return new Promise((resolve, reject) => {
+        const server: net.Server = app.listen(CLIENT_CONFIG.port, () => {
+            console.log(`Web server listening on port[${CLIENT_CONFIG.port}]`)
+            resolve(server)
+        })
     })
-}())
+}
