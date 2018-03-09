@@ -1,6 +1,7 @@
 {
 	"extends": "tslint:recommended",
 	"rules": {
+        "variable-name": false,
         "max-line-length": false,
         "jsdoc-format": false,
 		"object-literal-sort-keys": false,

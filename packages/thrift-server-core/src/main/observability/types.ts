@@ -6,6 +6,23 @@ export interface ITraceId {
     traceIdHigh?: boolean
 }
 
-export interface IHeaderMap {
+export interface IRequestHeaders {
     [name: string]: string | Array<string> | undefined
+}
+
+export interface IZipkinPluginOptions {
+    localServiceName: string
+    remoteServiceName?: string
+    port?: number
+    debug?: boolean
+    endpoint?: string
+    sampleRate?: number
+    httpInterval?: number
+}
+
+export interface IZipkinTracerConfig {
+    debug?: boolean
+    endpoint?: string
+    sampleRate?: number
+    httpInterval?: number
 }

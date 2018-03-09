@@ -1,83 +1,76 @@
-// import { Tracer, Instrumentation } from 'zipkin'
 import {
-    // getTracerForService
+    Instrumentation,
+    TraceId,
+    Tracer,
+} from 'zipkin'
+
+import {
+    addL5Dheaders,
+    asyncScope,
+    getTracerForService,
+    hasL5DHeader,
+    IRequestContext,
+    IRequestHeaders,
+    IZipkinPluginOptions,
 } from '@creditkarma/thrift-server-core'
+
 import { CoreOptions } from 'request'
 
 import {
-    IRequestMiddleware,
-    IThriftContext,
+    IRequestResponse,
+    IThriftMiddleware,
+    NextFunction,
+    ThriftContext,
 } from '../types'
 
-export interface IZipkinPluginOptions {
-    serviceName: string
-    port?: number
-    debug?: boolean
-    endpoint?: string
-    sampleRate?: number
+function applyL5DHeaders(incomingHeaders: IRequestHeaders, headers: IRequestHeaders): IRequestHeaders {
+    if (hasL5DHeader(incomingHeaders)) {
+        return addL5Dheaders(headers)
+    } else {
+        return headers
+    }
 }
 
 export function ZipkinTracePlugin({
-    serviceName,
+    localServiceName,
+    remoteServiceName,
     port = 0,
     debug = false,
     endpoint,
     sampleRate,
-}: IZipkinPluginOptions): IRequestMiddleware<CoreOptions> {
+}: IZipkinPluginOptions): IThriftMiddleware<CoreOptions> {
     return {
-        type: 'request',
         methods: [],
-        handler(context: IThriftContext<CoreOptions>): Promise<CoreOptions> {
-            console.log('context: ', context)
-            // const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, sampleRate })
-            // const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName: serviceName })
-            // if (context.headers !== undefined) {
+        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+            const requestContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
+            if (requestContext !== null) {
+                const traceId: TraceId = requestContext.traceId
+                const incomingHeaders: IRequestHeaders = requestContext.requestHeaders
+                tracer.setId(traceId)
+                return tracer.scoped(() => {
+                    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                    let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                    headers = applyL5DHeaders(incomingHeaders, headers)
 
-            // }
+                    return next(data, { headers }).then((res: IRequestResponse) => {
+                        tracer.scoped(() => {
+                            instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
+                        })
 
-            return Promise.resolve(context.options || {})
+                        return res
+
+                    }, (err: any) => {
+                        tracer.scoped(() => {
+                            instrumentation.recordError((traceId as any), err)
+                        })
+
+                        return Promise.reject(err)
+                    })
+                })
+            } else {
+                return next()
+            }
         },
     }
 }
-
-/**
- *
-const {
-    Instrumentation
-} = require('zipkin');
-
-function wrapFetch(fetch, { tracer, serviceName, remoteServiceName }) {
-    const instrumentation =
-        new Instrumentation.HttpClient({
-            tracer,
-            serviceName,
-            remoteServiceName
-        });
-
-    return function zipkinfetch(url, opts = {}) {
-        return new Promise((resolve, reject) => {
-            tracer.scoped(() => {
-                const method = opts.method || 'GET';
-                const zipkinOpts = instrumentation.recordRequest(opts, url, method);
-                const traceId = tracer.id;
-
-                fetch(url, zipkinOpts).then(res => {
-                    tracer.scoped(() => {
-                        instrumentation.recordResponse(traceId, res.status);
-                    });
-                    resolve(res);
-
-                }).catch(err => {
-                    tracer.scoped(() => {
-                        instrumentation.recordError(traceId, err);
-                    });
-                    reject(err);
-                });
-            });
-        });
-    };
-}
-
-module.exports = wrapFetch;
-
-*/

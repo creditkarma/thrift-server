@@ -126,7 +126,7 @@ export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                             { method },
                         )
                         reply(
-                            process({
+                            process<Hapi.Request>({
                                 processor: options.handler,
                                 buffer: request.payload,
                                 Transport,

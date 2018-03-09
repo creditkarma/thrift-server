@@ -1,13 +1,19 @@
 import { Int64 } from '@creditkarma/thrift-server-core'
+
 import {
     createThriftServer,
     zipkinPlugin,
 } from '@creditkarma/thrift-server-hapi'
+
 import * as Hapi from 'hapi'
+import { CoreOptions } from 'request'
 
 import { SharedStruct, SharedUnion } from './generated/shared/shared'
 
-import { SERVER_CONFIG } from './config'
+import {
+    ADD_SERVER_CONFIG,
+    CALC_SERVER_CONFIG,
+} from './config'
 
 import {
     Calculator,
@@ -16,9 +22,30 @@ import {
     Work,
 } from './generated/calculator/calculator'
 
-import { createClient } from '../main/index'
+import {
+    AddService,
+} from './generated/calculator/add-service'
 
-export function createServer(): Hapi.Server {
+import {
+    createClient,
+    ThriftContext,
+    ZipkinTracePlugin,
+} from '../main/index'
+
+export function createServer(sampleRate: number = 0): Hapi.Server {
+    // Create thrift client
+    const addServiceClient: AddService.Client<ThriftContext<CoreOptions>> =
+        createClient(AddService.Client, {
+            hostName: ADD_SERVER_CONFIG.hostName,
+            port: ADD_SERVER_CONFIG.port,
+            register: [ ZipkinTracePlugin({
+                localServiceName: 'calculator-service',
+                remoteServiceName: 'add-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
+            }) ],
+        })
+
     /**
      * Implementation of our thrift service.
      *
@@ -30,11 +57,11 @@ export function createServer(): Hapi.Server {
         ping(): void {
             return
         },
-        add(a: number, b: number): number {
-            return a + b
+        add(a: number, b: number, context?: Hapi.Request): Promise<number> {
+            return addServiceClient.add(a, b)
         },
-        addInt64(a: Int64, b: Int64, context?: Hapi.Request): Int64 {
-            return new Int64(a.toNumber() + b.toNumber())
+        addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
+            return addServiceClient.addInt64(a, b)
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (
@@ -46,10 +73,10 @@ export function createServer(): Hapi.Server {
                 throw new Error('Unauthorized')
             }
         },
-        calculate(logId: number, work: Work): number {
+        calculate(logId: number, work: Work, context?: Hapi.Request): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return work.num1 + work.num2
+                    return addServiceClient.add(work.num1, work.num2)
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:
@@ -117,8 +144,8 @@ export function createServer(): Hapi.Server {
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = createThriftServer({
-        port: SERVER_CONFIG.port,
-        path: SERVER_CONFIG.path,
+        port: CALC_SERVER_CONFIG.port,
+        path: CALC_SERVER_CONFIG.path,
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
@@ -127,8 +154,9 @@ export function createServer(): Hapi.Server {
 
     server.register(
         zipkinPlugin({
-            serviceName: 'calculator-service',
-            sampleRate: 1,
+            localServiceName: 'calculator-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate,
         }),
         (err: any) => {
             if (err) {
@@ -140,9 +168,9 @@ export function createServer(): Hapi.Server {
 
     const client: Calculator.Client = createClient(Calculator.Client, {
         serviceName: 'calculator-service',
-        hostName: SERVER_CONFIG.hostName,
-        port: SERVER_CONFIG.port,
-        path: SERVER_CONFIG.path,
+        hostName: CALC_SERVER_CONFIG.hostName,
+        port: CALC_SERVER_CONFIG.port,
+        path: CALC_SERVER_CONFIG.path,
     })
 
     server.route({

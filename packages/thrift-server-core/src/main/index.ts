@@ -12,6 +12,7 @@ export * from './transports'
 export * from './observability'
 export * from './errors'
 export * from './utils'
+export * from './async-scope'
 
 export function process<Context>(args: {
     processor: IThriftProcessor<Context>,

@@ -1,10 +1,16 @@
 import { EventEmitter } from 'events'
+import { TraceId } from 'zipkin'
 import { TProtocol } from './protocols'
 import { TTransport } from './transports'
 
 export * from './Int64'
 
 export type LogFunction = (msg: string, data?: any) => void
+
+export interface IRequestContext {
+    traceId: TraceId,
+    requestHeaders: { [name: string]: any }
+}
 
 /**
  * Options for any Thrift Server

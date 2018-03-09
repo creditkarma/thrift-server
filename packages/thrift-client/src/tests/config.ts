@@ -2,7 +2,12 @@ import {
     IHttpConnectionOptions,
 } from '../main'
 
-export const SERVER_CONFIG: IHttpConnectionOptions = {
+export const CALC_SERVER_CONFIG: IHttpConnectionOptions = {
+    hostName: 'localhost',
+    port: 8090,
+}
+
+export const ADD_SERVER_CONFIG: IHttpConnectionOptions = {
     hostName: 'localhost',
     port: 8080,
 }
