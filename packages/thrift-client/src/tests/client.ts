@@ -2,13 +2,12 @@ import { zipkinMiddleware } from '@creditkarma/thrift-server-express'
 
 import {
     createClient,
-    IThriftContext,
+    ThriftContext,
     ZipkinTracePlugin,
 } from '../main/'
 
 import * as express from 'express'
 import * as net from 'net'
-import * as path from 'path'
 import { CoreOptions } from 'request'
 
 import {
@@ -18,27 +17,30 @@ import {
 } from './generated/calculator/calculator'
 
 import {
+    CALC_SERVER_CONFIG,
     CLIENT_CONFIG,
-    SERVER_CONFIG,
 } from './config'
 
-export function createClientServer(): Promise<net.Server> {
+export function createClientServer(sampleRate: number = 0): Promise<net.Server> {
     // Get express instance
     const app = express()
 
     app.use(zipkinMiddleware({
-        serviceName: 'calculator-client',
-        sampleRate: 1,
+        localServiceName: 'calculator-client',
+        endpoint: 'http://localhost:9411/api/v1/spans',
+        sampleRate,
     }))
 
     // Create thrift client
-    const thriftClient: Calculator.Client<IThriftContext<CoreOptions>> =
+    const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
         createClient(Calculator.Client, {
-            hostName: SERVER_CONFIG.hostName,
-            port: SERVER_CONFIG.port,
+            hostName: CALC_SERVER_CONFIG.hostName,
+            port: CALC_SERVER_CONFIG.port,
             register: [ ZipkinTracePlugin({
-                serviceName: 'calculator-service',
-                sampleRate: 1,
+                localServiceName: 'calculator-client',
+                remoteServiceName: 'calculator-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
             }) ],
         })
 
@@ -56,10 +58,6 @@ export function createClientServer(): Promise<net.Server> {
                 throw new Error(`Unrecognized operation: ${sym}`)
         }
     }
-
-    app.get('/', (req: express.Request, res: express.Response): void => {
-        res.sendFile(path.join(__dirname, './index.html'))
-    })
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
         thriftClient.ping().then(() => {

@@ -1,17 +1,24 @@
 import { readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
-import { RequestConnection, RequestInstance } from '../../main'
+import {
+    HttpConnection,
+    IRequestResponse,
+    NextFunction,
+    RequestInstance,
+    ThriftContext,
+} from '../../main'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'
 
-import { SERVER_CONFIG } from '../config'
+import { CALC_SERVER_CONFIG } from '../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
 
-import { createServer } from '../server'
+import { createServer as addService } from '../add-service'
+import { createServer as calculatorService } from '../calculator-service'
 
 import { Calculator } from '../generated/calculator/calculator'
 
@@ -22,29 +29,37 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('RequestConnection', () => {
-    let server: Hapi.Server
+describe('HttpConnection', () => {
+    let calcServer: Hapi.Server
+    let addServer: Hapi.Server
 
     before(async () => {
-        server = createServer()
-        return server.start().then((err) => {
+        calcServer = calculatorService()
+        addServer = addService()
+        return Promise.all([
+            calcServer.start(),
+            addServer.start(),
+        ]).then((err) => {
             console.log('Thrift server running')
         })
     })
 
     after(async () => {
-        return server.stop().then(() => {
+        return Promise.all([
+            calcServer.stop(),
+            addServer.stop(),
+        ]).then((err) => {
             console.log('Thrift server stopped')
         })
     })
 
     describe('Basic Usage', () => {
-        let connection: RequestConnection
-        let client: Calculator.Client<CoreOptions>
+        let connection: HttpConnection
+        let client: Calculator.Client<ThriftContext<CoreOptions>>
 
         before(async () => {
             const requestClient: RequestInstance = request.defaults({})
-            connection = new RequestConnection(requestClient, SERVER_CONFIG)
+            connection = new HttpConnection(requestClient, CALC_SERVER_CONFIG)
             client = new Calculator.Client(connection)
         })
 
@@ -97,17 +112,16 @@ describe('RequestConnection', () => {
 
         it('should reject for a 500 server response', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const badConnection: RequestConnection = new RequestConnection(
+            const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: SERVER_CONFIG.hostName,
-                    port: SERVER_CONFIG.port,
+                    hostName: CALC_SERVER_CONFIG.hostName,
+                    port: CALC_SERVER_CONFIG.port,
                     path: '/return500',
                 },
             )
-            const badClient: Calculator.Client<
-                CoreOptions
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -121,15 +135,15 @@ describe('RequestConnection', () => {
 
         it('should reject for a 400 server response', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const badConnection: RequestConnection = new RequestConnection(
+            const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: SERVER_CONFIG.hostName,
-                    port: SERVER_CONFIG.port,
+                    hostName: CALC_SERVER_CONFIG.hostName,
+                    port: CALC_SERVER_CONFIG.port,
                     path: '/return400',
                 },
             )
-            const badClient: Calculator.Client<CoreOptions> =
+            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
                 new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
@@ -146,14 +160,14 @@ describe('RequestConnection', () => {
             const requestClient: RequestInstance = request.defaults({
                 timeout: 5000,
             })
-            const badConnection: RequestConnection = new RequestConnection(
+            const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
                     hostName: 'fakehost',
                     port: 8080,
                 },
             )
-            const badClient: Calculator.Client<CoreOptions> =
+            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
                 new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
@@ -172,16 +186,16 @@ describe('RequestConnection', () => {
     describe('IncomingMiddleware', () => {
         it('should resolve when middleware allows', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
-                handler(data: Buffer): Promise<Buffer> {
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     if (readThriftMethod(data) === 'add') {
-                        return Promise.resolve(data)
+                        return next()
                     } else {
                         return Promise.reject(
                             new Error(
@@ -201,17 +215,17 @@ describe('RequestConnection', () => {
 
         it('should resolve when middleware passes method filter', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
                 methods: ['add'],
-                handler(data: Buffer): Promise<Buffer> {
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     if (readThriftMethod(data) === 'add') {
-                        return Promise.resolve(data)
+                        return next()
                     } else {
                         return Promise.reject(
                             new Error(
@@ -231,16 +245,16 @@ describe('RequestConnection', () => {
 
         it('should reject when middleware rejects', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
-                handler(data: Buffer): Promise<Buffer> {
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     if (readThriftMethod(data) === 'nope') {
-                        return Promise.resolve(data)
+                        return next()
                     } else {
                         return Promise.reject(
                             new Error(
@@ -269,15 +283,15 @@ describe('RequestConnection', () => {
 
         it('should skip handler when middleware fails method filter', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
                 methods: ['nope'],
-                handler(data: Buffer): Promise<Buffer> {
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return Promise.reject(
                         new Error(
                             `Unrecognized method name: ${readThriftMethod(
@@ -297,22 +311,19 @@ describe('RequestConnection', () => {
     describe('OutgoingMiddleware', () => {
         it('should resolve when middleware adds auth token', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
-                type: 'request',
-                handler(context: CoreOptions): Promise<CoreOptions> {
-                    return Promise.resolve(
-                        Object.assign({}, context, {
-                            headers: {
-                                'X-Fake-Token': 'fake-token',
-                            },
-                        }),
-                    )
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(data, {
+                        headers: {
+                            'X-Fake-Token': 'fake-token',
+                        },
+                    })
                 },
             })
 
@@ -323,23 +334,20 @@ describe('RequestConnection', () => {
 
         it('should resolve when middleware passes method filter', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
-                type: 'request',
                 methods: ['addWithContext'],
-                handler(context: CoreOptions): Promise<CoreOptions> {
-                    return Promise.resolve(
-                        Object.assign({}, context, {
-                            headers: {
-                                'X-Fake-Token': 'fake-token',
-                            },
-                        }),
-                    )
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(data, {
+                        headers: {
+                            'X-Fake-Token': 'fake-token',
+                        },
+                    })
                 },
             })
 
@@ -350,11 +358,11 @@ describe('RequestConnection', () => {
 
         it('should reject when middleware does not add auth token', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -368,25 +376,22 @@ describe('RequestConnection', () => {
             )
         })
 
-        it('should resolve when middleware fails method filter', async () => {
+        it('should reject when middleware fails method filter', async () => {
             const requestClient: RequestInstance = request.defaults({})
-            const connection: RequestConnection = new RequestConnection(
+            const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                SERVER_CONFIG,
+                CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<CoreOptions>(connection)
+            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
 
             connection.register({
-                type: 'request',
                 methods: ['add'],
-                handler(context: CoreOptions): Promise<CoreOptions> {
-                    return Promise.resolve(
-                        Object.assign({}, context, {
+                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(data, {
                             headers: {
                                 'X-Fake-Token': 'fake-token',
                             },
-                        }),
-                    )
+                    })
                 },
             })
 

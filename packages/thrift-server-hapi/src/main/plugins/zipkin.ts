@@ -1,6 +1,8 @@
 import {
+    asyncScope,
     getTracerForService,
     IZipkinPluginOptions,
+    normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 import * as url from 'url'
@@ -21,7 +23,7 @@ function readStatusCode({ response }: Hapi.Request): number {
 }
 
 export function zipkinPlugin({
-    serviceName,
+    localServiceName,
     port = 0,
     debug = false,
     endpoint,
@@ -29,12 +31,11 @@ export function zipkinPlugin({
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next) {
-            const tracer = getTracerForService(serviceName, { debug, endpoint, sampleRate })
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
-                console.log('zipkin request hapi')
-                const { headers } = request
+                (request.headers as any) = normalizeHeaders(request.headers)
                 const plugins = request.plugins
 
                 tracer.scoped(() => {
@@ -42,8 +43,8 @@ export function zipkinPlugin({
                         request.method,
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
-                            const val = headers[header.toLowerCase()]
-                            if (val != null) {
+                            const val = request.headers[header.toLowerCase()]
+                            if (val !== null && val !== undefined) {
                                 return new option.Some(val)
                             } else {
                                 return option.None
@@ -52,6 +53,10 @@ export function zipkinPlugin({
                     )
 
                     plugins.zipkin = { traceId }
+                    asyncScope.set('requestContext', {
+                        traceId,
+                        requestHeaders: request.headers,
+                    })
 
                     return reply.continue()
                 })
@@ -61,7 +66,8 @@ export function zipkinPlugin({
                 const statusCode = readStatusCode(request)
 
                 tracer.scoped(() => {
-                    instrumentation.recordResponse(request.plugins.zipkin.traceId, `${statusCode}`)
+                    const traceId: any = request.plugins.zipkin.traceId
+                    instrumentation.recordResponse(traceId, `${statusCode}`)
                 })
 
                 return reply.continue()

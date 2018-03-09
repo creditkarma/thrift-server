@@ -2,26 +2,26 @@ import { IClientConstructor } from '@creditkarma/thrift-server-core'
 import * as request from 'request'
 
 import {
-    RequestConnection,
+    HttpConnection,
     RequestInstance,
-} from './RequestConnection'
+} from './HttpConnection'
 
 import {
-    ICreateClientOptions,
+    ICreateHttpClientOptions,
+    ThriftContext,
 } from '../types'
 
 export * from './HttpConnection'
-export * from './RequestConnection'
 
 export function createClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
-    options: ICreateClientOptions<request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
+    options: ICreateHttpClientOptions<request.CoreOptions>,
 ): TClient {
     const requestClient: RequestInstance =
         request.defaults(options.requestOptions || {})
 
-    const connection: RequestConnection =
-        new RequestConnection(requestClient, options)
+    const connection: HttpConnection =
+        new HttpConnection(requestClient, options)
 
     // Register optional middleware
     connection.register(...(options.register || []))
@@ -30,8 +30,8 @@ export function createClient<TClient>(
 }
 
 export function createHttpClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
-    options: ICreateClientOptions<request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
+    options: ICreateHttpClientOptions<request.CoreOptions>,
 ): TClient {
     return createClient<TClient>(ServiceClient, options)
 }

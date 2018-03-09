@@ -22,7 +22,7 @@
     "pretest": "npm run build",
     "test": "npm run test:only --",
     "test:watch": "watch 'npm run test:only' ./dist",
-    "test:only": "lab --verbose -l -S -P spec dist/tests/unit"
+    "test:only": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
