@@ -1,11 +1,11 @@
 {
-	"extends": "tslint:recommended",
-	"rules": {
+    "extends": "tslint:recommended",
+    "rules": {
         "variable-name": false,
         "max-line-length": false,
         "jsdoc-format": false,
-		"object-literal-sort-keys": false,
-		"no-console": false,
+        "object-literal-sort-keys": false,
+        "no-console": false,
         "no-var-requires": false,
         "array-type": [
             true,
@@ -20,5 +20,5 @@
             "single",
             "avoid-escape"
         ]
-	}
+    }
 }
