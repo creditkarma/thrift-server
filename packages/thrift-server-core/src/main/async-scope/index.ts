@@ -1,7 +1,4 @@
-import {
-    asyncHooks,
-    // debug,
-} from '../async-hooks'
+import * as AsyncHooks from '@creditkarma/async-hooks'
 
 export interface IAsyncScope {
     get<T>(key: string): T | null
@@ -15,7 +12,7 @@ interface IDictionary {
 
 interface IAsyncNode {
     id: number
-    parentId: number
+    parentId: number | null
     exited: boolean
     data: IDictionary
     children: Array<number>
@@ -24,25 +21,34 @@ interface IAsyncNode {
 type AsyncMap = Map<number, IAsyncNode>
 
 function cleanUpParents(asyncId: number, parentId: number, asyncMap: AsyncMap): void {
-    if (asyncMap.has(parentId)) {
-        asyncMap.get(parentId)!.children = asyncMap.get(parentId)!.children.filter((next: number) => {
+    const asyncNode: IAsyncNode | undefined = asyncMap.get(parentId)
+    if (asyncNode !== undefined) {
+        asyncNode.children = asyncNode.children.filter((next: number) => {
             return next !== asyncId
         })
 
-        if (asyncMap.get(parentId)!.exited && asyncMap.get(parentId)!.children.length === 0) {
-            const nextParentId: number = asyncMap.get(parentId)!.parentId
-            asyncMap.delete(parentId)
-            cleanUpParents(parentId, nextParentId, asyncMap)
+        if (asyncNode.exited && asyncNode.children.length === 0) {
+            const nextParentId: number | null = asyncNode.parentId
+            if (nextParentId !== null) {
+                asyncMap.delete(parentId)
+                cleanUpParents(parentId, nextParentId, asyncMap)
+            }
         }
     }
 }
 
 function recursiveGet<T>(key: string, asyncId: number, asyncMap: AsyncMap): T | null {
-    if (asyncMap.has(asyncId)) {
-        if (asyncMap.get(asyncId)!.data[key] !== undefined) {
+    const asyncNode: IAsyncNode | undefined = asyncMap.get(asyncId)
+    if (asyncNode !== undefined) {
+        if (asyncNode.data[key] !== undefined) {
             return asyncMap.get(asyncId)!.data[key]
         } else {
-            return recursiveGet<T>(key, asyncMap.get(asyncId)!.parentId, asyncMap)
+            const parentId: number | null = asyncNode.parentId
+            if (parentId !== null) {
+                return recursiveGet<T>(key, parentId, asyncMap)
+            } else {
+                return null
+            }
         }
     } else {
         return null
@@ -50,14 +56,17 @@ function recursiveGet<T>(key: string, asyncId: number, asyncMap: AsyncMap): T | 
 }
 
 function recursiveDelete(key: string, asyncId: number, asyncMap: AsyncMap): void {
-    if (asyncMap.has(asyncId)) {
-        const parentId: number = asyncMap.get(asyncId)!.parentId
+    const asyncNode: IAsyncNode | undefined = asyncMap.get(asyncId)
+    if (asyncNode !== undefined) {
+        const parentId: number | null = asyncNode.parentId
 
-        if (asyncMap.get(asyncId)!.data[key] !== undefined) {
-            delete asyncMap.get(asyncId)!.data[key]
+        if (asyncNode.data[key] !== undefined) {
+            delete asyncNode.data[key]
         }
 
-        recursiveDelete(key, parentId, asyncMap)
+        if (parentId !== null) {
+            recursiveDelete(key, parentId, asyncMap)
+        }
     }
 }
 
@@ -68,13 +77,13 @@ export class AsyncScope implements IAsyncScope {
         const self = this
         this.asyncMap = new Map()
 
-        asyncHooks.createHook({
+        AsyncHooks.createHook({
             init(asyncId, type, triggerAsyncId, resource) {
-                // debug('init: ', arguments)
+                // AsyncHooks.debug('init: ', arguments)
                 if (!self.asyncMap.has(triggerAsyncId)) {
                     self.asyncMap.set(triggerAsyncId, {
                         id: triggerAsyncId,
-                        parentId: -1,
+                        parentId: null,
                         exited: false,
                         data: {},
                         children: [],
@@ -92,23 +101,25 @@ export class AsyncScope implements IAsyncScope {
                 })
             },
             before(asyncId) {
-                // debug('before: ', asyncId)
+                // AsyncHooks.debug('before: ', asyncId)
             },
             after(asyncId) {
-                // debug('after: ', asyncId)
+                // AsyncHooks.debug('after: ', asyncId)
             },
             promiseResolve(asyncId) {
-                // debug('promiseResolve: ', asyncId)
+                // AsyncHooks.debug('promiseResolve: ', asyncId)
             },
             destroy(asyncId) {
-                // debug('destroy: ', asyncId)
+                // AsyncHooks.debug('destroy: ', asyncId)
                 if (self.asyncMap.has(asyncId)) {
                     // Only delete if the the child scopes are not still active
                     if (self.asyncMap.get(asyncId)!.children.length === 0) {
-                        const parentId: number = self.asyncMap.get(asyncId)!.parentId
-                        self.asyncMap.delete(asyncId)
+                        const parentId: number | null = self.asyncMap.get(asyncId)!.parentId
+                        if (parentId !== null) {
+                            self.asyncMap.delete(asyncId)
 
-                        cleanUpParents(asyncId, parentId, self.asyncMap)
+                            cleanUpParents(asyncId, parentId, self.asyncMap)
+                        }
 
                     // If child scopes are still active mark this scope as exited so we can clean up
                     // when child scopes do exit.
@@ -121,19 +132,19 @@ export class AsyncScope implements IAsyncScope {
     }
 
     public get<T>(key: string): T | null {
-        const activeId: number = asyncHooks.executionAsyncId()
+        const activeId: number = AsyncHooks.executionAsyncId()
         return recursiveGet<T>(key, activeId, this.asyncMap)
     }
 
     public set<T>(key: string, value: T): void {
-        const activeId: number = asyncHooks.executionAsyncId()
+        const activeId: number = AsyncHooks.executionAsyncId()
         if (this.asyncMap.has(activeId)) {
             this.asyncMap.get(activeId)!.data[key] = value
         }
     }
 
     public delete(key: string): void {
-        const activeId: number = asyncHooks.executionAsyncId()
+        const activeId: number = AsyncHooks.executionAsyncId()
         recursiveDelete(key, activeId, this.asyncMap)
     }
 }

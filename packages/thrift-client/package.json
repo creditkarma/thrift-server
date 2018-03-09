@@ -42,7 +42,7 @@
     "request": "^2.83.0"
   },
   "devDependencies": {
-    "@creditkarma/dynamic-config": "~0.5.0",
+    "@creditkarma/dynamic-config": "~0.5.2",
     "@creditkarma/thrift-server-core": "~0.4.3",
     "@creditkarma/thrift-server-express": "~0.4.3",
     "@creditkarma/thrift-server-hapi": "~0.4.3",

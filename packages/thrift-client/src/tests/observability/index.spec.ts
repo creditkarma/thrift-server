@@ -1,8 +1,8 @@
 import {
+    ITraceId,
     randomTraceId,
     serializeLinkerdHeader,
     traceIdFromTraceId,
-    ITraceId,
 } from '@creditkarma/thrift-server-core'
 import { expect } from 'code'
 import * as Hapi from 'hapi'
@@ -215,7 +215,7 @@ describe('Observability', () => {
                 },
                 headers: {
                     'l5d-ctx-trace': serializeLinkerdHeader(
-                        traceIdFromTraceId(trace_1)
+                        traceIdFromTraceId(trace_1),
                     ),
                     'x-b3-traceid': trace_2.traceId,
                     'x-b3-spanid': trace_2.spanId,
