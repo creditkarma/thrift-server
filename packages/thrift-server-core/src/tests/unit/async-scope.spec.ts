@@ -33,7 +33,6 @@ describe('AsyncStore', () => {
                     }, 50)
 
                     setTimeout(() => {
-                        console.log('what?')
                         expect(asyncScope.get<number>('bar')).to.equal(null)
                         done()
                     }, 250)

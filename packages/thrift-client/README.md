@@ -73,17 +73,18 @@ When creating a client using this method Thrift Client uses the [Request library
 
 ```typescript
 import {
-  createHttpClient
+    createHttpClient
 } from '@creditkaram/thrift-client'
+
 import { CoreOptions } from 'request'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
 const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
-  hostName: 'localhost',
-  port: 8080,
-  requestOptions: {} // CoreOptions to pass to Request
+    hostName: 'localhost',
+    port: 8080,
+    requestOptions: {} // CoreOptions to pass to Request
 })
 ```
 
@@ -117,9 +118,9 @@ Manually creating your Thrift client allows you to choose the use of another HTT
 
 ```typescript
 import {
-  RequestInstance,
-  RequestConnection,
-  IHttpConnectionOptions,
+    RequestInstance,
+    RequestConnection,
+    IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
 import * as request from 'request'
 import { CoreOptions } from 'request'
@@ -127,18 +128,18 @@ import { CoreOptions } from 'request'
 import { Calculator } from './codegen/calculator'
 
 const clientConfig: IHttpConnectionOptions = {
-  hostName: 'localhost',
-  port: 3000,
-  path: '/',
-  transport: 'buffered',
-  protocol: 'binary',
+    hostName: 'localhost',
+    port: 3000,
+    path: '/',
+    transport: 'buffered',
+    protocol: 'binary',
 }
 
 // Create Thrift client
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
-  new RequestConnection(requestClient, clientConfig)
+    new RequestConnection(requestClient, clientConfig)
 
 const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 ```
@@ -157,7 +158,7 @@ Related to context you will notice that our Thrift service client is a generic `
 
 ```typescript
 import {
-  createHttpClient
+    createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { CoreOptions } from 'request'
@@ -166,36 +167,36 @@ import * as express from 'express'
 import { Calculator } from './codegen/calculator'
 
 const serverConfig = {
-  hostName: 'localhost',
-  port: 8080,
+    hostName: 'localhost',
+    port: 8080,
 }
 
 // Create Thrift client
 const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
-  hostName: 'localhost',
-  port: 8080,
-  requestOptions: {} // CoreOptions to pass to Request
+    hostName: 'localhost',
+    port: 8080,
+    requestOptions: {} // CoreOptions to pass to Request
 })
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
-  // Request contexts allow you to do tracing and auth
-  const context: CoreOptions = {
-    headers: {
-      'X-Trace-Id': 'my-trace-id'
+    // Request contexts allow you to do tracing and auth
+    const context: CoreOptions = {
+        headers: {
+            'X-Trace-Id': 'my-trace-id'
+        }
     }
-  }
 
-  // Client methods return a Promise of the expected result
-  thriftClient.add(req.query.left, req.query.right, context).then((result: number) => {
-    res.send(result)
-  }, (err: any) => {
-    res.status(500).send(err)
-  })
+    // Client methods return a Promise of the expected result
+    thriftClient.add(req.query.left, req.query.right, context).then((result: number) => {
+        res.send(result)
+    }, (err: any) => {
+        res.status(500).send(err)
+    })
 })
 
 app.listen(serverConfig.port, () => {
-  console.log(`Web server listening at http://${serverConfig.hostName}:${serverConfig.port}`)
+    console.log(`Web server listening at http://${serverConfig.hostName}:${serverConfig.port}`)
 })
 ```
 
@@ -209,15 +210,15 @@ Middleware are applied in the order in which they are registered.
 
 ```typescript
 interface IResponseMiddleware {
-  type: 'reqponse'
-  methods: Array<string>
-  hander(data: Buffer): Promise<Buffer>
+    type: 'reqponse'
+    methods: Array<string>
+    hander(data: Buffer): Promise<Buffer>
 }
 
 interface IRequestMiddleware<Context> {
-  type: 'request'
-  mthods: Array<string>
-  handler(context: Context): Promise<Context>
+    type: 'request'
+    mthods: Array<string>
+    handler(context: Context): Promise<Context>
 }
 ```
 
@@ -229,24 +230,24 @@ interface IRequestMiddleware<Context> {
 
 ```typescript
 import {
-  createHttpClient
+    createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
 const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
-  hostName: 'localhost',
-  port: 8080,
-  register: [{
-    type: 'response',
-    handler(data: Buffer): Promise<Buffer> {
-      if (validatePayload(data)) {
-        return Promise.resolve(data)
-      } else {
-        return Promise.reject(new Error('Payload of thrift response is invalid'))
-      }
-    },
-  }]
+    hostName: 'localhost',
+    port: 8080,
+    register: [{
+        type: 'response',
+        handler(data: Buffer): Promise<Buffer> {
+            if (validatePayload(data)) {
+                return Promise.resolve(data)
+            } else {
+                return Promise.reject(new Error('Payload of thrift response is invalid'))
+            }
+        },
+    }]
 })
 ```
 
@@ -258,24 +259,24 @@ Here, the `X-Fake-Token` will be added to every outgoing client method call:
 
 ```typescript
 import {
-  createHttpClient
+    createHttpClient
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
 const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
-  hostName: 'localhost',
-  port: 8080,
-  register: [{
-    type: 'request',
-    handler(context: CoreOptions): Promise<CoreOptions> {
-      return Promise.resolve(Object.assign({}, context, {
-        headers: {
-          'X-Fake-Token': 'fake-token',
+    hostName: 'localhost',
+    port: 8080,
+    register: [{
+        type: 'request',
+        handler(context: CoreOptions): Promise<CoreOptions> {
+            return Promise.resolve(Object.assign({}, context, {
+                headers: {
+                    'X-Fake-Token': 'fake-token',
+                },
+            }))
         },
-      }))
-    },
-  }]
+    }]
 })
 ```
 
@@ -288,17 +289,17 @@ When you're not using `createHttpClient` you can add middleware directly to the 
 const requestClient: RequestInstance = request.defaults({})
 
 const connection: RequestConnection =
-  new RequestConnection(requestClient, clientConfig)
+    new RequestConnection(requestClient, clientConfig)
 
 connection.register({
-  type: 'request',
-  handler(context: CoreOptions): Promise<CoreOptions> {
-    return Promise.resolve(Object.assign({}, context, {
-      headers: {
-        'X-Fake-Token': 'fake-token',
-      },
-    }))
-  },
+    type: 'request',
+    handler(context: CoreOptions): Promise<CoreOptions> {
+        return Promise.resolve(Object.assign({}, context, {
+            headers: {
+                'X-Fake-Token': 'fake-token',
+            },
+        }))
+    },
 })
 
 const thriftClient: Calculator.Client = new Calculator.Client(connection)
@@ -314,43 +315,43 @@ As an example look at the RequestConnection:
 
 ```typescript
 export class RequestConnection extends HttpConnection<CoreOptions> {
-  private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
+    private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
 
-  constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
-    super(options)
-    this.request = requestApi.defaults({
-      // Encoding needs to be explicitly set to null or the response body will be a string
-      encoding: null,
-      url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
-    })
-  }
+    constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
+        super(options)
+        this.request = requestApi.defaults({
+            // Encoding needs to be explicitly set to null or the response body will be a string
+            encoding: null,
+            url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
+        })
+    }
 
-  public emptyContext(): CoreOptions {
-    return {}
-  }
+    public emptyContext(): CoreOptions {
+        return {}
+    }
 
-  public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
-    // Merge user options with required options
-    const requestOptions: request.CoreOptions = deepMerge(context, {
-      body: dataToWrite,
-      headers: {
-        'content-length': dataToWrite.length,
-        'content-type': 'application/octet-stream',
-      },
-    })
+    public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
+        // Merge user options with required options
+        const requestOptions: request.CoreOptions = deepMerge(context, {
+            body: dataToWrite,
+            headers: {
+                'content-length': dataToWrite.length,
+                'content-type': 'application/octet-stream',
+            },
+        })
 
-    return new Promise((resolve, reject) => {
-      this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
-        if (err !== null) {
-          reject(err)
-        } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
-          reject(new Error(body.toString()))
-        } else {
-          resolve(body)
-        }
-      })
-    })
-  }
+        return new Promise((resolve, reject) => {
+            this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
+                if (err !== null) {
+                    reject(err)
+                } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
+                    reject(new Error(body.toString()))
+                } else {
+                    resolve(body)
+                }
+            })
+        })
+    }
 }
 ```
 
