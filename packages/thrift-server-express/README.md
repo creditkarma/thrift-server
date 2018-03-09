@@ -49,7 +49,7 @@ import * as express from 'express'
 import { thriftExpress } from '../main'
 
 import {
-  Calculator,
+    Calculator,
 } from './codegen/calculator'
 
 const PORT = 8080
@@ -82,11 +82,11 @@ app.use(
 )
 
 app.get('/control', (req: express.Request, res: express.Response) => {
-  res.send('PASS')
+    res.send('PASS')
 })
 
 app.listen(PORT, () => {
-  console.log(`Express server listening on port: ${PORT}`)
+    console.log(`Express server listening on port: ${PORT}`)
 })
 ```
 
