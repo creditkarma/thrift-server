@@ -39,6 +39,7 @@ export function zipkinPlugin({
                 const plugins = request.plugins
 
                 tracer.scoped(() => {
+                    console.log(`hapi: recordRequest[${localServiceName}]: `, request.headers)
                     const traceId = instrumentation.recordRequest(
                         request.method,
                         url.format(request.url),
@@ -67,6 +68,7 @@ export function zipkinPlugin({
 
                 tracer.scoped(() => {
                     const traceId: any = request.plugins.zipkin.traceId
+                    console.log(`hapi: recordResponse[${localServiceName}]`)
                     instrumentation.recordResponse(traceId, `${statusCode}`)
                 })
 

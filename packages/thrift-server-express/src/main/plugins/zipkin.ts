@@ -46,6 +46,7 @@ export function zipkinMiddleware({
                 }
             }
 
+            console.log(`express: recordRequest[${localServiceName}]: `, req.headers)
             const traceId: TraceId =
                 instrumentation.recordRequest(
                     req.method,
@@ -60,6 +61,7 @@ export function zipkinMiddleware({
 
             res.on('finish', () => {
                 tracer.scoped(() => {
+                    console.log(`express: recordRequest[${localServiceName}]`)
                     instrumentation.recordResponse(
                         (traceId as any), // This method is also incorrectly typed
                         `${res.statusCode}`,
