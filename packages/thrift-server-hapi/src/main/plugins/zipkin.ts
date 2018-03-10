@@ -54,6 +54,7 @@ export function zipkinPlugin({
                     )
 
                     plugins.zipkin = { traceId }
+                    console.log('hapi: lineage: ', asyncScope.lineage())
                     asyncScope.set('requestContext', {
                         traceId,
                         requestHeaders: request.headers,
