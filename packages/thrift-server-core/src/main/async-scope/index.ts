@@ -153,6 +153,7 @@ export class AsyncScope implements IAsyncScope {
     public set<T>(key: string, value: T): void {
         const activeId: number = AsyncHooks.executionAsyncId()
         console.log(`set[${key}]: activeId[${activeId}]: `, this.lineage())
+        console.log(`set[${key}]: value: `, value)
         if (this.asyncMap.has(activeId)) {
             this.asyncMap.get(activeId)!.data[key] = value
         }
@@ -165,6 +166,7 @@ export class AsyncScope implements IAsyncScope {
     }
 
     public lineage(): Array<number> {
+        console.log('Map: ', this.asyncMap)
         const activeId: number = AsyncHooks.executionAsyncId()
         return lineageFor(activeId, this.asyncMap)
     }
