@@ -51,12 +51,13 @@ export function ZipkinTracePlugin({
                 tracer.setId(traceId)
                 return tracer.scoped(() => {
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                    console.log(`client: recordRequest[${localServiceName}]: `, incomingHeaders)
                     let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
                     headers = applyL5DHeaders(incomingHeaders, headers)
-                    console.log('headers: ', headers)
 
                     return next(data, { headers }).then((res: IRequestResponse) => {
                         tracer.scoped(() => {
+                            console.log(`client: recordResponse[${localServiceName}]`)
                             instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
                         })
 
