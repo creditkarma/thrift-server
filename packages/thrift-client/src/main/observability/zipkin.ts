@@ -42,6 +42,7 @@ export function ZipkinTracePlugin({
     return {
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            console.log('apply zipkin plugin: ', context)
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
             const requestContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
             if (requestContext !== null) {
@@ -52,6 +53,7 @@ export function ZipkinTracePlugin({
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
                     let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
                     headers = applyL5DHeaders(incomingHeaders, headers)
+                    console.log('headers: ', headers)
 
                     return next(data, { headers }).then((res: IRequestResponse) => {
                         tracer.scoped(() => {
