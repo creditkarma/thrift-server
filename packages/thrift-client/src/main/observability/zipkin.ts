@@ -42,10 +42,10 @@ export function ZipkinTracePlugin({
     return {
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-            console.log('apply zipkin plugin: ', context)
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
             const requestContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
-            console.log('requestContext: ', requestContext)
+            console.log('clieant: lineage: ', asyncScope.lineage())
+            console.log('client: requestContext: ', requestContext)
             if (requestContext !== null) {
                 const traceId: TraceId = requestContext.traceId
                 const incomingHeaders: IRequestHeaders = requestContext.requestHeaders

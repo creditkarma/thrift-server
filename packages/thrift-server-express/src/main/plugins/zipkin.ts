@@ -54,6 +54,7 @@ export function zipkinMiddleware({
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
 
+            console.log('express: lineage: ', asyncScope.lineage())
             asyncScope.set('requestContext', {
                 traceId,
                 requestHeaders: req.headers,

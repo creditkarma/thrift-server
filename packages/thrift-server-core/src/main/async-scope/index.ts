@@ -70,6 +70,19 @@ function recursiveDelete(key: string, asyncId: number, asyncMap: AsyncMap): void
     }
 }
 
+function lineageFor(asyncId: number, asyncMap: AsyncMap): Array<number> {
+    const asyncNode: IAsyncNode | undefined = asyncMap.get(asyncId)
+    if (asyncNode !== undefined) {
+        const parentId: number | null = asyncNode.parentId
+
+        if (parentId !== null) {
+            return [ asyncId, ...lineageFor(parentId, asyncMap) ]
+        }
+    }
+
+    return [ asyncId ]
+}
+
 export class AsyncScope implements IAsyncScope {
     private asyncMap: Map<number, IAsyncNode>
 
@@ -146,6 +159,11 @@ export class AsyncScope implements IAsyncScope {
     public delete(key: string): void {
         const activeId: number = AsyncHooks.executionAsyncId()
         recursiveDelete(key, activeId, this.asyncMap)
+    }
+
+    public lineage(): Array<number> {
+        const activeId: number = AsyncHooks.executionAsyncId()
+        return lineageFor(activeId, this.asyncMap)
     }
 }
 
