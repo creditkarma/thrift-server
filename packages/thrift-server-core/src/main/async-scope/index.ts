@@ -6,11 +6,14 @@ export interface IAsyncScope {
     delete(key: string): void
 }
 
+let uid: number = 0
+
 interface IDictionary {
     [key: string]: any
 }
 
 interface IAsyncNode {
+    _id: number
     id: number
     timestamp: number
     parentId: number | null
@@ -96,6 +99,7 @@ export class AsyncScope implements IAsyncScope {
                 // AsyncHooks.debug('init: ', arguments)
                 if (!self.asyncMap.has(triggerAsyncId)) {
                     self.asyncMap.set(triggerAsyncId, {
+                        _id: (uid += 1),
                         id: triggerAsyncId,
                         timestamp: Date.now(),
                         parentId: null,
@@ -108,6 +112,7 @@ export class AsyncScope implements IAsyncScope {
                 self.asyncMap.get(triggerAsyncId)!.children.push(asyncId)
 
                 self.asyncMap.set(asyncId, {
+                    _id: (uid += 1),
                     id: asyncId,
                     timestamp: Date.now(),
                     parentId: triggerAsyncId,
