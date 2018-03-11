@@ -62,7 +62,7 @@ function recursiveDelete(key: string, asyncId: number, asyncMap: AsyncMap): void
         const parentId: number | null = asyncNode.parentId
 
         if (asyncNode.data[key] !== undefined) {
-            delete asyncNode.data[key]
+            asyncNode.data[key] = undefined
         }
 
         if (parentId !== null) {
@@ -126,11 +126,14 @@ export class AsyncScope implements IAsyncScope {
                 // AsyncHooks.debug('promiseResolve: ', asyncId)
             },
             destroy(asyncId) {
-                // AsyncHooks.debug('destroy: ', asyncId)
-                if (self.asyncMap.has(asyncId)) {
+                const nodeToDestroy = self.asyncMap.get(asyncId)
+                if (asyncId < 200 && asyncId > 150) {
+                    AsyncHooks.debug(`destroy[${asyncId}]: `, nodeToDestroy)
+                }
+                if (nodeToDestroy !== undefined) {
                     // Only delete if the the child scopes are not still active
-                    if (self.asyncMap.get(asyncId)!.children.length === 0) {
-                        const parentId: number | null = self.asyncMap.get(asyncId)!.parentId
+                    if (nodeToDestroy.children.length === 0) {
+                        const parentId: number | null = nodeToDestroy.parentId
                         if (parentId !== null) {
                             self.asyncMap.delete(asyncId)
                             cleanUpParents(asyncId, parentId, self.asyncMap)
@@ -139,7 +142,7 @@ export class AsyncScope implements IAsyncScope {
                     // If child scopes are still active mark this scope as exited so we can clean up
                     // when child scopes do exit.
                     } else {
-                        self.asyncMap.get(asyncId)!.exited = true
+                        nodeToDestroy.exited = true
                     }
                 }
             },
