@@ -146,27 +146,34 @@ export class AsyncScope implements IAsyncScope {
 
     public get<T>(key: string): T | null {
         const activeId: number = AsyncHooks.executionAsyncId()
-        console.log(`get[${key}]: activeId[${activeId}]: `, this.lineage())
-        return recursiveGet<T>(key, activeId, this.asyncMap)
+        const result = recursiveGet<T>(key, activeId, this.asyncMap)
+        if (key === 'requestContext') {
+            console.log(`get[${key}]: activeId[${activeId}]: `, this.lineage())
+            console.log(`get[${key}]: map: `, this.asyncMap)
+            console.log(`get[${key}]: lineage: `, this.lineage())
+        }
+        return result
     }
 
     public set<T>(key: string, value: T): void {
         const activeId: number = AsyncHooks.executionAsyncId()
-        console.log(`set[${key}]: activeId[${activeId}]: `, this.lineage())
-        console.log(`set[${key}]: value: `, value)
         if (this.asyncMap.has(activeId)) {
             this.asyncMap.get(activeId)!.data[key] = value
+        }
+        if (key === 'requestContext') {
+            console.log(`set[${key}]: activeId[${activeId}]: `, this.lineage())
+            console.log(`set[${key}]: value: `, value)
+            console.log(`set[${key}]: map: `, this.asyncMap.get(activeId))
+            console.log(`get[${key}]: lineage: `, this.lineage())
         }
     }
 
     public delete(key: string): void {
         const activeId: number = AsyncHooks.executionAsyncId()
-        console.log(`delete[${key}]: activeId[${activeId}]: `, this.lineage())
         recursiveDelete(key, activeId, this.asyncMap)
     }
 
     public lineage(): Array<number> {
-        console.log('Map: ', this.asyncMap)
         const activeId: number = AsyncHooks.executionAsyncId()
         return lineageFor(activeId, this.asyncMap)
     }
