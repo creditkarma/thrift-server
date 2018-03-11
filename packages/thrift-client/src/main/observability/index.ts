@@ -1,1 +1,1 @@
-export { ZipkinTracePlugin } from './zipkin'
+export { zipkinClientMiddleware } from './zipkin'

@@ -45,19 +45,21 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         },
     })
 
-    server.register(
-        zipkinPlugin({
-            localServiceName: 'add-service',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate,
-        }),
-        (err: any) => {
-            if (err) {
-                console.log('error: ', err)
-                throw err
-            }
-        },
-    )
+    if (sampleRate > 0) {
+        server.register(
+            zipkinPlugin({
+                localServiceName: 'add-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
+            }),
+            (err: any) => {
+                if (err) {
+                    console.log('error: ', err)
+                    throw err
+                }
+            },
+        )
+    }
 
     /**
      * The Hapi server can process requests that are not targeted to the thrift

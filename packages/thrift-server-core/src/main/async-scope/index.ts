@@ -6,14 +6,11 @@ export interface IAsyncScope {
     delete(key: string): void
 }
 
-let uid: number = 0
-
 interface IDictionary {
     [key: string]: any
 }
 
 interface IAsyncNode {
-    _id: number
     id: number
     timestamp: number
     parentId: number | null
@@ -96,13 +93,8 @@ export class AsyncScope implements IAsyncScope {
 
         AsyncHooks.createHook({
             init(asyncId, type, triggerAsyncId, resource) {
-                if (asyncId < 200 && asyncId > 150) {
-                    AsyncHooks.debug(`init[${asyncId}]: `, arguments)
-                    AsyncHooks.debug(`init[${asyncId}]: parent[${triggerAsyncId}]: `, self.asyncMap.get(triggerAsyncId))
-                }
                 if (!self.asyncMap.has(triggerAsyncId)) {
                     self.asyncMap.set(triggerAsyncId, {
-                        _id: (uid += 1),
                         id: triggerAsyncId,
                         timestamp: Date.now(),
                         parentId: null,
@@ -115,7 +107,6 @@ export class AsyncScope implements IAsyncScope {
                 self.asyncMap.get(triggerAsyncId)!.children.push(asyncId)
 
                 self.asyncMap.set(asyncId, {
-                    _id: (uid += 1),
                     id: asyncId,
                     timestamp: Date.now(),
                     parentId: triggerAsyncId,
@@ -135,9 +126,6 @@ export class AsyncScope implements IAsyncScope {
             },
             destroy(asyncId) {
                 const nodeToDestroy = self.asyncMap.get(asyncId)
-                if (asyncId < 200 && asyncId > 150) {
-                    AsyncHooks.debug(`destroy[${asyncId}]: `, nodeToDestroy)
-                }
                 if (nodeToDestroy !== undefined) {
                     // Only delete if the the child scopes are not still active
                     if (nodeToDestroy.children.length === 0) {
@@ -159,14 +147,7 @@ export class AsyncScope implements IAsyncScope {
 
     public get<T>(key: string): T | null {
         const activeId: number = AsyncHooks.executionAsyncId()
-        const result = recursiveGet<T>(key, activeId, this.asyncMap)
-        if (key === 'requestContext') {
-            console.log(`get[${key}]: activeId[${activeId}]: `, this.lineage())
-            console.log(`get[${key}]: map: `, this.asyncMap.get(activeId))
-            console.log(`get[${key}]: result: `, result)
-            console.log(`get[${key}]: lineage: `, this.lineage())
-        }
-        return result
+        return recursiveGet<T>(key, activeId, this.asyncMap)
     }
 
     public set<T>(key: string, value: T): void {
@@ -175,20 +156,16 @@ export class AsyncScope implements IAsyncScope {
         if (activeNode !== undefined) {
             activeNode.data[key] = value
         }
-        if (key === 'requestContext') {
-            console.log(`set[${key}]: activeId[${activeId}]: `, this.lineage())
-            console.log(`set[${key}]: value: `, value)
-            console.log(`set[${key}]: map: `, this.asyncMap.get(activeId))
-            console.log(`set[${key}]: lineage: `, this.lineage())
-        }
     }
 
     public delete(key: string): void {
         const activeId: number = AsyncHooks.executionAsyncId()
-        console.log(`delete[${key}]: activeId[${activeId}]`)
         recursiveDelete(key, activeId, this.asyncMap)
     }
 
+    /**
+     * A method for debugging, returns the lineage (parent scope ids) of the current scope
+     */
     public lineage(): Array<number> {
         const activeId: number = AsyncHooks.executionAsyncId()
         return lineageFor(activeId, this.asyncMap)

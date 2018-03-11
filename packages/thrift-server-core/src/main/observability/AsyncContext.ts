@@ -3,7 +3,6 @@ import { asyncScope } from '../async-scope'
 
 export class AsyncContext implements Context<TraceId> {
     public setContext(ctx: TraceId): void {
-        // console.log('setContext')
         asyncScope.set('traceId', ctx)
     }
 

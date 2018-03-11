@@ -20,14 +20,15 @@ We're going to go through this step-by-step.
 * Run codegen on our Thrift IDL
 * Create a client
 * Make service calls with our client
+* Add observability with [Zipkin](https://github.com/openzipkin/zipkin-js)
 
 ### Install
 
-All Thrift Server libraries defined most things as peer dependencies to avoid type collisions.
+All Thrift Server libraries define inter-dependencies as peer dependencies to avoid type collisions.
 
 ```sh
 $ npm install --save-dev @creditkarma/thrift-typescript
-$ npm install --save @creditkarma/thrift-server-core"
+$ npm install --save @creditkarma/thrift-server-core
 $ npm install --save @creditkarma/thrift-client
 $ npm install --save request
 $ npm install --save @types/request
@@ -82,6 +83,7 @@ import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
 const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+    serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
     requestOptions: {} // CoreOptions to pass to Request
@@ -92,6 +94,7 @@ const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator
 
 The available options are:
 
+* serviceName (optional): The name of your service. Used for logging.
 * hostName (required): The name of the host to connect to.
 * port (required): The port number to attach to on the host.
 * path (optional): The path on which the Thrift service is listening. Defaults to '/thrift'.
@@ -119,7 +122,7 @@ Manually creating your Thrift client allows you to choose the use of another HTT
 ```typescript
 import {
     RequestInstance,
-    RequestConnection,
+    HttpConnection,
     IHttpConnectionOptions,
 } from '@creditkaram/thrift-client'
 import * as request from 'request'
@@ -138,15 +141,15 @@ const clientConfig: IHttpConnectionOptions = {
 // Create Thrift client
 const requestClient: RequestInstance = request.defaults({})
 
-const connection: RequestConnection =
-    new RequestConnection(requestClient, clientConfig)
+const connection: HttpConnection =
+    new HttpConnection(requestClient, clientConfig)
 
 const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 ```
 
-Here `RequestConnection` is a class that extends the `HttpConnection` abstract class. Later we will look closer at creating this class.
+Here `HttpConnection` is a class that implements the `IThriftConnection` interface. You could create custom connections, for instance TCP, by implementing this interface.
 
-Also of note here is that the type `IHttpConnectionOptions` does not accept the `requestOptions` parameter. Options to Request here would be passed directly to the call to `request.defaults({})`.
+Also of note here is that the type `IHttpConnectionOptions` does not accept the `requestOptions` parameter. Options to `Request` here would be passed directly to the call to `request.defaults({})`.
 
 ### Making Service Calls with our Client
 
@@ -154,7 +157,7 @@ However we chose to make our client, we use them in the same way.
 
 Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request library (CoreOptions). These options will be deep merged with any default options (passed in on instantiation) before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
 
-Related to context you will notice that our Thrift service client is a generic `Calculator.Client<CoreOptions>`. This type parameter refers to the type of the context, here the `CoreOptions` interface from the Request library.
+Related to context you will notice that our Thrift service client is a generic `Calculator.Client<ThriftContext<CoreOptions>>`. This type parameter refers to the type of the context, here the `ThriftContext<CoreOptions>` which extends the options interface from the Request library.
 
 ```typescript
 import {
@@ -172,7 +175,7 @@ const serverConfig = {
 }
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     requestOptions: {} // CoreOptions to pass to Request
@@ -202,31 +205,37 @@ app.listen(serverConfig.port, () => {
 
 ### Middleware
 
-Sometimes you'll want to universally filter or modify responses, or you'll want to universally add certain headers to outgoing client requests. You can do these things with middleware.
+Sometimes you'll want to universally filter or modify requests and/or responses. This is done with middleware. If you've used many server libraries you are probably used to the idea of plugins or middleware.
 
-A middleware is an object that consists of a handler function, the type of middleware and an optional list of client method names to apply the middleware to.
+A middleware is an object that consists of a handler function and an optional list of client method names to apply the middleware to.
 
 Middleware are applied in the order in which they are registered.
 
 ```typescript
-interface IResponseMiddleware {
-    type: 'reqponse'
-    methods: Array<string>
-    hander(data: Buffer): Promise<Buffer>
+interface IRequestResponse {
+    statusCode: number
+    headers: IRequestHeaders
+    body: Buffer
 }
 
-interface IRequestMiddleware<Context> {
-    type: 'request'
-    mthods: Array<string>
-    handler(context: Context): Promise<Context>
+type NextFunction<Options> =
+    (data?: Buffer, options?: Options) => Promise<IRequestResponse>
+
+interface IThriftMiddlewareConfig<Options> {
+    methods?: Array<string>
+    handler(data: Buffer, context: ThriftContext<Options>, next: NextFunction<Options>): Promise<IRequestResponse>
 }
 ```
 
-#### Response Middleware
+The `handler` function receives as its arguments the outgoing Thrift data as a `Buffer`, the `ThriftContext` for the outgoing request and the next `RequestHandler` in the chain. When you are done applying your middleware you `return` the call to `next`. When calling `next` you can optionall pass along a modified Thrift data `Buffer` or new options to apply to the request. `Options` is almost always going to be `CoreOptions` for the underlying request library.
 
-`response` middleware acts on responses coming into the client. The middleware receives the response before the Thrift processor so the data is a raw `Buffer` object. The middleware returns a `Promise` of data that will continue down the middleware chain to the Thrift processor. If the `Promise` is rejected the chain is broken and the client method call is rejected.
+*Note: The difference between `ThriftContext` and the raw `CoreOptions` interface is the addition of an optional `request` parameter. This parameter represents an incoming request that spawed this outgoing request. For instance if you are a service agreagting data from other services you received a request to incite sending this client request. A common usage of middleware could be to propegate headers from the incoming requests to outgoing requests.*
 
-`response` is the default middleware, so if the `type` property is ommited the middleware will be assumed to be `response`.
+#### Applying Middleware to Outgoing Requests
+
+Something you may want to do with middlware is to apply some common HTTP headers to every outgoing request from your service. Maybe there is a token your service should attach to every outgoing request.
+
+You could do something like this:
 
 ```typescript
 import {
@@ -238,45 +247,45 @@ import { Calculator } from './codegen/calculator'
 const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
-    register: [{
-        type: 'response',
-        handler(data: Buffer): Promise<Buffer> {
-            if (validatePayload(data)) {
-                return Promise.resolve(data)
-            } else {
-                return Promise.reject(new Error('Payload of thrift response is invalid'))
-            }
-        },
-    }]
-})
-```
-
-#### Request Middleware
-
-`request` middleware acts on the outgoing request. The middleware handler function operates on the request `context`. The context is of type `CoreOptions` when using Request. Changes to the context are applied before any context is passed to a client method. Therefore the context passed to a client method will have priority over the middleware handler.
-
-Here, the `X-Fake-Token` will be added to every outgoing client method call:
-
-```typescript
-import {
-    createHttpClient
-} from '@creditkaram/thrift-client'
-
-import { Calculator } from './codegen/calculator'
-
-const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
-    hostName: 'localhost',
-    port: 8080,
-    register: [{
-        type: 'request',
-        handler(context: CoreOptions): Promise<CoreOptions> {
-            return Promise.resolve(Object.assign({}, context, {
+    register: [ {
+        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            return next(data, {
                 headers: {
                     'X-Fake-Token': 'fake-token',
                 },
-            }))
+            })
         },
-    }]
+    } ]
+})
+```
+
+This sends data along unaltered, but adds a header `X-Fake-Token` to the outgoing request. When you send along options, the options are deep merged with any previous options that were applied.
+
+#### Applying Middleware to Incoming Responses
+
+To apply middleware to the response you would call `.then` on the `next` function. This would allow you to inspect or modify the response before allowing it to proceed up the chain.
+
+```typescript
+import {
+    createHttpClient
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
+    hostName: 'localhost',
+    port: 8080,
+    register: [ {
+        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            return next().then((res: IRequestResponse) => {
+                if (validateResponse(res.body)) {
+                    return res
+                } else {
+                    throw new Error('Invalid data returned')
+                }
+            })
+        },
+    } ]
 })
 ```
 
@@ -288,17 +297,16 @@ When you're not using `createHttpClient` you can add middleware directly to the 
 // Create thrift client
 const requestClient: RequestInstance = request.defaults({})
 
-const connection: RequestConnection =
-    new RequestConnection(requestClient, clientConfig)
+const connection: HttpConnection =
+    new HttpConnection(requestClient, clientConfig)
 
 connection.register({
-    type: 'request',
-    handler(context: CoreOptions): Promise<CoreOptions> {
-        return Promise.resolve(Object.assign({}, context, {
+    handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        return next(data, {
             headers: {
-                'X-Fake-Token': 'fake-token',
+                'x-fake-token': 'fake-token',
             },
-        }))
+        })
     },
 })
 
@@ -307,53 +315,11 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 The optional `register` option takes an array of middleware to apply. Unsurprisingly they are applied in the order you pass them in.
 
-## Creating Custom Connections
+### Observability
 
-While Thrift Client includes support Request using another Http client library should be easy. You need to extend the abstract HttpConnection class and implement the abstract write method.
+Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
-As an example look at the RequestConnection:
 
-```typescript
-export class RequestConnection extends HttpConnection<CoreOptions> {
-    private request: RequestAPI<Request, CoreOptions, OptionalUriUrl>
-
-    constructor(requestApi: RequestInstance, options: IHttpConnectionOptions) {
-        super(options)
-        this.request = requestApi.defaults({
-            // Encoding needs to be explicitly set to null or the response body will be a string
-            encoding: null,
-            url: `${this.protocol}://${this.hostName}:${this.port}${this.path}`,
-        })
-    }
-
-    public emptyContext(): CoreOptions {
-        return {}
-    }
-
-    public write(dataToWrite: Buffer, context: request.CoreOptions = {}): Promise<Buffer> {
-        // Merge user options with required options
-        const requestOptions: request.CoreOptions = deepMerge(context, {
-            body: dataToWrite,
-            headers: {
-                'content-length': dataToWrite.length,
-                'content-type': 'application/octet-stream',
-            },
-        })
-
-        return new Promise((resolve, reject) => {
-            this.request.post(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
-                if (err !== null) {
-                    reject(err)
-                } else if (response.statusCode && (response.statusCode < 200 || response.statusCode > 299)) {
-                    reject(new Error(body.toString()))
-                } else {
-                    resolve(body)
-                }
-            })
-        })
-    }
-}
-```
 
 ## Contributing
 
