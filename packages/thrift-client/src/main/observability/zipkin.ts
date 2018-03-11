@@ -7,11 +7,13 @@ import {
 import {
     addL5Dheaders,
     asyncScope,
+    containsZipkinHeaders,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
     IRequestHeaders,
     IZipkinPluginOptions,
+    traceIdForHeaders,
 } from '@creditkarma/thrift-server-core'
 
 import { CoreOptions } from 'request'
@@ -31,10 +33,29 @@ function applyL5DHeaders(incomingHeaders: IRequestHeaders, headers: IRequestHead
     }
 }
 
-export function ZipkinTracePlugin({
+function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer): IRequestContext {
+    if (context.request && containsZipkinHeaders(context.request.headers)) {
+        return {
+            traceId: traceIdForHeaders(context.request.headers),
+            requestHeaders: context.request.headers,
+        }
+    } else {
+        const asyncContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
+        if (asyncContext !== null) {
+            return asyncContext
+
+        } else {
+            return {
+                traceId: tracer.createRootId(),
+                requestHeaders: {},
+            }
+        }
+    }
+}
+
+export function zipkinClientMiddleware({
     localServiceName,
     remoteServiceName,
-    port = 0,
     debug = false,
     endpoint,
     sampleRate,
@@ -43,38 +64,31 @@ export function ZipkinTracePlugin({
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
-            const requestContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
-            console.log('clieant: lineage: ', asyncScope.lineage())
-            console.log('client: requestContext: ', requestContext)
-            if (requestContext !== null) {
-                const traceId: TraceId = requestContext.traceId
-                const incomingHeaders: IRequestHeaders = requestContext.requestHeaders
-                tracer.setId(traceId)
-                return tracer.scoped(() => {
-                    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-                    console.log(`client: recordRequest[${localServiceName}]: `, incomingHeaders)
-                    let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
-                    headers = applyL5DHeaders(incomingHeaders, headers)
+            const requestContext: IRequestContext | null = readRequestContext(context, tracer)
+            const traceId: TraceId = requestContext.traceId
+            const incomingHeaders: IRequestHeaders = requestContext.requestHeaders
+            tracer.setId(traceId)
 
-                    return next(data, { headers }).then((res: IRequestResponse) => {
-                        tracer.scoped(() => {
-                            console.log(`client: recordResponse[${localServiceName}]`)
-                            instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
-                        })
+            return tracer.scoped(() => {
+                const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                headers = applyL5DHeaders(incomingHeaders, headers)
 
-                        return res
-
-                    }, (err: any) => {
-                        tracer.scoped(() => {
-                            instrumentation.recordError((traceId as any), err)
-                        })
-
-                        return Promise.reject(err)
+                return next(data, { headers }).then((res: IRequestResponse) => {
+                    tracer.scoped(() => {
+                        instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
                     })
+
+                    return res
+
+                }, (err: any) => {
+                    tracer.scoped(() => {
+                        instrumentation.recordError((traceId as any), err)
+                    })
+
+                    return Promise.reject(err)
                 })
-            } else {
-                return next()
-            }
+            })
         },
     }
 }

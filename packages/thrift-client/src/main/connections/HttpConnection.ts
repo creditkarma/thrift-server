@@ -64,11 +64,6 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     protected readonly middleware: Array<IThriftMiddleware<CoreOptions>>
     private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-    // constructor(request: RequestInstance, options: IHttpConnectionOptions<CoreOptions>) {
-    //     super(options)
-    //     this.request = request
-    // }
-
     constructor(request: RequestInstance, options: IHttpConnectionOptions<CoreOptions>) {
         super(
             getTransport(options.transport),
@@ -91,9 +86,6 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
             })
         })
     }
-
-    // export type NextFunction<Options> =
-    //     (data?: Buffer, options?: Options) => Promise<IRequestResponse>
 
     public send(
         dataToSend: Buffer,

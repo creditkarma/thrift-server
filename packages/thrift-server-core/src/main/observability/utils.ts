@@ -121,6 +121,27 @@ export function traceIdFromTraceId(trace: ITraceId): TraceId {
     })
 }
 
+export function containsZipkinHeaders(headers: IRequestHeaders): boolean {
+    return (
+        headers[L5D_TRACE_HDR] !== undefined ||
+        (headers[ZipkinHeaders.TraceId] !== undefined && headers[ZipkinHeaders.SpanId] !== undefined)
+    )
+}
+
+export function traceIdForHeaders(headers: IRequestHeaders): TraceId {
+    const normalizedHeaders = normalizeHeaders(headers)
+    const traceId: string = normalizedHeaders[ZipkinHeaders.TraceId] as string
+    const spanId: string = normalizedHeaders[ZipkinHeaders.SpanId] as string
+    const parentId: string = normalizedHeaders[ZipkinHeaders.ParentId] as string
+    const sampled: string = normalizedHeaders[ZipkinHeaders.Sampled] as string
+    return traceIdFromTraceId({
+        traceId,
+        spanId,
+        parentId,
+        sampled: (sampled === '1') ? true : false,
+    })
+}
+
 export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
     if (headers[L5D_TRACE_HDR] !== undefined) {
         const linkTrace = deserializeLinkerdHeader(headers[L5D_TRACE_HDR] as string)

@@ -46,7 +46,6 @@ export function zipkinMiddleware({
                 }
             }
 
-            console.log(`express: recordRequest[${localServiceName}]: `, req.headers)
             const traceId: TraceId =
                 instrumentation.recordRequest(
                     req.method,
@@ -54,7 +53,6 @@ export function zipkinMiddleware({
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
 
-            console.log('express: lineage: ', asyncScope.lineage())
             asyncScope.set('requestContext', {
                 traceId,
                 requestHeaders: req.headers,
@@ -62,7 +60,6 @@ export function zipkinMiddleware({
 
             res.on('finish', () => {
                 tracer.scoped(() => {
-                    console.log(`express: recordResponse[${localServiceName}]`)
                     instrumentation.recordResponse(
                         (traceId as any), // This method is also incorrectly typed
                         `${res.statusCode}`,

@@ -6,6 +6,8 @@ import {
 
 import * as request from 'request'
 
+// import { TraceId } from 'zipkin'
+
 export interface IRequestResponse {
     statusCode: number
     headers: IRequestHeaders
