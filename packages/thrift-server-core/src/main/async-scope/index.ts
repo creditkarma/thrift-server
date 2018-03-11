@@ -96,7 +96,10 @@ export class AsyncScope implements IAsyncScope {
 
         AsyncHooks.createHook({
             init(asyncId, type, triggerAsyncId, resource) {
-                // AsyncHooks.debug('init: ', arguments)
+                if (asyncId < 200 && asyncId > 150) {
+                    AsyncHooks.debug(`init[${asyncId}]: `, arguments)
+                    AsyncHooks.debug(`init[${asyncId}]: parent[${triggerAsyncId}]: `, self.asyncMap.get(triggerAsyncId))
+                }
                 if (!self.asyncMap.has(triggerAsyncId)) {
                     self.asyncMap.set(triggerAsyncId, {
                         _id: (uid += 1),
