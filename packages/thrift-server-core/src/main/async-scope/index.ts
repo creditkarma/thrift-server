@@ -12,6 +12,7 @@ interface IDictionary {
 
 interface IAsyncNode {
     id: number
+    timestamp: number
     parentId: number | null
     exited: boolean
     data: IDictionary
@@ -96,6 +97,7 @@ export class AsyncScope implements IAsyncScope {
                 if (!self.asyncMap.has(triggerAsyncId)) {
                     self.asyncMap.set(triggerAsyncId, {
                         id: triggerAsyncId,
+                        timestamp: Date.now(),
                         parentId: null,
                         exited: false,
                         data: {},
@@ -107,6 +109,7 @@ export class AsyncScope implements IAsyncScope {
 
                 self.asyncMap.set(asyncId, {
                     id: asyncId,
+                    timestamp: Date.now(),
                     parentId: triggerAsyncId,
                     exited: false,
                     data: {},
@@ -130,7 +133,6 @@ export class AsyncScope implements IAsyncScope {
                         const parentId: number | null = self.asyncMap.get(asyncId)!.parentId
                         if (parentId !== null) {
                             self.asyncMap.delete(asyncId)
-
                             cleanUpParents(asyncId, parentId, self.asyncMap)
                         }
 
@@ -158,8 +160,9 @@ export class AsyncScope implements IAsyncScope {
 
     public set<T>(key: string, value: T): void {
         const activeId: number = AsyncHooks.executionAsyncId()
-        if (this.asyncMap.has(activeId)) {
-            this.asyncMap.get(activeId)!.data[key] = value
+        const activeNode: IAsyncNode | undefined = this.asyncMap.get(activeId)
+        if (activeNode !== undefined) {
+            activeNode.data[key] = value
         }
         if (key === 'requestContext') {
             console.log(`set[${key}]: activeId[${activeId}]: `, this.lineage())
