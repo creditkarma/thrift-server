@@ -94,17 +94,16 @@ app.listen(PORT, () => {
 
 #### Options
 
-* serviceName - The name of your service. Used for logging and tracing.
-* handler - The service Processor instance to handle service method calls.
-* path - The path on which to server your Thrift service. Defaults to '/thrift'.
-* transport - The kind of Thrift transport to use. Only 'buffered' is currently supported.
-* protocol - The kind of Thrift protocol to use. Only 'binary' is currently supported.
+* serviceName (required): The name of your service. Used for logging and tracing.
+* handler (required): The service Processor instance to handle service method calls.
+* transport (optional): The kind of Thrift transport to use. Only 'buffered' is currently supported.
+* protocol (optional): The kind of Thrift protocol to use. Only 'binary' is currently supported.
 
 ### Thrift Server Factory
 
 In the event that you will be creating an Express server only to serve Thrift, you can use the `createThriftServer` factory function to create a `Express.Application` and register the `thriftExpress` middleware in one step.
 
-The factory function takes all the same configuration options as the middleware.
+The factory function takes one additional config options `path`, the path on which to serve your Thrift API. The `path` parameter is optional and will default to `/thrift`. All of the plugin options are the same as above and passed in under the key `thriftOptions`.
 
 ```typescript
 import * as express from 'express'
@@ -131,7 +130,7 @@ const app: express.Application = createThriftServer({
 })
 
 app.listen(PORT, () => {
-  console.log(`Express server listening on port: ${PORT}`)
+    console.log(`Express server listening on port: ${PORT}`)
 })
 ```
 
@@ -176,7 +175,7 @@ app.use(zipkinMiddleware({
 }))
 
 app.listen(PORT, () => {
-  console.log(`Express server listening on port: ${PORT}`)
+    console.log(`Express server listening on port: ${PORT}`)
 })
 ```
 
