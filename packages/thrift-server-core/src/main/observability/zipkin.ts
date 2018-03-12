@@ -19,6 +19,10 @@ import {
     IZipkinTracerConfig,
 } from './types'
 
+export {
+    asyncScope,
+} from '@creditkarma/async-scope'
+
 const TRACER_CACHE: Map<string, Tracer> = new Map()
 
 /**
