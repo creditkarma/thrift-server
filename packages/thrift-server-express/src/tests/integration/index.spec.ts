@@ -1,9 +1,9 @@
-import { exec } from 'child_process'
 import { expect } from 'code'
 import * as express from 'express'
 import * as Lab from 'lab'
 import * as net from 'net'
 import { CoreOptions } from 'request'
+import * as rp from 'request-promise-native'
 
 import {
   createClient,
@@ -85,10 +85,9 @@ describe('Thrift Server Express', () => {
             })
     })
 
-    it('should handle requests not pointed to thrift service', (done: any) => {
-        exec(`curl http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`, (err, stout, sterr) => {
-            expect(stout).to.equal('PASS')
-            done()
+    it('should handle requests not pointed to thrift service', async () => {
+        return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`).then((val) => {
+            expect(val).to.equal('PASS')
         })
     })
 })

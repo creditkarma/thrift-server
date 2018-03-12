@@ -11,7 +11,7 @@ import {
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
-export * from './plugins'
+export * from './observability'
 
 export type HapiOptionsFunction<TProcessor> = (
     req?: Hapi.Request,
