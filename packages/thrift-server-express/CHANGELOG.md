@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/compare/v0.4.3...v0.5.0) (2018-03-12)
+
+
+### Bug Fixes
+
+* **dynamic-config:** use typescript compiler to load typescript configs ([#48](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/issues/48)) ([e4fe62b](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/commit/e4fe62b))
+* Have zipkin plugin generate root traceid if none ([09acbd6](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/commit/09acbd6))
+
+
+### Features
+
+* **thrift-server-express:** Add factory to create thrift servers ([2d37def](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/commit/2d37def))
+* Add Zipkin plugins ([33eeb24](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/commit/33eeb24))
+* Support distributed tracing with zipkin ([377e0c6](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/commit/377e0c6))
+
+
+
+
 <a name="0.4.3"></a>
 ## [0.4.3](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express/compare/v0.4.2...v0.4.3) (2018-02-02)
 
