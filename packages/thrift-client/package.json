@@ -11,9 +11,12 @@
     "example": "example"
   },
   "keywords": [
-    "Thrift",
-    "TypeScript",
-    "RPC"
+    "thrift",
+    "typescript",
+    "rpc",
+    "microservices",
+    "http client",
+    "framework"
   ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated",

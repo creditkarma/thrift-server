@@ -8,10 +8,13 @@
     "dist/main"
   ],
   "keywords": [
-    "Thrift",
-    "Express",
-    "TypeScript",
-    "RPC"
+    "thrift",
+    "express",
+    "typescript",
+    "rpc",
+    "microservices",
+    "server",
+    "framework"
   ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/integration/generated ",
