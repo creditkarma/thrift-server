@@ -9,7 +9,7 @@ Base package for the other Thrift libraries. This will usually not be used direc
 ## Usage
 
 ```sh
-$ npm install --save @creditkarma/thrift-server-core"
+$ npm install --save @creditkarma/thrift-server-core
 ```
 
 ### Int64

@@ -64,7 +64,7 @@ export function zipkinClientMiddleware({
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
-            const requestContext: IRequestContext | null = readRequestContext(context, tracer)
+            const requestContext: IRequestContext = readRequestContext(context, tracer)
             const traceId: TraceId = requestContext.traceId
             const incomingHeaders: IRequestHeaders = requestContext.requestHeaders
             tracer.setId(traceId)
