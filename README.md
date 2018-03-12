@@ -1,8 +1,13 @@
 # Thrift Server
 
-Thrift core library in TypeScript
+A set of libraries for building microservices in Node.js, written in TypeScript.
 
-Thrift Server is a collection of libraries that allow you to build Thrift servers and clients using familiar open source frameworks. Usually, you can easily set up your Thrift server or client as a plugin or middleware to a framework you are already using.
+As the name would suggest these libraries use [Apache Thrift](https://thrift.apache.org/) for service-to-service communication with RPC. All libraries come ready with distributed tracing through [Zipkin](https://zipkin.io/).
+
+The available libraries:
+* [Thrift Server Hapi](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi): Plugin to add Thrift support to Hapi.
+* [Thrift Server Express](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express): Middleware to add Thrift support to Express.
+* [Thrift Client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request).
 
 ## Contributing
 
