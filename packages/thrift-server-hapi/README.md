@@ -4,6 +4,10 @@ Hapi plugin for processing Thrift requests.
 
 ## Usage
 
+Adding Thrift support to Hapi is as easy as just including the provided plugin. Because we are just including a plugin it is easy for the same server to support APIs beyond Thrift RPC, such as REST.
+
+### Codegen
+
 Requires @creditkarma/thrift-typescript >= v1.0.0
 
 The easiest way to get started is to generate your Thrift services using @creditkarma/thrift-typescript.

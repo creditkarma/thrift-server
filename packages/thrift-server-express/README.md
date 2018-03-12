@@ -4,6 +4,8 @@ Express middleware for processing Thrift requests.
 
 ## Usage
 
+Adding Thrift support to Express is as easy as just including the provided middleware. Because we are just including middleware it is easy for the same server to support APIs beyond Thrift RPC, such as REST.
+
 ### Codegen
 
 Requires @creditkarma/thrift-typescript >= v1.0.0

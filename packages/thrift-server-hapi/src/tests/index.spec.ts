@@ -2,11 +2,11 @@ import {
     createClient,
 } from '@creditkarma/thrift-client'
 
-import * as childProcess from 'child_process'
 import { expect } from 'code'
 import * as Hapi from 'hapi'
 import * as Lab from 'lab'
 import { CoreOptions } from 'request'
+import * as rp from 'request-promise-native'
 
 import {
     SERVER_CONFIG,
@@ -84,10 +84,9 @@ describe('Thrift Server Hapi', () => {
             })
     })
 
-    it('should handle requests not pointed to thrift service', (done: any) => {
-        childProcess.exec(`curl http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`, (err, stout, sterr) => {
-            expect(stout).to.equal('PASS')
-            done()
+    it('should handle requests not pointed to thrift service', async () => {
+        return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`).then((val) => {
+            expect(val).to.equal('PASS')
         })
     })
 })
