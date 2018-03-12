@@ -9,7 +9,7 @@ export const lab = Lab.script()
 const describe = lab.describe
 const it = lab.it
 
-describe('AsyncStore', () => {
+describe('AsyncScope', () => {
     describe('set', () => {
         it('should add value to current execution scope', (done) => {
             asyncScope.set('set_test', 45)

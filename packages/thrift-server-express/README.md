@@ -46,7 +46,7 @@ To get things working you need to register the middleware as you would any other
 ```typescript
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
-import { thriftExpress } from '../main'
+import { thriftServerExpress } from '../main'
 
 import {
     Calculator,
@@ -75,7 +75,7 @@ const serviceHandlers: Calculator.IHandler<express.Request> = {
 app.use(
     '/thrift',
     bodyParser.raw(),
-    thriftExpress<Calculator.Processor>({
+    thriftServerExpress<Calculator.Processor>({
         serviceName: 'calculator-service',
         handler: new Calculator.Processor(serviceHandlers),
     }),
@@ -106,28 +106,91 @@ The factory function takes all the same configuration options as the middleware.
 
 ```typescript
 import * as express from 'express'
-import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-express'
 import { Calculator } from './codegen/calculator'
 
 const PORT = 8080
 
-const app: express.Application = createThriftServer<Calculator.Processor>({
-    serviceName: 'calculator-service',
+const serviceHandlers: Calculator.IHandler<express.Request> = {
+    add(left: number, right: number, context?: express.Request): number {
+        return left + right
+    },
+    subtract(left: number, right: number, context?: express.Request): number {
+        return left - right
+    },
+}
+
+const app: express.Application = createThriftServer({
     path: '/thrift',
-    handler: new Calculator.Processor({
-        add(left: number, right: number, context?: express.Request): number {
-            return left + right
-        },
-        subtract(left: number, right: number, context?: express.Request): number {
-            return left - right
-        },
-    })
+    thriftOptions: {
+        serviceName: 'calculator-service',
+        handler: new Calculator.Processor(serviceHandlers),
+    },
 })
 
 app.listen(PORT, () => {
   console.log(`Express server listening on port: ${PORT}`)
 })
 ```
+
+### Observability
+
+Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
+
+Zipkin tracing is added to your client through middleware.
+
+```typescript
+import * as express from 'express'
+
+import {
+    createThriftServer,
+    zipkinMiddleware,
+} from '@creditkarma/thrift-server-express'
+
+import { Calculator } from './codegen/calculator'
+
+const PORT = 8080
+const SERVICE_NAME = 'calculator-service'
+
+const app: express.Application = createThriftServer<Calculator.Processor>({
+    path: '/thrift',
+    thriftOptions: {
+        serviceName: SERVICE_NAME,
+        handler: new Calculator.Processor({
+            add(left: number, right: number, context?: express.Request): number {
+                return left + right
+            },
+            subtract(left: number, right: number, context?: express.Request): number {
+                return left - right
+            },
+        })
+    }
+})
+
+app.use(zipkinMiddleware({
+    localServiceName: SERVICE_NAME,
+    endpoint: 'http://localhost:9411/api/v1/spans',
+    sampleRate: 0.1,
+}))
+
+app.listen(PORT, () => {
+  console.log(`Express server listening on port: ${PORT}`)
+})
+```
+
+In order for tracing to be useful other services in your system will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-hapi` and `thrift-client`. The provided plugins in Thrift Server only support HTTP transport at the moment.
+
+#### Options
+
+* localServiceName (required): The name of your service.
+* remoteServiceName (optional): The name of the service you are calling.
+* debug (optional): In debug mode all requests are sampled.
+* port (optional): Port number on which local server operates. This is just added to recorded metadata. Defaults to 0.
+* endpoint (optional): URL of your collector (where to send traces).
+* sampleRate (optional): Percentage (from 0 to 1) of requests to sample. Defaults to 0.1.
+* httpInterval (optional): Sampling data is batched to reduce network load. This is the rate (in milliseconds) at which to empty the sample queue. Defaults to 1000.
+
+If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
 
 ## Contributing
 

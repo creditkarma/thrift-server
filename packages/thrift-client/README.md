@@ -319,7 +319,41 @@ The optional `register` option takes an array of middleware to apply. Unsurprisi
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
+Zipkin tracing is added to your client through middleware.
 
+```typescript
+import {
+    createHttpClient,
+    zipkinClientMiddleware,
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
+    createHttpClient(Calculator.Client, {
+        hostName: 'localhost',
+        port: 8080,
+        register: [ zipkinClientMiddleware({
+            localServiceName: 'calculator-client',
+            remoteServiceName: 'calculator-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate: 0.1,
+        }) ]
+    })
+```
+
+In order for tracing to be useful the services you are communicating with will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-hapi` and `thrift-server-express`. The provided plugins in Thrift Server only support HTTP transport at the moment.
+
+#### Options
+
+* localServiceName (required): The name of your service.
+* remoteServiceName (optional): The name of the service you are calling.
+* debug (optional): In debug mode all requests are sampled.
+* endpoint (optional): URL of your collector (where to send traces).
+* sampleRate (optional): Percentage (from 0 to 1) of requests to sample. Defaults to 0.1.
+* httpInterval (optional): Sampling data is batched to reduce network load. This is the rate (in milliseconds) at which to empty the sample queue. Defaults to 1000.
+
+If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
 
 ## Contributing
 

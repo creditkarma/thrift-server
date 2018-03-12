@@ -9,17 +9,12 @@ import {
     serializeLinkerdHeader,
     traceIdFromTraceId,
     traceIdValues,
-    // randomTraceId,
-    // SAMPLED,
-    // SAMPLING_KNOWN,
 } from '../../main/observability'
 
 export const lab = Lab.script()
 
 const describe = lab.describe
 const it = lab.it
-// const before = lab.before
-// const after = lab.after
 
 describe('Zipkin', () => {
     const traceId: TraceId = traceIdFromTraceId({

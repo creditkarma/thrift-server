@@ -1,7 +1,7 @@
 import { zipkinMiddleware } from '@creditkarma/thrift-server-express'
 
 import {
-    createClient,
+    createHttpClient,
     ThriftContext,
     zipkinClientMiddleware,
 } from '../main/'
@@ -35,7 +35,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
 
     // Create thrift client
     const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
-        createClient(Calculator.Client, {
+        createHttpClient(Calculator.Client, {
             hostName: CALC_SERVER_CONFIG.hostName,
             port: CALC_SERVER_CONFIG.port,
             register: (
@@ -47,7 +47,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         sampleRate,
                     }) ] :
                     []
-            )
+            ),
         })
 
     function symbolToOperation(sym: string): Operation {
