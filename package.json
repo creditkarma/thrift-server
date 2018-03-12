@@ -19,8 +19,11 @@
     "release:publish": "lerna exec 'npm publish --access public'"
   },
   "keywords": [
-    "Thrift",
-    "TypeScript"
+    "thrift",
+    "typescript",
+    "microservices",
+    "rpc",
+    "framework"
   ],
   "author": "Credit Karma",
   "license": "Apache-2.0",

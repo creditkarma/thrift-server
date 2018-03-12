@@ -27,7 +27,7 @@ import {
 } from './generated/calculator/add-service'
 
 import {
-    createClient,
+    createHttpClient,
     ThriftContext,
     zipkinClientMiddleware,
 } from '../main/index'
@@ -35,7 +35,7 @@ import {
 export function createServer(sampleRate: number = 0): Hapi.Server {
     // Create thrift client
     const addServiceClient: AddService.Client<ThriftContext<CoreOptions>> =
-        createClient(AddService.Client, {
+        createHttpClient(AddService.Client, {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
             register: (
@@ -47,7 +47,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                         sampleRate,
                     }) ] :
                     []
-            )
+            ),
         })
 
     /**
@@ -172,7 +172,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         )
     }
 
-    const client: Calculator.Client = createClient(Calculator.Client, {
+    const client: Calculator.Client = createHttpClient(Calculator.Client, {
         serviceName: 'calculator-service',
         hostName: CALC_SERVER_CONFIG.hostName,
         port: CALC_SERVER_CONFIG.port,

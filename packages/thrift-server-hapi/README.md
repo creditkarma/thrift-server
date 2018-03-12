@@ -45,8 +45,8 @@ The `ThriftPlugin` create a Hapi route at the given path on which to serve this 
 
 ```typescript
 import * as Hapi from 'hapi'
-import { ThriftPlugin } from '@creditkarma/thrift-server-hapi'
-import { UserService } from './codegen/user_service'
+import { thriftServerHapi } from '@creditkarma/thrift-server-hapi'
+import { Calculator } from './codegen/calculator'
 
 const PORT: number = 8080
 
@@ -61,19 +61,16 @@ server.connection({ port: PORT })
  * passed along to our service by the Hapi Thrift plugin. Thus, you have access to
  * all HTTP request data from within your service implementation.
  */
-const handlers: UserService.IHandler<Hapi.Request> = {
-    getUser(request: RecommendationsRequest, context?: Hapi.Request) {
-        const userId = request.userId
-
-        if (userId.toNumber() <= 0) {
-            throw new Error('User ID must be greater than zero')
-        }
-
-        return getUserForId(userId)
+const serviceHandlers: Calculator.IHandler<Hapi.Request> = {
+    add(left: number, right: number, context?: express.Request): number {
+        return left + right
+    },
+    subtract(left: number, right: number, context?: express.Request): number {
+        return left - right
     },
 }
 
-const processor: UserService.Processor<Hapi.Request> = new UserService.Processor(handlers)
+const processor: Calculator.Processor<Hapi.Request> = new Calculator.Processor(serviceHandlers)
 
 /**
  * Register the Thrift plugin.
@@ -86,10 +83,12 @@ const processor: UserService.Processor<Hapi.Request> = new UserService.Processor
  * option is the path to attache the route handler to and the handler is the
  * Thrift service processor instance.
  */
-server.register(ThriftPlugin<UserService.Processor>({
-    serviceName: 'user-service',
+server.register(thriftServerHapi<Calculator.Processor>({
     path: '/thrift',
-    handler: processor,
+    thriftOptions: {
+        serviceName: 'calculator-service',
+        handler: processor,
+    }
 }), err => {
     if (err) {
         throw err
@@ -124,25 +123,24 @@ The factory function takes all of the same configuration options as the plugin w
 ```typescript
 import * as Hapi from 'hapi'
 import { createThriftServer } from '@creditkarma/thrift-server-hapi'
-import { UserService } from './codegen/user_service'
+import { Calculator } from './codegen/calculator'
 
 const PORT: number = 8080
 
-const server: Hapi.Server = createThriftServer<UserService.Processor>({
-    serviceName: 'user-service',
+const server: Hapi.Server = createThriftServer<Calculator.Processor>({
     path: '/thrift',
     port: PORT,
-    handler: new UserService.Processor({
-        getUser(request: RecommendationsRequest, context?: Hapi.Request) {
-            const userId = request.userId
-
-            if (userId.toNumber() <= 0) {
-                throw new Error('User ID must be greater than zero')
-            }
-
-            return getUserForId(userId)
-        },
-    })
+    thriftOptions: {
+        serviceName: 'calculator-service',
+        handler: new Calculator.Processor({
+            add(left: number, right: number, context?: express.Request): number {
+                return left + right
+            },
+            subtract(left: number, right: number, context?: express.Request): number {
+                return left - right
+            },
+        })
+    }
 })
 
 /**
@@ -155,6 +153,73 @@ server.start((err) => {
     server.log('info', `Server running on port ${port}`)
 })
 ```
+
+### Observability
+
+Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
+
+Zipkin tracing is added to your client through middleware.
+
+```typescript
+import * as hapi from 'hapi'
+
+import {
+    createThriftServer,
+    zipkinPlugin,
+} from '@creditkarma/thrift-server-hapi'
+
+import { Calculator } from './codegen/calculator'
+
+const PORT = 8080
+const HOSTNAME = 'localhost'
+const SERVICE_NAME = 'calculator-service'
+
+const server: Hapi.Server = createThriftServer({
+    port: PORT,
+    path: HOSTNAME,
+    thriftOptions: {
+        serviceName: SERVICE_NAME,
+        handler: new Calculator.Processor({
+            add(left: number, right: number, context?: express.Request): number {
+                return left + right
+            },
+            subtract(left: number, right: number, context?: express.Request): number {
+                return left - right
+            },
+        })
+    },
+})
+
+server.register(
+    zipkinPlugin({
+        localServiceName: SERVICE_NAME,
+        endpoint: 'http://localhost:9411/api/v1/spans',
+        sampleRate: 0.1
+    }),
+    (err: any) => {
+        if (err) {
+            console.log('error: ', err)
+            throw err
+        }
+    },
+)
+
+server.start()
+```
+
+In order for tracing to be useful other services in your system will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-express` and `thrift-client`. The provided plugins in Thrift Server only support HTTP transport at the moment.
+
+#### Options
+
+* localServiceName (required): The name of your service.
+* remoteServiceName (optional): The name of the service you are calling.
+* debug (optional): In debug mode all requests are sampled.
+* port (optional): Port number on which local server operates. This is just added to recorded metadata. Defaults to 0.
+* endpoint (optional): URL of your collector (where to send traces).
+* sampleRate (optional): Percentage (expressed from 0 to 1) of requests to sample. Defaults to 0.1.
+* httpInterval (optional): Sampling data is batched to reduce network load. This is the rate (in milliseconds) at which to empty the sample queue by sending data to a collector. Defaults to 1000.
+
+If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
 
 ## Contributing
 
