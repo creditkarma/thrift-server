@@ -43,9 +43,9 @@ npm install --save @creditkarma/thrift-server-hapi
 
 ### Register
 
-To get things working you need to register the ThriftPlugin and define handlers for your service methods.
+To get things working you need to register the Thrift plugin and define handlers for your service methods.
 
-The `ThriftPlugin` create a Hapi route at the given path on which to serve this Thrift service.
+The `thriftServerHapi` function creates a Hapi route at the given path on which to serve this Thrift service.
 
 ```typescript
 import * as Hapi from 'hapi'
@@ -112,15 +112,15 @@ server.start((err) => {
 
 #### Options
 
-* serviceName - The name of your service. Used for logging and tracing.
-* handler - The service Processor instance to handle service method calls.
-* path - The path on which to server your Thrift service. Defaults to '/thrift'.
-* transport - The kind of Thrift transport to use. Only 'buffered' is currently supported.
-* protocol - The kind of Thrift protocol to use. Only 'binary' is currently supported.
+* path (required): The path on which to server your Thrift service. Defaults to '/thrift'.
+* thriftOptions.serviceName (required): The name of your service. Used for logging and tracing.
+* thriftOptions.handler (required): The service Processor instance to handle service method calls.
+* thriftOptions.transport (optional): The kind of Thrift transport to use. Only 'buffered' is currently supported.
+* thriftOptions.protocol (optional): The kind of Thrift protocol to use. Only 'binary' is currently supported.
 
 ### Thrift Server Factory
 
-In the event that you will be creating a Hapi server only to serve Thrift, you can use the `createThriftServer` factory function to create a `Hapi.Server` and register the `ThriftPlugin` in one step.
+In the event that you will be creating a Hapi server only to serve Thrift, you can use the `createThriftServer` factory function to create a `Hapi.Server` and register the Thrift plugin in one step.
 
 The factory function takes all of the same configuration options as the plugin with the addition of `port`. What port do you want your server to run on?
 
