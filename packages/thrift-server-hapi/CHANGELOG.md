@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.6.2"></a>
+## [0.6.2](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.6.1...v0.6.2) (2018-03-13)
+
+
+### Bug Fixes
+
+* Bump peer dependencies ([256bdce](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/commit/256bdce))
+
+
+
+
 <a name="0.6.1"></a>
 ## [0.6.1](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.6.0...v0.6.1) (2018-03-13)
 
