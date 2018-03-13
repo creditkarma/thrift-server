@@ -324,7 +324,7 @@ Zipkin tracing is added to your client through middleware.
 ```typescript
 import {
     createHttpClient,
-    zipkinClientMiddleware,
+    ZipkinTracingThriftClient,
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
@@ -333,7 +333,7 @@ const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
     createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
-        register: [ zipkinClientMiddleware({
+        register: [ ZipkinTracingThriftClient({
             localServiceName: 'calculator-client',
             remoteServiceName: 'calculator-service',
             endpoint: 'http://localhost:9411/api/v1/spans',

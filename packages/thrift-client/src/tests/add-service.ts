@@ -2,7 +2,7 @@ import { Int64 } from '@creditkarma/thrift-server-core'
 
 import {
     createThriftServer,
-    zipkinPlugin,
+    ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
 
 import * as Hapi from 'hapi'
@@ -47,7 +47,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
 
     if (sampleRate > 0) {
         server.register(
-            zipkinPlugin({
+            ZipkinTracingHapi({
                 localServiceName: 'add-service',
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,

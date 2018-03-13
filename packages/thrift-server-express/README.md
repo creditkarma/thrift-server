@@ -48,7 +48,7 @@ To get things working you need to register the middleware as you would any other
 ```typescript
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
-import { thriftServerExpress } from '../main'
+import { ThriftServerExpress } from '../main'
 
 import {
     Calculator,
@@ -77,7 +77,7 @@ const serviceHandlers: Calculator.IHandler<express.Request> = {
 app.use(
     '/thrift',
     bodyParser.raw(),
-    thriftServerExpress<Calculator.Processor>({
+    ThriftServerExpress<Calculator.Processor>({
         serviceName: 'calculator-service',
         handler: new Calculator.Processor(serviceHandlers),
     }),
@@ -145,7 +145,7 @@ import * as express from 'express'
 
 import {
     createThriftServer,
-    zipkinMiddleware,
+    ZipkinTracingExpress,
 } from '@creditkarma/thrift-server-express'
 
 import { Calculator } from './codegen/calculator'
@@ -168,7 +168,7 @@ const app: express.Application = createThriftServer<Calculator.Processor>({
     }
 })
 
-app.use(zipkinMiddleware({
+app.use(ZipkinTracingExpress({
     localServiceName: SERVICE_NAME,
     endpoint: 'http://localhost:9411/api/v1/spans',
     sampleRate: 0.1,

@@ -25,7 +25,7 @@ function formatRequestUrl(req: express.Request): string {
     })
 }
 
-export function zipkinMiddleware({
+export function ZipkinTracingExpress({
     localServiceName,
     port = 0,
     debug = false,

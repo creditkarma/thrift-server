@@ -22,7 +22,7 @@ function readStatusCode({ response }: Hapi.Request): number {
     }
 }
 
-export function zipkinPlugin({
+export function ZipkinTracingHapi({
     localServiceName,
     port = 0,
     debug = false,

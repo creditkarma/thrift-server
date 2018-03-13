@@ -45,11 +45,11 @@ npm install --save @creditkarma/thrift-server-hapi
 
 To get things working you need to register the Thrift plugin and define handlers for your service methods.
 
-The `thriftServerHapi` function creates a Hapi route at the given path on which to serve this Thrift service.
+The `ThriftServerHapi` function creates a Hapi route at the given path on which to serve this Thrift service.
 
 ```typescript
 import * as Hapi from 'hapi'
-import { thriftServerHapi } from '@creditkarma/thrift-server-hapi'
+import { ThriftServerHapi } from '@creditkarma/thrift-server-hapi'
 import { Calculator } from './codegen/calculator'
 
 const PORT: number = 8080
@@ -87,7 +87,7 @@ const processor: Calculator.Processor<Hapi.Request> = new Calculator.Processor(s
  * option is the path to attache the route handler to and the handler is the
  * Thrift service processor instance.
  */
-server.register(thriftServerHapi<Calculator.Processor>({
+server.register(ThriftServerHapi<Calculator.Processor>({
     path: '/thrift',
     thriftOptions: {
         serviceName: 'calculator-service',
@@ -113,6 +113,7 @@ server.start((err) => {
 #### Options
 
 * path (required): The path on which to server your Thrift service. Defaults to '/thrift'.
+* auth (optional): Authentication strategy for Thrift route as defined by [Hapi](https://hapijs.com/api/16.6.3#serverauthstrategyname-scheme-mode-options).
 * thriftOptions.serviceName (required): The name of your service. Used for logging and tracing.
 * thriftOptions.handler (required): The service Processor instance to handle service method calls.
 * thriftOptions.transport (optional): The kind of Thrift transport to use. Only 'buffered' is currently supported.
@@ -169,7 +170,7 @@ import * as hapi from 'hapi'
 
 import {
     createThriftServer,
-    zipkinPlugin,
+    ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
 
 import { Calculator } from './codegen/calculator'
@@ -195,7 +196,7 @@ const server: Hapi.Server = createThriftServer({
 })
 
 server.register(
-    zipkinPlugin({
+    ZipkinTracingHapi({
         localServiceName: SERVICE_NAME,
         endpoint: 'http://localhost:9411/api/v1/spans',
         sampleRate: 0.1

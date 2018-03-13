@@ -13,9 +13,6 @@ import * as express from 'express'
 
 export * from './observability'
 
-export type ExpressOptionsFunction<TProcessor> =
-    (req?: express.Request, res?: express.Response) => IThriftServerOptions<TProcessor>
-
 export interface ICreateExpressServerOptions<TProcessor> {
     path?: string
     thriftOptions: IThriftServerOptions<TProcessor>
@@ -29,35 +26,22 @@ export function createThriftServer<TProcessor extends IThriftProcessor<express.R
     app.use(
         options.path || '/thrift',
         bodyParser.raw(),
-        thriftServerExpress<TProcessor>(options.thriftOptions),
+        ThriftServerExpress<TProcessor>(options.thriftOptions),
     )
 
     return app
 }
 
-function getPluginOptions<TProcessor>(
-    request: express.Request,
-    response: express.Response,
-    options: IThriftServerOptions<TProcessor> | ExpressOptionsFunction<TProcessor>,
-): IThriftServerOptions<TProcessor> {
-    if (typeof options === 'function') {
-        return options(request, response)
-    } else {
-        return options
-    }
-}
-
-export function thriftServerExpress<TProcessor extends IThriftProcessor<express.Request>>(
-    pluginOptions: IThriftServerOptions<TProcessor> | ExpressOptionsFunction<TProcessor>,
+export function ThriftServerExpress<TProcessor extends IThriftProcessor<express.Request>>(
+    pluginOptions: IThriftServerOptions<TProcessor>,
 ): express.RequestHandler {
     return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
-        const options = getPluginOptions(request, response, pluginOptions)
-        const Transport: ITransportConstructor = getTransport(options.transport)
-        const Protocol: IProtocolConstructor = getProtocol(options.protocol)
+        const Transport: ITransportConstructor = getTransport(pluginOptions.transport)
+        const Protocol: IProtocolConstructor = getProtocol(pluginOptions.protocol)
 
         try {
             process({
-                processor: options.handler,
+                processor: pluginOptions.handler,
                 buffer: request.body,
                 Transport,
                 Protocol,

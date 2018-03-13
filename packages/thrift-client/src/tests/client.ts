@@ -1,9 +1,9 @@
-import { zipkinMiddleware } from '@creditkarma/thrift-server-express'
+import { ZipkinTracingExpress } from '@creditkarma/thrift-server-express'
 
 import {
     createHttpClient,
     ThriftContext,
-    zipkinClientMiddleware,
+    ZipkinTracingThriftClient,
 } from '../main/'
 
 import * as express from 'express'
@@ -26,7 +26,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     const app = express()
 
     if (sampleRate > 0) {
-        app.use(zipkinMiddleware({
+        app.use(ZipkinTracingExpress({
             localServiceName: 'calculator-client',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate,
@@ -40,7 +40,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             port: CALC_SERVER_CONFIG.port,
             register: (
                 (sampleRate > 0) ?
-                    [ zipkinClientMiddleware({
+                    [ ZipkinTracingThriftClient({
                         localServiceName: 'calculator-client',
                         remoteServiceName: 'calculator-service',
                         endpoint: 'http://localhost:9411/api/v1/spans',
