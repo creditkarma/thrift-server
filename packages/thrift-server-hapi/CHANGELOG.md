@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.6.0"></a>
+# [0.6.0](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.5.1...v0.6.0) (2018-03-13)
+
+
+### Features
+
+* **thrift-server-hapi:** Allow passing auth strategy to hapi plugin ([#55](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/issues/55)) ([f84e73b](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/commit/f84e73b))
+
+
+
+
 <a name="0.5.1"></a>
 ## [0.5.1](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi/compare/v0.5.0...v0.5.1) (2018-03-12)
 
