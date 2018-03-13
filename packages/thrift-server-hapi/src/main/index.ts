@@ -50,7 +50,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
      * thrift / REST endpoints on the same server instance.
      */
     server.register(
-        thirftServerHapi<TProcessor>({
+        ThriftServerHapi<TProcessor>({
             path: options.path,
             thriftOptions: options.thriftOptions,
         }),
@@ -70,7 +70,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
  *
  * @param pluginOptions
  */
-export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
+export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
     const hapiThriftPlugin: ThriftHapiPlugin = {
