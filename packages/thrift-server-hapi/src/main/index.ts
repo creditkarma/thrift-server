@@ -13,24 +13,14 @@ import {
 
 export * from './observability'
 
-export type HapiOptionsFunction<TProcessor> = (
-    req?: Hapi.Request,
-) => IThriftServerOptions<TProcessor>
-
 export interface IHandlerOptions<TProcessor> {
     service: TProcessor
 }
 
-export type HapiThriftOptionsFunction<TProcessor> = (
-    request: Hapi.Request,
-    reply: Hapi.ReplyNoContinue,
-) => IThriftServerOptions<TProcessor>
-
 export interface IHapiPluginOptions<TProcessor> {
     path?: string
-    thriftOptions:
-        | IThriftServerOptions<TProcessor>
-        | HapiOptionsFunction<TProcessor>
+    auth?: false | string | Hapi.AuthOptions
+    thriftOptions: IThriftServerOptions<TProcessor>
 }
 
 export interface ICreateHapiServerOptions<TProcessor>
@@ -66,24 +56,13 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
         }),
         (err: any) => {
             if (err) {
-                console.log('error 2: ', err)
+                console.log('error: ', err)
                 throw err
             }
         },
     )
 
     return server
-}
-
-function getPluginOptions<TProcessor>(
-    request: Hapi.Request,
-    options: IHapiPluginOptions<TProcessor>,
-): IThriftServerOptions<TProcessor> {
-    if (typeof options.thriftOptions === 'function') {
-        return options.thriftOptions(request)
-    } else {
-        return options.thriftOptions
-    }
 }
 
 /**
@@ -103,8 +82,7 @@ export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                     request: Hapi.Request,
                     reply: Hapi.ReplyNoContinue,
                 ) => {
-                    const options: IThriftServerOptions<TProcessor> =
-                        getPluginOptions(request, pluginOptions)
+                    const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
 
                     const Transport: ITransportConstructor = getTransport(
                         options.transport,
@@ -142,6 +120,7 @@ export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                     payload: {
                         parse: false,
                     },
+                    auth: pluginOptions.auth,
                 },
             })
 
@@ -150,10 +129,8 @@ export function thirftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     }
 
     hapiThriftPlugin.register.attributes = {
-        pkg: {
-            name: 'thrift-server-hapi',
-            version: require('../../package.json').version,
-        },
+        name: 'thrift-server-hapi',
+        version: require('../../package.json').version,
     }
 
     return hapiThriftPlugin

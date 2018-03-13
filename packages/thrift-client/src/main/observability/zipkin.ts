@@ -53,7 +53,7 @@ function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer)
     }
 }
 
-export function zipkinClientMiddleware({
+export function ZipkinTracingThriftClient({
     localServiceName,
     remoteServiceName,
     debug = false,
