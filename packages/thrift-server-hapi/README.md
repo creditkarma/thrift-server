@@ -113,6 +113,7 @@ server.start((err) => {
 #### Options
 
 * path (required): The path on which to server your Thrift service. Defaults to '/thrift'.
+* auth (optional): Authentication strategy for Thrift route as defined by [Hapi](https://hapijs.com/api/16.6.3#serverauthstrategyname-scheme-mode-options).
 * thriftOptions.serviceName (required): The name of your service. Used for logging and tracing.
 * thriftOptions.handler (required): The service Processor instance to handle service method calls.
 * thriftOptions.transport (optional): The kind of Thrift transport to use. Only 'buffered' is currently supported.
