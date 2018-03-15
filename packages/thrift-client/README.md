@@ -2,15 +2,6 @@
 
 Thrift client library for NodeJS written in TypeScript.
 
-## Running the Sample Application
-
-```sh
-$ npm install
-$ npm start
-```
-
-This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
-
 ## Usage
 
 We're going to go through this step-by-step.
@@ -319,7 +310,7 @@ The optional `register` option takes an array of middleware to apply. Unsurprisi
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
-Zipkin tracing is added to your client through middleware.
+Zipkin tracing is added to your Thrift client through middleware.
 
 ```typescript
 import {
@@ -354,6 +345,35 @@ In order for tracing to be useful the services you are communicating with will a
 * httpInterval (optional): Sampling data is batched to reduce network load. This is the rate (in milliseconds) at which to empty the sample queue. Defaults to 1000.
 
 If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
+
+## Running the Sample Application
+
+Included in this repo is a sample application that uses `thrift-client` and `thrift-server-hapi`. To get the sample application up and running you need to do a few things.
+
+First, clone the `thrift-server` repo:
+
+```sh
+$ git clone https://github.com/creditkarma/thrift-server.git
+```
+
+Then, `cd` into the `thrift-server` directory and run `npm install` and `npm run build`.
+
+```sh
+$ cd thrift-server
+$ npm install
+$ npm run build
+```
+
+The `thrift-server` project uses [lerna](https://lernajs.io/) to manage inter-library dependencies. The `npm install` command will obviously install all your dependencies, but it will also perform a `lerna bootstrap` that will set up sym-links between all the libraries within the mono-repo.
+
+Now that everything is linked and built we can got to the `thrift-client` package and start the example application:
+
+```sh
+$ cd packages/thrift-client
+$ npm start
+```
+
+This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
 
 ## Contributing
 

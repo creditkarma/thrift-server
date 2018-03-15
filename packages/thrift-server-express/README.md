@@ -138,7 +138,7 @@ app.listen(PORT, () => {
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
-Zipkin tracing is added to your client through middleware.
+Zipkin tracing is added to your Express server through middleware.
 
 ```typescript
 import * as express from 'express'

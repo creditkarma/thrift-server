@@ -79,12 +79,8 @@ const processor: Calculator.Processor<Hapi.Request> = new Calculator.Processor(s
 /**
  * Register the Thrift plugin.
  *
- * This will allow us to define Hapi routes for our Thrift service(s).
- * They behave like any other HTTP route handler, so you can mix and match
- * Thrift / REST endpoints on the same server instance.
- *
  * This plugin adds a route to your server for handling Thrift requests. The path
- * option is the path to attache the route handler to and the handler is the
+ * option is the path to attach the route handler to and the handler is the
  * Thrift service processor instance.
  */
 server.register(ThriftServerHapi<Calculator.Processor>({
@@ -163,7 +159,7 @@ server.start((err) => {
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
-Zipkin tracing is added to your client through middleware.
+Zipkin tracing is added to your Hapi server with a plugin.
 
 ```typescript
 import * as hapi from 'hapi'
