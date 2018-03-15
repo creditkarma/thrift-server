@@ -6,10 +6,6 @@ export interface ITraceId {
     traceIdHigh?: boolean
 }
 
-export interface IRequestHeaders {
-    [name: string]: string | Array<string> | undefined
-}
-
 export interface IZipkinPluginOptions {
     localServiceName: string
     remoteServiceName?: string

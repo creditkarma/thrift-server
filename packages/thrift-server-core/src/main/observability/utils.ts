@@ -2,7 +2,6 @@ import ByteBuffer = require('bytebuffer')
 import { option, TraceId } from 'zipkin'
 
 import {
-    IRequestHeaders,
     ITraceId,
 } from './types'
 
@@ -10,6 +9,10 @@ import {
     L5D_TRACE_HDR,
     ZipkinHeaders,
 } from './constants'
+
+import {
+    IRequestHeaders,
+} from '../types'
 
 function isFlagSet(flags: number, field: number): boolean {
     return (flags & field) === field

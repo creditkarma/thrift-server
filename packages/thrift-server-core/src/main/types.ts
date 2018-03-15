@@ -7,6 +7,10 @@ export * from './Int64'
 
 export type LogFunction = (msg: string, data?: any) => void
 
+export interface IRequestHeaders {
+    [name: string]: string | Array<string> | undefined
+}
+
 export interface IRequestContext {
     traceId: TraceId,
     requestHeaders: { [name: string]: any }
