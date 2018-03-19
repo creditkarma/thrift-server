@@ -4,6 +4,7 @@ import {
     IZipkinPluginOptions,
     normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
+
 import * as Hapi from 'hapi'
 import * as url from 'url'
 import { Instrumentation, option } from 'zipkin'
@@ -35,7 +36,7 @@ export function ZipkinTracingHapi({
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
-                (request.headers as any) = normalizeHeaders(request.headers)
+                const normalizedHeaders = normalizeHeaders(request.headers)
                 const plugins = request.plugins
 
                 tracer.scoped(() => {
@@ -43,7 +44,7 @@ export function ZipkinTracingHapi({
                         request.method,
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
-                            const val = request.headers[header.toLowerCase()]
+                            const val = normalizedHeaders[header.toLowerCase()]
                             if (val !== null && val !== undefined) {
                                 return new option.Some(val)
                             } else {
@@ -55,7 +56,7 @@ export function ZipkinTracingHapi({
                     plugins.zipkin = { traceId }
                     asyncScope.set('requestContext', {
                         traceId,
-                        requestHeaders: request.headers,
+                        requestHeaders: normalizedHeaders,
                     })
 
                     return reply.continue()

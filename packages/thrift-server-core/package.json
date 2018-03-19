@@ -30,11 +30,7 @@
     "type": "git",
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
-  "peerDependencies": {
-    "@creditkarma/dynamic-config": "~0.5.2"
-  },
   "devDependencies": {
-    "@creditkarma/dynamic-config": "~0.5.2",
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",
     "@types/lab": "^11.1.0",

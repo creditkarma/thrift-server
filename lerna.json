@@ -1,5 +1,5 @@
 {
-  "lerna": "2.4.0",
+  "lerna": "2.9.0",
   "version": "0.6.2",
   "loglevel": "verbose",
   "packages": [
