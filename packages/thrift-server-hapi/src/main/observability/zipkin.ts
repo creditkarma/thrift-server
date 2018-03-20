@@ -1,13 +1,19 @@
 import {
     asyncScope,
     getTracerForService,
+    hasL5DHeader,
+    IRequestContext,
     IZipkinPluginOptions,
     normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
 
 import * as Hapi from 'hapi'
 import * as url from 'url'
-import { Instrumentation, option } from 'zipkin'
+import {
+    Instrumentation,
+    option,
+    TraceId,
+} from 'zipkin'
 
 const pkg: any = require('../../../package.json')
 
@@ -40,7 +46,7 @@ export function ZipkinTracingHapi({
                 const plugins = request.plugins
 
                 tracer.scoped(() => {
-                    const traceId = instrumentation.recordRequest(
+                    const traceId: TraceId = instrumentation.recordRequest(
                         request.method,
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
@@ -51,13 +57,17 @@ export function ZipkinTracingHapi({
                                 return option.None
                             }
                         },
-                    )
+                    ) as any as TraceId // Nasty but this method is incorrectly typed
 
-                    plugins.zipkin = { traceId }
-                    asyncScope.set('requestContext', {
+                    const requestContext: IRequestContext = {
                         traceId,
+                        usesLinkerd: hasL5DHeader(normalizedHeaders),
                         requestHeaders: normalizedHeaders,
-                    })
+                    }
+
+                    plugins.zipkin = requestContext
+
+                    asyncScope.set('requestContext', requestContext)
 
                     return reply.continue()
                 })

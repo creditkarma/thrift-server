@@ -19,11 +19,17 @@ import {
     IZipkinTracerConfig,
 } from './types'
 
-export {
-    asyncScope,
+import {
+    AsyncScope,
 } from '@creditkarma/async-scope'
 
+export const asyncScope: AsyncScope = new AsyncScope()
+
 const TRACER_CACHE: Map<string, Tracer> = new Map()
+
+const map: WeakMap<object, object> = new WeakMap()
+
+map.set({ headers: {} }, { traceId: 1 })
 
 /**
  * `http://localhost:9411/api/v1/spans`

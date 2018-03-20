@@ -78,10 +78,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
-                handler: (
-                    request: Hapi.Request,
-                    reply: Hapi.ReplyNoContinue,
-                ) => {
+                handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
                     const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
 
                     const Transport: ITransportConstructor = getTransport(

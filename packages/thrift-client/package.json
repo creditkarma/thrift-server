@@ -72,6 +72,6 @@
   },
   "dependencies": {
     "async-hook": "^1.7.1",
-    "zipkin": "^0.11.2"
+    "zipkin": "^0.12.0"
   }
 }

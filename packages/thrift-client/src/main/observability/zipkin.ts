@@ -25,9 +25,10 @@ import {
     ThriftContext,
 } from '../types'
 
-function applyL5DHeaders(incomingHeaders: IRequestHeaders, headers: IRequestHeaders): IRequestHeaders {
-    if (hasL5DHeader(incomingHeaders)) {
+function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeaders): IRequestHeaders {
+    if (requestContext.usesLinkerd) {
         return addL5Dheaders(headers)
+
     } else {
         return headers
     }
@@ -37,6 +38,7 @@ function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer)
     if (context.request && containsZipkinHeaders(context.request.headers)) {
         return {
             traceId: traceIdForHeaders(context.request.headers),
+            usesLinkerd: hasL5DHeader(context.request.headers),
             requestHeaders: context.request.headers,
         }
     } else {
@@ -47,6 +49,7 @@ function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer)
         } else {
             return {
                 traceId: tracer.createRootId(),
+                usesLinkerd: false,
                 requestHeaders: {},
             }
         }
@@ -66,13 +69,12 @@ export function ZipkinTracingThriftClient({
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
             const requestContext: IRequestContext = readRequestContext(context, tracer)
             const traceId: TraceId = requestContext.traceId
-            const incomingHeaders: IRequestHeaders = requestContext.requestHeaders
             tracer.setId(traceId)
 
             return tracer.scoped(() => {
                 const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
                 let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
-                headers = applyL5DHeaders(incomingHeaders, headers)
+                headers = applyL5DHeaders(requestContext, headers)
 
                 return next(data, { headers }).then((res: IRequestResponse) => {
                     tracer.scoped(() => {
