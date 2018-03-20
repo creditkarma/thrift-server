@@ -1,6 +1,7 @@
 import {
     asyncScope,
     getTracerForService,
+    hasL5DHeader,
     IZipkinPluginOptions,
     normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
@@ -55,6 +56,7 @@ export function ZipkinTracingExpress({
 
             asyncScope.set('requestContext', {
                 traceId,
+                usesLinkerd: hasL5DHeader(req.headers),
                 requestHeaders: req.headers,
             })
 

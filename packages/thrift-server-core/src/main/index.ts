@@ -13,6 +13,16 @@ export * from './observability'
 export * from './errors'
 export * from './utils'
 
+const contextMap: WeakMap<object, object> = new WeakMap()
+
+export function addContext<R extends object>(request: R, context: object): void {
+    contextMap.set(request, context)
+}
+
+export function getConext<R extends object>(request: R): object | null {
+    return contextMap.get(request) || null
+}
+
 export function process<Context>(args: {
     processor: IThriftProcessor<Context>,
     buffer: Buffer,
