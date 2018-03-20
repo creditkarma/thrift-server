@@ -19,7 +19,7 @@
     "release:prerelease": "lerna publish --cd-version prerelease --skip-npm --yes --force-publish=*",
     "release:push": "git push --follow-tags",
     "release:publish": "lerna exec 'npm publish --access public'",
-    "release:prepublish": "lerna exec 'npm publish --tag next --access public"
+    "release:prepublish": "lerna exec 'npm publish --tag next --access public'"
   },
   "keywords": [
     "thrift",
