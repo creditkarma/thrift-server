@@ -2,7 +2,6 @@ import {
     BatchRecorder,
     ConsoleRecorder,
     Context,
-    ExplicitContext,
     Recorder,
     sampler,
     TraceId,
@@ -12,6 +11,10 @@ import {
 import {
     ZipkinHeaders,
 } from './constants'
+
+import {
+    AsyncContext,
+} from './AsyncContext'
 
 import { HttpLogger } from 'zipkin-transport-http'
 
@@ -26,10 +29,6 @@ import {
 export const asyncScope: AsyncScope = new AsyncScope()
 
 const TRACER_CACHE: Map<string, Tracer> = new Map()
-
-const map: WeakMap<object, object> = new WeakMap()
-
-map.set({ headers: {} }, { traceId: 1 })
 
 /**
  * `http://localhost:9411/api/v1/spans`
@@ -76,7 +75,7 @@ export function getTracerForService(serviceName: string, options: IZipkinTracerC
         return maybeTracer
 
     } else {
-        const ctxImpl: Context<TraceId> = new ExplicitContext()
+        const ctxImpl: Context<TraceId> = new AsyncContext()
         const recorder: Recorder = recorderForOptions(options)
 
         const tracer = new Tracer({

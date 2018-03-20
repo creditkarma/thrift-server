@@ -36,8 +36,10 @@ function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeade
 
 function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer): IRequestContext {
     if (context.request && containsZipkinHeaders(context.request.headers)) {
+        const traceId: TraceId = traceIdForHeaders(context.request.headers)
+        tracer.setId(traceId)
         return {
-            traceId: traceIdForHeaders(context.request.headers),
+            traceId,
             usesLinkerd: hasL5DHeader(context.request.headers),
             requestHeaders: context.request.headers,
         }
@@ -67,12 +69,11 @@ export function ZipkinTracingThriftClient({
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+            const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
             const requestContext: IRequestContext = readRequestContext(context, tracer)
-            const traceId: TraceId = requestContext.traceId
-            tracer.setId(traceId)
 
             return tracer.scoped(() => {
-                const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                const traceId: TraceId = tracer.id
                 let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
                 headers = applyL5DHeaders(requestContext, headers)
 
