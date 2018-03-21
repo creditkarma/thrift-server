@@ -28,7 +28,20 @@ import {
 
 export const asyncScope: AsyncScope = new AsyncScope()
 
-const TRACER_CACHE: Map<string, Tracer> = new Map()
+class MaybeMap<K,V> extends Map<K,V> {
+    getOrElse(key: K, orElse: () => V): V {
+        const value: V | undefined = this.get(key)
+        if (value === undefined) {
+            const newValue: V = orElse()
+            this.set(key, newValue)
+            return newValue
+        } else {
+            return value
+        }
+    }
+}
+
+const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
 /**
  * `http://localhost:9411/api/v1/spans`
@@ -69,12 +82,7 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
 }
 
 export function getTracerForService(serviceName: string, options: IZipkinTracerConfig = {}): Tracer {
-    const maybeTracer = TRACER_CACHE.get(serviceName)
-
-    if (maybeTracer !== undefined) {
-        return maybeTracer
-
-    } else {
+    return TRACER_CACHE.getOrElse(serviceName, () => {
         const ctxImpl: Context<TraceId> = new AsyncContext()
         const recorder: Recorder = recorderForOptions(options)
 
@@ -89,8 +97,6 @@ export function getTracerForService(serviceName: string, options: IZipkinTracerC
             localServiceName: serviceName, // name of this application
         })
 
-        TRACER_CACHE.set(serviceName, tracer)
-
         return tracer
-    }
+    })
 }
