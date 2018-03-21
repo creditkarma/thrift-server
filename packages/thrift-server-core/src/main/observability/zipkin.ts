@@ -34,8 +34,8 @@ const TRACER_CACHE: Map<string, Tracer> = new Map()
  * `http://localhost:9411/api/v1/spans`
  */
 
-function recorderForOptions(options?: IZipkinTracerConfig): Recorder {
-    if (options !== undefined && options.endpoint !== undefined) {
+function recorderForOptions(options: IZipkinTracerConfig): Recorder {
+    if (options.endpoint !== undefined) {
         return new BatchRecorder({
             logger: new HttpLogger({
                 endpoint: options.endpoint,
@@ -68,7 +68,7 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
     }
 }
 
-export function getTracerForService(serviceName: string, options?: IZipkinTracerConfig): Tracer {
+export function getTracerForService(serviceName: string, options: IZipkinTracerConfig = {}): Tracer {
     const maybeTracer = TRACER_CACHE.get(serviceName)
 
     if (maybeTracer !== undefined) {
@@ -82,7 +82,7 @@ export function getTracerForService(serviceName: string, options?: IZipkinTracer
             ctxImpl,
             recorder,
             sampler: new sampler.CountingSampler(
-                (options !== undefined && options.sampleRate !== undefined) ?
+                (options.sampleRate !== undefined) ?
                     options.sampleRate :
                     0.1,
             ),
