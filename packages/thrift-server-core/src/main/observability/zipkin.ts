@@ -28,8 +28,8 @@ import {
 
 export const asyncScope: AsyncScope = new AsyncScope()
 
-class MaybeMap<K,V> extends Map<K,V> {
-    getOrElse(key: K, orElse: () => V): V {
+class MaybeMap<K, V> extends Map<K, V> {
+    public getOrElse(key: K, orElse: () => V): V {
         const value: V | undefined = this.get(key)
         if (value === undefined) {
             const newValue: V = orElse()

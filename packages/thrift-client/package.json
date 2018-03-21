@@ -41,7 +41,6 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "0.6.x",
-    "@types/request": "^2.47.0",
     "request": "^2.83.0"
   },
   "devDependencies": {
@@ -53,7 +52,6 @@
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",
-    "@types/hapi": "^16.1.10",
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
     "@types/q": "^1.0.5",
@@ -61,7 +59,7 @@
     "body-parser": "^1.17.2",
     "code": "^4.1.0",
     "express": "^4.16.0",
-    "hapi": "^16.6.2",
+    "hapi": "^16.5.2",
     "lab": "^14.3.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
@@ -71,6 +69,7 @@
     "typescript": "2.7.x"
   },
   "dependencies": {
+    "@types/request": "^2.47.0",
     "async-hook": "^1.7.1",
     "zipkin": "^0.12.0"
   }
