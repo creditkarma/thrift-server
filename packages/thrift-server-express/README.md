@@ -193,6 +193,24 @@ In order for tracing to be useful other services in your system will also need t
 
 If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
 
+#### Tracing Non-Thrift Endpoints
+
+Sometimes, as part of completing your service request, you may need to gather data from both Thrift and non-Thrift endpoints. To get a complete picture you need to trace all of these calls. You can add Zipkin to other requests with instrumentation provided by the [OpenZipkin](https://github.com/openzipkin/zipkin-js) project.
+
+When constructing instrumentation provided by another library you need to use the same `Tracer` in order to maintain the correct trace context. You can import this shared `Tracer` through a call to `getTracerForService`. This assumes a `Tracer` has already been created for your service by usage of one of the Thrift Zipkin plugins.
+
+```typescript
+import { getTracerForService } from '@creditkarma/thrift-server-core'
+import * as wrapRequest from 'zipkin-instrumentation-request'
+import * as request from 'request'
+
+const tracer = getTracerForService('calculator-client')
+const zipkinRequest = wrapRequest(request, { tracer, remoteServiceName: 'calculator-service' })
+zipkinRequest.get(url, (err, resp, body) => {
+    // Do something
+})
+```
+
 ## Contributing
 
 For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
