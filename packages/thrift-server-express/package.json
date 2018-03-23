@@ -37,6 +37,8 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "0.6.x",
+    "@types/body-parser": "^1.16.5",
+    "@types/express": "^4.0.37",
     "body-parser": "^1.17.2",
     "express": "^4.16.0"
   },
@@ -66,8 +68,6 @@
     "typescript": "2.7.x"
   },
   "dependencies": {
-    "@types/body-parser": "^1.16.5",
-    "@types/express": "^4.0.37",
     "zipkin": "^0.12.0"
   }
 }
