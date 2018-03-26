@@ -9,6 +9,8 @@ The available libraries:
 * [Thrift Server Express](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express): Middleware to add Thrift support to Express.
 * [Thrift Client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request).
 
+*Note: Thrift Server is young and will still be undergoing some breaking changes before v1.0.0. The rule of thumb before 1.0.0 is that minor releases will potentially include breaking changes, but patch versions will not.*
+
 ## Development
 
 To build and run `thrift-server` locally you can follow these steps.
