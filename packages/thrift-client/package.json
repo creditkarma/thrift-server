@@ -68,7 +68,7 @@
     "rimraf": "^2.6.2",
     "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
-    "typescript": "2.7.x"
+    "typescript": "2.8.x"
   },
   "dependencies": {
     "async-hook": "^1.7.1",
