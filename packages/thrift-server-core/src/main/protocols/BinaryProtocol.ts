@@ -118,8 +118,12 @@ export class BinaryProtocol extends TProtocol {
         this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
     }
 
-    public writeI64(i64: Int64): void {
-        this.transport.write(i64.buffer)
+    public writeI64(i64: number | Int64): void {
+        if (typeof i64 === 'number') {
+            this.transport.write(new Int64(i64).buffer)
+        } else {
+            this.transport.write(i64.buffer)
+        }
     }
 
     public writeDouble(dub: number): void {

@@ -15,8 +15,12 @@
     "release:patch": "lerna publish --cd-version patch --skip-npm --yes --force-publish=* && npm run release:push",
     "release:minor": "lerna publish --cd-version minor --skip-npm --yes --force-publish=* && npm run release:push",
     "release:major": "lerna publish --cd-version major --skip-npm --yes --force-publish=* && npm run release:push",
+    "release:prepatch": "lerna publish --cd-version prepatch --skip-npm --yes --force-publish=*",
+    "release:prerelease": "lerna publish --cd-version prerelease --skip-npm --yes --force-publish=*",
     "release:push": "git push --follow-tags",
-    "release:publish": "lerna exec 'npm publish --access public'"
+    "release:publish": "lerna exec 'npm publish --access public'",
+    "release:prepublish": "lerna exec 'npm publish --tag next --access public'",
+    "release:fixpublish": "lerna exec 'npm publish --tag fix --access public'"
   },
   "keywords": [
     "Thrift",
