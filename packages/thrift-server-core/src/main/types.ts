@@ -56,8 +56,8 @@ export abstract class StructLike {
     public abstract write(output: TProtocol): void
 }
 
-export interface IStructCodec<StructType> {
-    encode(obj: StructType, output: TProtocol): void
+export interface IStructCodec<LooseType, StructType> {
+    encode(obj: LooseType, output: TProtocol): void
     decode(input: TProtocol): StructType
 }
 
