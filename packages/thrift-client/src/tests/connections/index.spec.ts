@@ -1,4 +1,4 @@
-import { readThriftMethod, Int64 } from '@creditkarma/thrift-server-core'
+import { Int64, readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import {

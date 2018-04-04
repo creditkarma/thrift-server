@@ -4,7 +4,7 @@ import { createThriftServer } from '../main/'
 import {
   SharedStruct,
   SharedUnion,
-} from './generated/shared/shared'
+} from './generated/shared'
 
 import {
   SERVER_CONFIG,
@@ -14,7 +14,7 @@ import {
   Calculator,
   Operation,
   Work,
-} from './generated/calculator/calculator'
+} from './generated/calculator'
 
 export function createServer(): Hapi.Server {
     /**
@@ -24,7 +24,7 @@ export function createServer(): Hapi.Server {
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const handlers: Calculator.IHandler<Hapi.Request> = {
+    const handlers: Calculator.Handler<Hapi.Request> = {
         ping(): void {
             return
         },
