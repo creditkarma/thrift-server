@@ -21,7 +21,7 @@
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/integration/generated",
     "lint": "tslint --fix './src/**/*.ts'",
-    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
+    "codegen": "thrift-typescript --strictUnions true --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
     "prebuild:test": "npm run clean && npm run codegen",
@@ -45,8 +45,11 @@
     "request": "^2.83.0"
   },
   "devDependencies": {
-    "@creditkarma/dynamic-config": "~0.5.2",
-    "@creditkarma/thrift-typescript": "2.0.0-3",
+    "@creditkarma/dynamic-config": "~0.6.7",
+    "@creditkarma/thrift-server-core": "^0.6.9",
+    "@creditkarma/thrift-server-express": "^0.6.9",
+    "@creditkarma/thrift-server-hapi": "^0.6.9",
+    "@creditkarma/thrift-typescript": "2.0.0-5",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",

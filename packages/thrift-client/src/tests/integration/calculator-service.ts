@@ -19,9 +19,9 @@ import {
     AddService,
     Calculator,
     Choice,
+    CommonStruct,
     Operation,
     Work,
-    CommonStruct,
 } from './generated/calculator'
 
 import {
@@ -93,7 +93,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         getStruct(): SharedStruct {
             return {
                 code: {
-                    status: new Int64(0)
+                    status: new Int64(0),
                 },
                 value: 'test',
             }
@@ -145,11 +145,11 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         fetchThing(): CommonStruct {
             return {
                 code: {
-                    status: new Int64(0)
+                    status: new Int64(0),
                 },
                 value: 'test',
             }
-        }
+        },
     })
 
     /**

@@ -1,23 +1,29 @@
-import * as childProcess from 'child_process'
 import { expect } from 'code'
+import * as express from 'express'
 import * as Lab from 'lab'
+import * as net from 'net'
 import { CoreOptions } from 'request'
+import * as rp from 'request-promise-native'
 
 import {
-  createClient,
+    createHttpClient,
 } from '@creditkarma/thrift-client'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from './config'
 
 import {
-  Calculator,
-} from './generated/calculator/calculator'
+    Calculator,
+} from './generated/calculator'
 
 import {
-  SharedStruct,
-} from './generated/shared/shared'
+    SharedStruct,
+} from './generated/shared'
+
+import {
+    createServer,
+} from './server'
 
 export const lab = Lab.script()
 
@@ -27,77 +33,61 @@ const before = lab.before
 const after = lab.after
 
 describe('Thrift Server Express', () => {
-  let server: any
-  let client: Calculator.Client<CoreOptions>
+    let server: net.Server
+    let client: Calculator.Client<CoreOptions>
 
-  before((done: any) => {
-    server = childProcess.fork('./dist/tests/server.js')
-    server.on('message', (msg: any) => console.log(msg))
-    client = createClient(Calculator.Client, SERVER_CONFIG)
+    before((done: any) => {
+        const app: express.Application = createServer()
+        client = createHttpClient(Calculator.Client, SERVER_CONFIG)
 
-    setTimeout(done, 1000)
-  })
+        server = app.listen(SERVER_CONFIG.port, () => {
+            console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)
+            done()
+        })
+    })
 
-  it('should corrently handle a service client request', (done: any) => {
-    client.add(5, 7)
-      .then((response: number) => {
-        expect(response).to.equal(12)
+    after((done: any) => {
+        server.close()
         done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      })
-  })
+    })
 
-  it('should corrently handle a service client request for a struct', (done: any) => {
-    client.getStruct(1)
-      .then((response: SharedStruct) => {
-        const expected = {
-          key: 0,
-          value: 'test',
-        }
-        expect(response).to.equal(expected)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      })
-  })
+    it('should corrently handle a service client request', async () => {
+        return client.add(5, 7)
+            .then((response: number) => {
+                expect(response).to.equal(12)
+            })
+    })
 
-  it('should correctly handle a service request with context', (done: any) => {
-    client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
-      .then((response: number) => {
-        expect(response).to.equal(12)
-        done()
-      }, (err: any) => {
-        console.log('error: ', err)
-        done(err)
-      })
-  })
+    it('should corrently handle a service client request for a struct', async () => {
+        return client.getStruct(1)
+            .then((response: SharedStruct) => {
+                const expected = {
+                    key: 0,
+                    value: 'test',
+                }
+                expect(response).to.equal(expected)
+            })
+    })
 
-  it('should reject service call with incorrect context', (done: any) => {
-    client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
-      .then((response: number) => {
-        expect(true).to.equal(false)
-        done()
-      }, (err: any) => {
-        expect(true).to.equal(true)
-        done()
-      })
-  })
+    it('should correctly handle a service request with context', async () => {
+        return client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+            .then((response: number) => {
+                expect(response).to.equal(12)
+            })
+    })
 
-  it('should handle requests not pointed to thrift service', (done: any) => {
-    childProcess.exec(
-      `curl http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`,
-      (err, stout, sterr) => {
-        expect(stout).to.equal('PASS')
-        done()
-      },
-    )
-  })
+    it('should reject service call with incorrect context', async () => {
+        return client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
+            .then((response: number) => {
+                throw new Error('Should reject for incorrect context')
+            }, (err: any) => {
+                expect(err.message).to.equal('Unauthorized')
+            })
+    })
 
-  after((done: any) => {
-    server.kill('SIGINT')
-    setTimeout(done, 1000)
-  })
+    it('should handle requests not pointed to thrift service', async () => {
+        return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`).then((val) => {
+            expect(val).to.equal('PASS')
+        })
+    })
 })

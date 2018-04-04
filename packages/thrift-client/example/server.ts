@@ -2,8 +2,8 @@ import { config } from '@creditkarma/dynamic-config'
 import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
-import { Operation, Calculator, Work } from './generated/calculator/calculator'
-import { SharedStruct, SharedUnion } from './generated/shared/shared'
+import { Operation, Calculator, Work } from './generated/calculator'
+import { SharedStruct, SharedUnion } from './generated/shared'
 
 (async function startService(): Promise<void> {
     const SERVER_CONFIG = await config().get('server')
