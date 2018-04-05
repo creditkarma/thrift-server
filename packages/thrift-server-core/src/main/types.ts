@@ -32,13 +32,13 @@ export interface IThriftServerOptions<TProcessor> {
     protocol?: ProtocolType
 }
 
-export interface IThriftConnection<Context = never> {
+export interface IThriftConnection<Context = undefined> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = never> extends EventEmitter implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = undefined> extends EventEmitter implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
