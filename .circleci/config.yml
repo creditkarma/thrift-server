@@ -100,7 +100,7 @@ workflows:
             - test_node_8
           filters:
             tags:
-              only: /^(v){1}(0){1}(\.[6]){1}(\.[0-9]+){1}$/
+              only: /^(v){1}(0){1}(\.[7]){1}(\.[0-9]+){1}$/
             branches:
               ignore: /.*/
 
@@ -110,7 +110,7 @@ workflows:
             - test_node_8
           filters:
             tags:
-              only: /^(v){1}(0){1}(\.[0-5]){1}(\.[0-9]+){1}$/
+              only: /^(v){1}(0){1}(\.[0-6]){1}(\.[0-9]+){1}$/
             branches:
               ignore: /.*/
 
@@ -120,6 +120,6 @@ workflows:
             - test_node_8
             filters:
               tags:
-                only: /^(v){1}(0){1}(\.[6]){2}(-)[0-9]+$/
+                only: /^(v){1}(0){1}(\.[6-7]){1}(\.[0-9]){1}(-)[0-9]+$/
               branches:
                 ignore: /.*/
