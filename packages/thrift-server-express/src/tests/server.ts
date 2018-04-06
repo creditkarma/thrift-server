@@ -1,21 +1,21 @@
 import * as express from 'express'
-import { createThriftServer } from '../../main'
+import { createThriftServer } from '../main'
 
 import {
     SharedStruct,
     SharedUnion,
-} from './generated/shared/shared'
+} from './generated/shared'
 
 import {
     Calculator,
     Operation,
     Work,
-} from './generated/calculator/calculator'
+} from './generated/calculator'
 
 import { SERVER_CONFIG } from './config'
 
 export function createServer(): express.Application {
-    const serviceHandlers: Calculator.IHandler<express.Request> = {
+    const serviceHandlers: Calculator.Handler<express.Request> = {
         ping(): void {
             return
         },
@@ -45,16 +45,16 @@ export function createServer(): express.Application {
             return
         },
         getStruct(): SharedStruct {
-            return new SharedStruct({
+            return {
                 key: 0,
                 value: 'test',
-            })
+            }
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
     }

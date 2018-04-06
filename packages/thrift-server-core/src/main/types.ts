@@ -32,13 +32,13 @@ export interface IThriftServerOptions<TProcessor> {
     protocol?: ProtocolType
 }
 
-export interface IThriftConnection<Context = never> {
+export interface IThriftConnection<Context = undefined> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = never> extends EventEmitter implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = undefined> extends EventEmitter implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
@@ -46,6 +46,19 @@ export abstract class ThriftConnection<Context = never> extends EventEmitter imp
         super()
     }
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
+}
+
+export abstract class StructLike {
+    public static read(input: TProtocol): StructLike {
+      throw new Error('Not implemented')
+    }
+
+    public abstract write(output: TProtocol): void
+}
+
+export interface IStructCodec<LooseType, StructType> {
+    encode(obj: LooseType, output: TProtocol): void
+    decode(input: TProtocol): StructType
 }
 
 export interface IProtocolConstructor {
@@ -65,14 +78,6 @@ export interface IClientConstructor<TClient, Context> {
 
 export interface IProcessorConstructor<TProcessor, THandler> {
     new(handler: THandler): TProcessor
-}
-
-export abstract class StructLike {
-    public static read(input: TProtocol): StructLike {
-        throw new Error('Not implemented')
-    }
-
-    public abstract write(output: TProtocol): void
 }
 
 export type ProtocolType =

@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-express",
-  "version": "0.6.6",
+  "version": "0.7.0-2",
   "description": "Thrift core library in TypeScript",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -17,8 +17,8 @@
     "framework"
   ],
   "scripts": {
-    "clean": "rimraf ./dist ./src/tests/integration/generated ",
-    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
+    "clean": "rimraf ./dist ./src/tests/generated ",
+    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
     "prebuild:test": "npm run clean && npm run codegen",
@@ -26,7 +26,7 @@
     "watch": "tsc --watch",
     "pretest": "npm run build:test",
     "test": "npm run test:integration",
-    "test:integration": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/integration",
+    "test:integration": "lab --timeout 10000 --verbose -l -S -P spec dist/tests",
     "lint": "tslint --fix './src/**/*.ts'"
   },
   "author": "Credit Karma",
@@ -36,16 +36,16 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express"
   },
   "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.6.x",
+    "@creditkarma/thrift-server-core": "next",
     "@types/body-parser": "^1.16.5",
     "@types/express": "^4.0.37",
     "body-parser": "^1.17.2",
     "express": "^4.16.0"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.6.6",
-    "@creditkarma/thrift-server-core": "^0.6.6",
-    "@creditkarma/thrift-typescript": "~1.1.4",
+    "@creditkarma/thrift-client": "^0.7.0-2",
+    "@creditkarma/thrift-server-core": "^0.7.0-2",
+    "@creditkarma/thrift-typescript": "2.0.0-5",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",

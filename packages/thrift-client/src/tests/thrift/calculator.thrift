@@ -46,23 +46,10 @@
  * Did you also notice that Thrift supports C style comments?
  */
 
-// Just in case you were wondering... yes. We support simple C comments too.
-
-/**
- * Thrift files can reference other Thrift files to include common struct
- * and service definitions. These are found using the current path, or by
- * searching relative to any paths specified with the -I compiler flag.
- *
- * Included objects are accessed using the name of the .thrift file as a
- * prefix. i.e. shared.SharedObject
- */
 include "shared.thrift"
+include "common.thrift"
 include "operation.thrift"
 
-/**
- * Thrift files can namespace, package, or prefix their output in various
- * target languages.
- */
 namespace cpp calculator
 namespace d calculator
 namespace dart calculator
@@ -72,79 +59,44 @@ namespace perl calculator
 namespace haxe calculator
 namespace netcore calculator
 
-/**
- * Thrift lets you do typedefs to get pretty names for your types. Standard
- * C style here.
- */
 typedef i32 MyInteger
 typedef operation.Operation Operation
+typedef common.CommonStruct CommonStruct
 
-/**
- * Thrift also lets you define constants for use across languages. Complex
- * types and structs are specified using JSON notation.
- */
 const i32 INT32CONSTANT = 9853
 const map<string,string> MAPCONSTANT = {'hello':'world', 'goodnight':'moon'}
 
-/**
- * Structs are the basic complex data structures. They are comprised of fields
- * which each have an integer identifier, a type, a symbolic name, and an
- * optional default value.
- *
- * Fields can be declared "optional", which ensures they will not be included
- * in the serialized output if they aren't set.  Note that this requires some
- * manual management in some languages.
- */
 struct Work {
   1: required i32 num1 = 0,
   2: required i32 num2,
-  3: required operation.Operation op,
+  3: required Operation op,
   4: optional string comment,
 }
 
-/**
- * Structs can also be exceptions, if they are nasty.
- */
-exception InvalidOperation {
-  1: i32 whatOp,
-  2: string why
-}
-
 struct FirstName {
-    1: string name
+  1: string name
 }
 
 struct LastName {
-    1: string name
+  1: string name
 }
 
 union Choice {
-    1: FirstName firstName
-    2: LastName lastName
+  1: FirstName firstName
+  2: LastName lastName
 }
 
-/**
- * Ahh, now onto the cool part, defining a service. Services just need a name
- * and can optionally inherit from another service using the extends keyword.
- */
 service Calculator extends shared.SharedService {
-
-  /**
-   * A method definition looks like C code. It has a return type, arguments,
-   * and optionally a list of exceptions that it may throw. Note that argument
-   * lists and exception lists are specified using the exact same syntax as
-   * field lists in struct or exception definitions.
-   */
 
    void ping(),
 
-   i32 add(1: i32 num1, 2: i32 num2),
+   i32 add(1: i32 num1, 2: i32 num2) throws (1: operation.JankyResult exp),
 
    i64 addInt64(1: i64 num1, 2: i64 num2),
 
    i32 addWithContext(1: i32 num1, 2: i32 num2),
 
-   i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
+   i32 calculate(1:i32 logid, 2:Work work) throws (1: operation.JankyOperation ouch),
 
    string echoBinary(1: binary word)
 
@@ -159,6 +111,8 @@ service Calculator extends shared.SharedService {
    list<i32> mapValues(1: map<string,i32> arg)
 
    map<string,string> listToMap(1: list<list<string>> arg)
+
+   common.CommonStruct fetchThing()
 
    /**
     * This method has a oneway modifier. That means the client only makes

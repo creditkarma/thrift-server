@@ -13,8 +13,8 @@ import { CoreOptions } from 'request'
 import {
     Calculator,
     Operation,
-    Work,
-} from './generated/calculator/calculator'
+    Work_Loose,
+} from './generated/calculator'
 
 import {
     CALC_SERVER_CONFIG,
@@ -75,11 +75,11 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     })
 
     app.get('/calculate', (req: express.Request, res: express.Response): void => {
-        const work: Work = new Work({
+        const work: Work_Loose = {
             num1: req.query.left,
             num2: req.query.right,
             op: symbolToOperation(req.query.op),
-        })
+        }
 
         thriftClient.calculate(1, work).then((val: number) => {
             res.send(`result: ${val}`)
@@ -89,11 +89,11 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     })
 
     app.get('/calculate-overwrite', (req: express.Request, res: express.Response): void => {
-        const work: Work = new Work({
+        const work: Work_Loose = {
             num1: req.query.left,
             num2: req.query.right,
             op: symbolToOperation(req.query.op),
-        })
+        }
 
         thriftClient.calculate(1, work, {
             request: {
