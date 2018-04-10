@@ -128,6 +128,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     hapiThriftPlugin.register.attributes = {
         name: require('../../package.json').name,
         version: require('../../package.json').version,
+        multiple: true,
     }
 
     return hapiThriftPlugin
