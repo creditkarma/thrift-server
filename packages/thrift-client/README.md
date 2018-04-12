@@ -177,7 +177,7 @@ app.get('/add', (req: express.Request, res: express.Response): void => {
     // Request contexts allow you to do tracing and auth
     const context: CoreOptions = {
         headers: {
-            'X-Trace-Id': 'my-trace-id'
+            'x-trace-id': 'my-trace-id'
         }
     }
 
@@ -242,7 +242,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             return next(data, {
                 headers: {
-                    'X-Fake-Token': 'fake-token',
+                    'x-fake-token': 'fake-token',
                 },
             })
         },
@@ -250,7 +250,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
 })
 ```
 
-This sends data along unaltered, but adds a header `X-Fake-Token` to the outgoing request. When you send along options, the options are deep merged with any previous options that were applied.
+This sends data along unaltered, but adds a header `x-fake-token` to the outgoing request. When you send along options, the options are deep merged with any previous options that were applied.
 
 #### Applying Middleware to Incoming Responses
 
