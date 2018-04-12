@@ -17,6 +17,14 @@ export function createClient<TClient>(
     ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
     options: ICreateHttpClientOptions<request.CoreOptions>,
 ): TClient {
+    console.warn(`[Deprecated]: Please use 'createHttpClient' instead`)
+    return createHttpClient<TClient>(ServiceClient, options)
+}
+
+export function createHttpClient<TClient>(
+    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
+    options: ICreateHttpClientOptions<request.CoreOptions>,
+): TClient {
     const requestClient: RequestInstance =
         request.defaults(options.requestOptions || {})
 
@@ -27,11 +35,4 @@ export function createClient<TClient>(
     connection.register(...(options.register || []))
 
     return new ServiceClient(connection)
-}
-
-export function createHttpClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
-    options: ICreateHttpClientOptions<request.CoreOptions>,
-): TClient {
-    return createClient<TClient>(ServiceClient, options)
 }

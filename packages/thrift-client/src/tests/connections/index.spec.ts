@@ -162,7 +162,7 @@ describe('createClient', () => {
         it('should allow passing of a request context', async () => {
             return client
                 .addWithContext(5, 7, {
-                    headers: { 'X-Fake-Token': 'fake-token' },
+                    headers: { 'x-fake-token': 'fake-token' },
                 })
                 .then((response: number) => {
                     expect(response).to.equal(12)
@@ -231,9 +231,11 @@ describe('createClient', () => {
 
             return badClient.add(5, 7).then(
                 (response: number) => {
+                    console.log('res: ', response)
                     throw new Error('Should reject with host not found')
                 },
                 (err: any) => {
+                    console.log('err: ', err)
                     expect(err.message).to.equal(
                         'getaddrinfo ENOTFOUND fakehost fakehost:8080',
                     )
@@ -373,7 +375,7 @@ describe('createClient', () => {
                         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next(data, {
                                 headers: {
-                                    'X-Fake-Token': 'fake-token',
+                                    'x-fake-token': 'fake-token',
                                 },
                             })
                         },
@@ -396,7 +398,7 @@ describe('createClient', () => {
                         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next(data, {
                                 headers: {
-                                    'X-Fake-Token': 'fake-token',
+                                    'x-fake-token': 'fake-token',
                                 },
                             })
                         },
@@ -434,7 +436,7 @@ describe('createClient', () => {
                         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next(data, {
                                 headers: {
-                                    'X-Fake-Token': 'fake-token',
+                                    'x-fake-token': 'fake-token',
                                 },
                             })
                         },

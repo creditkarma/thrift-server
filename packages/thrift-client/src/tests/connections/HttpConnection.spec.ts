@@ -92,7 +92,7 @@ describe('HttpConnection', () => {
         it('should allow passing of a request context', async () => {
             return client
                 .addWithContext(5, 7, {
-                    headers: { 'X-Fake-Token': 'fake-token' },
+                    headers: { 'x-fake-token': 'fake-token' },
                 })
                 .then((response: number) => {
                     expect(response).to.equal(12)
@@ -321,7 +321,7 @@ describe('HttpConnection', () => {
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return next(data, {
                         headers: {
-                            'X-Fake-Token': 'fake-token',
+                            'x-fake-token': 'fake-token',
                         },
                     })
                 },
@@ -345,7 +345,7 @@ describe('HttpConnection', () => {
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return next(data, {
                         headers: {
-                            'X-Fake-Token': 'fake-token',
+                            'x-fake-token': 'fake-token',
                         },
                     })
                 },
@@ -389,7 +389,7 @@ describe('HttpConnection', () => {
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return next(data, {
                             headers: {
-                                'X-Fake-Token': 'fake-token',
+                                'x-fake-token': 'fake-token',
                             },
                     })
                 },

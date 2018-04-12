@@ -69,14 +69,14 @@ describe('Thrift Server Hapi', () => {
     })
 
     it('should correctly handle a service request with context', async () => {
-        return client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'fake-token' } })
+        return client.addWithContext(5, 7, { headers: { 'x-fake-token': 'fake-token' } })
             .then((response: number) => {
                 expect(response).to.equal(12)
             })
     })
 
     it('should reject service call with incorrect context', async () => {
-        return client.addWithContext(5, 7, { headers: { 'X-Fake-Token': 'wrong' } })
+        return client.addWithContext(5, 7, { headers: { 'x-fake-token': 'wrong' } })
             .then((response: number) => {
                 throw new Error('Should reject with incorrect context')
             }, (err: any) => {
