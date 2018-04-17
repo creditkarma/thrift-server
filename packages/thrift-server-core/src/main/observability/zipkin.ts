@@ -27,8 +27,8 @@ import {
 } from '@creditkarma/async-scope'
 
 export const asyncScope: AsyncScope = new AsyncScope({
-    nodeExpiration: 30000,
-    purgeInterval: (1000 * 60),
+    nodeExpiration: (1000 * 60 * 1.5),
+    purgeInterval: (1000 * 60 * 3),
 })
 
 class MaybeMap<K, V> extends Map<K, V> {
