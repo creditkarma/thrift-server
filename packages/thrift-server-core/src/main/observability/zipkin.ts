@@ -26,7 +26,10 @@ import {
     AsyncScope,
 } from '@creditkarma/async-scope'
 
-export const asyncScope: AsyncScope = new AsyncScope()
+export const asyncScope: AsyncScope = new AsyncScope({
+    nodeExpiration: 30000,
+    purgeInterval: (1000 * 60),
+})
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
