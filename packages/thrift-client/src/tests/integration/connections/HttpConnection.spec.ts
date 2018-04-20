@@ -7,7 +7,7 @@ import {
     NextFunction,
     RequestInstance,
     ThriftContext,
-} from '../../main'
+} from '../../../main'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'

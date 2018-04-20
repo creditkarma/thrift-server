@@ -30,7 +30,7 @@ import {
     createHttpClient,
     ThriftContext,
     ZipkinTracingThriftClient,
-} from '../main/index'
+} from '../../main/index'
 
 export function createServer(sampleRate: number = 0): Hapi.Server {
     // Create thrift client

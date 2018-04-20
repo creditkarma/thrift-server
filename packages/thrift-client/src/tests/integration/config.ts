@@ -1,6 +1,6 @@
 import {
     IHttpConnectionOptions,
-} from '../main'
+} from '../../main'
 
 export const CALC_SERVER_CONFIG: IHttpConnectionOptions = {
     hostName: 'localhost',

@@ -2,11 +2,11 @@ import { readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import {
-    createClient,
+    createHttpClient,
     IRequestResponse,
     NextFunction,
     ThriftContext,
-} from '../../main'
+} from '../../../main'
 
 import { CoreOptions } from 'request'
 
@@ -34,7 +34,7 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('createClient', () => {
+describe('createHttpClient', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
 
@@ -62,7 +62,7 @@ describe('createClient', () => {
         let client: Calculator.Client<CoreOptions>
 
         before(async () => {
-            client = createClient(Calculator.Client, CALC_SERVER_CONFIG)
+            client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
         })
 
         it('should corrently handle a service client request', async () => {
@@ -181,7 +181,7 @@ describe('createClient', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const badClient: Calculator.Client<CoreOptions> = createClient(
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: CALC_SERVER_CONFIG.hostName,
@@ -201,7 +201,7 @@ describe('createClient', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const badClient: Calculator.Client<CoreOptions> = createClient(
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: CALC_SERVER_CONFIG.hostName,
@@ -221,7 +221,7 @@ describe('createClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<CoreOptions> = createClient(
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: 'fakehost',
@@ -246,7 +246,7 @@ describe('createClient', () => {
 
     describe('IncomingMiddleware', () => {
         it('should resolve when middleware allows', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -276,7 +276,7 @@ describe('createClient', () => {
         })
 
         it('should resolve when middleware passes method filter', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -303,7 +303,7 @@ describe('createClient', () => {
         })
 
         it('should reject when middleware rejects', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -338,7 +338,7 @@ describe('createClient', () => {
         })
 
         it('should skip handler when middleware fails method filter', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -367,7 +367,7 @@ describe('createClient', () => {
 
     describe('OutgoingMiddleware', () => {
         it('should resolve when middleware adds auth token', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -389,7 +389,7 @@ describe('createClient', () => {
         })
 
         it('should resolve when middleware passes method filter', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [
@@ -412,7 +412,7 @@ describe('createClient', () => {
         })
 
         it('should reject when middleware does not add auth token', async () => {
-            const client = createClient(Calculator.Client, CALC_SERVER_CONFIG)
+            const client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -427,7 +427,7 @@ describe('createClient', () => {
         })
 
         it('should resolve when middleware fails method filter', async () => {
-            const client = createClient(Calculator.Client, {
+            const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
                 port: CALC_SERVER_CONFIG.port,
                 register: [

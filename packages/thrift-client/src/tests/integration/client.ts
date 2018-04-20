@@ -4,7 +4,7 @@ import {
     createHttpClient,
     ThriftContext,
     ZipkinTracingThriftClient,
-} from '../main/'
+} from '../../main/'
 
 import * as express from 'express'
 import * as net from 'net'
