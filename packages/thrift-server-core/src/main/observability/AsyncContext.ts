@@ -1,15 +1,27 @@
 import { AsyncScope } from '@creditkarma/async-scope'
 import { Context, TraceId } from 'zipkin'
 
-const asyncScope = new AsyncScope()
+export const getAsyncScope: () => AsyncScope = (function() {
+    let instance: AsyncScope | undefined
+    return function(): AsyncScope {
+        if (instance === undefined) {
+            instance = new AsyncScope({
+                nodeExpiration: (1000 * 60 * 1.5),
+                purgeInterval: (1000 * 60 * 3),
+            })
+        }
+
+        return instance!
+    }
+}())
 
 export class AsyncContext implements Context<TraceId> {
     public setContext(ctx: TraceId): void {
-        asyncScope.set('traceId', ctx)
+        getAsyncScope().set('traceId', ctx)
     }
 
     public getContext(): TraceId {
-        return asyncScope.get<TraceId>('traceId')!
+        return getAsyncScope().get<TraceId>('traceId')!
     }
 
     public scoped<V>(callable: () => V): V {

@@ -6,8 +6,8 @@ import {
 
 import {
     addL5Dheaders,
-    asyncScope,
     containsZipkinHeaders,
+    getAsyncScope,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -43,8 +43,9 @@ function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer)
             usesLinkerd: hasL5DHeader(context.request.headers),
             requestHeaders: context.request.headers,
         }
+
     } else {
-        const asyncContext: IRequestContext | null = asyncScope.get<IRequestContext>('requestContext')
+        const asyncContext: IRequestContext | null = getAsyncScope().get<IRequestContext>('requestContext')
         if (asyncContext !== null) {
             return asyncContext
 

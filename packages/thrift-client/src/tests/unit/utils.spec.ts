@@ -23,7 +23,7 @@ describe('Utils', () => {
                 name: {
                     last: 'Murphy',
                 },
-                email: 'bob@fake.com'
+                email: 'bob@fake.com',
             }
             const actual = Utils.deepMerge(obj1, obj2)
             const expected: any = {
