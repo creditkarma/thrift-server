@@ -22,15 +22,6 @@ import {
     IZipkinTracerConfig,
 } from './types'
 
-import {
-    AsyncScope,
-} from '@creditkarma/async-scope'
-
-export const asyncScope: AsyncScope = new AsyncScope({
-    nodeExpiration: (1000 * 60 * 1.5),
-    purgeInterval: (1000 * 60 * 3),
-})
-
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
         const value: V | undefined = this.get(key)

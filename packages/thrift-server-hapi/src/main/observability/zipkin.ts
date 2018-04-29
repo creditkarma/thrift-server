@@ -1,5 +1,5 @@
 import {
-    asyncScope,
+    getAsyncScope,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -67,7 +67,7 @@ export function ZipkinTracingHapi({
 
                     plugins.zipkin = requestContext
 
-                    asyncScope.set('requestContext', requestContext)
+                    getAsyncScope().set('requestContext', requestContext)
 
                     return reply.continue()
                 })
