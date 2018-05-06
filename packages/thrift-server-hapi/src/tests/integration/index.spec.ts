@@ -17,7 +17,7 @@ import {
 } from './generated/calculator'
 
 import {
-    SharedStruct,
+    ISharedStruct,
 } from './generated/shared'
 
 import {
@@ -59,7 +59,7 @@ describe('Thrift Server Hapi', () => {
 
     it('should corrently handle a service client request for a struct', async () => {
         return client.getStruct(1)
-            .then((response: SharedStruct) => {
+            .then((response: ISharedStruct) => {
                 const expected = {
                     key: 0,
                     value: 'test',
