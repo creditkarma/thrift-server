@@ -17,10 +17,10 @@ import * as Lab from 'lab'
 
 import {
     Calculator,
-    Choice,
+    IChoice,
 } from '../generated/calculator'
 
-import { SharedStruct } from '../generated/shared'
+import { ISharedStruct } from '../generated/shared'
 
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
@@ -117,8 +117,8 @@ describe('createHttpClient', () => {
         })
 
         it('should call an endpoint with union arguments', async () => {
-            const firstName: Choice = { firstName: { name: 'Louis' } }
-            const lastName: Choice = { lastName: { name: 'Smith' } }
+            const firstName: IChoice = { firstName: { name: 'Louis' } }
+            const lastName: IChoice = { lastName: { name: 'Smith' } }
 
             return Promise.all([
                 client.checkName(firstName),
@@ -141,7 +141,7 @@ describe('createHttpClient', () => {
 
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5)
-                .then((response: SharedStruct) => {
+                .then((response: ISharedStruct) => {
                     expect(response).to.equal({ code: { status: new Int64(0) }, value: 'test' })
                 })
         })
@@ -219,6 +219,9 @@ describe('createHttpClient', () => {
                 {
                     hostName: 'fakehost',
                     port: 8080,
+                    requestOptions: {
+                        timeout: 5000,
+                    },
                 },
             )
 
@@ -229,9 +232,7 @@ describe('createHttpClient', () => {
                 },
                 (err: any) => {
                     console.log('err: ', err)
-                    expect(err.message).to.equal(
-                        'getaddrinfo ENOTFOUND fakehost fakehost:8080',
-                    )
+                    expect(err).to.exist()
                 },
             )
         })

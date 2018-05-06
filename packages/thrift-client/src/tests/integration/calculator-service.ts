@@ -8,7 +8,10 @@ import {
 import * as Hapi from 'hapi'
 import { CoreOptions } from 'request'
 
-import { SharedStruct, SharedUnion } from './generated/shared'
+import {
+    ISharedStruct,
+    ISharedUnion,
+} from './generated/shared'
 
 import {
     ADD_SERVER_CONFIG,
@@ -18,8 +21,8 @@ import {
 import {
     AddService,
     Calculator,
-    Choice,
-    CommonStruct,
+    IChoice,
+    ICommonStruct,
     Operation,
     Work,
 } from './generated/calculator'
@@ -90,7 +93,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         zip(): void {
             return
         },
-        getStruct(): SharedStruct {
+        getStruct(): ISharedStruct {
             return {
                 code: {
                     status: new Int64(0),
@@ -98,7 +101,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 value: 'test',
             }
         },
-        getUnion(index: number): SharedUnion {
+        getUnion(index: number): ISharedUnion {
             if (index === 1) {
                 return { option1: 'foo' }
             } else {
@@ -111,7 +114,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         echoString(word: string): string {
             return word
         },
-        checkName(choice: Choice): string {
+        checkName(choice: IChoice): string {
             if (choice.firstName !== undefined) {
                 return `FirstName: ${choice.firstName.name}`
             } else if (choice.lastName !== undefined) {
@@ -142,7 +145,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 new Map(),
             )
         },
-        fetchThing(): CommonStruct {
+        fetchThing(): ICommonStruct {
             return {
                 code: {
                     status: new Int64(0),

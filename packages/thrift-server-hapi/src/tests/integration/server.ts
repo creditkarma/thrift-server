@@ -1,28 +1,37 @@
-import * as express from 'express'
-import { createThriftServer } from '../main'
+import * as Hapi from 'hapi'
+import { createThriftServer } from '../../main/'
 
 import {
-    SharedStruct,
-    SharedUnion,
+  ISharedStruct,
+  ISharedUnion,
 } from './generated/shared'
 
 import {
-    Calculator,
-    Operation,
-    Work,
+  SERVER_CONFIG,
+} from './config'
+
+import {
+  Calculator,
+  Operation,
+  Work,
 } from './generated/calculator'
 
-import { SERVER_CONFIG } from './config'
-
-export function createServer(): express.Application {
-    const serviceHandlers: Calculator.Handler<express.Request> = {
+export function createServer(): Hapi.Server {
+    /**
+     * Implementation of our thrift service.
+     *
+     * Notice the second parameter, "context" - this is the Hapi request object,
+     * passed along to our service by the Hapi thrift plugin. Thus, you have access to
+     * all HTTP request data from within your service implementation.
+     */
+    const handlers: Calculator.IHandler<Hapi.Request> = {
         ping(): void {
             return
         },
         add(a: number, b: number): number {
             return a + b
         },
-        addWithContext(a: number, b: number, context?: express.Request): number {
+        addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (context !== undefined && context.headers['x-fake-token'] === 'fake-token') {
                 return a + b
             } else {
@@ -44,13 +53,13 @@ export function createServer(): express.Application {
         zip(): void {
             return
         },
-        getStruct(): SharedStruct {
+        getStruct(): ISharedStruct {
             return {
                 key: 0,
                 value: 'test',
             }
         },
-        getUnion(index: number): SharedUnion {
+        getUnion(index: number): ISharedUnion {
             if (index === 1) {
                 return { option1: 'foo' }
             } else {
@@ -59,17 +68,26 @@ export function createServer(): express.Application {
         },
     }
 
-    const app: express.Application = createThriftServer({
+    const server: Hapi.Server = createThriftServer({
+        port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
         thriftOptions: {
             serviceName: 'calculator-service',
-            handler: new Calculator.Processor(serviceHandlers),
+            handler: new Calculator.Processor(handlers),
         },
     })
 
-    app.get('/control', (req: express.Request, res: express.Response) => {
-        res.send('PASS')
+    /**
+     * The Hapi server can process requests that are not targeted to the thrift
+     * service
+     */
+    server.route({
+        method: 'GET',
+        path: '/control',
+        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+            reply('PASS')
+        },
     })
 
-    return app
+    return server
 }

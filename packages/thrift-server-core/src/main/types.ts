@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events'
 import { TraceId } from 'zipkin'
 import { TProtocol } from './protocols'
 import { TTransport } from './transports'
@@ -38,22 +37,26 @@ export interface IThriftConnection<Context = undefined> {
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = undefined> extends EventEmitter implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = undefined> implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
-    ) {
-        super()
-    }
+    ) {}
+
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
 export abstract class StructLike {
     public static read(input: TProtocol): StructLike {
-      throw new Error('Not implemented')
+        throw new Error('Not implemented')
     }
 
     public abstract write(output: TProtocol): void
+}
+
+export interface IStructConstructor<T extends StructLike> {
+    new (args?: any): T
+    read(input: TProtocol): T
 }
 
 export interface IStructCodec<LooseType, StructType> {

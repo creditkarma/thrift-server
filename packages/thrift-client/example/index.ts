@@ -8,9 +8,10 @@ generate({
     outDir: 'generated',
     sourceDir: 'thrift',
     target: 'thrift-server',
+    flags: {},
     files: [
         './calculator.thrift'
-    ]
+    ],
 })
 
 const clientProc = fork('./client.ts')
