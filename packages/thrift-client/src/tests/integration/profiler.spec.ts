@@ -4,10 +4,6 @@ import * as Lab from 'lab'
 import * as net from 'net'
 import * as rp from 'request-promise-native'
 
-import {
-    CLIENT_CONFIG,
-} from './config'
-
 import { createServer as addService } from './add-service'
 import { createServer as calculatorService } from './calculator-service'
 import { createServer as mockCollector } from './observability/mock-collector'
@@ -16,6 +12,10 @@ import {
     createClientServer,
 } from './client'
 
+import {
+    CLIENT_CONFIG,
+} from './config'
+
 export const lab = Lab.script()
 
 const describe = lab.describe
@@ -23,26 +23,21 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-const sizes: Array<number> = [ 100 ]
+// Number of requests to send
+const REQUEST_COUNT: number = 1000
 
-const average = () => {
-    const sum = sizes.reduce((a, b) => a + b)
-    return (sum / sizes.length)
-}
+// Max heap size in MB
+const MAX_HEAP_SIZE: number = 200
 
 const profile = () => {
-    const rss = process.memoryUsage().rss / 1024 / 1024
     const used = process.memoryUsage().heapUsed / 1024 / 1024
-    const total = process.memoryUsage().heapTotal / 1024 / 1024
 
     if (process.env.DEBUG) {
-        console.log(`RSS: ${rss} MB`)
         console.log(`Used: ${used} MB`)
-        console.log(`Total: ${total} MB`)
     }
 
-    if (used > (average() * 1.30)) {
-        throw new Error(`Heap usage spike`)
+    if (used > MAX_HEAP_SIZE) {
+        throw new Error(`Heap usage[${Math.round(used)}] exceeded ${MAX_HEAP_SIZE} MB`)
     }
 }
 
@@ -77,11 +72,10 @@ describe('Memory Profile', () => {
     })
 
     it('should verify consistent memory usage', (done: any) => {
-        const count: number = 1000
         let current: number = 0
         let completed: number = 0
 
-        function runRequest(): void {
+        const runRequest = (): void => {
             current += 1
             profile()
 
@@ -93,15 +87,17 @@ describe('Memory Profile', () => {
                 },
             }).then(() => {
                 completed += 1
-                if (completed === count) {
+                if (completed === REQUEST_COUNT) {
                     profile()
                     expect(true).to.equal(true)
                     done()
                 }
+            }, (err: any) => {
+                done(err)
             })
 
             setTimeout(() => {
-                if (current < count) {
+                if (current < REQUEST_COUNT) {
                     runRequest()
                 }
             }, (Math.random() * 20 + 5))

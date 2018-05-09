@@ -8,6 +8,7 @@ export const getAsyncScope: () => AsyncScope = (function() {
             instance = new AsyncScope({
                 nodeExpiration: 3000,
                 purgeInterval: 5000,
+                maxSize: 3000,
             })
         }
 
