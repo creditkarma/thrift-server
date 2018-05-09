@@ -114,18 +114,18 @@ const impl = new Calculator.Processor<Hapi.Request>({
  * using whichever protocol is configured (binary, compact, json...)
  */
 server.route({
-  method: 'POST',
-  path: '/',
-  handler: {
-    thrift: {
-      service: impl,
+    method: 'POST',
+    path: '/',
+    handler: {
+        thrift: {
+            service: impl,
+        },
     },
-  },
-  config: {
-    payload: {
-      parse: false,
+    config: {
+        payload: {
+            parse: false,
+        },
     },
-  },
 })
 
 /**
@@ -133,35 +133,35 @@ server.route({
  * service
  */
 server.route({
-  method: 'GET',
-  path: '/control',
-  handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-    reply('PASS')
-  },
+    method: 'GET',
+    path: '/control',
+    handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+        reply('PASS')
+    },
 })
 
 server.route({
-  method: 'POST',
-  path: '/return500',
-  handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-    reply('NOPE').code(500)
-  },
+    method: 'POST',
+    path: '/return500',
+    handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+        reply('NOPE').code(500)
+    },
 })
 
 server.route({
-  method: 'POST',
-  path: '/return400',
-  handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-    reply('NOPE').code(400)
-  },
+    method: 'POST',
+    path: '/return400',
+    handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
+        reply('NOPE').code(400)
+    },
 })
 
 /**
  * Finally, we're ready to start the server.
  */
 server.start((err: any) => {
-  if (err) {
-    throw err
-  }
-  console.log('info', `Server running on port ${SERVER_CONFIG.port}`)
+    if (err) {
+        throw err
+    }
+    console.log('info', `Server running on port ${SERVER_CONFIG.port}`)
 })

@@ -1,15 +1,15 @@
 import {
-  createClient,
+    createClient,
 } from '../../main'
 
 import { CoreOptions } from 'request'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from '../config'
 
 import {
-  readThriftMethod,
+    readThriftMethod,
 } from '../../main/utils'
 
 import * as childProcess from 'child_process'
@@ -17,10 +17,10 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 
 import {
-  Calculator,
-  Choice,
-  FirstName,
-  LastName,
+    Calculator,
+    Choice,
+    FirstName,
+    LastName,
 } from '../generated/calculator/calculator'
 
 import {
@@ -35,19 +35,24 @@ const before = lab.before
 const after = lab.after
 
 describe('createClient', () => {
-  let server: childProcess.ChildProcess
+    let server: childProcess.ChildProcess
 
-  before((done: any) => {
-    server = childProcess.fork('./dist/tests/server.js')
-    server.on('message', (msg: any) => console.log(msg))
-    setTimeout(done, 2000)
-  })
+    before((done: any) => {
+        server = childProcess.fork('./dist/tests/server.js')
+        server.on('message', (msg: any) => console.log(msg))
+        setTimeout(done, 2000)
+    })
 
-  describe('Basic Usage', () => {
+    after((done: any) => {
+        server.kill('SIGINT')
+        setTimeout(done, 1000)
+    })
+
+    describe('Basic Usage', () => {
         let client: Calculator.Client<CoreOptions>
 
         before(async () => {
-        client = createClient(Calculator.Client, SERVER_CONFIG)
+            client = createClient(Calculator.Client, SERVER_CONFIG)
         })
 
         it('should corrently handle a service client request', async () => {
@@ -168,18 +173,21 @@ describe('createClient', () => {
             const badClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
                 hostName: 'fakehost',
                 port: 8080,
+                requestOptions: {
+                    timeout: 5000,
+                },
             })
 
             return badClient.add(5, 7)
                 .then((response: number) => {
                     throw new Error('Should reject with host not found')
                 }, (err: any) => {
-                    expect(err.message).to.equal('getaddrinfo ENOTFOUND fakehost fakehost:8080')
+                    expect(err).to.exist()
                 })
         })
     })
 
-  describe('IncomingMiddleware', () => {
+    describe('IncomingMiddleware', () => {
         it('should resolve when middleware allows', async () => {
             const client = createClient(Calculator.Client, {
                 hostName: SERVER_CONFIG.hostName,
@@ -267,7 +275,7 @@ describe('createClient', () => {
         })
     })
 
-  describe('OutgoingMiddleware', () => {
+    describe('OutgoingMiddleware', () => {
         it('should resolve when middleware adds auth token', async () => {
             const client = createClient(Calculator.Client, {
                 hostName: SERVER_CONFIG.hostName,
@@ -350,7 +358,7 @@ describe('createClient', () => {
         })
     })
 
-  after((done: any) => {
+    after((done: any) => {
         server.kill('SIGINT')
         setTimeout(done, 1000)
     })

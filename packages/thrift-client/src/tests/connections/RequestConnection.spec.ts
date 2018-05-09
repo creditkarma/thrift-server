@@ -129,19 +129,19 @@ describe('RequestConnection', () => {
     })
 
     it('should reject for a request to a missing service', async () => {
-      const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
-      const badConnection: RequestConnection =
-        new RequestConnection(requestClient, {
-          hostName: 'fakehost',
-          port: 8080,
-        })
-      const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
+        const requestClient: RequestInstance = request.defaults({ timeout: 5000 })
+        const badConnection: RequestConnection =
+            new RequestConnection(requestClient, {
+                hostName: 'fakehost',
+                port: 8080,
+            })
+        const badClient: Calculator.Client<CoreOptions> = new Calculator.Client(badConnection)
 
-      return badClient.add(5, 7)
+        return badClient.add(5, 7)
         .then((response: number) => {
           throw new Error('Should reject with host not found')
         }, (err: any) => {
-          expect(err.message).to.equal('getaddrinfo ENOTFOUND fakehost fakehost:8080')
+          expect(err.message).to.exist()
         })
     })
   })
