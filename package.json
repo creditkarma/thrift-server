@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "lerna exec -- npm run build",
-    "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated",
+    "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated **/generated-apache",
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap --hoist",

@@ -27,30 +27,14 @@ import {
     deepMerge,
 } from '../utils'
 
-function normalizePath(path: string = '/'): string {
-    if (path.startsWith('/')) {
-        return path
-
-    } else {
-        return `/${path}`
-    }
-}
+import {
+    filterByMethod,
+    getHandler,
+    normalizePath,
+} from './utils'
 
 export type HttpProtocol =
     'http' | 'https'
-
-export function filterByMethod<Context>(method: string): (middleware: IThriftMiddleware<Context>) => boolean {
-    return (middleware: IThriftMiddleware<Context>): boolean => {
-        return (
-            middleware.methods.length === 0 ||
-            middleware.methods.indexOf(method) > -1
-        )
-    }
-}
-
-export function getHandler<Context>(middleware: IThriftMiddleware<Context>): RequestHandler<Context> {
-    return middleware.handler
-}
 
 export type RequestInstance =
     RequestAPI<Request, CoreOptions, RequiredUriUrl>
