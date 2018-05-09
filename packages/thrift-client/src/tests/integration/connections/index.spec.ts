@@ -226,6 +226,9 @@ describe('createHttpClient', () => {
                 {
                     hostName: 'fakehost',
                     port: 8080,
+                    requestOptions: {
+                        timeout: 5000,
+                    }
                 },
             )
 
@@ -236,9 +239,7 @@ describe('createHttpClient', () => {
                 },
                 (err: any) => {
                     console.log('err: ', err)
-                    expect(err.message).to.equal(
-                        'getaddrinfo ENOTFOUND fakehost fakehost:8080',
-                    )
+                    expect(err).to.exist()
                 },
             )
         })
