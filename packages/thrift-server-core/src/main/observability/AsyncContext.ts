@@ -6,8 +6,8 @@ export const getAsyncScope: () => AsyncScope = (function() {
     return function(): AsyncScope {
         if (instance === undefined) {
             instance = new AsyncScope({
-                nodeExpiration: (1000 * 60 * 1.5),
-                purgeInterval: (1000 * 60 * 3),
+                nodeExpiration: 3000,
+                purgeInterval: 5000,
             })
         }
 
