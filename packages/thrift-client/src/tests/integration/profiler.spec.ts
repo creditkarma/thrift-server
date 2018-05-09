@@ -23,10 +23,17 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
+const sizes: Array<number> = [ 100 ]
+
+const average = () => {
+    const sum = sizes.reduce((a, b) => a + b)
+    return (sum / sizes.length)
+}
+
 const profile = () => {
     const rss = process.memoryUsage().rss / 1024 / 1024
     const used = process.memoryUsage().heapUsed / 1024 / 1024
-    const total = process.memoryUsage().heapTotal / 1024 /1024
+    const total = process.memoryUsage().heapTotal / 1024 / 1024
 
     if (process.env.DEBUG) {
         console.log(`RSS: ${rss} MB`)
@@ -34,8 +41,8 @@ const profile = () => {
         console.log(`Total: ${total} MB`)
     }
 
-    if (used >= 150) {
-        throw new Error(`Heap usage exceeded 150 MB`)
+    if (used > (average() * 1.30)) {
+        throw new Error(`Heap usage spike`)
     }
 }
 
@@ -69,7 +76,7 @@ describe('Memory Profile', () => {
         })
     })
 
-    it('should correctly trace request using B3 headers', (done: any) => {
+    it('should verify consistent memory usage', (done: any) => {
         const count: number = 1000
         let current: number = 0
         let completed: number = 0
