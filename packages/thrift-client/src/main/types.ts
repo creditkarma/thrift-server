@@ -5,6 +5,7 @@ import {
 } from '@creditkarma/thrift-server-core'
 
 import * as request from 'request'
+import * as tls from 'tls'
 
 export interface IRequestResponse {
     statusCode: number
@@ -12,35 +13,49 @@ export interface IRequestResponse {
     body: Buffer
 }
 
-export type ThriftContext<Options> =
-    Options & { request?: { headers: IRequestHeaders} }
+export type ThriftContext<Context> =
+    Context & { request?: { headers: IRequestHeaders} }
 
-export type ClientOptionsFunction<Options> =
-    () => ThriftContext<Options>
+export type ClientOptionsFunction<Context> =
+    () => ThriftContext<Context>
 
-export interface IHttpConnectionOptions<Options = never> {
+export interface IConnectionOptions {
+    hostName: string
+    port: number
+    timeout?: number
+    transport?: TransportType
+    protocol?: ProtocolType
+    tls?: tls.TlsOptions
+}
+
+export interface ICreateTcpClientOptions extends IConnectionOptions {
+    serviceName?: string
+    register?: Array<IThriftMiddlewareConfig<void>>
+}
+
+export interface IHttpConnectionOptions<Context = never> {
     hostName: string
     port: number
     path?: string
     https?: boolean
     transport?: TransportType
     protocol?: ProtocolType
-    context?: ThriftContext<Options> | ClientOptionsFunction<Options>
+    context?: ThriftContext<Context> | ClientOptionsFunction<Context>
 }
 
-export interface ICreateHttpClientOptions<Options> extends IHttpConnectionOptions<Options> {
+export interface ICreateHttpClientOptions<Context> extends IHttpConnectionOptions<Context> {
     serviceName?: string
-    register?: Array<IThriftMiddlewareConfig<Options>>
+    register?: Array<IThriftMiddlewareConfig<Context>>
     requestOptions?: request.CoreOptions
 }
 
 export type NextFunction<Options> =
     (data?: Buffer, options?: Options) => Promise<IRequestResponse>
 
-export type RequestHandler<Options> = (
+export type RequestHandler<Context> = (
     data: Buffer,
-    context: ThriftContext<Options>,
-    next: NextFunction<Options>,
+    context: Context,
+    next: NextFunction<Context>,
 ) => Promise<IRequestResponse>
 
 export interface IThriftMiddleware<Options> {
