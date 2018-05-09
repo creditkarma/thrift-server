@@ -10,7 +10,7 @@ import {
 
 import { createServer as addService } from './add-service'
 import { createServer as calculatorService } from './calculator-service'
-import { createServer as mockCollector } from './Observability/mock-collector'
+import { createServer as mockCollector } from './observability/mock-collector'
 
 import {
     createClientServer,
@@ -24,11 +24,22 @@ const before = lab.before
 const after = lab.after
 
 const profile = () => {
+    const rss = process.memoryUsage().rss / 1024 / 1024
     const used = process.memoryUsage().heapUsed / 1024 / 1024
-    console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`)
+    const total = process.memoryUsage().heapTotal / 1024 /1024
+
+    if (process.env.DEBUG) {
+        console.log(`RSS: ${rss} MB`)
+        console.log(`Used: ${used} MB`)
+        console.log(`Total: ${total} MB`)
+    }
+
+    if (used >= 150) {
+        throw new Error(`Heap usage exceeded 150 MB`)
+    }
 }
 
-describe('Observability', () => {
+describe('Memory Profile', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
     let clientServer: net.Server
@@ -59,7 +70,7 @@ describe('Observability', () => {
     })
 
     it('should correctly trace request using B3 headers', (done: any) => {
-        const count: number = 100
+        const count: number = 1000
         let current: number = 0
         let completed: number = 0
 
@@ -86,7 +97,7 @@ describe('Observability', () => {
                 if (current < count) {
                     runRequest()
                 }
-            }, Math.random() * 100)
+            }, (Math.random() * 20 + 5))
         }
 
         runRequest()
