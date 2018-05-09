@@ -228,7 +228,7 @@ describe('createHttpClient', () => {
                     port: 8080,
                     requestOptions: {
                         timeout: 5000,
-                    }
+                    },
                 },
             )
 
