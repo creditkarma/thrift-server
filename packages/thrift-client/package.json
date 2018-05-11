@@ -20,6 +20,7 @@
   ],
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/integration/generated ./src/tests/integration/generated-apache",
+    "clean-dist": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
     "codegen-ts": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
     "codegen-apache": "thrift-typescript --target apache --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated-apache",
@@ -33,7 +34,7 @@
     "pretest": "npm run build:test",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/unit",
-    "test:integration": "lab --timeout 180000 --verbose -l -S -P spec dist/tests/integration"
+    "test:integration": "lab --timeout 60000 --verbose -l -S -P spec dist/tests/integration"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
@@ -51,7 +52,7 @@
     "@creditkarma/thrift-server-core": "^0.6.12",
     "@creditkarma/thrift-server-express": "^0.6.12",
     "@creditkarma/thrift-server-hapi": "^0.6.12",
-    "@creditkarma/thrift-typescript": "~1.1.5",
+    "@creditkarma/thrift-typescript": "~1.1.7",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",

@@ -42,9 +42,9 @@ export function createServer(): net.Server {
         zip(): void {
             return
         },
-        getStruct(): SharedStruct {
+        getStruct(key: number): SharedStruct {
             return new SharedStruct({
-                key: 0,
+                key,
                 value: 'test',
             })
         },
