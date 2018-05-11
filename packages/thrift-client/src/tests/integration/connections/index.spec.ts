@@ -148,7 +148,7 @@ describe('createHttpClient', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: SharedStruct) => {
                 expect(response).to.equal(
-                    new SharedStruct({ key: 0, value: 'test' }),
+                    new SharedStruct({ key: 5, value: 'test' }),
                 )
             })
         })

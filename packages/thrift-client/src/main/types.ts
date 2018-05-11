@@ -4,6 +4,8 @@ import {
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
+import * as GenericPool from 'generic-pool'
+
 import * as request from 'request'
 import * as tls from 'tls'
 
@@ -26,6 +28,7 @@ export interface IConnectionOptions {
     transport?: TransportType
     protocol?: ProtocolType
     tls?: tls.TlsOptions
+    pool?: GenericPool.Options
 }
 
 export interface ICreateTcpClientOptions extends IConnectionOptions {

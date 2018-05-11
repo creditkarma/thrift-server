@@ -23,10 +23,6 @@ import {
     createPool,
 } from './pool'
 
-import {
-    deepMerge,
-} from '../utils'
-
 import * as logger from '../logger'
 
 import {
@@ -40,7 +36,6 @@ export class TcpConnection extends ThriftConnection<void> {
     protected readonly middleware: Array<IThriftMiddleware<void>>
 
     private pool: GenericPool.Pool<Connection>
-    // private offlineQueue: Array<Buffer> = []
 
     constructor(options: IConnectionOptions) {
         super(
@@ -50,7 +45,7 @@ export class TcpConnection extends ThriftConnection<void> {
         this.port = options.port
         this.hostName = options.hostName
         this.middleware = []
-        this.pool = createPool(options, {})
+        this.pool = createPool(options, (options.pool || {}))
     }
 
     public register(...middleware: Array<IThriftMiddlewareConfig<void>>): void {
@@ -79,8 +74,7 @@ export class TcpConnection extends ThriftConnection<void> {
 
             } else {
                 return head(data, currentContext, (nextData?: Buffer, nextContext?: void): Promise<IRequestResponse> => {
-                    const resolvedContext = deepMerge(currentContext, (nextContext || {}))
-                    return applyHandlers((nextData || data), resolvedContext, tail)
+                    return applyHandlers((nextData || data), undefined, tail)
                 })
             }
         }
@@ -90,20 +84,29 @@ export class TcpConnection extends ThriftConnection<void> {
         })
     }
 
+    public destory(): Promise<void> {
+        logger.warn('Destroying TCP connection')
+        return this.pool.drain().then(() => {
+            return this.pool.clear()
+        }) as any as Promise<void>
+    }
+
     public emptyContext(): void {
         return undefined
     }
 
     public write(dataToWrite: Buffer, options?: void): Promise<IRequestResponse> {
-        return this.pool.acquire().then((connection) => {
-            return connection.send(dataToWrite).then((response: Buffer) => {
+        return this.pool.acquire().then(async (connection) => {
+            try {
+                const response: Buffer = await connection.send(dataToWrite)
                 return {
                     statusCode: 200,
                     headers: {},
                     body: response,
                 }
-            })
-
+            } finally {
+                this.pool.release(connection)
+            }
         }, (err: any) => {
             logger.error(`Unable to acquire connection for client: `, err)
             throw new Error(`Unable to acquire connection for thrift client`)

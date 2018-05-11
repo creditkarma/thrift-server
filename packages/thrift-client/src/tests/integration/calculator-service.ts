@@ -92,11 +92,8 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         zip(): void {
             return
         },
-        getStruct(): SharedStruct {
-            return new SharedStruct({
-                key: 0,
-                value: 'test',
-            })
+        getStruct(key: number): SharedStruct {
+            return new SharedStruct({ key, value: 'test' })
         },
         getUnion(index: number): SharedUnion {
             if (index === 1) {

@@ -5,6 +5,7 @@ import * as logger from '../logger'
 export interface IConnectionConfig {
     port: number
     hostName: string
+    timeout?: number
     auth?: {
         username: string
         password: string,
@@ -17,20 +18,27 @@ export interface IConnectionConfig {
 
 const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.Socket> => {
     return new Promise((resolve, reject) => {
+        const timeoutHandler = () => {
+            logger.log(`connection config: ${config.hostName}:${config.port}`)
+            reject(new Error('Timed out connecting'))
+        }
+        const errorHandler = () => {
+            logger.log(`connection config: ${config.hostName}:${config.port}`)
+            reject(new Error('Error connecting'))
+        }
+
         const socket: net.Socket = net.connect(config.port, config.hostName)
+        socket.setTimeout(config.timeout || 5000)
+
         socket.once('connect', (): void => {
+            socket.removeListener('error', errorHandler)
+            socket.removeListener('timeout', timeoutHandler)
             resolve(socket)
         })
 
-        socket.once('error', (err: Error): void => {
-            logger.log(`connection config: ${config.hostName}:${config.port}`)
-            reject(new Error('Error connecting'))
-        })
+        socket.once('error', errorHandler)
 
-        socket.once('timeout', (): void => {
-            logger.log(`connection config: ${config.hostName}:${config.port}`)
-            reject(new Error('Timed out connecting'))
-        })
+        socket.once('timeout', timeoutHandler)
     })
 }
 
@@ -75,7 +83,6 @@ export class Connection {
             this.socket.once('error', errorHandler)
             this.socket.once('timeout', timeoutHandler)
 
-            // Inject command ID
             this.socket.write(data)
         })
     }

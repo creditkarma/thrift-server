@@ -21,6 +21,10 @@ import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
 
 import { Calculator } from '../generated/calculator/calculator'
+import {
+    SharedStruct,
+    SharedUnion,
+} from '../generated/shared/shared'
 
 export const lab = Lab.script()
 
@@ -76,16 +80,14 @@ describe('HttpConnection', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client
-                .getStruct(5)
-                .then((response: { key: number; value: string }) => {
-                    expect(response).to.equal({ key: 0, value: 'test' })
-                })
+            return client.getStruct(5).then((response: SharedStruct) => {
+                expect(response).to.equal(new SharedStruct({ key: 5, value: 'test' }))
+            })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
-            return client.getUnion(1).then((response: any) => {
-                expect(response).to.equal({ option1: 'foo' })
+            return client.getUnion(1).then((response: SharedUnion) => {
+                expect(response).to.equal(new SharedUnion({ option1: 'foo' }))
             })
         })
 
@@ -182,7 +184,7 @@ describe('HttpConnection', () => {
         })
     })
 
-    describe('IncomingMiddleware', () => {
+    describe('Incoming Middleware', () => {
         it('should resolve when middleware allows', async () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
@@ -197,11 +199,7 @@ describe('HttpConnection', () => {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(
-                                `Unrecognized method name: ${readThriftMethod(
-                                    data,
-                                )}`,
-                            ),
+                            new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
                         )
                     }
                 },
@@ -256,11 +254,7 @@ describe('HttpConnection', () => {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(
-                                `Unrecognized method name: ${readThriftMethod(
-                                    data,
-                                )}`,
-                            ),
+                            new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
                         )
                     }
                 },
@@ -273,9 +267,7 @@ describe('HttpConnection', () => {
                     )
                 },
                 (err: any) => {
-                    expect(err.message).to.equal(
-                        'Unrecognized method name: add',
-                    )
+                    expect(err.message).to.equal('Unrecognized method name: add')
                 },
             )
         })
@@ -292,11 +284,7 @@ describe('HttpConnection', () => {
                 methods: ['nope'],
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return Promise.reject(
-                        new Error(
-                            `Unrecognized method name: ${readThriftMethod(
-                                data,
-                            )}`,
-                        ),
+                        new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
                     )
                 },
             })
@@ -307,7 +295,7 @@ describe('HttpConnection', () => {
         })
     })
 
-    describe('OutgoingMiddleware', () => {
+    describe('Outgoing Middleware', () => {
         it('should resolve when middleware adds auth token', async () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
