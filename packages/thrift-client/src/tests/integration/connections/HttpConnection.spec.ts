@@ -1,4 +1,4 @@
-import { readThriftMethod } from '@creditkarma/thrift-server-core'
+import { Int64, readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import {
@@ -20,7 +20,10 @@ import * as Lab from 'lab'
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
 
-import { Calculator } from '../generated/calculator/calculator'
+import {
+    Calculator,
+    ICommonStruct,
+} from '../generated/calculator'
 
 export const lab = Lab.script()
 
@@ -78,8 +81,8 @@ describe('HttpConnection', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client
                 .getStruct(5)
-                .then((response: { key: number; value: string }) => {
-                    expect(response).to.equal({ key: 0, value: 'test' })
+                .then((response: ICommonStruct) => {
+                    expect(response).to.equal({ code: { status: new Int64(0) }, value: 'test' })
                 })
         })
 

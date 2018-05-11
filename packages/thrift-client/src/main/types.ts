@@ -18,7 +18,7 @@ export type ThriftContext<Options> =
 export type ClientOptionsFunction<Options> =
     () => ThriftContext<Options>
 
-export interface IHttpConnectionOptions<Options = never> {
+export interface IHttpConnectionOptions<Options> {
     hostName: string
     port: number
     path?: string

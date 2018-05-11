@@ -1,10 +1,10 @@
 import * as Hapi from 'hapi'
-import { createThriftServer } from '../main/'
+import { createThriftServer } from '../../main/'
 
 import {
-  SharedStruct,
-  SharedUnion,
-} from './generated/shared/shared'
+  ISharedStruct,
+  ISharedUnion,
+} from './generated/shared'
 
 import {
   SERVER_CONFIG,
@@ -14,7 +14,7 @@ import {
   Calculator,
   Operation,
   Work,
-} from './generated/calculator/calculator'
+} from './generated/calculator'
 
 export function createServer(): Hapi.Server {
     /**
@@ -53,17 +53,17 @@ export function createServer(): Hapi.Server {
         zip(): void {
             return
         },
-        getStruct(): SharedStruct {
-            return new SharedStruct({
+        getStruct(): ISharedStruct {
+            return {
                 key: 0,
                 value: 'test',
-            })
+            }
         },
-        getUnion(index: number): SharedUnion {
+        getUnion(index: number): ISharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
     }

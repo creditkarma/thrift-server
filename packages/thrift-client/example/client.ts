@@ -15,7 +15,7 @@ import {
     Work,
     Operation,
     Calculator,
-} from './generated/calculator/calculator'
+} from './generated/calculator'
 
 (async function() {
     const SERVER_CONFIG = await config().get('server')

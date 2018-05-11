@@ -28,7 +28,7 @@ export interface ICreateHapiServerOptions<TProcessor>
     port: number
 }
 
-export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<never>
+export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<undefined>
 
 /**
  * Creates and returns a Hapi server with the thrift plugin registered.
@@ -74,7 +74,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
     const hapiThriftPlugin: ThriftHapiPlugin = {
-        register(server: Hapi.Server, nothing: never, next) {
+        register(server: Hapi.Server, nothing: undefined, next) {
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',

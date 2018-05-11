@@ -2,8 +2,8 @@ import { config } from '@creditkarma/dynamic-config'
 import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
 
-import { Operation, Calculator, Work } from './generated/calculator/calculator'
-import { SharedStruct, SharedUnion } from './generated/shared/shared'
+import { Operation, Calculator, IWork } from './generated/calculator'
+import { ISharedStruct, ISharedUnion } from './generated/shared'
 
 (async function startService(): Promise<void> {
     const SERVER_CONFIG = await config().get('server')
@@ -13,7 +13,7 @@ import { SharedStruct, SharedUnion } from './generated/shared/shared'
         add(a: number, b: number): number {
             return a + b;
         },
-        calculate(logId: number, work: Work): number {
+        calculate(logId: number, work: IWork): number {
             switch (work.op) {
                 case Operation.ADD:
                     return work.num1 + work.num2;
@@ -26,17 +26,17 @@ import { SharedStruct, SharedUnion } from './generated/shared/shared'
             }
         },
         zip(): void {},
-        getStruct(): SharedStruct {
-            return new SharedStruct({
+        getStruct(): ISharedStruct {
+            return {
                 key: 0,
                 value: 'test',
-            })
+            }
         },
-        getUnion(index: number): SharedUnion {
+        getUnion(index: number): ISharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
     })

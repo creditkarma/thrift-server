@@ -118,8 +118,12 @@ export class BinaryProtocol extends TProtocol {
         this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
     }
 
-    public writeI64(i64: Int64): void {
-        this.transport.write(i64.buffer)
+    public writeI64(i64: number | Int64): void {
+        if (typeof i64 === 'number') {
+            this.transport.write(new Int64(i64).buffer)
+        } else {
+            this.transport.write(i64.buffer)
+        }
     }
 
     public writeDouble(dub: number): void {
@@ -149,17 +153,20 @@ export class BinaryProtocol extends TProtocol {
 
         if (size < 0) {
             const version = size & VERSION_MASK
+
             if (version !== VERSION_1) {
                 console.log(`BAD: ${version}`)
                 throw new TProtocolException(
                     TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
                 )
             }
+
             return {
                 fieldName: this.readString(),
                 messageType: (size & TYPE_MASK),
                 requestId: this.readI32(),
             }
+
         } else {
             // if (this.strictRead) {
             //   throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, "No protocol version header")

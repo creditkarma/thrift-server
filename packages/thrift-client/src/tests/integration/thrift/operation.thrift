@@ -1,9 +1,10 @@
-/**
- * Thrift files can namespace, package, or prefix their output in various
- * target languages.
- */
 namespace java operation
 namespace js operation
+
+include "exceptions.thrift"
+
+typedef exceptions.InvalidOperation JankyOperation
+typedef exceptions.InvalidResult JankyResult
 
 /**
  * You can define enums, which are just 32 bit integers. Values are optional
@@ -15,3 +16,5 @@ enum Operation {
   MULTIPLY = 3,
   DIVIDE = 4
 }
+
+typedef Operation SomethingToDo

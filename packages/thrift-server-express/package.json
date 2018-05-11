@@ -1,7 +1,7 @@
 {
   "name": "@creditkarma/thrift-server-express",
-  "version": "0.6.12",
-  "description": "Thrift core library in TypeScript",
+  "version": "0.7.0-3",
+  "description": "Express server middleware for the Apache Thrift protocol",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
   "files": [
@@ -17,7 +17,8 @@
     "framework"
   ],
   "scripts": {
-    "clean": "rimraf ./dist ./src/tests/integration/generated ",
+    "clean": "rimraf ./dist ./src/tests/generated",
+    "lint": "tslint --fix './src/**/*.ts'",
     "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
@@ -27,7 +28,7 @@
     "pretest": "npm run build:test",
     "test": "npm run test:integration",
     "test:integration": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/integration",
-    "lint": "tslint --fix './src/**/*.ts'"
+    "test:only": "lab --timeout 10000 --verbose -l -S -P spec dist/tests"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
@@ -36,36 +37,31 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express"
   },
   "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.6.x",
-    "@types/body-parser": "^1.16.5",
-    "@types/express": "^4.0.37",
-    "body-parser": "^1.17.2",
-    "express": "^4.16.0"
+    "@creditkarma/thrift-server-core": "next",
+    "@types/express": "^4.11.1",
+    "express": "^4.16.3"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.6.12",
-    "@creditkarma/thrift-server-core": "^0.6.12",
-    "@creditkarma/thrift-typescript": "~1.1.4",
+    "@creditkarma/thrift-client": "^0.7.0-3",
+    "@creditkarma/thrift-server-core": "^0.7.0-3",
+    "@creditkarma/thrift-typescript": "2.0.0-11",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
-    "@types/debug": "0.0.30",
-    "@types/express": "^4.0.37",
+    "@types/express": "^4.11.1",
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
     "@types/q": "^1.0.5",
     "@types/request": "^2.47.0",
-    "@types/rimraf": "0.0.28",
-    "body-parser": "^1.17.2",
     "code": "^4.1.0",
-    "express": "^4.16.0",
-    "lab": "^14.2.0",
-    "lerna": "^2.0.0",
+    "express": "^4.16.3",
+    "lab": "^14.3.1",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "rimraf": "^2.6.2",
     "tslint": "^5.6.0",
     "tslint-eslint-rules": "^4.1.1",
-    "typescript": "2.8.x"
+    "typescript": "2.8.x",
+    "watch": "^1.0.2"
   },
   "dependencies": {
     "zipkin": "^0.12.0"

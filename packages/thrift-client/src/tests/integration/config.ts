@@ -1,18 +1,16 @@
-import {
-    IHttpConnectionOptions,
-} from '../../main'
-
-export const CALC_SERVER_CONFIG: IHttpConnectionOptions = {
+export const CALC_SERVER_CONFIG = {
     hostName: 'localhost',
     port: 8090,
+    path: '/thrift',
 }
 
-export const ADD_SERVER_CONFIG: IHttpConnectionOptions = {
+export const ADD_SERVER_CONFIG = {
     hostName: 'localhost',
     port: 8080,
+    path: '/thrift',
 }
 
-export const CLIENT_CONFIG: IHttpConnectionOptions = {
+export const CLIENT_CONFIG = {
     hostName: 'localhost',
     port: 9000,
 }
