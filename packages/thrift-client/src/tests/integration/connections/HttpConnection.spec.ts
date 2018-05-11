@@ -163,6 +163,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({
                 timeout: 5000,
             })
+
             const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
