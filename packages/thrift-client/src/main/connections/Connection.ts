@@ -27,27 +27,38 @@ export interface IConnectionConfig {
 
 const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.Socket> => {
     return new Promise((resolve, reject) => {
-        const timeoutHandler = () => {
-            logger.log(`connection config: ${config.hostName}:${config.port}`)
+        const removeHandlers = (): void => {
+            socket.removeAllListeners()
+        }
+        const connectHandler = (): void => {
+            logger.log(`Connected to: ${config.hostName}:${config.port}`)
+            removeHandlers()
+            resolve(socket)
+        }
+        const timeoutHandler = (): void => {
+            logger.error(`Timed out connecting: ${config.hostName}:${config.port}`)
+            removeHandlers()
+            socket.destroy()
             reject(new Error('Timed out connecting'))
         }
-        const errorHandler = () => {
-            logger.log(`connection config: ${config.hostName}:${config.port}`)
+        const errorHandler = (): void => {
+            logger.error(`Error connecting: ${config.hostName}:${config.port}`)
+            removeHandlers()
+            socket.destroy()
             reject(new Error('Error connecting'))
         }
 
-        const socket: net.Socket = net.connect(config.port, config.hostName)
-        socket.setTimeout(config.timeout || 5000)
+        const socket: net.Socket = new net.Socket()
 
-        socket.once('connect', (): void => {
-            socket.removeListener('error', errorHandler)
-            socket.removeListener('timeout', timeoutHandler)
-            resolve(socket)
-        })
+        socket.setTimeout(config.timeout || 5000)
 
         socket.once('error', errorHandler)
 
         socket.once('timeout', timeoutHandler)
+
+        socket.once('connect', connectHandler)
+
+        socket.connect(config.port, config.hostName)
     })
 }
 
@@ -111,6 +122,7 @@ export class Connection {
                     }
                 } catch (err) {
                     if (err instanceof InputBufferUnderrunError === false) {
+                        logger.error('Error reading data from connection: ', err)
                         removeHandlers()
                         reject(err)
                     }
