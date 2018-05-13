@@ -22,6 +22,10 @@ import {
     SharedUnion,
 } from '../generated/shared/shared'
 
+import {
+    APACHE_SERVER_CONFIG,
+} from '../config'
+
 export const lab = Lab.script()
 
 const describe = lab.describe
@@ -29,15 +33,13 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-const PORT: number = 8888
-
 describe('TcpConnection', () => {
     let server: net.Server
 
     before((done) => {
         server = createServer()
-        server.listen(PORT, 'localhost', () => {
-            console.log(`TCP server running on port[${PORT}]`)
+        server.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
+            console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
             done()
         })
     })

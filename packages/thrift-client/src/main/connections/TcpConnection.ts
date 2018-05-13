@@ -98,7 +98,7 @@ export class TcpConnection extends ThriftConnection<void> {
     public write(dataToWrite: Buffer, options?: void): Promise<IRequestResponse> {
         return this.pool.acquire().then(async (connection) => {
             try {
-                const response: Buffer = await connection.send(dataToWrite)
+                const response: Buffer = await connection.send(dataToWrite, this.Transport, this.Protocol)
                 return {
                     statusCode: 200,
                     headers: {},
