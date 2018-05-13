@@ -150,7 +150,7 @@ export class BinaryProtocol extends TProtocol {
         if (size < 0) {
             const version = size & VERSION_MASK
             if (version !== VERSION_1) {
-                console.log(`BAD: ${version}`)
+                console.error(`BAD: ${version}`)
                 throw new TProtocolException(
                     TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
                 )

@@ -1,5 +1,14 @@
 import * as net from 'net'
 import * as tls from 'tls'
+import {
+    TType,
+    // TTransport,
+    TProtocol,
+    IThriftField,
+    IProtocolConstructor,
+    ITransportConstructor,
+    InputBufferUnderrunError,
+} from '@creditkarma/thrift-server-core'
 import * as logger from '../logger'
 
 export interface IConnectionConfig {
@@ -60,23 +69,56 @@ export class Connection {
         this.socket.destroy()
     }
 
-    public send(data: Buffer): Promise<Buffer> {
+    public send(data: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            // const responses: Array<string> = []
+            let buf: Buffer = Buffer.from([])
+
+            const removeHandlers = () => {
+                this.socket.removeListener('data', dataHandler)
+                this.socket.removeListener('end', endHandler)
+                this.socket.removeListener('error', errorHandler)
+                this.socket.removeListener('timeout', timeoutHandler)
+            }
+
             const timeoutHandler = () => {
+                removeHandlers()
                 reject(new Error('Thrift connection timed out'))
             }
             const endHandler = () => {
+                removeHandlers()
                 reject(new Error('Thrift connection ended'))
             }
             const errorHandler = () => {
+                removeHandlers()
                 reject(new Error('Thrift connection error'))
             }
 
+            const dataHandler = (chunk: Buffer) => {
+                buf = Buffer.concat([ buf, chunk ])
+                try {
+                    const input: TProtocol = new Protocol(new Transport(buf))
+                    input.readMessageBegin()
+                    while (true) {
+                        const ret: IThriftField = input.readFieldBegin()
+                        const fieldType: TType = ret.fieldType
+                        if (fieldType === TType.STOP) {
+                            removeHandlers()
+                            resolve(buf)
+                            break
+                        } else {
+                            input.skip(fieldType)
+                        }
+                    }
+                } catch (err) {
+                    if (err instanceof InputBufferUnderrunError === false) {
+                        removeHandlers()
+                        reject(err)
+                    }
+                }
+            }
+
             // Listen for incoming responses
-            this.socket.on('data', (chunk: Buffer) => {
-                resolve(chunk)
-            })
+            this.socket.on('data', dataHandler)
 
             // Make sure to reject the promise on errors
             this.socket.once('end', endHandler)

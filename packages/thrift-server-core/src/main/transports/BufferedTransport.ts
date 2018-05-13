@@ -12,7 +12,6 @@ const DEFAULT_READ_BUFFER_SIDE: number = 1024
 
 export class BufferedTransport extends TTransport {
     public static receiver(data: Buffer): BufferedTransport {
-        console.log('received: ', data)
         const reader = new BufferedTransport()
 
         if (reader.writeCursor + data.length > reader.buffer.length) {

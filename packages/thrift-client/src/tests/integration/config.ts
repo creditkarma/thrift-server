@@ -1,6 +1,12 @@
 import {
     IHttpConnectionOptions,
+    IConnectionOptions,
 } from '../../main'
+
+export const APACHE_SERVER_CONFIG: IConnectionOptions = {
+    hostName: 'localhost',
+    port: 8888,
+}
 
 export const CALC_SERVER_CONFIG: IHttpConnectionOptions = {
     hostName: 'localhost',
