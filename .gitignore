@@ -62,6 +62,7 @@ dist
 
 # Codegen artifacts
 generated
+generated-apache
 
 # Temp files
 *.tmp
