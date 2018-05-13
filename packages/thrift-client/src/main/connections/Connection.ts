@@ -121,7 +121,7 @@ export class Connection {
                         }
                     }
                 } catch (err) {
-                    if (err instanceof InputBufferUnderrunError === false) {
+                    if (!(err instanceof InputBufferUnderrunError)) {
                         logger.error('Error reading data from connection: ', err)
                         removeHandlers()
                         reject(err)
