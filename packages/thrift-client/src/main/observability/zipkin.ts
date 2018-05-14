@@ -50,8 +50,10 @@ function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer)
             return asyncContext
 
         } else {
+            const traceId: TraceId = tracer.createRootId()
+            tracer.setId(traceId)
             return {
-                traceId: tracer.createRootId(),
+                traceId,
                 usesLinkerd: false,
                 requestHeaders: {},
             }

@@ -33,8 +33,6 @@ import {
 export type TcpContext<T> = T | void
 
 export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
-    protected readonly port: number
-    protected readonly hostName: string
     protected readonly middleware: Array<IThriftMiddleware<T>>
 
     private pool: GenericPool.Pool<Connection>
@@ -44,8 +42,6 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
             getTransport(options.transport),
             getProtocol(options.protocol),
         )
-        this.port = options.port
-        this.hostName = options.hostName
         this.middleware = []
         this.pool = createPool(options, (options.pool || {}))
     }

@@ -5,6 +5,7 @@ import {
     IThriftField,
     ITransportConstructor,
     TProtocol,
+    TTransport,
     TType,
 } from '@creditkarma/thrift-server-core'
 import * as net from 'net'
@@ -23,6 +24,29 @@ export interface IConnectionConfig {
     https?: boolean
     rejectUnauthorized?: boolean
     tlsHostname?: string
+}
+
+const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Buffer => {
+    try {
+        const transport: TTransport = new Transport(buffer)
+        const input: TProtocol = new Protocol(transport)
+        input.readStructBegin()
+        while (true) {
+            const ret = input.readFieldBegin()
+            const fieldType = ret.fieldType
+            if (fieldType === TType.STOP) {
+                break
+            } else {
+                input.skip(fieldType)
+                input.readFieldEnd()
+            }
+        }
+
+        input.readStructEnd()
+        return transport.remaining()
+    } catch (err) {
+        return buffer
+    }
 }
 
 const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.Socket> => {
@@ -82,7 +106,7 @@ export class Connection {
 
     public send(data: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            let buf: Buffer = Buffer.from([])
+            let buffer: Buffer = Buffer.from([])
 
             const removeHandlers = () => {
                 this.socket.removeListener('data', dataHandler)
@@ -99,22 +123,25 @@ export class Connection {
                 removeHandlers()
                 reject(new Error('Thrift connection ended'))
             }
-            const errorHandler = () => {
+            const errorHandler = (err: Error) => {
+                logger.error('Error sending data to thrift service: ', err)
                 removeHandlers()
                 reject(new Error('Thrift connection error'))
             }
 
             const dataHandler = (chunk: Buffer) => {
-                buf = Buffer.concat([ buf, chunk ])
+                buffer = Buffer.concat([ buffer, chunk ])
+                const stripped: Buffer = skipStruct(buffer, Transport, Protocol)
+
                 try {
-                    const input: TProtocol = new Protocol(new Transport(buf))
+                    const input: TProtocol = new Protocol(new Transport(stripped))
                     input.readMessageBegin()
                     while (true) {
                         const ret: IThriftField = input.readFieldBegin()
                         const fieldType: TType = ret.fieldType
                         if (fieldType === TType.STOP) {
                             removeHandlers()
-                            resolve(buf)
+                            resolve(buffer)
                             break
                         } else {
                             input.skip(fieldType)
