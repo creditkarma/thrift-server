@@ -8,8 +8,6 @@ import {
 import * as Hapi from 'hapi'
 import { CoreOptions } from 'request'
 
-import { SharedStruct, SharedUnion } from './generated/shared/shared'
-
 import {
     ADD_SERVER_CONFIG,
     CALC_SERVER_CONFIG,
@@ -20,11 +18,16 @@ import {
     Choice,
     Operation,
     Work,
-} from './generated/calculator/calculator'
+} from '../generated/calculator/calculator'
 
 import {
     AddService,
-} from './generated/calculator/add-service'
+} from '../generated/calculator/add-service'
+
+import {
+    SharedStruct,
+    SharedUnion,
+} from '../generated/shared/shared'
 
 import {
     createHttpClient,

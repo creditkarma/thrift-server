@@ -13,8 +13,8 @@ import {
 import { CoreOptions } from 'request'
 
 import {
-    CALC_SERVER_CONFIG,
     APACHE_SERVER_CONFIG,
+    CALC_SERVER_CONFIG,
 } from '../config'
 
 import { expect } from 'code'
@@ -25,13 +25,13 @@ import {
     Choice,
     FirstName,
     LastName,
-} from '../generated/calculator/calculator'
+} from '../../generated/calculator/calculator'
 
-import { SharedStruct } from '../generated/shared/shared'
+import { SharedStruct } from '../../generated/shared/shared'
 
 import { createServer as addService } from '../add-service'
-import { createServer as calculatorService } from '../calculator-service'
 import { createServer as apacheService } from '../apache-service'
+import { createServer as calculatorService } from '../calculator-service'
 
 export const lab = Lab.script()
 

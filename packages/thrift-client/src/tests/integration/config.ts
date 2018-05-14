@@ -1,6 +1,6 @@
 import {
-    IHttpConnectionOptions,
     IConnectionOptions,
+    IHttpConnectionOptions,
 } from '../../main'
 
 export const APACHE_SERVER_CONFIG: IConnectionOptions = {

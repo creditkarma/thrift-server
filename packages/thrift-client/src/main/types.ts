@@ -52,8 +52,8 @@ export interface ICreateHttpClientOptions<Context> extends IHttpConnectionOption
     requestOptions?: request.CoreOptions
 }
 
-export type NextFunction<Options> =
-    (data?: Buffer, options?: Options) => Promise<IRequestResponse>
+export type NextFunction<Context> =
+    (data?: Buffer, context?: Context) => Promise<IRequestResponse>
 
 export type RequestHandler<Context> = (
     data: Buffer,
@@ -61,12 +61,12 @@ export type RequestHandler<Context> = (
     next: NextFunction<Context>,
 ) => Promise<IRequestResponse>
 
-export interface IThriftMiddleware<Options> {
+export interface IThriftMiddleware<Context> {
     methods: Array<string>
-    handler: RequestHandler<Options>
+    handler: RequestHandler<Context>
 }
 
-export interface IThriftMiddlewareConfig<Options> {
+export interface IThriftMiddlewareConfig<Context> {
     methods?: Array<string>
-    handler: RequestHandler<Options>
+    handler: RequestHandler<Context>
 }

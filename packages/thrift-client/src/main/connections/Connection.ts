@@ -1,14 +1,14 @@
+import {
+    InputBufferUnderrunError,
+    // TTransport,
+    IProtocolConstructor,
+    IThriftField,
+    ITransportConstructor,
+    TProtocol,
+    TType,
+} from '@creditkarma/thrift-server-core'
 import * as net from 'net'
 import * as tls from 'tls'
-import {
-    TType,
-    // TTransport,
-    TProtocol,
-    IThriftField,
-    IProtocolConstructor,
-    ITransportConstructor,
-    InputBufferUnderrunError,
-} from '@creditkarma/thrift-server-core'
 import * as logger from '../logger'
 
 export interface IConnectionConfig {

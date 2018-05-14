@@ -8,7 +8,7 @@ export * from './Int64'
 export type LogFunction = (msg: string, data?: any) => void
 
 export interface IRequestHeaders {
-    [name: string]: string | Array<string> | undefined
+    [name: string]: any
 }
 
 export interface IRequestContext {
@@ -32,13 +32,13 @@ export interface IThriftServerOptions<TProcessor> {
     protocol?: ProtocolType
 }
 
-export interface IThriftConnection<Context = never> {
+export interface IThriftConnection<Context = void> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = never> extends EventEmitter implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = void> extends EventEmitter implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
@@ -65,6 +65,11 @@ export interface IClientConstructor<TClient, Context> {
 
 export interface IProcessorConstructor<TProcessor, THandler> {
     new(handler: THandler): TProcessor
+}
+
+export interface IStructConstructor<T extends StructLike> {
+    new (args?: any): T
+    read(input: TProtocol): T
 }
 
 export abstract class StructLike {

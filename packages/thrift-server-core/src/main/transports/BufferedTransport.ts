@@ -39,6 +39,15 @@ export class BufferedTransport extends TTransport {
         this.outCount = 0
     }
 
+    public remaining(): Buffer {
+        const remainingSize = this.writeCursor - this.readCursor
+        const remainingBuffer = Buffer.alloc(remainingSize)
+        if (remainingSize > 0) {
+            this.buffer.copy(remainingBuffer, 0, this.readCursor, this.writeCursor)
+        }
+        return remainingBuffer
+    }
+
     public commitPosition(): void {
         const unreadSize: number = this.writeCursor - this.readCursor
         const bufSize: number = (

@@ -6,12 +6,12 @@ import {
     Choice,
     Operation,
     Work,
-} from './generated-apache/calculator/calculator'
+} from '../generated-apache/calculator/calculator'
 
 import {
     SharedStruct,
     SharedUnion,
-} from './generated-apache/shared/shared'
+} from '../generated-apache/shared/shared'
 
 export function createServer(): net.Server {
     const impl: Calculator.IHandler = {

@@ -1,26 +1,29 @@
 import * as thrift from '@creditkarma/thrift-server-core'
-
+import { expect } from 'code'
+import * as Lab from 'lab'
 import * as net from 'net'
 
 import {
     IRequestResponse,
     NextFunction,
     TcpConnection,
+    ThriftContextPlugin,
 } from '../../../main'
-
-import { expect } from 'code'
-import * as Lab from 'lab'
 
 import { createServer } from '../apache-service'
 
 import {
     Calculator,
-} from '../generated/calculator/calculator'
+} from '../../generated/calculator/calculator'
 
 import {
     SharedStruct,
     SharedUnion,
-} from '../generated/shared/shared'
+} from '../../generated/shared/shared'
+
+import {
+    Metadata,
+} from '../../generated/common/common'
 
 import {
     APACHE_SERVER_CONFIG,
@@ -96,59 +99,7 @@ describe('TcpConnection', () => {
         })
     })
 
-    describe('Incoming Middleware', () => {
-        let connection: TcpConnection
-        let client: Calculator.Client<void>
-
-        before(async () => {
-            connection = new TcpConnection({
-                hostName: 'localhost',
-                port: 8888,
-            })
-
-            connection.register({
-                handler(data: Buffer, context: void, next: NextFunction<void>): Promise<IRequestResponse> {
-                    return next(data)
-                },
-            }, {
-                methods: ['echoString'],
-                handler(data: Buffer, context: void, next: NextFunction<void>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(data) === 'fake') {
-                        return next()
-
-                    } else {
-                        return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
-                        )
-                    }
-                },
-            })
-
-            client = new Calculator.Client(connection)
-        })
-
-        after(async () => {
-            return connection.destory().then(() => {
-                console.log('Connection destroyed')
-            })
-        })
-
-        it('should resolve when middleware allows', async () => {
-            return client.add(5, 7).then((response: number) => {
-                expect(response).to.equal(12)
-            })
-        })
-
-        it('should reject when middleware rejects', async () => {
-            return client.echoString('fake').then((response: string) => {
-                throw new Error('Should reject')
-            }, (err: any) => {
-                expect(err.message).to.equal('Unrecognized method name: echoString')
-            })
-        })
-    })
-
-    describe('Outgoing Middleware', () => {
+    describe('Thrift Middleware', () => {
         let connection: TcpConnection
         let client: Calculator.Client<void>
 
@@ -205,6 +156,44 @@ describe('TcpConnection', () => {
         it('should allow rewriting of request data', async () => {
             return client.addWithContext(5, 7).then((response: number) => {
                 expect(response).to.equal(80)
+            })
+        })
+
+        it('should reject when middleware rejects', async () => {
+            return client.echoString('fake').then((response: string) => {
+                throw new Error('Should reject')
+            }, (err: any) => {
+                expect(err.message).to.equal('Unrecognized method name: echoString')
+            })
+        })
+    })
+
+    describe('ThriftContextPlugin', () => {
+        let connection: TcpConnection<Metadata>
+        let client: Calculator.Client<Metadata>
+
+        before(async () => {
+            connection = new TcpConnection({
+                hostName: 'localhost',
+                port: 8888,
+            })
+
+            connection.register(
+                ThriftContextPlugin<Metadata>(Metadata),
+            )
+
+            client = new Calculator.Client(connection)
+        })
+
+        after(async () => {
+            return connection.destory().then(() => {
+                console.log('Connection destroyed')
+            })
+        })
+
+        it('should do things', () => {
+            return client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
+                expect(5).to.equal(5)
             })
         })
     })
