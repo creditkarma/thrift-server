@@ -11,7 +11,7 @@ const defaultOptions: GenericPool.Options = {
     max: 10,
     evictionRunIntervalMillis: 10000,
     idleTimeoutMillis: 10000,
-    acquireTimeoutMillis: 5000,
+    acquireTimeoutMillis: 1000,
     testOnBorrow: true,
 }
 
