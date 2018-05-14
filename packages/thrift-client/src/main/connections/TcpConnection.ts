@@ -30,7 +30,9 @@ import {
     getHandler,
 } from './utils'
 
-export class TcpConnection<T = void> extends ThriftConnection<T> {
+export type TcpContext<T> = T | void
+
+export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly middleware: Array<IThriftMiddleware<T>>
@@ -59,14 +61,14 @@ export class TcpConnection<T = void> extends ThriftConnection<T> {
 
     public send(
         dataToSend: Buffer,
-        context: T,
+        context: TcpContext<T> = this.emptyContext(),
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
         const handlers: Array<RequestHandler<T>> = this.handlersForMethod(requestMethod)
 
         const applyHandlers = (
             data: Buffer,
-            currentContext: T | undefined,
+            currentContext: TcpContext<T>,
             [ head, ...tail ]: Array<RequestHandler<T>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
@@ -91,7 +93,7 @@ export class TcpConnection<T = void> extends ThriftConnection<T> {
         }) as any as Promise<void>
     }
 
-    public write(dataToWrite: Buffer, options?: T): Promise<IRequestResponse> {
+    public write(dataToWrite: Buffer, options?: TcpContext<T>): Promise<IRequestResponse> {
         return this.pool.acquire().then(async (connection) => {
             try {
                 const response: Buffer = await connection.send(dataToWrite, this.Transport, this.Protocol)
@@ -107,6 +109,10 @@ export class TcpConnection<T = void> extends ThriftConnection<T> {
             logger.error(`Unable to acquire connection for client: `, err)
             throw new Error(`Unable to acquire connection for thrift client`)
         }) as any
+    }
+
+    private emptyContext(): void {
+        return undefined
     }
 
     private handlersForMethod(name: string): Array<RequestHandler<T>> {
