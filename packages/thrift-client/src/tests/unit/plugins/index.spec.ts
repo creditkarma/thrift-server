@@ -55,14 +55,14 @@ describe('Plugins', () => {
     })
 
     describe('readThriftObject', () => {
-        it('should do things', async () => {
+        it('should reject when unable to read thrift object from Buffer', async () => {
             const meta: Metadata = new Metadata({ traceId: 7 })
             const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
             const totalLength: number = (await encode(meta)).length + data.length
             return appendThriftObject(meta, data).then((val: Buffer) => {
                 expect(val.length).to.equal(totalLength)
                 return readThriftObject(val, SharedStruct).then((result: [SharedStruct, Buffer]) => {
-                    expect(result[1].length).to.equal(data.length)
+                    throw new Error('Should reject')
                 }, (err: any) => {
                     expect(err.message).to.equal('Unable to read SharedStruct from input')
                 })
