@@ -25,7 +25,10 @@ const before = lab.before
 const after = lab.after
 
 // Number of requests to send
-const REQUEST_COUNT: number = 1500
+const REQUEST_COUNT: number = 1000
+
+// Aprox delay between requests
+const REQUEST_DELAY: number = 20
 
 // Max heap size in MB
 const MAX_HEAP_SIZE: number = 200
@@ -166,7 +169,7 @@ describe('Memory Profile', () => {
                 if (current < REQUEST_COUNT && !isFinished) {
                     runRequest()
                 }
-            }, (Math.random() * 15 + 5))
+            }, (Math.random() * REQUEST_DELAY))
         }
 
         runRequest()
