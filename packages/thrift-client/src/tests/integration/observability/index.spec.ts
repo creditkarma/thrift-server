@@ -49,14 +49,19 @@ describe('Observability', () => {
         })
     })
 
-    after(async () => {
-        clientServer.close()
-        collectServer.close()
-        return Promise.all([
-            calcServer.stop(),
-            addServer.stop(),
-        ]).then((err) => {
-            console.log('Thrift server stopped')
+    after((done) => {
+        clientServer.close(() => {
+            clientServer.unref()
+            collectServer.close(() => {
+                collectServer.unref()
+                Promise.all([
+                    calcServer.stop(),
+                    addServer.stop(),
+                ]).then((err) => {
+                    console.log('Thrift server stopped')
+                    done()
+                })
+            })
         })
     })
 

@@ -30,12 +30,12 @@ export function ThriftContextPlugin<RequestContext extends StructLike, ResponseC
     return {
         handler(data: Buffer, context: RequestContext, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
             return appendThriftObject(context, data, transportType, protocolType).then((extended: Buffer) => {
-                return next().then((res: IRequestResponse): Promise<IRequestResponse> => {
+                return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
                     return readThriftObject(
                         res.body,
                         ResponseContextClass,
                         transportType,
-                        protocolType
+                        protocolType,
                     ).then((result: [ResponseContext, Buffer]) => {
                         return {
                             statusCode: res.statusCode,
