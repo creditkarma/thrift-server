@@ -1,5 +1,5 @@
 import {
-    createClient,
+    createHttpClient,
 } from '@creditkarma/thrift-client'
 
 import { expect } from 'code'
@@ -37,7 +37,7 @@ describe('Thrift Server Hapi', () => {
 
     before(async () => {
         server = createServer()
-        client = createClient(Calculator.Client, SERVER_CONFIG)
+        client = createHttpClient(Calculator.Client, SERVER_CONFIG)
 
         return server.start().then(() => {
             console.log('Thrift server started')

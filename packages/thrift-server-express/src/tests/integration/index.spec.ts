@@ -6,19 +6,19 @@ import { CoreOptions } from 'request'
 import * as rp from 'request-promise-native'
 
 import {
-  createClient,
+    createHttpClient,
 } from '@creditkarma/thrift-client'
 
 import {
-  SERVER_CONFIG,
+    SERVER_CONFIG,
 } from './config'
 
 import {
-  Calculator,
+    Calculator,
 } from './generated/calculator/calculator'
 
 import {
-  SharedStruct,
+    SharedStruct,
 } from './generated/shared/shared'
 
 import {
@@ -38,7 +38,7 @@ describe('Thrift Server Express', () => {
 
     before((done: any) => {
         const app: express.Application = createServer()
-        client = createClient(Calculator.Client, SERVER_CONFIG)
+        client = createHttpClient(Calculator.Client, SERVER_CONFIG)
 
         server = app.listen(SERVER_CONFIG.port, () => {
             console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)

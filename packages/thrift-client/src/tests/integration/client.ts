@@ -14,7 +14,7 @@ import {
     Calculator,
     Operation,
     Work,
-} from './generated/calculator/calculator'
+} from '../generated/calculator/calculator'
 
 import {
     CALC_SERVER_CONFIG,

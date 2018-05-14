@@ -20,11 +20,11 @@ import * as Lab from 'lab'
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
 
-import { Calculator } from '../generated/calculator/calculator'
+import { Calculator } from '../../generated/calculator/calculator'
 import {
     SharedStruct,
     SharedUnion,
-} from '../generated/shared/shared'
+} from '../../generated/shared/shared'
 
 export const lab = Lab.script()
 
