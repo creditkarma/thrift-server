@@ -191,7 +191,7 @@ describe('TcpConnection', () => {
             })
         })
 
-        it('should do things', () => {
+        it('should handle appending data to payload', () => {
             return client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
                 expect(5).to.equal(5)
             })
