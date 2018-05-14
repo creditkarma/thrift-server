@@ -119,6 +119,7 @@ describe('Memory Profile', () => {
     it('should verify consistent memory usage', (done: any) => {
         let current: number = 0
         let completed: number = 0
+        let isFinished: boolean = false
 
         const testStartTime: number = Date.now()
 
@@ -152,15 +153,17 @@ describe('Memory Profile', () => {
                 if (completed === REQUEST_COUNT) {
                     profile(completedTime - testStartTime)
                     expect(true).to.equal(true)
+                    isFinished = true
                     done()
                 }
 
             }, (err: any) => {
+                isFinished = true
                 done(err)
             })
 
             setTimeout(() => {
-                if (current < REQUEST_COUNT) {
+                if (current < REQUEST_COUNT && !isFinished) {
                     runRequest()
                 }
             }, (Math.random() * 15 + 5))
