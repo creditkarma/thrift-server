@@ -179,7 +179,7 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                ThriftContextPlugin<Metadata>(Metadata),
+                ThriftContextPlugin<Metadata, Metadata>(Metadata, Metadata),
             )
 
             client = new Calculator.Client(connection)

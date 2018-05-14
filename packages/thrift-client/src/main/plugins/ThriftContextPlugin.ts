@@ -21,16 +21,22 @@ import {
 
 import * as logger from '../logger'
 
-export function ThriftContextPlugin<T extends StructLike>(
-    ContextClass: IStructConstructor<T>,
+export function ThriftContextPlugin<RequestContext extends StructLike, ResponseContext extends StructLike>(
+    RequestContextClass: IStructConstructor<RequestContext>,
+    ResponseContextClass: IStructConstructor<ResponseContext>,
     transportType: TransportType = 'buffered',
     protocolType: ProtocolType = 'binary',
-): IThriftMiddlewareConfig<T> {
+): IThriftMiddlewareConfig<RequestContext> {
     return {
-        handler(data: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
+        handler(data: Buffer, context: RequestContext, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
             return appendThriftObject(context, data, transportType, protocolType).then((extended: Buffer) => {
                 return next().then((res: IRequestResponse): Promise<IRequestResponse> => {
-                    return readThriftObject(res.body, ContextClass, transportType, protocolType).then((result: [T, Buffer]) => {
+                    return readThriftObject(
+                        res.body,
+                        ResponseContextClass,
+                        transportType,
+                        protocolType
+                    ).then((result: [ResponseContext, Buffer]) => {
                         return {
                             statusCode: res.statusCode,
                             headers: {
