@@ -8,6 +8,7 @@ import {
     NextFunction,
     TcpConnection,
     ThriftContextPlugin,
+    TTwitter,
     TTwitterClientFilter,
 } from '../../../main'
 
@@ -31,10 +32,6 @@ import {
 import {
     Metadata,
 } from '../../generated/common/common'
-
-import {
-    ResponseHeader,
-} from '../../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
 
 import {
     APACHE_SERVER_CONFIG,
@@ -334,7 +331,7 @@ describe('TcpConnection', () => {
             mockServer = net.createServer((socket: net.Socket): void => {
                 console.log('TCP server created')
                 socket.addListener('data', (chunk: Buffer) => {
-                    const responseHeader = new ResponseHeader()
+                    const responseHeader = new TTwitter.ResponseHeader()
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('add', thrift.MessageType.CALL, 1)

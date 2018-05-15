@@ -27,16 +27,12 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import {
-    ClientId,
-    RequestHeader,
-    ResponseHeader,
-} from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
+import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
 
 import * as logger from '../logger'
 
 // Exported generated Twitter types...
-export * from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
+export { TTwitter }
 
 export interface IClientId {
     name: string
@@ -92,12 +88,12 @@ export function TTwitterClientFilter<T>({
                 return tracer.scoped(() => {
                     const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
 
-                    const requestHeader: RequestHeader = new RequestHeader({
+                    const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
                         trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
                         span_id: ((headers as any)[ZipkinHeaders.SpanId]),
                         parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
                         sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
-                        client_id: (clientId !== undefined) ? new ClientId(clientId) : undefined,
+                        client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
                         contexts: [],
                         delegations: [],
                     })
@@ -106,10 +102,10 @@ export function TTwitterClientFilter<T>({
                         return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
                             return readThriftObject(
                                 res.body,
-                                ResponseHeader,
+                                TTwitter.ResponseHeader,
                                 transportType,
                                 protocolType,
-                            ).then((result: [ResponseHeader, Buffer]) => {
+                            ).then((result: [TTwitter.ResponseHeader, Buffer]) => {
                                 return {
                                     statusCode: res.statusCode,
                                     headers: {
