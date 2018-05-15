@@ -450,7 +450,7 @@ thriftClient.add(5, 6).then((response: number) => {
 
 ##### Options
 
-Available options for ThriftContextPlugin:
+Available options for TTwitterClientFilter:
 
 * localServiceName (required): The name of your local service/application.
 * remoteServiceName (required): The name of the remote service you are calling.
