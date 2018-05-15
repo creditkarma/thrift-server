@@ -34,7 +34,6 @@ export function appendThriftObject<T extends StructLike>(
     const Transport: ITransportConstructor = getTransport(transportType)
     const Protocol: IProtocolConstructor = getProtocol(protocolType)
     return encode(value, Transport, Protocol).then((encoded: Buffer) => {
-        console.log('encoded: ', encoded)
         return Buffer.concat([ encoded, data ])
     })
 }

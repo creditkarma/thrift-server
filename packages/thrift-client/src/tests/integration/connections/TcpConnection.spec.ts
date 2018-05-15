@@ -46,6 +46,7 @@ const describe = lab.describe
 const it = lab.it
 const before = lab.before
 const after = lab.after
+const afterEach = lab.afterEach
 
 describe('TcpConnection', () => {
     let server: net.Server
@@ -185,20 +186,7 @@ describe('TcpConnection', () => {
         let client: Calculator.Client<Metadata>
         let mockServer: net.Server
 
-        before(async () => {
-            connection = new TcpConnection({
-                hostName: 'localhost',
-                port: PORT,
-            })
-
-            connection.register(
-                ThriftContextPlugin<Metadata, Metadata>(Metadata, Metadata),
-            )
-
-            client = new Calculator.Client(connection)
-        })
-
-        after((done) => {
+        afterEach((done) => {
             mockServer.close(() => {
                 mockServer.unref()
                 connection.destory().then(() => {
@@ -209,6 +197,20 @@ describe('TcpConnection', () => {
         })
 
         it('should handle appending data to payload', (done) => {
+            connection = new TcpConnection({
+                hostName: 'localhost',
+                port: PORT,
+            })
+
+            connection.register(
+                ThriftContextPlugin<Metadata, Metadata>({
+                    RequestContextClass: Metadata,
+                    ResponseContextClass: Metadata,
+                }),
+            )
+
+            client = new Calculator.Client(connection)
+
             mockServer = net.createServer((socket: net.Socket): void => {
                 console.log('TCP server created')
                 socket.addListener('data', (chunk: Buffer) => {
@@ -230,9 +232,51 @@ describe('TcpConnection', () => {
             mockServer.listen(PORT, () => {
                 console.log(`TCP server listening on port: ${PORT}`)
                 client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
-                    expect(89).to.equal(89)
+                    expect(response).to.equal(89)
                     done()
                 }).catch((err: any) => {
+                    console.log('err: ', err)
+                    done(err)
+                })
+            })
+        })
+
+        it('should work with only a request context', (done) => {
+            connection = new TcpConnection({
+                hostName: 'localhost',
+                port: PORT,
+            })
+
+            connection.register(
+                ThriftContextPlugin<Metadata, Metadata>({
+                    RequestContextClass: Metadata,
+                }),
+            )
+
+            client = new Calculator.Client(connection)
+
+            mockServer = net.createServer((socket: net.Socket): void => {
+                console.log('TCP server created')
+                socket.addListener('data', (chunk: Buffer) => {
+                    const writer: thrift.TTransport = new thrift.BufferedTransport()
+                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                    const result = new Calculator.AddResult({ success: 102 })
+                    result.write(output)
+                    output.writeMessageEnd()
+                    const data: Buffer = writer.flush()
+
+                    socket.write(data)
+                })
+            })
+
+            mockServer.listen(PORT, () => {
+                console.log(`TCP server listening on port: ${PORT}`)
+                client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
+                    expect(response).to.equal(102)
+                    done()
+                }).catch((err: any) => {
+                    console.log('err: ', err)
                     done(err)
                 })
             })
@@ -312,6 +356,7 @@ describe('TcpConnection', () => {
                     expect(61).to.equal(61)
                     done()
                 }).catch((err: any) => {
+                    console.log('err: ', err)
                     done(err)
                 })
             })

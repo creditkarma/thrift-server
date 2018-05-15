@@ -11,6 +11,8 @@ import {
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
+import * as logger from './logger'
+
 export * from './observability'
 
 export interface IHandlerOptions<TProcessor> {
@@ -56,7 +58,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
         }),
         (err: any) => {
             if (err) {
-                console.log('error: ', err)
+                logger.log('error: ', err)
                 throw err
             }
         },
