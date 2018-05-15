@@ -35,6 +35,9 @@ import {
 
 import * as logger from '../logger'
 
+// Exported generated Twitter types...
+export * from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
+
 export interface IClientId {
     name: string
 }
@@ -55,16 +58,16 @@ export interface ITTwitterFileterOptions {
 function readRequestContext(tracer: Tracer): IRequestContext {
     const asyncContext: IRequestContext | null = getAsyncScope().get<IRequestContext>('requestContext')
     if (asyncContext !== null) {
-            return asyncContext
+        return asyncContext
 
-        } else {
-            const traceId: TraceId = tracer.createRootId()
-            return {
-                traceId,
-                usesLinkerd: false,
-                requestHeaders: {},
-            }
+    } else {
+        const traceId: TraceId = tracer.createRootId()
+        return {
+            traceId,
+            usesLinkerd: false,
+            requestHeaders: {},
         }
+    }
 }
 
 export function TTwitterClientFilter<T>({
