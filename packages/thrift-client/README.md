@@ -441,10 +441,12 @@ const thriftClient: Calculator.Client<RequestContext> =
         }) ]
     })
 
-thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response: number) => {
+thriftClient.add(5, 6).then((response: number) => {
     // Do stuff...
 })
 ```
+
+*Note: The Twitter types are generated and exported under the name `TTwitter`*
 
 ##### Options
 
