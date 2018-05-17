@@ -14,6 +14,7 @@ export abstract class TTransport {
     // Return any bytes remaining to be read
     public abstract remaining(): Buffer
 
+    public abstract commitPosition(): void
     public abstract rollbackPosition(): void
     // public abstract getBytesRemaining(): number
     // public abstract getBufferPosition(): number

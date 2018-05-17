@@ -18,10 +18,11 @@ export function encode(
     Protocol: IProtocolConstructor = BinaryProtocol,
 ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-        const transport: TTransport = new Transport(Buffer.from([]))
+        const transport: TTransport = new Transport()
         const protocol: TProtocol = new Protocol(transport)
         thriftObject.write(protocol)
-        resolve(transport.flush())
+        const data = protocol.flush()
+        resolve(data)
     })
 }
 
@@ -34,6 +35,6 @@ export function appendThriftObject<T extends StructLike>(
     const Transport: ITransportConstructor = getTransport(transportType)
     const Protocol: IProtocolConstructor = getProtocol(protocolType)
     return encode(value, Transport, Protocol).then((encoded: Buffer) => {
-        return new Transport(Buffer.concat([ encoded, data ])).flush()
+        return Buffer.concat([ encoded, data ])
     })
 }

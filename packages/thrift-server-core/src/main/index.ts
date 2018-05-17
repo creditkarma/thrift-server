@@ -1,3 +1,5 @@
+import { InputBufferUnderrunError } from './errors'
+
 import {
     IProtocolConstructor,
     IThriftProcessor,
@@ -25,7 +27,11 @@ export function process<Context>(args: {
         const output = new args.Protocol(new args.Transport())
         args.processor.process(input, output, args.context).then((result: Buffer) => {
             resolve(result)
+            transportWithData.commitPosition()
         }, (err: any) => {
+            if (err instanceof InputBufferUnderrunError) {
+                transportWithData.rollbackPosition()
+            }
             reject(err)
         })
     })

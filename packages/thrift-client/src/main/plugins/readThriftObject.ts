@@ -21,7 +21,7 @@ export function readThriftObject<T extends StructLike>(
     const Protocol: IProtocolConstructor = getProtocol(protocolType)
 
     return new Promise((resolve, reject) => {
-        const receiver: TTransport = Transport.receiver(data)
+        const receiver: TTransport = new Transport(data)
         const input: TProtocol = new Protocol(receiver)
         const decoded = ThriftClass.read(input)
         resolve([ decoded, receiver.remaining() ])

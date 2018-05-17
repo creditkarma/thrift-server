@@ -45,8 +45,10 @@ describe('Plugins', () => {
             output.writeMessageEnd()
             const data: Buffer = writer.flush()
             const totalLength: number = (await encode(meta)).length + data.length
+
             return appendThriftObject(meta, data).then((val: Buffer) => {
                 expect(val.length).to.equal(totalLength)
+
                 return readThriftObject(val, Metadata).then((result: [Metadata, Buffer]) => {
                     expect(result[1].length).to.equal(data.length)
                 })
@@ -59,8 +61,10 @@ describe('Plugins', () => {
             const meta: Metadata = new Metadata({ traceId: 7 })
             const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
             const totalLength: number = (await encode(meta)).length + data.length
+
             return appendThriftObject(meta, data).then((val: Buffer) => {
                 expect(val.length).to.equal(totalLength)
+
                 return readThriftObject(val, SharedStruct).then((result: [SharedStruct, Buffer]) => {
                     throw new Error('Should reject')
                 }, (err: any) => {

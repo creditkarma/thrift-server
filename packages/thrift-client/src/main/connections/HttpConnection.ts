@@ -111,7 +111,6 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     }
 
     public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<IRequestResponse> {
-        console.log('dataToWrite: ', dataToWrite)
         // Merge user options with required options
         const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
             method: 'POST',
@@ -126,7 +125,6 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
 
         return new Promise((resolve, reject) => {
             this.request(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
-                console.log('response: ', arguments)
                 if (err !== null) {
                     reject(err)
 
