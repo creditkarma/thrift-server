@@ -1,13 +1,14 @@
 import {
     InputBufferUnderrunError,
-    // TTransport,
     IProtocolConstructor,
-    IThriftField,
+    // IThriftField,
     ITransportConstructor,
+    ThriftFrameCodec,
     TProtocol,
     TTransport,
     TType,
 } from '@creditkarma/thrift-server-core'
+
 import * as net from 'net'
 import * as tls from 'tls'
 import * as logger from '../logger'
@@ -44,6 +45,7 @@ const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: 
 
         input.readStructEnd()
         return transport.remaining()
+
     } catch (err) {
         return buffer
     }
@@ -88,11 +90,13 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
 
 export class Connection {
     private socket: tls.TLSSocket | net.Socket
+    private frameCodec: ThriftFrameCodec
     private _hasSession: boolean
 
     constructor(socket: tls.TLSSocket | net.Socket) {
         this._hasSession = false
         this.socket = socket
+        this.frameCodec = new ThriftFrameCodec()
         this.initializeSocket()
     }
 
@@ -104,9 +108,9 @@ export class Connection {
         this.socket.destroy()
     }
 
-    public send(data: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
+    public send(dataToSend: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            let buffer: Buffer = Buffer.from([])
+            let saved: Buffer = Buffer.alloc(0)
 
             const removeHandlers = () => {
                 this.socket.removeListener('data', dataHandler)
@@ -130,15 +134,16 @@ export class Connection {
             }
 
             const dataHandler = (chunk: Buffer) => {
-                buffer = Buffer.concat([ buffer, chunk ])
+                saved = Buffer.concat([ saved, chunk ])
+                const buffer: Buffer = this.frameCodec.decode(saved)
                 const stripped: Buffer = skipStruct(buffer, Transport, Protocol)
 
                 try {
-                    const input: TProtocol = new Protocol(new Transport(stripped))
+                    const input = new Protocol(new Transport(stripped))
                     input.readMessageBegin()
                     while (true) {
-                        const ret: IThriftField = input.readFieldBegin()
-                        const fieldType: TType = ret.fieldType
+                        const ret = input.readFieldBegin()
+                        const fieldType = ret.fieldType
                         if (fieldType === TType.STOP) {
                             removeHandlers()
                             resolve(buffer)
@@ -164,7 +169,7 @@ export class Connection {
             this.socket.once('error', errorHandler)
             this.socket.once('timeout', timeoutHandler)
 
-            this.socket.write(data)
+            this.socket.write(this.frameCodec.encode(dataToSend))
         })
     }
 

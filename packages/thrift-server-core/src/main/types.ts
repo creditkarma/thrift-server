@@ -68,7 +68,7 @@ export interface IProcessorConstructor<TProcessor, THandler> {
 }
 
 export interface IStructConstructor<T extends StructLike> {
-    new (args?: any): T
+    new(args?: any): T
     read(input: TProtocol): T
 }
 

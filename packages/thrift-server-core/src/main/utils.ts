@@ -15,7 +15,7 @@ export function readThriftMethod(
     Transport: ITransportConstructor = BufferedTransport,
     Protocol: IProtocolConstructor = BinaryProtocol,
 ): string {
-    const transportWithData: TTransport = new Transport(buffer)
+    const transportWithData: TTransport = Transport.receiver(buffer)
     const input: TProtocol = new Protocol(transportWithData)
     const { fieldName } = input.readMessageBegin()
 

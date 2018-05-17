@@ -1,9 +1,16 @@
 import {
     getAsyncScope,
+    getProtocol,
     getTracerForService,
+    getTransport,
+    IProtocolConstructor,
     IRequestContext,
+    ITransportConstructor,
+    MessageType,
     ProtocolType,
+    TProtocol,
     TransportType,
+    TTransport,
     ZipkinHeaders,
 } from '@creditkarma/thrift-server-core'
 
@@ -51,6 +58,8 @@ export interface ITTwitterFileterOptions {
     httpInterval?: number
 }
 
+const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
+
 function readRequestContext(tracer: Tracer): IRequestContext {
     const asyncContext: IRequestContext | null = getAsyncScope().get<IRequestContext>('requestContext')
     if (asyncContext !== null) {
@@ -66,6 +75,23 @@ function readRequestContext(tracer: Tracer): IRequestContext {
     }
 }
 
+function upgradeRequest(
+    transportType: TransportType = 'buffered',
+    protocolType: ProtocolType = 'binary',
+): Buffer {
+    const Transport: ITransportConstructor = getTransport(transportType)
+    const Protocol: IProtocolConstructor = getProtocol(protocolType)
+    const options: TTwitter.ConnectionOptions = new TTwitter.ConnectionOptions()
+    const writer: TTransport = new Transport()
+    const output: TProtocol = new Protocol(writer)
+
+    output.writeMessageBegin(CAN_TRACE_METHOD_NAME, MessageType.CALL, 0)
+    options.write(output)
+    output.writeMessageEnd()
+
+    return output.flush()
+}
+
 export function TTwitterClientFilter<T>({
     localServiceName,
     remoteServiceName,
@@ -77,51 +103,78 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
 }: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
+    let hasUpgraded: boolean = false
+    let upgradeRequested: boolean = false
+
     return {
-        async handler(data: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
+        async handler(dataToSend: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
             if (isUpgraded) {
-                const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
-                const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-                const requestContext: IRequestContext = readRequestContext(tracer)
-                tracer.setId(requestContext.traceId)
+                function sendUpgradedRequest(): Promise<IRequestResponse> {
+                    logger.log('TTwitter upgraded')
+                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+                    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                    const requestContext: IRequestContext = readRequestContext(tracer)
+                    tracer.setId(requestContext.traceId)
 
-                return tracer.scoped(() => {
-                    const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                    return tracer.scoped(() => {
+                        const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
 
-                    const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
-                        trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
-                        span_id: ((headers as any)[ZipkinHeaders.SpanId]),
-                        parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
-                        sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
-                        client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
-                        contexts: [],
-                        delegations: [],
-                    })
+                        const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
+                            trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
+                            span_id: ((headers as any)[ZipkinHeaders.SpanId]),
+                            parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
+                            sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
+                            client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
+                            contexts: [],
+                            dest: 'reference-service',
+                            delegations: [],
+                        })
 
-                    return appendThriftObject(requestHeader, data, transportType, protocolType).then((extended: Buffer) => {
-                        return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
-                            return readThriftObject(
-                                res.body,
-                                TTwitter.ResponseHeader,
-                                transportType,
-                                protocolType,
-                            ).then((result: [TTwitter.ResponseHeader, Buffer]) => {
-                                return {
-                                    statusCode: res.statusCode,
-                                    headers: {
-                                        thriftContext: result[0],
-                                    },
-                                    body: result[1],
-                                }
-                            }, (err: any) => {
-                                logger.warn(`Error reading context from Thrift response: `, err)
-                                return res
+                        return appendThriftObject(requestHeader, dataToSend, transportType, protocolType).then((extended: Buffer) => {
+                            return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
+                                return readThriftObject(
+                                    res.body,
+                                    TTwitter.ResponseHeader,
+                                    transportType,
+                                    protocolType,
+                                ).then((result: [TTwitter.ResponseHeader, Buffer]) => {
+                                    return {
+                                        statusCode: res.statusCode,
+                                        headers: {
+                                            thriftContext: result[0],
+                                        },
+                                        body: result[1],
+                                    }
+                                }, (err: any) => {
+                                    logger.warn(`Error reading context from Thrift response: `, err)
+                                    return res
+                                })
                             })
                         })
                     })
-                })
+                }
+
+                if (hasUpgraded) {
+                    return sendUpgradedRequest()
+
+                } else if (upgradeRequested) {
+                    return next(dataToSend, context)
+
+                } else {
+                    logger.log('Requesting TTwitter upgrade')
+                    upgradeRequested = true
+                    return next(upgradeRequest(), context).then((upgradeResponse: IRequestResponse) => {
+                        hasUpgraded = true
+                        return sendUpgradedRequest()
+
+                    }, (err: any) => {
+                        logger.log('Downgrading TTwitter request: ', err)
+                        return next(dataToSend, context)
+                   })
+                }
+
             } else {
-                return next(data, context)
+                return next(dataToSend, context)
             }
         },
     }

@@ -37,13 +37,25 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
 
     private pool: GenericPool.Pool<Connection>
 
-    constructor(options: IConnectionOptions) {
+    constructor({
+        hostName,
+        port,
+        timeout = 5000,
+        transport = 'buffered',
+        protocol = 'binary',
+        tls,
+        pool,
+    }: IConnectionOptions) {
         super(
-            getTransport(options.transport),
-            getProtocol(options.protocol),
+            getTransport(transport),
+            getProtocol(protocol),
         )
         this.middleware = []
-        this.pool = createPool(options, (options.pool || {}))
+        this.pool = createPool({
+            port,
+            hostName,
+            timeout,
+        }, (pool || {}))
     }
 
     public register(...middleware: Array<IThriftMiddlewareConfig<T>>): void {
@@ -63,16 +75,20 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         const handlers: Array<RequestHandler<T>> = this.handlersForMethod(requestMethod)
 
         const applyHandlers = (
-            data: Buffer,
+            currentData: Buffer,
             currentContext: TcpContext<T>,
             [ head, ...tail ]: Array<RequestHandler<T>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(data, currentContext)
+                return this.write(currentData, currentContext).catch((err: any) => {
+                    return Promise.reject(err)
+                })
 
             } else {
-                return head(data, (currentContext as any), (nextData?: Buffer, nextContext?: T): Promise<IRequestResponse> => {
-                    return applyHandlers((nextData || data), nextContext, tail)
+                return head(currentData, (currentContext as any), (nextData?: Buffer, nextContext?: T): Promise<IRequestResponse> => {
+                    return applyHandlers((nextData || currentData), nextContext, tail).catch((err: any) => {
+                        return Promise.reject(err)
+                    })
                 })
             }
         }
@@ -90,17 +106,19 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
     }
 
     public write(dataToWrite: Buffer, options?: TcpContext<T>): Promise<IRequestResponse> {
-        return this.pool.acquire().then(async (connection) => {
-            try {
-                const response: Buffer = await connection.send(dataToWrite, this.Transport, this.Protocol)
+        return this.pool.acquire().then((connection) => {
+            return connection.send(dataToWrite, this.Transport, this.Protocol).then((response: Buffer) => {
+                this.pool.release(connection)
                 return {
                     statusCode: 200,
                     headers: {},
                     body: response,
                 }
-            } finally {
+            }, (err: any) => {
+                logger.error('Error sending Thrift request: ', err)
                 this.pool.release(connection)
-            }
+                return Promise.reject(err)
+            })
         }, (err: any) => {
             logger.error(`Unable to acquire connection for client: `, err)
             throw new Error(`Unable to acquire connection for thrift client`)

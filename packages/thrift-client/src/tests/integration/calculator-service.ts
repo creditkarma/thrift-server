@@ -65,6 +65,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
             return
         },
         add(a: number, b: number, context?: Hapi.Request): Promise<number> {
+            console.log(`add: ${a} + ${b}`)
             return addServiceClient.add(a, b)
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
