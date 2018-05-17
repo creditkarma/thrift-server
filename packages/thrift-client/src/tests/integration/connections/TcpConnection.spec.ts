@@ -299,6 +299,7 @@ describe('TcpConnection', () => {
                 TTwitterClientFilter({
                     localServiceName: 'calculator-client',
                     remoteServiceName: 'calculator-service',
+                    destHeader: 'calculator-service',
                     endpoint: 'http://localhost:9411/api/v1/spans',
                     sampleRate: 1,
                 }),

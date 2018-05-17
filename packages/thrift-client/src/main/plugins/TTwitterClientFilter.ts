@@ -48,6 +48,7 @@ export interface IClientId {
 export interface ITTwitterFileterOptions {
     localServiceName: string
     remoteServiceName: string
+    destHeader: string
     isUpgraded?: boolean
     clientId?: IClientId
     transportType?: TransportType,
@@ -95,6 +96,7 @@ function upgradeRequest(
 export function TTwitterClientFilter<T>({
     localServiceName,
     remoteServiceName,
+    destHeader,
     isUpgraded = true,
     clientId,
     debug = false,
@@ -126,7 +128,7 @@ export function TTwitterClientFilter<T>({
                             sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
                             client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
                             contexts: [],
-                            dest: 'reference-service',
+                            dest: destHeader,
                             delegations: [],
                         })
 
