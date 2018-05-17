@@ -21,6 +21,7 @@ import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
 
 import { Calculator } from '../../generated/calculator/calculator'
+
 import {
     SharedStruct,
     SharedUnion,
@@ -70,6 +71,9 @@ describe('HttpConnection', () => {
         it('should corrently handle a service client request', async () => {
             return client.add(5, 7).then((response: number) => {
                 expect(response).to.equal(12)
+            }, (err: any) => {
+                console.log('err: ', err)
+                throw err
             })
         })
 
@@ -375,9 +379,9 @@ describe('HttpConnection', () => {
                 methods: ['add'],
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return next(data, {
-                            headers: {
-                                'x-fake-token': 'fake-token',
-                            },
+                        headers: {
+                            'x-fake-token': 'fake-token',
+                        },
                     })
                 },
             })

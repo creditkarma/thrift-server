@@ -1,5 +1,5 @@
 export const log = (msg: string, data?: any) => {
-    if (data !== undefined && process.env.DUBUG !== undefined) {
+    if (data !== undefined && process.env.DEBUG !== undefined) {
         console.log(`[thrift-client:info] ${msg}`, data)
     } else if (process.env.DUBUG !== undefined) {
         console.log(`[thrift-client:info] ${msg}`)

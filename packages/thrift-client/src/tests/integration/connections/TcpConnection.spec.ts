@@ -45,6 +45,8 @@ const before = lab.before
 const after = lab.after
 const afterEach = lab.afterEach
 
+const frameCodec: thrift.ThriftFrameCodec = new thrift.ThriftFrameCodec()
+
 describe('TcpConnection', () => {
     let server: net.Server
 
@@ -83,7 +85,7 @@ describe('TcpConnection', () => {
             })
         })
 
-        it('should do things', async () => {
+        it('should handle a simple service call', async () => {
             return client.add(5, 7).then((response: number) => {
                 expect(response).to.equal(12)
             })
@@ -221,7 +223,7 @@ describe('TcpConnection', () => {
                     const data: Buffer = writer.flush()
 
                     appendThriftObject(meta, data).then((extended: Buffer) => {
-                        socket.write(extended)
+                        socket.write(frameCodec.encode(extended))
                     })
                 })
             })
@@ -263,7 +265,7 @@ describe('TcpConnection', () => {
                     output.writeMessageEnd()
                     const data: Buffer = writer.flush()
 
-                    socket.write(data)
+                    socket.write(frameCodec.encode(data))
                 })
             })
 
@@ -328,22 +330,34 @@ describe('TcpConnection', () => {
         })
 
         it('should handle appending data to payload', (done) => {
+            let count: number = 0
             mockServer = net.createServer((socket: net.Socket): void => {
                 console.log('TCP server created')
                 socket.addListener('data', (chunk: Buffer) => {
-                    const responseHeader = new TTwitter.ResponseHeader()
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result = new Calculator.AddResult({ success: 61 })
-                    result.write(output)
-                    output.writeMessageEnd()
-                    const data: Buffer = writer.flush()
+                    if (count < 1) {
+                        count += 1
+                        const upgradeResponse = new TTwitter.UpgradeReply()
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        upgradeResponse.write(output)
+                        output.writeMessageEnd()
+                        socket.write(frameCodec.encode(writer.flush()))
 
-                    appendThriftObject(responseHeader, data).then((extended: Buffer) => {
-                        console.log('socket: write: ', extended)
-                        socket.write(extended)
-                    })
+                    } else {
+                        const responseHeader = new TTwitter.ResponseHeader()
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        const result = new Calculator.AddResult({ success: 61 })
+                        result.write(output)
+                        output.writeMessageEnd()
+                        const data: Buffer = writer.flush()
+
+                        appendThriftObject(responseHeader, data).then((extended: Buffer) => {
+                            socket.write(frameCodec.encode(extended))
+                        })
+                    }
                 })
             })
 

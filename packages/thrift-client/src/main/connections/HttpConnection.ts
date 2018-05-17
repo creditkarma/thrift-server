@@ -48,16 +48,23 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     protected readonly middleware: Array<IThriftMiddleware<CoreOptions>>
     private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-    constructor(request: RequestInstance, options: IHttpConnectionOptions<CoreOptions>) {
+    constructor(request: RequestInstance, {
+        hostName,
+        port,
+        path = '/thrift',
+        https = false,
+        transport = 'buffered',
+        protocol = 'binary',
+    }: IHttpConnectionOptions<CoreOptions>) {
         super(
-            getTransport(options.transport),
-            getProtocol(options.protocol),
+            getTransport(transport),
+            getProtocol(protocol),
         )
         this.request = request
-        this.port = options.port
-        this.hostName = options.hostName
-        this.path = normalizePath(options.path || '/thrift')
-        this.protocol = ((options.https === true) ? 'https' : 'http')
+        this.port = port
+        this.hostName = hostName
+        this.path = normalizePath(path || '/thrift')
+        this.protocol = ((https === true) ? 'https' : 'http')
         this.url = `${this.protocol}://${this.hostName}:${this.port}${this.path}`
         this.middleware = []
     }
@@ -104,6 +111,7 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     }
 
     public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<IRequestResponse> {
+        console.log('dataToWrite: ', dataToWrite)
         // Merge user options with required options
         const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
             method: 'POST',
@@ -118,6 +126,7 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
 
         return new Promise((resolve, reject) => {
             this.request(requestOptions, (err: any, response: RequestResponse, body: Buffer) => {
+                console.log('response: ', arguments)
                 if (err !== null) {
                     reject(err)
 

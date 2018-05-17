@@ -26,6 +26,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
             return
         },
         add(a: number, b: number, context?: Hapi.Request): number {
+            console.log(`add: ${a} + ${b}`)
             return a + b
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Int64 {
