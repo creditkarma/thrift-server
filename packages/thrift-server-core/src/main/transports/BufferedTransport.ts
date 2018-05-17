@@ -8,6 +8,8 @@ import * as binary from '../binary'
 import { InputBufferUnderrunError } from '../errors'
 import { TTransport } from './TTransport'
 
+const DEFAULT_READ_BUFFER_SIDE: number = 1024
+
 export class BufferedTransport extends TTransport {
     public static receiver(data: Buffer): BufferedTransport {
         const reader = new BufferedTransport(Buffer.alloc(data.length))
@@ -15,15 +17,17 @@ export class BufferedTransport extends TTransport {
         return reader
     }
 
-    protected readCursor: number
-    protected writeCursor: number
-    protected outBuffers: Array<Buffer>
+    private readCursor: number
+    private writeCursor: number
+    private outBuffers: Array<Buffer>
+    private outCount: number
 
     constructor(buffer?: Buffer) {
-        super(buffer || Buffer.alloc(0))
+        super(buffer || Buffer.alloc(DEFAULT_READ_BUFFER_SIDE))
         this.readCursor = 0
         this.writeCursor = (buffer !== undefined) ? buffer.length : 0
         this.outBuffers = []
+        this.outCount = 0
     }
 
     public remaining(): Buffer {
@@ -33,6 +37,24 @@ export class BufferedTransport extends TTransport {
             this.buffer.copy(remainingBuffer, 0, this.readCursor, this.writeCursor)
         }
         return remainingBuffer
+    }
+
+    public commitPosition(): void {
+        const unreadSize: number = this.writeCursor - this.readCursor
+        const bufSize: number = (
+            (unreadSize * 2 > DEFAULT_READ_BUFFER_SIDE) ?
+                unreadSize * 2 :
+                DEFAULT_READ_BUFFER_SIDE
+        )
+        const buf: Buffer = Buffer.alloc(bufSize)
+
+        if (unreadSize > 0) {
+            this.buffer.copy(buf, 0, this.readCursor, this.writeCursor)
+        }
+
+        this.readCursor = 0
+        this.writeCursor = unreadSize
+        this.buffer = buf
     }
 
     public rollbackPosition(): void {
@@ -97,24 +119,27 @@ export class BufferedTransport extends TTransport {
     }
 
     public write(buf: Buffer): void {
-        this.resize(buf.length)
-        buf.copy(this.buffer, this.writeCursor)
         this.outBuffers.push(buf)
-        this.writeCursor += buf.length
+        this.outCount += buf.length
     }
 
     public flush(): Buffer {
-        const returnData: Buffer = this.buffer
-        this.buffer = Buffer.alloc(0)
-        return returnData
-    }
-
-    private resize(len: number): void {
-        if (this.buffer.length < this.writeCursor + len) {
-            const saved: Buffer = this.buffer
-            this.buffer = Buffer.alloc(this.writeCursor + len)
-            saved.copy(this.buffer, 0, 0)
+        if (this.outCount < 1) {
+            return Buffer.alloc(0)
         }
+
+        const msg: Buffer = Buffer.alloc(this.outCount)
+        let pos: number = 0
+
+        this.outBuffers.forEach((buf: Buffer): void => {
+            buf.copy(msg, pos, 0)
+            pos += buf.length
+        })
+
+        this.outBuffers = []
+        this.outCount = 0
+
+        return msg
     }
 
     private ensureAvailable(len: number): void {
