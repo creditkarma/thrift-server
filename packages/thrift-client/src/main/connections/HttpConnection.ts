@@ -86,17 +86,17 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
         const handlers: Array<RequestHandler<CoreOptions>> = this.handlersForMethod(requestMethod)
 
         const applyHandlers = (
-            data: Buffer,
+            currentData: Buffer,
             currentContext: ThriftContext<CoreOptions>,
             [head, ...tail]: Array<RequestHandler<CoreOptions>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(data, currentContext)
+                return this.write(currentData, currentContext)
 
             } else {
-                return head(data, currentContext, (nextData?: Buffer, nextContext?: CoreOptions): Promise<IRequestResponse> => {
+                return head(currentData, currentContext, (nextData?: Buffer, nextContext?: CoreOptions): Promise<IRequestResponse> => {
                     const resolvedContext = deepMerge(currentContext, (nextContext || {}))
-                    return applyHandlers((nextData || data), resolvedContext, tail)
+                    return applyHandlers((nextData || currentData), resolvedContext, tail)
                 })
             }
         }
