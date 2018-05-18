@@ -23,7 +23,7 @@ import {
     IThriftMiddleware,
     NextFunction,
     ThriftContext,
-} from '../types'
+} from '../../types'
 
 function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeaders): IRequestHeaders {
     if (requestContext.usesLinkerd) {

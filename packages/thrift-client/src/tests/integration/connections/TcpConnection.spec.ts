@@ -18,7 +18,7 @@ import {
 
 import { createServer } from '../apache-service'
 
-import { createServer as mockCollector } from '../observability/mock-collector'
+import { createServer as mockCollector } from '../tracing/mock-collector'
 
 import {
     Calculator,
@@ -299,7 +299,6 @@ describe('TcpConnection', () => {
                 TTwitterClientFilter({
                     localServiceName: 'calculator-client',
                     remoteServiceName: 'calculator-service',
-                    destHeader: 'calculator-service',
                     endpoint: 'http://localhost:9411/api/v1/spans',
                     sampleRate: 1,
                 }),
@@ -319,12 +318,9 @@ describe('TcpConnection', () => {
                 mockServer.close(() => {
                     console.log('TCP server closed')
                     mockServer.unref()
-                    collectServer.close(() => {
-                        collectServer.unref()
-                        connection.destory().then(() => {
-                            console.log('Connection destroyed')
-                            done()
-                        })
+                    connection.destory().then(() => {
+                        console.log('Connection destroyed')
+                        done()
                     })
                 })
             })

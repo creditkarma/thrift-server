@@ -1,12 +1,17 @@
-import { readThriftMethod } from '@creditkarma/thrift-server-core'
+import * as thrift from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
+import * as http from 'http'
+import * as net from 'net'
 
 import {
+    appendThriftObject,
     HttpConnection,
     IRequestResponse,
     NextFunction,
     RequestInstance,
     ThriftContext,
+    TTwitter,
+    TTwitterClientFilter,
 } from '../../../main'
 
 import * as request from 'request'
@@ -19,6 +24,7 @@ import * as Lab from 'lab'
 
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
+import { createServer as mockCollector } from '../tracing/mock-collector'
 
 import { Calculator } from '../../generated/calculator/calculator'
 
@@ -199,11 +205,11 @@ describe('HttpConnection', () => {
 
             connection.register({
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (readThriftMethod(data) === 'add') {
+                    if (thrift.readThriftMethod(data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
+                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
                         )
                     }
                 },
@@ -225,12 +231,12 @@ describe('HttpConnection', () => {
             connection.register({
                 methods: ['add'],
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (readThriftMethod(data) === 'add') {
+                    if (thrift.readThriftMethod(data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
                             new Error(
-                                `Unrecognized method name: ${readThriftMethod(
+                                `Unrecognized method name: ${thrift.readThriftMethod(
                                     data,
                                 )}`,
                             ),
@@ -254,11 +260,11 @@ describe('HttpConnection', () => {
 
             connection.register({
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (readThriftMethod(data) === 'nope') {
+                    if (thrift.readThriftMethod(data) === 'nope') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
+                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
                         )
                     }
                 },
@@ -288,7 +294,7 @@ describe('HttpConnection', () => {
                 methods: ['nope'],
                 handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return Promise.reject(
-                        new Error(`Unrecognized method name: ${readThriftMethod(data)}`),
+                        new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
                     )
                 },
             })
@@ -396,6 +402,94 @@ describe('HttpConnection', () => {
                     expect(err.message).to.equal('Unauthorized')
                 },
             )
+        })
+    })
+
+    describe('TTwitterClientFilter', () => {
+        const PORT: number = 9010
+        let connection: HttpConnection
+        let client: Calculator.Client
+        let collectServer: net.Server
+        let mockServer: http.Server
+
+        before((done) => {
+            const requestClient: RequestInstance = request.defaults({})
+            connection = new HttpConnection(requestClient, {
+                hostName: 'localhost',
+                port: PORT,
+            })
+
+            connection.register(
+                TTwitterClientFilter({
+                    localServiceName: 'calculator-client',
+                    remoteServiceName: 'calculator-service',
+                    endpoint: 'http://localhost:9411/api/v1/spans',
+                    sampleRate: 1,
+                }),
+            )
+
+            client = new Calculator.Client(connection)
+            mockCollector().then((collector: net.Server) => {
+                collectServer = collector
+                done()
+            })
+        })
+
+        after((done) => {
+            collectServer.close(() => {
+                console.log('Mock collector closed')
+                collectServer.unref()
+
+                mockServer.close(() => {
+                    console.log('HTTP server closed')
+                    mockServer.unref()
+                    done()
+                })
+            })
+        })
+
+        it('should handle appending data to payload', (done) => {
+            let count: number = 0
+            mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
+                console.log('HTTP server request: ', req.headers)
+                if (count < 1) {
+                    count += 1
+                    const upgradeResponse = new TTwitter.UpgradeReply()
+                    const writer: thrift.TTransport = new thrift.BufferedTransport()
+                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                    upgradeResponse.write(output)
+                    output.writeMessageEnd()
+                    res.writeHead(200)
+                    res.end(writer.flush())
+
+                } else {
+                    const responseHeader = new TTwitter.ResponseHeader()
+                    const writer: thrift.TTransport = new thrift.BufferedTransport()
+                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                    const result = new Calculator.AddResult({ success: 61 })
+                    result.write(output)
+                    output.writeMessageEnd()
+                    const data: Buffer = writer.flush()
+
+                    appendThriftObject(responseHeader, data).then((extended: Buffer) => {
+                        res.writeHead(200)
+                        res.end(extended)
+                    })
+                }
+            })
+
+            mockServer.listen(PORT, () => {
+                console.log(`HTTP server listening on port: ${PORT}`)
+                client.add(2, 3).then((response: number) => {
+                    expect(61).to.equal(61)
+                    done()
+                }).catch((err: any) => {
+                    console.log('err: ', err)
+                    done(err)
+                })
+            })
         })
     })
 })

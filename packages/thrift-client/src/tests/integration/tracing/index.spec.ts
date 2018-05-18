@@ -30,7 +30,7 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('Observability', () => {
+describe('Tracing', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
     let clientServer: net.Server
@@ -106,6 +106,8 @@ describe('Observability', () => {
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
+                }).catch((err: any) => {
+                    done(err)
                 })
             }, 3000)
         })
@@ -138,6 +140,8 @@ describe('Observability', () => {
                     expect(Object.keys(result[traceId_1]).length).to.equal(1)
                     expect(Object.keys(result['411d1802c9151ded']).length).to.equal(3)
                     done()
+                }).catch((err: any) => {
+                    done(err)
                 })
             }, 3000)
         })
@@ -188,6 +192,8 @@ describe('Observability', () => {
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
+                }).catch((err: any) => {
+                    done(err)
                 })
             }, 3000)
         })
@@ -225,6 +231,8 @@ describe('Observability', () => {
                     expect(Object.keys(result)[0]).to.equal(traceId_2)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
+                }).catch((err: any) => {
+                    done(err)
                 })
             }, 3000)
         })
@@ -272,6 +280,8 @@ describe('Observability', () => {
                     expect(piece.id).to.equal(trace_1.spanId)
                     expect(piece.parentId).to.equal(trace_1.parentId)
                     done()
+                }).catch((err: any) => {
+                    done(err)
                 })
             }, 3000)
         })

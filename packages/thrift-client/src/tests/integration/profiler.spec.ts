@@ -7,7 +7,7 @@ import * as rp from 'request-promise-native'
 
 import { createServer as addService } from './add-service'
 import { createServer as calculatorService } from './calculator-service'
-import { createServer as mockCollector } from './observability/mock-collector'
+import { createServer as mockCollector } from './tracing/mock-collector'
 
 import {
     createClientServer,

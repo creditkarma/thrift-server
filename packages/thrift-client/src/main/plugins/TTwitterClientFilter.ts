@@ -48,7 +48,7 @@ export interface IClientId {
 export interface ITTwitterFileterOptions {
     localServiceName: string
     remoteServiceName: string
-    destHeader: string
+    destHeader?: string
     isUpgraded?: boolean
     clientId?: IClientId
     transportType?: TransportType,
@@ -96,7 +96,7 @@ function upgradeRequest(
 export function TTwitterClientFilter<T>({
     localServiceName,
     remoteServiceName,
-    destHeader,
+    destHeader = remoteServiceName,
     isUpgraded = true,
     clientId,
     debug = false,
@@ -120,7 +120,6 @@ export function TTwitterClientFilter<T>({
 
                     return tracer.scoped(() => {
                         const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
-
                         const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
                             trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
                             span_id: ((headers as any)[ZipkinHeaders.SpanId]),
