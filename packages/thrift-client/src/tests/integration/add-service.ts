@@ -51,6 +51,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 localServiceName: 'add-service',
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
+                httpInterval: 0,
             }),
             (err: any) => {
                 if (err) {

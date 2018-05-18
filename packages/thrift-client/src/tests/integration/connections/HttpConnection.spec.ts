@@ -1,7 +1,6 @@
 import * as thrift from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 import * as http from 'http'
-import * as net from 'net'
 
 import {
     appendThriftObject,
@@ -24,7 +23,7 @@ import * as Lab from 'lab'
 
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
-import { createServer as mockCollector } from '../tracing/mock-collector'
+import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
 
 import { Calculator } from '../../generated/calculator/calculator'
 
@@ -409,7 +408,7 @@ describe('HttpConnection', () => {
         const PORT: number = 9010
         let connection: HttpConnection
         let client: Calculator.Client
-        let collectServer: net.Server
+        let collectServer: IMockCollector
         let mockServer: http.Server
 
         before((done) => {
@@ -429,16 +428,15 @@ describe('HttpConnection', () => {
             )
 
             client = new Calculator.Client(connection)
-            mockCollector().then((collector: net.Server) => {
+            mockCollector().then((collector: IMockCollector) => {
                 collectServer = collector
                 done()
             })
         })
 
         after((done) => {
-            collectServer.close(() => {
+            collectServer.close().then(() => {
                 console.log('Mock collector closed')
-                collectServer.unref()
 
                 mockServer.close(() => {
                     console.log('HTTP server closed')
@@ -450,8 +448,8 @@ describe('HttpConnection', () => {
 
         it('should handle appending data to payload', (done) => {
             let count: number = 0
+            collectServer.reset()
             mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
-                console.log('HTTP server request: ', req.headers)
                 if (count < 1) {
                     count += 1
                     const upgradeResponse = new TTwitter.UpgradeReply()
@@ -483,7 +481,7 @@ describe('HttpConnection', () => {
             mockServer.listen(PORT, () => {
                 console.log(`HTTP server listening on port: ${PORT}`)
                 client.add(2, 3).then((response: number) => {
-                    expect(61).to.equal(61)
+                    expect(response).to.equal(61)
                     done()
                 }).catch((err: any) => {
                     console.log('err: ', err)

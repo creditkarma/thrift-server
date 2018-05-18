@@ -18,7 +18,7 @@ import {
 
 import { createServer } from '../apache-service'
 
-import { createServer as mockCollector } from '../tracing/mock-collector'
+import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
 
 import {
     Calculator,
@@ -286,7 +286,7 @@ describe('TcpConnection', () => {
         const PORT: number = 9010
         let connection: TcpConnection<void>
         let client: Calculator.Client<void>
-        let collectServer: net.Server
+        let collectServer: IMockCollector
         let mockServer: net.Server
 
         before((done) => {
@@ -305,16 +305,16 @@ describe('TcpConnection', () => {
             )
 
             client = new Calculator.Client(connection)
-            mockCollector().then((collector: net.Server) => {
+
+            mockCollector().then((collector: IMockCollector) => {
                 collectServer = collector
                 done()
             })
         })
 
         after((done) => {
-            collectServer.close(() => {
-                collectServer.unref()
-
+            collectServer.close().then(() => {
+                console.log('Mock collector closed')
                 mockServer.close(() => {
                     console.log('TCP server closed')
                     mockServer.unref()
@@ -361,7 +361,7 @@ describe('TcpConnection', () => {
             mockServer.listen(PORT, () => {
                 console.log(`TCP server listening on port: ${PORT}`)
                 client.add(2, 3).then((response: number) => {
-                    expect(61).to.equal(61)
+                    expect(response).to.equal(61)
                     done()
                 }).catch((err: any) => {
                     console.log('err: ', err)
