@@ -240,7 +240,6 @@ describe('createHttpClient', () => {
 
             return badClient.add(5, 7).then(
                 (response: number) => {
-                    console.log('res: ', response)
                     throw new Error('Should reject with host not found')
                 },
                 (err: any) => {

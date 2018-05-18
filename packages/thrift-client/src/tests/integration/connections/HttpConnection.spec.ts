@@ -420,7 +420,7 @@ describe('HttpConnection', () => {
 
             connection.register(
                 TTwitterClientFilter({
-                    localServiceName: 'calculator-client',
+                    localServiceName: 'http-calculator-client',
                     remoteServiceName: 'calculator-service',
                     endpoint: 'http://localhost:9411/api/v1/spans',
                     sampleRate: 1,
@@ -437,8 +437,6 @@ describe('HttpConnection', () => {
 
         after((done) => {
             collectServer.close().then(() => {
-                console.log('Mock collector closed')
-
                 mockServer.close(() => {
                     console.log('HTTP server closed')
                     mockServer.unref()
