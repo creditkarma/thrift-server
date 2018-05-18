@@ -16,7 +16,14 @@ export function serviceName(span: any): string | undefined {
     }
 }
 
-export function createServer(): Promise<net.Server> {
+export interface IMockCollector {
+    server: net.Server
+    reset: () => void
+    traces: () => any
+    close: () => Promise<void>
+}
+
+export function createServer(): Promise<IMockCollector> {
     // Get express instance
     const app = express()
 
@@ -47,18 +54,33 @@ export function createServer(): Promise<net.Server> {
         res.sendStatus(202)
     })
 
-    app.get('/api/v1/spans', (req: express.Request, res: express.Response): void => {
-        res.send(traces)
-        traces = {}
-    })
-
     return new Promise((resolve, reject) => {
         const server: net.Server = app.listen(COLLECTOR_CONFIG.port, (err: any) => {
             if (err) {
                 reject(err)
+
             } else {
                 console.log(`MockCollector listening on port[${COLLECTOR_CONFIG.port}]`)
-                resolve(server)
+                resolve({
+                    server,
+                    reset() {
+                        traces = {}
+                    },
+                    traces(): any {
+                        const tracesToReturn = traces
+                        traces = {}
+                        return tracesToReturn
+                    },
+                    close(): Promise<void> {
+                        return new Promise((resolve, reject) => {
+                            server.close(() => {
+                                console.log('MockCollector closed')
+                                server.unref()
+                                resolve()
+                            })
+                        })
+                    }
+                })
             }
         })
     })

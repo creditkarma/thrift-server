@@ -45,6 +45,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         remoteServiceName: 'calculator-service',
                         endpoint: 'http://localhost:9411/api/v1/spans',
                         sampleRate,
+                        httpInterval: 0,
                     }) ] :
                     []
             ),

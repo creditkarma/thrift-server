@@ -17,7 +17,7 @@ import {
 
 import { createServer as addService } from '../add-service'
 import { createServer as calculatorService } from '../calculator-service'
-import { createServer as mockCollector } from './mock-collector'
+import { createServer as mockCollector, IMockCollector } from './mock-collector'
 
 import {
     createClientServer,
@@ -34,7 +34,7 @@ describe('Tracing', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
     let clientServer: net.Server
-    let collectServer: net.Server
+    let collectServer: IMockCollector
 
     before(async () => {
         calcServer = calculatorService(1)
@@ -52,8 +52,7 @@ describe('Tracing', () => {
     after((done) => {
         clientServer.close(() => {
             clientServer.unref()
-            collectServer.close(() => {
-                collectServer.unref()
+            collectServer.close().then(() => {
                 Promise.all([
                     calcServer.stop(),
                     addServer.stop(),
@@ -98,17 +97,16 @@ describe('Tracing', () => {
         ]).then((val: any) => {
             expect(val).to.equal(['result: 14', 'result: 29'])
             setTimeout(() => {
-                rp('http://localhost:9411/api/v1/spans').then((traces: any) => {
-                    const result = JSON.parse(traces)
-                    expect(Object.keys(result).length).to.equal(2)
+                try {
+                    const result = collectServer.traces()
                     expect(result[traceId_1]).to.exist()
                     expect(result[traceId_2]).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
-                }).catch((err: any) => {
+                } catch (err) {
                     done(err)
-                })
+                }
             }, 3000)
         })
     })
@@ -132,17 +130,16 @@ describe('Tracing', () => {
         ]).then((val: any) => {
             expect(val).to.equal(['result: 14'])
             setTimeout(() => {
-                rp('http://localhost:9411/api/v1/spans').then((traces: any) => {
-                    const result = JSON.parse(traces)
-                    expect(Object.keys(result).length).to.equal(2)
+                try {
+                    const result = collectServer.traces()
                     expect(result[traceId_1]).to.exist()
                     expect(result['411d1802c9151ded']).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(1)
                     expect(Object.keys(result['411d1802c9151ded']).length).to.equal(3)
                     done()
-                }).catch((err: any) => {
+                } catch (err) {
                     done(err)
-                })
+                }
             }, 3000)
         })
     })
@@ -184,17 +181,16 @@ describe('Tracing', () => {
         ]).then((val: any) => {
             expect(val).to.equal(['result: 14', 'result: 29'])
             setTimeout(() => {
-                rp('http://localhost:9411/api/v1/spans').then((traces: any) => {
-                    const result = JSON.parse(traces)
-                    expect(Object.keys(result).length).to.equal(2)
+                try {
+                    const result = collectServer.traces()
                     expect(result[traceId_1]).to.exist()
                     expect(result[traceId_2]).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
-                }).catch((err: any) => {
+                } catch (err) {
                     done(err)
-                })
+                }
             }, 3000)
         })
     })
@@ -225,15 +221,14 @@ describe('Tracing', () => {
         ]).then((val: any) => {
             expect(val).to.equal(['result: 14'])
             setTimeout(() => {
-                rp('http://localhost:9411/api/v1/spans').then((traces: any) => {
-                    const result = JSON.parse(traces)
-                    expect(Object.keys(result).length).to.equal(1)
+                try {
+                    const result = collectServer.traces()
                     expect(Object.keys(result)[0]).to.equal(traceId_2)
                     expect(Object.keys(result[traceId_2]).length).to.equal(3)
                     done()
-                }).catch((err: any) => {
+                } catch (err) {
                     done(err)
-                })
+                }
             }, 3000)
         })
     })
@@ -272,17 +267,16 @@ describe('Tracing', () => {
         ]).then((val: any) => {
             expect(val).to.equal(['result: 14'])
             setTimeout(() => {
-                rp('http://localhost:9411/api/v1/spans').then((traces: any) => {
-                    const result = JSON.parse(traces)
+                try {
+                    const result = collectServer.traces()
                     const piece = result[trace_1.traceId][trace_1.spanId]
-                    expect(Object.keys(result).length).to.equal(1)
                     expect(piece.traceId).to.equal(trace_1.traceId)
                     expect(piece.id).to.equal(trace_1.spanId)
                     expect(piece.parentId).to.equal(trace_1.parentId)
                     done()
-                }).catch((err: any) => {
+                } catch (err) {
                     done(err)
-                })
+                }
             }, 3000)
         })
     })

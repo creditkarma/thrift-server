@@ -7,7 +7,7 @@ import * as rp from 'request-promise-native'
 
 import { createServer as addService } from './add-service'
 import { createServer as calculatorService } from './calculator-service'
-import { createServer as mockCollector } from './tracing/mock-collector'
+import { createServer as mockCollector, IMockCollector } from './tracing/mock-collector'
 
 import {
     createClientServer,
@@ -93,7 +93,7 @@ describe('Memory Profile', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
     let clientServer: net.Server
-    let collectServer: net.Server
+    let collectServer: IMockCollector
 
     before(async () => {
         calcServer = calculatorService(1)
@@ -108,14 +108,18 @@ describe('Memory Profile', () => {
         })
     })
 
-    after(async () => {
-        clientServer.close()
-        collectServer.close()
-        return Promise.all([
-            calcServer.stop(),
-            addServer.stop(),
-        ]).then((err) => {
-            console.log('Thrift server stopped')
+    after((done) => {
+        clientServer.close(() => {
+            clientServer.unref()
+            collectServer.close().then(() => {
+                return Promise.all([
+                    calcServer.stop(),
+                    addServer.stop(),
+                ]).then((err) => {
+                    console.log('Thrift server stopped')
+                    done()
+                })
+            })
         })
     })
 
