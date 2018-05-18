@@ -65,6 +65,7 @@ describe('Tracing', () => {
     })
 
     it('should correctly trace request using B3 headers', (done: any) => {
+        collectServer.reset()
         const traceId_1: string = randomTraceId()
         const traceId_2: string = randomTraceId()
         Promise.all([
