@@ -1,4 +1,5 @@
 export { appendThriftObject } from './appendThriftObject'
 export * from './readThriftObject'
+export * from './tracing'
 export * from './ThriftContextPlugin'
 export * from './TTwitterClientFilter'

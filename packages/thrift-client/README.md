@@ -436,6 +436,7 @@ const thriftClient: Calculator.Client<RequestContext> =
         register: [ TTwitterClientFilter({
             localServiceName: 'calculator-client',
             remoteServiceName: 'calculator-service',
+            destHeader: 'calculator-service',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate: 1,
         }) ]
@@ -454,6 +455,7 @@ Available options for TTwitterClientFilter:
 
 * localServiceName (required): The name of your local service/application.
 * remoteServiceName (required): The name of the remote service you are calling.
+* destHeader (optional): A name for the destination added to the RequestHeader object Finagle expects. Defaults to the value of `remoteServiceName`.
 * isUpgraded (optional): Is the service using TTwitter context. Defaults to true.
 * clientId (optional): A unique identifier for the client. Defaults to undefined.
 * debug (optional): Zipkin debug mode. Defaults to false.
