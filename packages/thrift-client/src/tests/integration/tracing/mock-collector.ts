@@ -72,14 +72,14 @@ export function createServer(): Promise<IMockCollector> {
                         return tracesToReturn
                     },
                     close(): Promise<void> {
-                        return new Promise((resolve, reject) => {
+                        return new Promise((res, rej) => {
                             server.close(() => {
                                 console.log('MockCollector closed')
                                 server.unref()
-                                resolve()
+                                res()
                             })
                         })
-                    }
+                    },
                 })
             }
         })
