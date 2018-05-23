@@ -1,1 +1,1 @@
-export * from './zipkin'
+export * from './ZipkinTracingExpress'
