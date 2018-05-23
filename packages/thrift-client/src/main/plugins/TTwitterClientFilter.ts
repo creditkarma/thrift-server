@@ -1,8 +1,9 @@
 import {
-    getAsyncScope,
+    getContextForService,
     getProtocol,
     getTracerForService,
     getTransport,
+    IAsyncContext,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -61,8 +62,8 @@ export interface ITTwitterFileterOptions {
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
 
-function readRequestContext(tracer: Tracer): IRequestContext {
-    const asyncContext: IRequestContext | null = getAsyncScope().get<IRequestContext>('requestContext')
+function readRequestContext(context: IAsyncContext, tracer: Tracer): IRequestContext {
+    const asyncContext: IRequestContext | null = context.getValue<IRequestContext>('requestContext')
     if (asyncContext !== null) {
         return asyncContext
 
@@ -115,7 +116,8 @@ export function TTwitterClientFilter<T>({
                     logger.log('TTwitter upgraded')
                     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-                    const requestContext: IRequestContext = readRequestContext(tracer)
+                    const asyncContext: IAsyncContext = getContextForService(localServiceName)
+                    const requestContext: IRequestContext = readRequestContext(asyncContext, tracer)
                     tracer.setId(requestContext.traceId)
 
                     return tracer.scoped(() => {
@@ -133,7 +135,7 @@ export function TTwitterClientFilter<T>({
 
                         return appendThriftObject(requestHeader, dataToSend, transportType, protocolType).then((extended: Buffer) => {
                             return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
-                                return readThriftObject(
+                                return readThriftObject<TTwitter.RequestHeader>(
                                     res.body,
                                     TTwitter.ResponseHeader,
                                     transportType,

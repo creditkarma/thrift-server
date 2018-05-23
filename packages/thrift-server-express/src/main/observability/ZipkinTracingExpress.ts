@@ -1,5 +1,5 @@
 import {
-    getAsyncScope,
+    getContextForService,
     getTracerForService,
     hasL5DHeader,
     IZipkinPluginOptions,
@@ -54,7 +54,7 @@ export function ZipkinTracingExpress({
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
 
-            getAsyncScope().set('requestContext', {
+            getContextForService(localServiceName).setValue('requestContext', {
                 traceId,
                 usesLinkerd: hasL5DHeader(req.headers),
                 requestHeaders: req.headers,
