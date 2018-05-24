@@ -32,7 +32,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             sampleRate,
             asyncOptions: {
                 nodeExpiration: 502,
-            }
+            },
         }))
     }
 
@@ -51,7 +51,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         httpInterval: 0,
                         asyncOptions: {
                             nodeExpiration: 601,
-                        }
+                        },
                     }) ] :
                     []
             ),
