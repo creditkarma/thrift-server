@@ -11,48 +11,10 @@ import {
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
-import * as logger from './logger'
-
 import {
-    ICreateHapiServerOptions,
     IHapiPluginOptions,
     ThriftHapiPlugin,
 } from './types'
-
-/**
- * Creates and returns a Hapi server with the thrift plugin registered.
- *
- * @param options
- */
-export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    options: ICreateHapiServerOptions<TProcessor>,
-): Hapi.Server {
-    const server = new Hapi.Server({ debug: { request: ['error'] } })
-
-    server.connection({ port: options.port })
-
-    /**
-     * Register the thrift plugin.
-     *
-     * This will allow us to define Hapi routes for our thrift service(s).
-     * They behave like any other HTTP route handler, so you can mix and match
-     * thrift / REST endpoints on the same server instance.
-     */
-    server.register(
-        ThriftServerHapi<TProcessor>({
-            path: options.path,
-            thriftOptions: options.thriftOptions,
-        }),
-        (err: any) => {
-            if (err) {
-                logger.log('error: ', err)
-                throw err
-            }
-        },
-    )
-
-    return server
-}
 
 /**
  * Create the thrift plugin for Hapi
