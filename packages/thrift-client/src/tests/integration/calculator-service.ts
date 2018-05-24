@@ -169,7 +169,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 httpInterval: 0,
                 asyncOptions: {
                     nodeExpiration: 503,
-                }
+                },
             }),
             (err: any) => {
                 if (err) {

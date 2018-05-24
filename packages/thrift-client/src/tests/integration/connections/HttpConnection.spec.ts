@@ -427,7 +427,7 @@ describe('HttpConnection', () => {
                     httpInterval: 0,
                     asyncOptions: {
                         nodeExpiration: 504,
-                    }
+                    },
                 }),
             )
 
