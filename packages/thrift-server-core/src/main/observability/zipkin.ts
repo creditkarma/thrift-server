@@ -97,9 +97,11 @@ export function getTracerForService(serviceName: string, options: IZipkinTracerC
             ctxImpl,
             recorder,
             sampler: new sampler.CountingSampler(
-                (options.sampleRate !== undefined) ?
-                    options.sampleRate :
-                    0.1,
+                (options.debug) ?
+                    100 :
+                    (options.sampleRate !== undefined) ?
+                        options.sampleRate :
+                        0.1,
             ),
             localServiceName: serviceName, // name of this application
         })
