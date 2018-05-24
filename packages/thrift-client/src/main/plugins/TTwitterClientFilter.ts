@@ -4,6 +4,7 @@ import {
     getTracerForService,
     getTransport,
     IAsyncContext,
+    IAsyncOptions,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -58,6 +59,7 @@ export interface ITTwitterFileterOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    asyncOptions?: IAsyncOptions
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
@@ -105,6 +107,8 @@ export function TTwitterClientFilter<T>({
     sampleRate,
     transportType = 'buffered',
     protocolType = 'binary',
+    httpInterval,
+    asyncOptions,
 }: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -114,7 +118,7 @@ export function TTwitterClientFilter<T>({
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
-                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
                     const asyncContext: IAsyncContext = getContextForService(localServiceName)
                     const requestContext: IRequestContext = readRequestContext(asyncContext, tracer)
