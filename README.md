@@ -7,7 +7,7 @@ As the name would suggest these libraries use [Apache Thrift](https://thrift.apa
 The available libraries:
 * [Thrift Server Hapi](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi): Plugin to add Thrift support to Hapi.
 * [Thrift Server Express](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express): Middleware to add Thrift support to Express.
-* [Thrift Client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request).
+* [Thrift Client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request) and a TCP client build on Node sockets. Both support communicating with services created by the Twitter [Finagle](https://github.com/twitter/finagle) project.
 
 *Note: Thrift Server is young and will still be undergoing some breaking changes before v1.0.0. The rule of thumb before 1.0.0 is that minor releases will potentially include breaking changes, but patch versions will not.*
 
