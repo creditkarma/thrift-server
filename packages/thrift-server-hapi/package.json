@@ -57,9 +57,9 @@
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "rimraf": "^2.6.2",
-    "tslint": "^5.6.0",
+    "tslint": "^5.10.0",
     "tslint-eslint-rules": "^4.1.1",
-    "typescript": "2.8.x",
+    "typescript": "2.9.x",
     "watch": "^1.0.2"
   },
   "dependencies": {
