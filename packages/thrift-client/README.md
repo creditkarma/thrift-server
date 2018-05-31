@@ -152,6 +152,8 @@ Creating a TCP client is much like creating an HTTP client.
 * Use the `createTcpClient` factory function.
 * Manually create your own `TcpConnection` object
 
+*Note: Our TcpConnection object uses an underlying connection pool instead of all client requests reusing the same connection. This pool is configrable. We use [GenericPool](https://github.com/coopernurse/node-pool) for managing our connection pool. Pool options are passed directly through to GenericPool.*
+
 #### `createTcpClient`
 
 Using the `createTcpClient` function you pass in two arguments, the first is your Thrift service client class and the second is a map of options to configure the underlying TCP connection.
