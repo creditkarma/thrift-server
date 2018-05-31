@@ -11,7 +11,7 @@ import { ADD_SERVER_CONFIG } from './config'
 
 import {
     AddService,
-} from './generated/calculator'
+} from '../generated/calculator'
 
 export function createServer(sampleRate: number = 0): Hapi.Server {
     /**

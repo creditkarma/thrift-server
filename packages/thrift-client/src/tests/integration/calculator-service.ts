@@ -11,7 +11,7 @@ import { CoreOptions } from 'request'
 import {
     ISharedStruct,
     ISharedUnion,
-} from './generated/shared'
+} from '../generated/shared'
 
 import {
     ADD_SERVER_CONFIG,
@@ -25,7 +25,7 @@ import {
     ICommonStruct,
     Operation,
     Work,
-} from './generated/calculator'
+} from '../generated/calculator'
 
 import {
     createHttpClient,

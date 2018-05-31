@@ -23,9 +23,9 @@ import * as Lab from 'lab'
 import {
     Calculator,
     IChoice,
-} from '../generated/calculator'
+} from '../../generated/calculator'
 
-import { ISharedStruct } from '../generated/shared'
+import { ISharedStruct } from '../../generated/shared'
 
 import { createServer as addService } from '../add-service'
 import { createServer as apacheService } from '../apache-service'
@@ -540,12 +540,13 @@ describe('createTcpClient', () => {
         })
 
         it('should call an endpoint with union arguments', async () => {
-            const firstName: Choice = new Choice({
-                firstName: new FirstName({ name: 'Louis' }),
-            })
-            const lastName: Choice = new Choice({
-                lastName: new LastName({ name: 'Smith' }),
-            })
+            const firstName: IChoice = {
+                firstName: { name: 'Louis' },
+            }
+
+            const lastName: IChoice = {
+                lastName: { name: 'Smith' },
+            }
 
             return Promise.all([
                 client.checkName(firstName),
@@ -567,10 +568,8 @@ describe('createTcpClient', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5).then((response: SharedStruct) => {
-                expect(response).to.equal(
-                    new SharedStruct({ key: 5, value: 'test' }),
-                )
+            return client.getStruct(5).then((response: ISharedStruct) => {
+                expect(response).to.equal({ code: { status: new Int64(5) }, value: 'test' })
             })
         })
 

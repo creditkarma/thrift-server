@@ -36,7 +36,7 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
+import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift'
 
 import * as logger from '../logger'
 
@@ -126,7 +126,7 @@ export function TTwitterClientFilter<T>({
 
                     return tracer.scoped(() => {
                         const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
-                        const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
+                        const requestHeader: TTwitter.IRequestHeader = {
                             trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
                             span_id: ((headers as any)[ZipkinHeaders.SpanId]),
                             parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
@@ -135,16 +135,22 @@ export function TTwitterClientFilter<T>({
                             contexts: [],
                             dest: destHeader,
                             delegations: [],
-                        })
+                        }
 
-                        return appendThriftObject(requestHeader, dataToSend, transportType, protocolType).then((extended: Buffer) => {
+                        return appendThriftObject<TTwitter.IResponseHeader_Loose>(
+                            requestHeader,
+                            dataToSend,
+                            TTwitter.RequestHeaderCodec,
+                            transportType,
+                            protocolType
+                        ).then((extended: Buffer) => {
                             return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
-                                return readThriftObject<TTwitter.RequestHeader>(
+                                return readThriftObject<TTwitter.IResponseHeader>(
                                     res.body,
-                                    TTwitter.ResponseHeader,
+                                    TTwitter.ResponseHeaderCodec,
                                     transportType,
                                     protocolType,
-                                ).then((result: [TTwitter.ResponseHeader, Buffer]) => {
+                                ).then((result: [TTwitter.IResponseHeader, Buffer]) => {
                                     return {
                                         statusCode: res.statusCode,
                                         headers: {

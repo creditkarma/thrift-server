@@ -15,7 +15,7 @@ import {
     IWork_Loose,
     Operation,
     Work,
-} from './generated/calculator'
+} from '../generated/calculator'
 
 import {
     CALC_SERVER_CONFIG,

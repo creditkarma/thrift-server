@@ -20,7 +20,7 @@
     "framework"
   ],
   "scripts": {
-    "clean": "rimraf ./dist ./src/tests/integration/generated ./src/tests/integration/generated-apache",
+    "clean": "rimraf ./dist ./src/ttwitter ./src/tests/integration/generated ./src/tests/integration/generated-apache",
     "clean-dist": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
     "codegen-twitter": "thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./ttwitter",

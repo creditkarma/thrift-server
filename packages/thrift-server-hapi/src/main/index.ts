@@ -7,17 +7,10 @@ import {
 
 import {
     ICreateHapiServerOptions,
-    IHapiPluginOptions,
 } from './types'
 
 import * as logger from './logger'
 
-export interface ICreateHapiServerOptions<TProcessor>
-    extends IHapiPluginOptions<TProcessor> {
-    port: number
-}
-
-export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<undefined>
 export * from './observability'
 export * from './ThriftServerHapi'
 export * from './types'

@@ -35,19 +35,12 @@ export function ZipkinTracingHapi({
     debug = false,
     endpoint,
     sampleRate,
-<<<<<<< HEAD:packages/thrift-server-hapi/src/main/observability/zipkin.ts
-}: IZipkinPluginOptions): Hapi.PluginRegistrationObject<undefined> {
-    const hapiZipkinPlugin: Hapi.PluginRegistrationObject<undefined> = {
-        register(server: Hapi.Server, nothing: undefined, next) {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
-=======
     httpInterval,
     asyncOptions,
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
->>>>>>> master:packages/thrift-server-hapi/src/main/observability/ZipkinTracingHapi.ts
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {

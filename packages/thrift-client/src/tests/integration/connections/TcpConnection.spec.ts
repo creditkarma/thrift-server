@@ -22,16 +22,17 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 
 import {
     Calculator,
-} from '../../generated/calculator/calculator'
+} from '../../generated/calculator'
 
 import {
-    SharedStruct,
-    SharedUnion,
-} from '../../generated/shared/shared'
+    ISharedStruct,
+    ISharedUnion,
+} from '../../generated/shared'
 
 import {
-    Metadata,
-} from '../../generated/common/common'
+    IMetadata,
+    MetadataCodec,
+} from '../../generated/common'
 
 import {
     APACHE_SERVER_CONFIG,
@@ -98,14 +99,19 @@ describe('TcpConnection', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5).then((response: SharedStruct) => {
-                expect(response).to.equal(new SharedStruct({ key: 5, value: 'test' }))
+            return client.getStruct(5).then((response: ISharedStruct) => {
+                expect(response).to.equal({
+                    code: {
+                        status: new thrift.Int64(5),
+                    },
+                    value: 'test',
+                })
             })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
-            return client.getUnion(1).then((response: SharedUnion) => {
-                expect(response).to.equal(new SharedUnion({ option1: 'foo' }))
+            return client.getUnion(1).then((response: ISharedUnion) => {
+                expect(response).to.equal({ option1: 'foo' })
             })
         })
     })
@@ -181,8 +187,8 @@ describe('TcpConnection', () => {
 
     describe('ThriftContextPlugin', () => {
         const PORT: number = 9010
-        let connection: TcpConnection<Metadata>
-        let client: Calculator.Client<Metadata>
+        let connection: TcpConnection<IMetadata>
+        let client: Calculator.Client<IMetadata>
         let mockServer: net.Server
 
         afterEach((done) => {
@@ -202,9 +208,9 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                ThriftContextPlugin<Metadata, Metadata>({
-                    RequestContextClass: Metadata,
-                    ResponseContextClass: Metadata,
+                ThriftContextPlugin<IMetadata, IMetadata>({
+                    RequestCodec: MetadataCodec,
+                    ResponseCodec: MetadataCodec,
                 }),
             )
 
@@ -213,7 +219,7 @@ describe('TcpConnection', () => {
             mockServer = net.createServer((socket: net.Socket): void => {
                 console.log('TCP server created')
                 socket.addListener('data', (chunk: Buffer) => {
-                    const meta = new Metadata({ traceId: 9 })
+                    const meta: IMetadata = { traceId: 9 }
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
@@ -222,7 +228,7 @@ describe('TcpConnection', () => {
                     output.writeMessageEnd()
                     const data: Buffer = writer.flush()
 
-                    appendThriftObject(meta, data).then((extended: Buffer) => {
+                    appendThriftObject(meta, data, MetadataCodec).then((extended: Buffer) => {
                         socket.write(frameCodec.encode(extended))
                     })
                 })
@@ -230,7 +236,7 @@ describe('TcpConnection', () => {
 
             mockServer.listen(PORT, () => {
                 console.log(`TCP server listening on port: ${PORT}`)
-                client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
+                client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
                     expect(response).to.equal(89)
                     done()
                 }).catch((err: any) => {
@@ -247,8 +253,9 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                ThriftContextPlugin<Metadata, Metadata>({
-                    RequestContextClass: Metadata,
+                ThriftContextPlugin<IMetadata, IMetadata>({
+                    RequestCodec: MetadataCodec,
+                    ResponseCodec: MetadataCodec,
                 }),
             )
 
@@ -260,8 +267,8 @@ describe('TcpConnection', () => {
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result = new Calculator.AddResult({ success: 102 })
-                    result.write(output)
+                    const result: Calculator.IAddResult = { success: 102 }
+                    Calculator.AddResultCodec.encode(result, output)
                     output.writeMessageEnd()
                     const data: Buffer = writer.flush()
 
@@ -271,7 +278,7 @@ describe('TcpConnection', () => {
 
             mockServer.listen(PORT, () => {
                 console.log(`TCP server listening on port: ${PORT}`)
-                client.add(2, 3, new Metadata({ traceId: 1, clientId: 2 })).then((response: number) => {
+                client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
                     expect(response).to.equal(102)
                     done()
                 }).catch((err: any) => {
@@ -336,16 +343,16 @@ describe('TcpConnection', () => {
                 socket.addListener('data', (chunk: Buffer) => {
                     if (count < 1) {
                         count += 1
-                        const upgradeResponse = new TTwitter.UpgradeReply()
+                        const upgradeResponse: TTwitter.IUpgradeReply = {}
                         const writer: thrift.TTransport = new thrift.BufferedTransport()
                         const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                         output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        upgradeResponse.write(output)
+                        TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
                         output.writeMessageEnd()
                         socket.write(frameCodec.encode(writer.flush()))
 
                     } else {
-                        const responseHeader = new TTwitter.ResponseHeader()
+                        const responseHeader = new TTwitter.ResponseHeader({})
                         const writer: thrift.TTransport = new thrift.BufferedTransport()
                         const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                         output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
@@ -354,7 +361,7 @@ describe('TcpConnection', () => {
                         output.writeMessageEnd()
                         const data: Buffer = writer.flush()
 
-                        appendThriftObject(responseHeader, data).then((extended: Buffer) => {
+                        appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
                             socket.write(frameCodec.encode(extended))
                         })
                     }

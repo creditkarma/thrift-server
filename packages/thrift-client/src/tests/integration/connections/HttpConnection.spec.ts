@@ -28,11 +28,10 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 import {
     Calculator,
     ICommonStruct,
-} from '../generated/calculator'
+} from '../../generated/calculator'
 
 import {
-    SharedStruct,
-    SharedUnion,
+    ISharedUnion,
 } from '../../generated/shared'
 
 export const lab = Lab.script()
@@ -100,8 +99,8 @@ describe('HttpConnection', () => {
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
-            return client.getUnion(1).then((response: SharedUnion) => {
-                expect(response).to.equal(new SharedUnion({ option1: 'foo' }))
+            return client.getUnion(1).then((response: ISharedUnion) => {
+                expect(response).to.equal({ option1: 'foo' })
             })
         })
 
@@ -459,17 +458,17 @@ describe('HttpConnection', () => {
             mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
                 if (count < 1) {
                     count += 1
-                    const upgradeResponse = new TTwitter.UpgradeReply()
+                    const upgradeResponse: TTwitter.IUpgradeReply = {}
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    upgradeResponse.write(output)
+                    TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
                     output.writeMessageEnd()
                     res.writeHead(200)
                     res.end(writer.flush())
 
                 } else {
-                    const responseHeader = new TTwitter.ResponseHeader()
+                    const responseHeader: TTwitter.IResponseHeader = {}
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
@@ -478,7 +477,7 @@ describe('HttpConnection', () => {
                     output.writeMessageEnd()
                     const data: Buffer = writer.flush()
 
-                    appendThriftObject(responseHeader, data).then((extended: Buffer) => {
+                    appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
                         res.writeHead(200)
                         res.end(extended)
                     })
