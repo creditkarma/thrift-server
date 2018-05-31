@@ -1,1 +1,0 @@
-export { ZipkinTracingThriftClient } from './zipkin'

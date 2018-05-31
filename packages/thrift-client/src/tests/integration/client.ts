@@ -31,6 +31,9 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             localServiceName: 'calculator-client',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate,
+            asyncOptions: {
+                nodeExpiration: 502,
+            },
         }))
     }
 
@@ -46,6 +49,10 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         remoteServiceName: 'calculator-service',
                         endpoint: 'http://localhost:9411/api/v1/spans',
                         sampleRate,
+                        httpInterval: 0,
+                        asyncOptions: {
+                            nodeExpiration: 601,
+                        },
                     }) ] :
                     []
             ),

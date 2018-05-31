@@ -1,27 +1,53 @@
-import { AsyncScope } from '@creditkarma/async-scope'
+import { AsyncScope, IAsyncOptions } from '@creditkarma/async-scope'
 import { Context, TraceId } from 'zipkin'
 
-export const getAsyncScope: () => AsyncScope = (function() {
+export const getAsyncScope: (options: IAsyncOptions) => AsyncScope = (() => {
     let instance: AsyncScope | undefined
-    return function(): AsyncScope {
+    return (options: IAsyncOptions): AsyncScope => {
         if (instance === undefined) {
             instance = new AsyncScope({
-                nodeExpiration: (1000 * 60 * 1.5),
-                purgeInterval: (1000 * 60 * 3),
+                nodeExpiration: (options.nodeExpiration || 800),
+                purgeInterval: (options.purgeInterval || 3000),
+                maxSize: (options.maxSize || 3000),
             })
         }
 
         return instance!
     }
-}())
+})()
 
-export class AsyncContext implements Context<TraceId> {
+export interface IAsyncContext extends Context<TraceId> {
+    getValue<T>(key: string): T | null
+    setValue<T>(key: string, val: T): void
+}
+
+export class AsyncContext implements IAsyncContext {
+    private options: IAsyncOptions
+    private scope: AsyncScope
+
+    constructor(options: IAsyncOptions) {
+        this.options = options
+        this.scope = getAsyncScope(this.options)
+    }
+
+    public getValue<T>(key: string): T | null {
+        return this.scope.get<T>(key)
+    }
+
+    public setValue<T>(key: string, val: T): void {
+        return this.scope.set(key, val)
+    }
+
+    public getScope(): AsyncScope {
+        return this.scope
+    }
+
     public setContext(ctx: TraceId): void {
-        getAsyncScope().set('traceId', ctx)
+        this.scope.set('traceId', ctx)
     }
 
     public getContext(): TraceId {
-        return getAsyncScope().get<TraceId>('traceId')!
+        return this.scope.get<TraceId>('traceId')!
     }
 
     public scoped<V>(callable: () => V): V {

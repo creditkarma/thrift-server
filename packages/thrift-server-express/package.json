@@ -1,7 +1,12 @@
 {
   "name": "@creditkarma/thrift-server-express",
+<<<<<<< HEAD
   "version": "0.7.0-3",
   "description": "Express server middleware for the Apache Thrift protocol",
+=======
+  "version": "0.6.18",
+  "description": "Thrift core library in TypeScript",
+>>>>>>> master
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
   "files": [
@@ -42,9 +47,16 @@
     "express": "^4.16.3"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@creditkarma/thrift-client": "^0.7.0-3",
     "@creditkarma/thrift-server-core": "^0.7.0-3",
     "@creditkarma/thrift-typescript": "2.0.0-11",
+=======
+    "@creditkarma/thrift-client": "^0.6.18",
+    "@creditkarma/thrift-server-core": "^0.6.18",
+    "@creditkarma/thrift-typescript": "~1.1.7",
+    "@types/body-parser": "^1.16.5",
+>>>>>>> master
     "@types/code": "^4.0.3",
     "@types/express": "^4.11.1",
     "@types/lab": "^11.1.0",
@@ -57,10 +69,14 @@
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
     "rimraf": "^2.6.2",
-    "tslint": "^5.6.0",
+    "tslint": "^5.10.0",
     "tslint-eslint-rules": "^4.1.1",
+<<<<<<< HEAD
     "typescript": "2.8.x",
     "watch": "^1.0.2"
+=======
+    "typescript": "2.9.x"
+>>>>>>> master
   },
   "dependencies": {
     "zipkin": "^0.12.0"

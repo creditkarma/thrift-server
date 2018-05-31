@@ -7,9 +7,10 @@ import {
 import {
     addL5Dheaders,
     containsZipkinHeaders,
-    getAsyncScope,
+    getContextForService,
     getTracerForService,
     hasL5DHeader,
+    IAsyncContext,
     IRequestContext,
     IRequestHeaders,
     IZipkinPluginOptions,
@@ -23,7 +24,7 @@ import {
     IThriftMiddleware,
     NextFunction,
     ThriftContext,
-} from '../types'
+} from '../../types'
 
 function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeaders): IRequestHeaders {
     if (requestContext.usesLinkerd) {
@@ -34,24 +35,30 @@ function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeade
     }
 }
 
-function readRequestContext(context: ThriftContext<CoreOptions>, tracer: Tracer): IRequestContext {
-    if (context.request && containsZipkinHeaders(context.request.headers)) {
-        const traceId: TraceId = traceIdForHeaders(context.request.headers)
+function readRequestContext(
+    asyncContext: IAsyncContext,
+    thriftContext: ThriftContext<CoreOptions>,
+    tracer: Tracer,
+): IRequestContext {
+    if (thriftContext.request && containsZipkinHeaders(thriftContext.request.headers)) {
+        const traceId: TraceId = traceIdForHeaders(thriftContext.request.headers)
         tracer.setId(traceId)
         return {
             traceId,
-            usesLinkerd: hasL5DHeader(context.request.headers),
-            requestHeaders: context.request.headers,
+            usesLinkerd: hasL5DHeader(thriftContext.request.headers),
+            requestHeaders: thriftContext.request.headers,
         }
 
     } else {
-        const asyncContext: IRequestContext | null = getAsyncScope().get<IRequestContext>('requestContext')
-        if (asyncContext !== null) {
-            return asyncContext
+        const requestContext: IRequestContext | null = asyncContext.getValue<IRequestContext>('requestContext')
+        if (requestContext !== null) {
+            return requestContext
 
         } else {
+            const traceId: TraceId = tracer.createRootId()
+            tracer.setId(traceId)
             return {
-                traceId: tracer.createRootId(),
+                traceId,
                 usesLinkerd: false,
                 requestHeaders: {},
             }
@@ -70,8 +77,9 @@ export function ZipkinTracingThriftClient({
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+            const asyncContext: IAsyncContext  = getContextForService(localServiceName)
             const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-            const requestContext: IRequestContext = readRequestContext(context, tracer)
+            const requestContext: IRequestContext = readRequestContext(asyncContext, context, tracer)
 
             return tracer.scoped(() => {
                 const traceId: TraceId = tracer.id

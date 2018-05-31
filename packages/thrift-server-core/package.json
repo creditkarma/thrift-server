@@ -43,12 +43,12 @@
     "lab": "^14.2.0",
     "lerna": "^2.0.0",
     "rimraf": "^2.6.2",
-    "tslint": "^5.6.0",
+    "tslint": "^5.10.0",
     "tslint-eslint-rules": "^4.1.1",
-    "typescript": "2.8.x"
+    "typescript": "2.9.x"
   },
   "dependencies": {
-    "@creditkarma/async-scope": "0.0.7",
+    "@creditkarma/async-scope": "0.0.16",
     "@types/bytebuffer": "^5.0.36",
     "@types/node-int64": "^0.4.29",
     "bytebuffer": "^5.0.1",

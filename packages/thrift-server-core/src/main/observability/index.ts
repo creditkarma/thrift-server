@@ -1,4 +1,5 @@
+export * from './constants'
 export * from './types'
 export * from './utils'
 export * from './zipkin'
-export { getAsyncScope } from './AsyncContext'
+export { IAsyncContext } from './AsyncContext'

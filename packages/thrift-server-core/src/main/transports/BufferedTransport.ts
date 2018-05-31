@@ -12,17 +12,8 @@ const DEFAULT_READ_BUFFER_SIDE: number = 1024
 
 export class BufferedTransport extends TTransport {
     public static receiver(data: Buffer): BufferedTransport {
-        const reader = new BufferedTransport()
-
-        if (reader.writeCursor + data.length > reader.buffer.length) {
-            const buf = Buffer.alloc(reader.writeCursor + data.length)
-            reader.buffer.copy(buf, 0, 0, reader.writeCursor)
-            reader.buffer = buf
-        }
-
-        data.copy(reader.buffer, reader.writeCursor, 0)
-        reader.writeCursor += data.length
-
+        const reader = new BufferedTransport(Buffer.alloc(data.length))
+        data.copy(reader.buffer, 0, 0)
         return reader
     }
 
@@ -31,12 +22,21 @@ export class BufferedTransport extends TTransport {
     private outBuffers: Array<Buffer>
     private outCount: number
 
-    constructor(buffer: Buffer = Buffer.alloc(DEFAULT_READ_BUFFER_SIDE)) {
-        super(buffer)
+    constructor(buffer?: Buffer) {
+        super(buffer || Buffer.alloc(DEFAULT_READ_BUFFER_SIDE))
         this.readCursor = 0
-        this.writeCursor = 0
+        this.writeCursor = (buffer !== undefined) ? buffer.length : 0
         this.outBuffers = []
         this.outCount = 0
+    }
+
+    public remaining(): Buffer {
+        const remainingSize = this.writeCursor - this.readCursor
+        const remainingBuffer = Buffer.alloc(remainingSize)
+        if (remainingSize > 0) {
+            this.buffer.copy(remainingBuffer, 0, this.readCursor, this.writeCursor)
+        }
+        return remainingBuffer
     }
 
     public commitPosition(): void {

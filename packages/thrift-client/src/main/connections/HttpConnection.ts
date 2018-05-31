@@ -27,30 +27,14 @@ import {
     deepMerge,
 } from '../utils'
 
-function normalizePath(path: string = '/'): string {
-    if (path.startsWith('/')) {
-        return path
-
-    } else {
-        return `/${path}`
-    }
-}
+import {
+    filterByMethod,
+    getHandler,
+    normalizePath,
+} from './utils'
 
 export type HttpProtocol =
     'http' | 'https'
-
-export function filterByMethod<Context>(method: string): (middleware: IThriftMiddleware<Context>) => boolean {
-    return (middleware: IThriftMiddleware<Context>): boolean => {
-        return (
-            middleware.methods.length === 0 ||
-            middleware.methods.indexOf(method) > -1
-        )
-    }
-}
-
-export function getHandler<Context>(middleware: IThriftMiddleware<Context>): RequestHandler<Context> {
-    return middleware.handler
-}
 
 export type RequestInstance =
     RequestAPI<Request, CoreOptions, RequiredUriUrl>
@@ -64,16 +48,23 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     protected readonly middleware: Array<IThriftMiddleware<CoreOptions>>
     private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-    constructor(request: RequestInstance, options: IHttpConnectionOptions<CoreOptions>) {
+    constructor(request: RequestInstance, {
+        hostName,
+        port,
+        path = '/thrift',
+        https = false,
+        transport = 'buffered',
+        protocol = 'binary',
+    }: IHttpConnectionOptions<CoreOptions>) {
         super(
-            getTransport(options.transport),
-            getProtocol(options.protocol),
+            getTransport(transport),
+            getProtocol(protocol),
         )
         this.request = request
-        this.port = options.port
-        this.hostName = options.hostName
-        this.path = normalizePath(options.path || '/thrift')
-        this.protocol = ((options.https === true) ? 'https' : 'http')
+        this.port = port
+        this.hostName = hostName
+        this.path = normalizePath(path || '/thrift')
+        this.protocol = ((https === true) ? 'https' : 'http')
         this.url = `${this.protocol}://${this.hostName}:${this.port}${this.path}`
         this.middleware = []
     }
@@ -95,17 +86,17 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
         const handlers: Array<RequestHandler<CoreOptions>> = this.handlersForMethod(requestMethod)
 
         const applyHandlers = (
-            data: Buffer,
+            currentData: Buffer,
             currentContext: ThriftContext<CoreOptions>,
             [head, ...tail]: Array<RequestHandler<CoreOptions>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(data, currentContext)
+                return this.write(currentData, currentContext)
 
             } else {
-                return head(data, currentContext, (nextData?: Buffer, nextContext?: CoreOptions): Promise<IRequestResponse> => {
+                return head(currentData, currentContext, (nextData?: Buffer, nextContext?: CoreOptions): Promise<IRequestResponse> => {
                     const resolvedContext = deepMerge(currentContext, (nextContext || {}))
-                    return applyHandlers((nextData || data), resolvedContext, tail)
+                    return applyHandlers((nextData || currentData), resolvedContext, tail)
                 })
             }
         }

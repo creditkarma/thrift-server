@@ -1,3 +1,5 @@
+import { IAsyncOptions } from '@creditkarma/async-scope'
+
 export interface ITraceId {
     spanId: string
     parentId: string
@@ -14,6 +16,7 @@ export interface IZipkinPluginOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    asyncOptions?: IAsyncOptions
 }
 
 export interface IZipkinTracerConfig {
@@ -21,4 +24,5 @@ export interface IZipkinTracerConfig {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    asyncOptions?: IAsyncOptions
 }

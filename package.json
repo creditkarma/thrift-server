@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "lerna exec -- npm run build",
-    "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated",
+    "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated **/generated-apache",
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap --hoist",
@@ -46,9 +46,9 @@
     "lab": "^14.2.0",
     "lerna": "^2.9.0",
     "rimraf": "^2.6.1",
-    "tslint": "^5.6.0",
+    "tslint": "^5.10.0",
     "tslint-eslint-rules": "^4.1.1",
-    "typescript": "2.8.x",
+    "typescript": "2.9.x",
     "watch": "^1.0.2"
   }
 }

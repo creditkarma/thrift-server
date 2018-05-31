@@ -1,5 +1,5 @@
 import {
-    getAsyncScope,
+    getContextForService,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -35,10 +35,19 @@ export function ZipkinTracingHapi({
     debug = false,
     endpoint,
     sampleRate,
+<<<<<<< HEAD:packages/thrift-server-hapi/src/main/observability/zipkin.ts
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<undefined> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<undefined> = {
         register(server: Hapi.Server, nothing: undefined, next) {
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate })
+=======
+    httpInterval,
+    asyncOptions,
+}: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
+    const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
+        register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
+>>>>>>> master:packages/thrift-server-hapi/src/main/observability/ZipkinTracingHapi.ts
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
@@ -53,6 +62,7 @@ export function ZipkinTracingHapi({
                             const val = normalizedHeaders[header.toLowerCase()]
                             if (val !== null && val !== undefined) {
                                 return new option.Some(val)
+
                             } else {
                                 return option.None
                             }
@@ -67,7 +77,7 @@ export function ZipkinTracingHapi({
 
                     plugins.zipkin = requestContext
 
-                    getAsyncScope().set('requestContext', requestContext)
+                    getContextForService(localServiceName).setValue('requestContext', requestContext)
 
                     return reply.continue()
                 })

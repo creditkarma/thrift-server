@@ -4,10 +4,12 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
+export { IAsyncOptions } from '@creditkarma/async-scope'
+
 export type LogFunction = (msg: string, data?: any) => void
 
 export interface IRequestHeaders {
-    [name: string]: string | Array<string> | undefined
+    [name: string]: any
 }
 
 export interface IRequestContext {
@@ -31,13 +33,13 @@ export interface IThriftServerOptions<TProcessor> {
     protocol?: ProtocolType
 }
 
-export interface IThriftConnection<Context = undefined> {
+export interface IThriftConnection<Context = void> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = undefined> implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = void> implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,

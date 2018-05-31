@@ -2,6 +2,8 @@
 
 Thrift client library for NodeJS written in TypeScript.
 
+Supports communicating with Thrift services over HTTP or TCP.
+
 ## Usage
 
 We're going to go through this step-by-step.
@@ -50,9 +52,9 @@ Then you can run codegen:
 $ npm run codegen
 ```
 
-### Creating a Client
+### Creating an HTTP Client
 
-There are two ways to create clients with the public API.
+There are two ways to create HTTP clients with the public API.
 
 * Use the `createHttpClient` factory function.
 * Manually create your own `HttpConnection` object
@@ -93,6 +95,7 @@ The available options are:
 * transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
 * requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
+* register (optional): A list of middleware to apply to your client. More on this later.
 
 Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary protocol. Framed transport along with compact and JSON protocol will be added soon.
 
@@ -138,9 +141,71 @@ const connection: HttpConnection =
 const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
 ```
 
-Here `HttpConnection` is a class that implements the `IThriftConnection` interface. You could create custom connections, for instance TCP, by implementing this interface.
+Here `HttpConnection` is a class that extends the `ThriftConnection` abstract class. You could create custom connections, for instance TCP, by extending the same class.
 
 Also of note here is that the type `IHttpConnectionOptions` does not accept the `requestOptions` parameter. Options to `Request` here would be passed directly to the call to `request.defaults({})`.
+
+### Creating a TCP Client
+
+Creating a TCP client is much like creating an HTTP client.
+
+* Use the `createTcpClient` factory function.
+* Manually create your own `TcpConnection` object
+
+*Note: Our TcpConnection object uses an underlying connection pool instead of all client requests reusing the same connection. This pool is configrable. We use [GenericPool](https://github.com/coopernurse/node-pool) for managing our connection pool. Pool options are passed directly through to GenericPool.*
+
+#### `createTcpClient`
+
+Using the `createTcpClient` function you pass in two arguments, the first is your Thrift service client class and the second is a map of options to configure the underlying TCP connection.
+
+```typescript
+import {
+    createTcpClient
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+// Create Thrift client
+const thriftClient: Calculator.Client<CoreOptions> = createTcpClient(Calculator.Client, {
+    serviceName: 'calculator-service',
+    hostName: 'localhost',
+    port: 8080,
+})
+```
+
+##### Options
+
+The available options are:
+
+* serviceName (optional): The name of your service. Used for logging.
+* hostName (required): The name of the host to connect to.
+* port (required): The port number to attach to on the host.
+* timeout (optional): Connection timeout in milliseconds. Defaults to 5000.
+* transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
+* protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
+* pool (optional): Options to configure the underlying connection pool.
+* register (optional): A list of middleware to apply to your client. More on this later.
+
+#### Manual Creation
+
+```typescript
+import {
+    TcpConnection,
+} from '@creditkaram/thrift-client'
+
+import { Calculator } from './codegen/calculator'
+
+const connection: TcpConnection = new TcpConnection({
+    hostName: 'localhost',
+    port: 3000,
+    transport: 'buffered',
+    protocol: 'binary',
+})
+
+const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
+```
+
+Here `TcpConnection` is a class that extends the `ThriftConnection` abstract class. You could create custom connections, for instance TCP, by extending the same class.
 
 ### Making Service Calls with our Client
 
@@ -305,6 +370,102 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
 The optional `register` option takes an array of middleware to apply. Unsurprisingly they are applied in the order you pass them in.
+
+### TCP Middleware
+
+When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two middleware for helping with this situation.
+
+#### ThriftContextPlugin
+
+This plugin writes a Thrift struct onto the head of an outgoing payload and reads a struct off of the head of an incoming payload.
+
+```typescript
+import {
+    createTcpClient,
+    ThriftContextPlugin,
+} from '@creditkarma/thrift-client'
+
+import {
+    RequestContext,
+    ResponseContext,
+} from './codegen/metadata'
+
+import {
+    Calculator,
+} from './codegen/calculator'
+
+const thriftClient: Calculator.Client<RequestContext> =
+    createTcpClient(Calculator.Client, {
+        hostName: 'localhost',
+        port: 8080,
+        register: [ ThriftContextPlugin<RequestContext, ResponseContext>({
+            RequestContextClass: RequestContext,
+        }) ]
+    })
+
+thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response: number) => {
+    // Do stuff...
+})
+```
+
+##### Options
+
+Available options for ThriftContextPlugin:
+
+* RequestContextClass (required): A class (extending StructLike) that is to be prepended to outgoing requests.
+* ResponseContextClass (optional): A class (extending StructLike) that is prepended to incoming responses. Defaults to nothing.
+* transportType (optional): The type of transport to use. Currently only 'buffered'.
+* protocolType (optional): The type of protocol to use. Currently only 'binary'.
+
+#### TTwitterClientFilter
+
+This plugin can be used in conjuction with Twitter's open source [Finagle](https://github.com/twitter/finagle) project to add and receive the headers that project expects.
+
+```typescript
+import {
+    createTcpClient,
+    TTwitterClientFilter,
+} from '@creditkarma/thrift-client'
+
+import {
+    Calculator,
+} from './codegen/calculator'
+
+const thriftClient: Calculator.Client<RequestContext> =
+    createTcpClient(Calculator.Client, {
+        hostName: 'localhost',
+        port: 8080,
+        register: [ TTwitterClientFilter({
+            localServiceName: 'calculator-client',
+            remoteServiceName: 'calculator-service',
+            destHeader: 'calculator-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate: 1,
+        }) ]
+    })
+
+thriftClient.add(5, 6).then((response: number) => {
+    // Do stuff...
+})
+```
+
+*Note: The Twitter types are generated and exported under the name `TTwitter`*
+
+##### Options
+
+Available options for TTwitterClientFilter:
+
+* localServiceName (required): The name of your local service/application.
+* remoteServiceName (required): The name of the remote service you are calling.
+* destHeader (optional): A name for the destination added to the RequestHeader object Finagle expects. Defaults to the value of `remoteServiceName`.
+* isUpgraded (optional): Is the service using TTwitter context. Defaults to true.
+* clientId (optional): A unique identifier for the client. Defaults to undefined.
+* debug (optional): Zipkin debug mode. Defaults to false.
+* endpoint (optional): Zipkin endpoint. Defaults to ''.
+* sampleRate (optional): Zipkin samplerate. Defaults to 0.1.
+* httpInterval (optional): Rate (in milliseconds) at which to send traces to Zipkin collector. Defaults to 1000.
+* transportType (optional): The type of transport to use. Currently only 'buffered'.
+* protocolType (optional): The type of protocol to use. Currently only 'binary'.
 
 ### Observability
 

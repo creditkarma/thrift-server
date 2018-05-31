@@ -1,3 +1,8 @@
+export const APACHE_SERVER_CONFIG = {
+    hostName: 'localhost',
+    port: 8888,
+}
+
 export const CALC_SERVER_CONFIG = {
     hostName: 'localhost',
     port: 8090,

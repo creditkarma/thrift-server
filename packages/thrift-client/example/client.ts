@@ -4,7 +4,7 @@ import {
 } from '@creditkarma/thrift-server-express'
 
 import {
-    createClient,
+    createHttpClient,
 } from '../src/main/'
 
 import * as path from 'path'
@@ -25,7 +25,7 @@ import {
     const app = express()
 
     // Create thrift client
-    const thriftClient: Calculator.Client<CoreOptions> = createClient(Calculator.Client, {
+    const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
         hostName: SERVER_CONFIG.host,
         port: SERVER_CONFIG.port,
     })
