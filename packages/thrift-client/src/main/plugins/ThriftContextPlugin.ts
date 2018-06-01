@@ -1,7 +1,7 @@
 import {
+    IStructCodec,
     ProtocolType,
     TransportType,
-    IStructCodec,
 } from '@creditkarma/thrift-server-core'
 
 import {

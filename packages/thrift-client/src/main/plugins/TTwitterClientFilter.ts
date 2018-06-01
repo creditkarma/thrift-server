@@ -142,7 +142,7 @@ export function TTwitterClientFilter<T>({
                             dataToSend,
                             TTwitter.RequestHeaderCodec,
                             transportType,
-                            protocolType
+                            protocolType,
                         ).then((extended: Buffer) => {
                             return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
                                 return readThriftObject<TTwitter.IResponseHeader>(

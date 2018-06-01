@@ -4,12 +4,12 @@ import {
     getProtocol,
     getTransport,
     IProtocolConstructor,
+    IStructCodec,
     ITransportConstructor,
     ProtocolType,
     TProtocol,
     TransportType,
     TTransport,
-    IStructCodec,
 } from '@creditkarma/thrift-server-core'
 
 export function encode<LooseType>(
