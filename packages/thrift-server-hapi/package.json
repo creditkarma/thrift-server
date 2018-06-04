@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-hapi",
-  "version": "0.6.19",
+  "version": "0.7.0-4",
   "description": "A Hapi server plugin for the Apache Thrift protocol",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -19,15 +19,15 @@
   "scripts": {
     "clean": "rimraf ./dist ./src/tests/generated",
     "lint": "tslint --fix './src/**/*.ts'",
-    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
+    "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests/integration --sourceDir ./thrift --outDir ./generated",
     "prebuild": "npm run clean",
     "build": "npm run lint && tsc -p tsconfig.json",
     "prebuild:test": "npm run clean && npm run codegen",
     "build:test": "tsc -p tsconfig.test.json",
     "watch": "tsc --watch",
     "pretest": "npm run build:test",
-    "test": "npm run test:only --",
-    "test:watch": "watch 'npm run test:only' ./dist",
+    "test": "npm run test:integration",
+    "test:integration": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/integration",
     "test:only": "lab --timeout 10000 --verbose -l -S -P spec dist/tests"
   },
   "author": "Credit Karma",
@@ -37,14 +37,14 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
   },
   "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.6.x",
+    "@creditkarma/thrift-server-core": "0.7.x",
     "@types/hapi": "^16.1.10",
     "hapi": "^16.6.2"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.6.19",
-    "@creditkarma/thrift-server-core": "^0.6.19",
-    "@creditkarma/thrift-typescript": "~1.1.7",
+    "@creditkarma/thrift-client": "^0.7.0-4",
+    "@creditkarma/thrift-server-core": "^0.7.0-4",
+    "@creditkarma/thrift-typescript": "^2.0.0",
     "@types/code": "^4.0.3",
     "@types/hapi": "^16.1.10",
     "@types/lab": "^11.1.0",

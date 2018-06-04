@@ -36,14 +36,14 @@ export interface ICreateTcpClientOptions extends IConnectionOptions {
     register?: Array<IThriftMiddlewareConfig<void>>
 }
 
-export interface IHttpConnectionOptions<Context = never> {
+export interface IHttpConnectionOptions<Options> {
     hostName: string
     port: number
     path?: string
     https?: boolean
     transport?: TransportType
     protocol?: ProtocolType
-    context?: ThriftContext<Context> | ClientOptionsFunction<Context>
+    context?: ThriftContext<Options> | ClientOptionsFunction<Options>
 }
 
 export interface ICreateHttpClientOptions<Context> extends IHttpConnectionOptions<Context> {

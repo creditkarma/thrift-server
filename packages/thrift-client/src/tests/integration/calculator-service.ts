@@ -9,25 +9,23 @@ import * as Hapi from 'hapi'
 import { CoreOptions } from 'request'
 
 import {
+    ISharedStruct,
+    ISharedUnion,
+} from '../generated/shared'
+
+import {
     ADD_SERVER_CONFIG,
     CALC_SERVER_CONFIG,
 } from './config'
 
 import {
+    AddService,
     Calculator,
-    Choice,
+    IChoice,
+    ICommonStruct,
     Operation,
     Work,
-} from '../generated/calculator/calculator'
-
-import {
-    AddService,
-} from '../generated/calculator/add-service'
-
-import {
-    SharedStruct,
-    SharedUnion,
-} from '../generated/shared/shared'
+} from '../generated/calculator'
 
 import {
     createHttpClient,
@@ -99,14 +97,19 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         zip(): void {
             return
         },
-        getStruct(key: number): SharedStruct {
-            return new SharedStruct({ key, value: 'test' })
+        getStruct(): ISharedStruct {
+            return {
+                code: {
+                    status: new Int64(0),
+                },
+                value: 'test',
+            }
         },
-        getUnion(index: number): SharedUnion {
+        getUnion(index: number): ISharedUnion {
             if (index === 1) {
-                return SharedUnion.fromOption1('foo')
+                return { option1: 'foo' }
             } else {
-                return SharedUnion.fromOption2('bar')
+                return { option2: 'bar' }
             }
         },
         echoBinary(word: Buffer): string {
@@ -115,7 +118,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         echoString(word: string): string {
             return word
         },
-        checkName(choice: Choice): string {
+        checkName(choice: IChoice): string {
             if (choice.firstName !== undefined) {
                 return `FirstName: ${choice.firstName.name}`
             } else if (choice.lastName !== undefined) {
@@ -145,6 +148,14 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 },
                 new Map(),
             )
+        },
+        fetchThing(): ICommonStruct {
+            return {
+                code: {
+                    status: new Int64(0),
+                },
+                value: 'test',
+            }
         },
     })
 

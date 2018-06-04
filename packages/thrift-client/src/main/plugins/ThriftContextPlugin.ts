@@ -1,8 +1,6 @@
 import {
-    IStructConstructor,
+    IStructCodec,
     ProtocolType,
-    StructLike,
-    TProtocol,
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
@@ -22,38 +20,26 @@ import {
 
 import * as logger from '../logger'
 
-export interface IThriftContextOptions<RequestContext extends StructLike, ResponseContext extends StructLike> {
-    RequestContextClass: IStructConstructor<RequestContext>
-    ResponseContextClass?: IStructConstructor<ResponseContext>
+export interface IThriftContextOptions<RequestContext, ResponseContext> {
+    RequestCodec: IStructCodec<RequestContext, any>
+    ResponseCodec: IStructCodec<ResponseContext, any>
     transportType?: TransportType
     protocolType?: ProtocolType
 }
 
-export class DefaultReponse implements StructLike {
-    public static read(input: TProtocol): DefaultReponse {
-        return new DefaultReponse()
-    }
-    constructor(args?: {}) {
-        // Nothing to see here
-    }
-    public write(output: TProtocol): void {
-        return
-    }
-}
-
-export function ThriftContextPlugin<RequestContext extends StructLike, ResponseContext extends StructLike = DefaultReponse>({
-    RequestContextClass,
-    ResponseContextClass = DefaultReponse,
+export function ThriftContextPlugin<RequestContext, ResponseContext>({
+    RequestCodec,
+    ResponseCodec,
     transportType = 'buffered',
     protocolType = 'binary',
 }: IThriftContextOptions<RequestContext, ResponseContext>): IThriftMiddlewareConfig<RequestContext> {
     return {
         handler(data: Buffer, context: RequestContext, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
-            return appendThriftObject(context, data, transportType, protocolType).then((extended: Buffer) => {
+            return appendThriftObject(context, data, RequestCodec, transportType, protocolType).then((extended: Buffer) => {
                 return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
                     return readThriftObject(
                         res.body,
-                        ResponseContextClass,
+                        ResponseCodec,
                         transportType,
                         protocolType,
                     ).then((result: [any, Buffer]): IRequestResponse => {

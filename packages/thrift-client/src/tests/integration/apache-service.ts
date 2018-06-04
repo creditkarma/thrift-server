@@ -4,14 +4,16 @@ import * as thrift from 'thrift'
 import {
     Calculator,
     Choice,
+    CommonStruct,
     Operation,
     Work,
-} from '../generated-apache/calculator/calculator'
+} from '../generated-apache/calculator'
 
 import {
+    Code,
     SharedStruct,
     SharedUnion,
-} from '../generated-apache/shared/shared'
+} from '../generated-apache/shared'
 
 export function createServer(): net.Server {
     const impl: Calculator.IHandler = {
@@ -44,7 +46,7 @@ export function createServer(): net.Server {
         },
         getStruct(key: number): SharedStruct {
             return new SharedStruct({
-                key,
+                code: new Code({ status: 5 }),
                 value: 'test',
             })
         },
@@ -91,6 +93,12 @@ export function createServer(): net.Server {
                 },
                 new Map(),
             )
+        },
+        fetchThing(): CommonStruct {
+            return new CommonStruct({
+                code: new Code({ status: 5 }),
+                value: 'test',
+            })
         },
     }
 

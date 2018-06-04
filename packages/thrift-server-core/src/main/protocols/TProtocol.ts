@@ -65,7 +65,7 @@ export abstract class TProtocol {
 
     public abstract writeI32(i32: number): void
 
-    public abstract writeI64(i64: Int64): void
+    public abstract writeI64(i64: number | Int64): void
 
     public abstract writeDouble(dbl: number): void
 

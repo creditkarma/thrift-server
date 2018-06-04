@@ -1,4 +1,3 @@
-import { EventEmitter } from 'events'
 import { TraceId } from 'zipkin'
 import { TProtocol } from './protocols'
 import { TTransport } from './transports'
@@ -40,14 +39,32 @@ export interface IThriftConnection<Context = void> {
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = void> extends EventEmitter implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = void> implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
-    ) {
-        super()
-    }
+    ) {}
+
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
+}
+
+export abstract class StructLike {
+    public abstract write(output: TProtocol): void
+}
+
+export interface IStructConstructor<T extends StructLike> {
+    new (args?: any): T
+    read(input: TProtocol): T
+    write(data: T, output: TProtocol): void
+}
+
+export type ThriftReadCodec<ThriftType> = IStructCodec<any, ThriftType>
+
+export type ThriftWriteCodec<ThriftType> = IStructCodec<ThriftType, any>
+
+export interface IStructCodec<LooseType, StrictType> {
+    encode(obj: LooseType, output: TProtocol): void
+    decode(input: TProtocol): StrictType
 }
 
 export interface IProtocolConstructor {
@@ -60,26 +77,11 @@ export interface ITransportConstructor {
 }
 
 export interface IClientConstructor<TClient, Context> {
-    new(
-        connection: ThriftConnection<Context>,
-    ): TClient
+    new(connection: ThriftConnection<Context>): TClient
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
     new(handler: THandler): TProcessor
-}
-
-export interface IStructConstructor<T extends StructLike> {
-    new(args?: any): T
-    read(input: TProtocol): T
-}
-
-export abstract class StructLike {
-    public static read(input: TProtocol): StructLike {
-        throw new Error('Not implemented')
-    }
-
-    public abstract write(output: TProtocol): void
 }
 
 export type ProtocolType =

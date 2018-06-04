@@ -16,11 +16,13 @@
     "release:minor": "lerna publish --cd-version minor --skip-npm --yes --force-publish=* && npm run release:push",
     "release:major": "lerna publish --cd-version major --skip-npm --yes --force-publish=* && npm run release:push",
     "release:prepatch": "lerna publish --cd-version prepatch --skip-npm --yes --force-publish=*",
+    "release:preminor": "lerna publish --cd-version preminor --skip-npm --yes --force-publish=*",
+    "release:premajor": "lerna publish --cd-version premajor --skip-npm --yes --force-publish=*",
     "release:prerelease": "lerna publish --cd-version prerelease --skip-npm --yes --force-publish=*",
     "release:push": "git push --follow-tags",
     "release:publish": "lerna exec 'npm publish --access public'",
-    "release:prepublish": "lerna exec 'npm publish --tag next --access public'",
-    "release:fixpublish": "lerna exec 'npm publish --tag fix --access public'"
+    "release:publish-fix": "lerna exec 'npm publish --tag fix --access public'",
+    "release:publish-next": "lerna exec 'npm publish --tag next --access public'"
   },
   "keywords": [
     "thrift",
@@ -42,10 +44,10 @@
     "@types/node": "^8.0.23",
     "code": "^4.1.0",
     "lab": "^14.2.0",
-    "lerna": "^2.9.0",
+    "lerna": "^2.11.0",
     "rimraf": "^2.6.1",
     "tslint": "^5.10.0",
-    "tslint-eslint-rules": "^4.1.1",
+    "tslint-eslint-rules": "^5.3.1",
     "typescript": "2.9.x",
     "watch": "^1.0.2"
   }
