@@ -49,21 +49,20 @@ export abstract class ThriftConnection<Context = void> implements IThriftConnect
 }
 
 export abstract class StructLike {
-    public static read(input: TProtocol): StructLike {
-        throw new Error('Not implemented')
-    }
-
     public abstract write(output: TProtocol): void
 }
 
 export interface IStructConstructor<T extends StructLike> {
     new (args?: any): T
     read(input: TProtocol): T
+    write(data: T, output: TProtocol): void
 }
 
-export interface IStructCodec<LooseType, StructType> {
+export type ThriftCodec<ThriftType> = IStructCodec<ThriftType, ThriftType>
+
+export interface IStructCodec<LooseType, StrictType> {
     encode(obj: LooseType, output: TProtocol): void
-    decode(input: TProtocol): StructType
+    decode(input: TProtocol): StrictType
 }
 
 export interface IProtocolConstructor {
@@ -76,9 +75,7 @@ export interface ITransportConstructor {
 }
 
 export interface IClientConstructor<TClient, Context> {
-    new(
-        connection: ThriftConnection<Context>,
-    ): TClient
+    new(connection: ThriftConnection<Context>): TClient
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {

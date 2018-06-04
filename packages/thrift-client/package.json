@@ -54,7 +54,7 @@
     "@creditkarma/thrift-server-core": "^0.7.0-4",
     "@creditkarma/thrift-server-express": "^0.7.0-4",
     "@creditkarma/thrift-server-hapi": "^0.7.0-4",
-    "@creditkarma/thrift-typescript": "2.0.0-13",
+    "@creditkarma/thrift-typescript": "2.0.0-16",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.3",
     "@types/express": "^4.0.37",

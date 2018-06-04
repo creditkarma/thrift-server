@@ -137,7 +137,7 @@ export function TTwitterClientFilter<T>({
                             delegations: [],
                         }
 
-                        return appendThriftObject<TTwitter.IResponseHeader_Loose>(
+                        return appendThriftObject<TTwitter.IResponseHeaderArgs>(
                             requestHeader,
                             dataToSend,
                             TTwitter.RequestHeaderCodec,
