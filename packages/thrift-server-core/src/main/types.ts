@@ -58,7 +58,9 @@ export interface IStructConstructor<T extends StructLike> {
     write(data: T, output: TProtocol): void
 }
 
-export type ThriftCodec<ThriftType> = IStructCodec<ThriftType, ThriftType>
+export type ThriftReadCodec<ThriftType> = IStructCodec<any, ThriftType>
+
+export type ThriftWriteCodec<ThriftType> = IStructCodec<ThriftType, any>
 
 export interface IStructCodec<LooseType, StrictType> {
     encode(obj: LooseType, output: TProtocol): void
