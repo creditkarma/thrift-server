@@ -23,6 +23,7 @@ export interface IZipkinTracerConfig {
     debug?: boolean
     endpoint?: string
     sampleRate?: number
+    headers: { [key: string]: string }
     httpInterval?: number
     asyncOptions?: IAsyncOptions
 }
