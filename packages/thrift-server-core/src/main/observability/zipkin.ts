@@ -54,6 +54,7 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
         return new BatchRecorder({
             logger: new HttpLogger({
                 endpoint: options.endpoint,
+                headers: options.headers,
                 httpInterval: options.httpInterval,
             }),
         })
