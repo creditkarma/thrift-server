@@ -34,11 +34,13 @@ export function ZipkinTracingHapi({
     debug = false,
     endpoint,
     sampleRate,
+    headers,
     httpInterval,
+    httpTimeout,
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {

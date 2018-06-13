@@ -19,6 +19,8 @@ import {
     IZipkinTracerConfig,
 } from './types'
 
+import { IRequestHeaders } from '../types'
+
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
         const value: V | undefined = this.get(key)
@@ -33,6 +35,13 @@ class MaybeMap<K, V> extends Map<K, V> {
     }
 }
 
+interface IHttpLoggerOptions {
+    endpoint: string
+    httpInterval?: number
+    httpTimeout?: number,
+    headers?: IRequestHeaders,
+}
+
 // Save tracers by service name
 const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
@@ -42,11 +51,15 @@ const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
 function recorderForOptions(options: IZipkinTracerConfig): Recorder {
     if (options.endpoint !== undefined) {
+        const httpOptions: IHttpLoggerOptions = {
+            endpoint: options.endpoint,
+            headers: options.headers,
+            httpInterval: options.httpInterval,
+            httpTimeout: options.httpTimeout,
+        }
+
         return new BatchRecorder({
-            logger: new HttpLogger({
-                endpoint: options.endpoint,
-                httpInterval: options.httpInterval,
-            }),
+            logger: new HttpLogger(httpOptions),
         })
 
     } else {

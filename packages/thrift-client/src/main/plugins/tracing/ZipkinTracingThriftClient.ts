@@ -60,22 +60,24 @@ export function ZipkinTracingThriftClient({
     remoteServiceName,
     debug = false,
     endpoint,
+    headers,
     sampleRate,
     httpInterval,
+    httpTimeout,
 }: IZipkinPluginOptions): IThriftMiddleware<CoreOptions> {
     return {
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-            const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
+            const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
             const requestContext: IRequestContext = readRequestContext(context, tracer)
             tracer.setId(requestContext.traceId)
 
             return tracer.scoped(() => {
-                let { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
-                headers = applyL5DHeaders(requestContext, headers)
+                const requestHeaders = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                const withLD5headers = applyL5DHeaders(requestContext, requestHeaders.headers)
 
-                return next(data, { headers }).then((res: IRequestResponse) => {
+                return next(data, { headers: withLD5headers }).then((res: IRequestResponse) => {
                     tracer.scoped(() => {
                         instrumentation.recordResponse((requestContext.traceId as any), `${res.statusCode}`)
                     })
