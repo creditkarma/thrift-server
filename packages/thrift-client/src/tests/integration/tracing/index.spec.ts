@@ -100,7 +100,6 @@ describe('Tracing', () => {
             setTimeout(() => {
                 try {
                     const result = collectServer.traces()
-                    console.log(JSON.stringify(result, null, 4))
                     expect(result[traceId_1]).to.exist()
                     expect(result[traceId_2]).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
