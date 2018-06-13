@@ -27,11 +27,13 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     const app = express()
 
     if (sampleRate > 0) {
-        app.use([ZipkinTracingExpress({
-            localServiceName: 'calculator-client',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate,
-        }))
+        app.use([
+            ZipkinTracingExpress({
+                localServiceName: 'calculator-client',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
+            }),
+        ])
     }
 
     // Create thrift client
