@@ -1,12 +1,14 @@
 defaults: &defaults
   working_directory: ~/thrift-server
   docker:
-    - image: circleci/node:6.12.3
+    - image: circleci/node:8.9.4
 
 version: 2
 jobs:
   test_node_6:
     <<: *defaults
+    docker:
+      - image: circleci/node:6.12.3
     steps:
       - checkout
       - run:
@@ -18,8 +20,6 @@ jobs:
 
   test_node_8:
     <<: *defaults
-    docker:
-      - image: circleci/node:8.9.4
     steps:
       - checkout
       - run:
