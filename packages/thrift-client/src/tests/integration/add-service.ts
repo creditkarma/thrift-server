@@ -52,9 +52,6 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
                 httpInterval: 0,
-                asyncOptions: {
-                    nodeExpiration: 600,
-                },
             }),
             (err: any) => {
                 if (err) {

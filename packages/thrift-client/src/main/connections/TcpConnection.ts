@@ -34,7 +34,6 @@ export type TcpContext<T> = T | void
 
 export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
     protected readonly middleware: Array<IThriftMiddleware<T>>
-
     private pool: GenericPool.Pool<Connection>
 
     constructor({

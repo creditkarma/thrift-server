@@ -66,8 +66,8 @@ describe('Tracing', () => {
 
     it('should correctly trace request using B3 headers', (done: any) => {
         collectServer.reset()
-        const traceId_1: string = randomTraceId()
-        const traceId_2: string = randomTraceId()
+        const traceId_1: string = '4808dde1609f5673'
+        const traceId_2: string = 'b82ba1422cf1ec6c'
         Promise.all([
             rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
                 qs: {
@@ -79,14 +79,14 @@ describe('Tracing', () => {
                     'x-b3-traceid': traceId_1,
                     'x-b3-spanid': traceId_1,
                     'x-b3-parentspanid': traceId_1,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
             rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
                 qs: {
-                    left: 7,
+                    left: 5,
                     op: 'add',
-                    right: 22,
+                    right: 9,
                 },
                 headers: {
                     'x-b3-traceid': traceId_2,
@@ -96,7 +96,7 @@ describe('Tracing', () => {
                 },
             }),
         ]).then((val: any) => {
-            expect(val).to.equal(['result: 14', 'result: 29'])
+            expect(val).to.equal(['result: 14', 'result: 14'])
             setTimeout(() => {
                 try {
                     const result = collectServer.traces()

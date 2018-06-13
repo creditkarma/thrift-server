@@ -48,7 +48,6 @@
     "typescript": "2.9.x"
   },
   "dependencies": {
-    "@creditkarma/async-scope": "0.0.16",
     "@types/bytebuffer": "^5.0.36",
     "@types/node-int64": "^0.4.29",
     "bytebuffer": "^5.0.1",
