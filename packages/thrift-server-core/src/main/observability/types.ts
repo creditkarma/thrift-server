@@ -1,3 +1,5 @@
+import { IRequestHeaders } from '../types'
+
 export interface ITraceId {
     spanId: string
     parentId: string
@@ -14,6 +16,8 @@ export interface IZipkinPluginOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    httpTimeout?: number
+    headers?: IRequestHeaders
 }
 
 export interface IZipkinTracerConfig {
@@ -21,4 +25,6 @@ export interface IZipkinTracerConfig {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    httpTimeout?: number
+    headers?: IRequestHeaders
 }

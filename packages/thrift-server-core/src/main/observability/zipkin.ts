@@ -9,15 +9,11 @@ import {
     Tracer,
 } from 'zipkin'
 
-import {
-    ZipkinHeaders,
-} from './constants'
-
 import { HttpLogger } from 'zipkin-transport-http'
 
-import {
-    IZipkinTracerConfig,
-} from './types'
+import { IRequestHeaders } from '../types'
+import { ZipkinHeaders } from './constants'
+import { IZipkinTracerConfig } from './types'
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
@@ -40,13 +36,25 @@ const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
  * `http://localhost:9411/api/v1/spans`
  */
 
+type HttpLoggerOptions = {
+    endpoint: string
+    httpInterval?: number
+    httpTimeout?: number,
+} & {
+    headers?: IRequestHeaders,
+}
+
 function recorderForOptions(options: IZipkinTracerConfig): Recorder {
     if (options.endpoint !== undefined) {
+        const httpOptions: HttpLoggerOptions = {
+            endpoint: options.endpoint,
+            httpInterval: options.httpInterval,
+            httpTimeout: options.httpTimeout,
+            headers: options.headers,
+        }
+
         return new BatchRecorder({
-            logger: new HttpLogger({
-                endpoint: options.endpoint,
-                httpInterval: options.httpInterval,
-            }),
+            logger: new HttpLogger(httpOptions),
         })
 
     } else {
