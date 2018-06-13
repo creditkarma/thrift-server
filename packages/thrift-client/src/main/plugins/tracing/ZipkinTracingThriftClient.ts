@@ -77,7 +77,7 @@ export function ZipkinTracingThriftClient({
                 let { headers: requestHeaders } = instrumentation.recordRequest({ headers: {} }, '', 'post')
                 requestHeaders = applyL5DHeaders(requestContext, requestHeaders)
 
-                return next(data, { headers }).then((res: IRequestResponse) => {
+                return next(data, { headers: requestHeaders }).then((res: IRequestResponse) => {
                     tracer.scoped(() => {
                         instrumentation.recordResponse((requestContext.traceId as any), `${res.statusCode}`)
                     })

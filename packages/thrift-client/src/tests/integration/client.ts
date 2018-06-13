@@ -21,6 +21,14 @@ import {
     CLIENT_CONFIG,
 } from './config'
 
+function requestContext(req: express.Request): { request: { headers: { [name: string]: any }}} {
+    return {
+        request: {
+            headers: req.headers,
+        },
+    }
+}
+
 export function createClientServer(sampleRate: number = 0): Promise<net.Server> {
     // Get express instance
     const app = express()
@@ -67,7 +75,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     }
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
-        thriftClient.ping({ request: req }).then(() => {
+        thriftClient.ping(requestContext(req)).then(() => {
             res.send('success')
         }, (err: any) => {
             console.log('err: ', err)
@@ -82,7 +90,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             op: symbolToOperation(req.query.op),
         })
 
-        thriftClient.calculate(1, work, { request: req }).then((val: number) => {
+        thriftClient.calculate(1, work, requestContext(req)).then((val: number) => {
             res.send(`result: ${val}`)
         }, (err: any) => {
             res.status(500).send(err)

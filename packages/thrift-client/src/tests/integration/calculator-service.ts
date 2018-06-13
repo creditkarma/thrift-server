@@ -35,6 +35,18 @@ import {
     ZipkinTracingThriftClient,
 } from '../../main/index'
 
+function requestContext(req?: Hapi.Request): { request: { headers: { [name: string]: any }}} {
+    if (req !== undefined) {
+        return {
+            request: {
+                headers: req.headers,
+            },
+        }
+    } else {
+        return { request: { headers: {} }}
+    }
+}
+
 export function createServer(sampleRate: number = 0): Hapi.Server {
     // Create thrift client
     const addServiceClient: AddService.Client<ThriftContext<CoreOptions>> =
@@ -66,10 +78,10 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
             return
         },
         add(a: number, b: number, context?: Hapi.Request): Promise<number> {
-            return addServiceClient.add(a, b, { request: context })
+            return addServiceClient.add(a, b, requestContext(context))
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
-            return addServiceClient.addInt64(a, b, { request: context })
+            return addServiceClient.addInt64(a, b, requestContext(context))
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (
@@ -84,7 +96,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         calculate(logId: number, work: Work, context?: Hapi.Request): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2, { request: context })
+                    return addServiceClient.add(work.num1, work.num2, requestContext(context))
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:

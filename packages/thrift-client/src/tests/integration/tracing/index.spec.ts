@@ -66,8 +66,8 @@ describe('Tracing', () => {
 
     it('should correctly trace request using B3 headers', (done: any) => {
         collectServer.reset()
-        const traceId_1: string = randomTraceId()
-        const traceId_2: string = randomTraceId()
+        const traceId_1: string = 'b4953d297c21a63d'
+        const traceId_2: string = '11f319c0c8ff9675'
         Promise.all([
             rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
                 qs: {

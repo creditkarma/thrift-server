@@ -34,9 +34,9 @@
     "watch": "tsc --watch",
     "start": "ts-node --project ./example ./example/index.ts",
     "pretest": "npm run build:test",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "npm run test:integration",
     "test:unit": "lab --timeout 10000 --verbose -l -S -P spec dist/tests/unit",
-    "test:integration": "lab --timeout 60000 --verbose -l -S -P spec dist/tests/integration"
+    "test:integration": "lab --timeout 60000 --verbose -l -S -P spec dist/tests/integration/tracing"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",
