@@ -2,6 +2,7 @@ import {
     BatchRecorder,
     ConsoleRecorder,
     Context,
+    ExplicitContext,
     Recorder,
     sampler,
     TraceId,
@@ -12,18 +13,11 @@ import {
     ZipkinHeaders,
 } from './constants'
 
-import {
-    AsyncContext,
-    IAsyncContext,
-} from './AsyncContext'
-
 import { HttpLogger } from 'zipkin-transport-http'
 
 import {
     IZipkinTracerConfig,
 } from './types'
-
-import { IAsyncOptions } from '@creditkarma/async-scope'
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
@@ -41,9 +35,6 @@ class MaybeMap<K, V> extends Map<K, V> {
 
 // Save tracers by service name
 const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
-
-// Save contexts by service name
-const CONTEXT_CACHE: MaybeMap<string, AsyncContext> = new MaybeMap()
 
 /**
  * `http://localhost:9411/api/v1/spans`
@@ -83,15 +74,9 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
     }
 }
 
-export function getContextForService(serviceName: string, options: IAsyncOptions = {}): IAsyncContext {
-    return CONTEXT_CACHE.getOrElse(serviceName, () => {
-        return new AsyncContext(options)
-    })
-}
-
 export function getTracerForService(serviceName: string, options: IZipkinTracerConfig = {}): Tracer {
     return TRACER_CACHE.getOrElse(serviceName, () => {
-        const ctxImpl: Context<TraceId> = getContextForService(serviceName, options.asyncOptions)
+        const ctxImpl: Context<TraceId> = new ExplicitContext()
         const recorder: Recorder = recorderForOptions(options)
         return new Tracer({
             ctxImpl,

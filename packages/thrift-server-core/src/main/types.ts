@@ -4,8 +4,6 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
-export { IAsyncOptions } from '@creditkarma/async-scope'
-
 export type LogFunction = (msg: string, data?: any) => void
 
 export interface IRequestHeaders {
@@ -53,7 +51,7 @@ export abstract class StructLike {
 }
 
 export interface IStructConstructor<T extends StructLike> {
-    new (args?: any): T
+    new(args?: any): T
     read(input: TProtocol): T
     write(data: T, output: TProtocol): void
 }
@@ -80,6 +78,10 @@ export interface IClientConstructor<TClient, Context> {
     new(connection: ThriftConnection<Context>): TClient
 }
 
+export interface IThriftProcessor<Context> {
+    process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
+}
+
 export interface IProcessorConstructor<TProcessor, THandler> {
     new(handler: THandler): TProcessor
 }
@@ -96,10 +98,6 @@ export interface ITransportMap {
 
 export interface IProtocolMap {
     [name: string]: IProtocolConstructor
-}
-
-export interface IThriftProcessor<Context> {
-    process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
 
 export enum TType {

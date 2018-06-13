@@ -1,5 +1,4 @@
 import {
-    getContextForService,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -36,11 +35,10 @@ export function ZipkinTracingHapi({
     endpoint,
     sampleRate,
     httpInterval,
-    asyncOptions,
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
@@ -70,17 +68,15 @@ export function ZipkinTracingHapi({
 
                     plugins.zipkin = requestContext
 
-                    getContextForService(localServiceName).setValue('requestContext', requestContext)
-
                     return reply.continue()
                 })
             })
 
             server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ReplyWithContinue) => {
                 const statusCode = readStatusCode(request)
+                const traceId: any = request.plugins.zipkin.traceId
 
                 tracer.scoped(() => {
-                    const traceId: any = request.plugins.zipkin.traceId
                     instrumentation.recordResponse(traceId, `${statusCode}`)
                 })
 
