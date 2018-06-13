@@ -79,7 +79,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': traceId_1,
                     'x-b3-spanid': traceId_1,
                     'x-b3-parentspanid': traceId_1,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
             rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
@@ -100,6 +100,7 @@ describe('Tracing', () => {
             setTimeout(() => {
                 try {
                     const result = collectServer.traces()
+                    console.log(JSON.stringify(result, null, 4))
                     expect(result[traceId_1]).to.exist()
                     expect(result[traceId_2]).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(3)
@@ -125,7 +126,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': traceId_1,
                     'x-b3-spanid': traceId_1,
                     'x-b3-parentspanid': traceId_1,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
         ]).then((val: any) => {
@@ -262,7 +263,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': trace_2.traceId,
                     'x-b3-spanid': trace_2.spanId,
                     'x-b3-parentspanid': trace_2.parentId,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
         ]).then((val: any) => {

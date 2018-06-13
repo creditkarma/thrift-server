@@ -425,9 +425,6 @@ describe('HttpConnection', () => {
                     endpoint: 'http://localhost:9411/api/v1/spans',
                     sampleRate: 1,
                     httpInterval: 0,
-                    asyncOptions: {
-                        nodeExpiration: 504,
-                    },
                 }),
             )
 
