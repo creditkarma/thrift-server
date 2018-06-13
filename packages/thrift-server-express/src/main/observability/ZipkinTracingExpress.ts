@@ -1,5 +1,4 @@
 import {
-    getContextForService,
     getTracerForService,
     hasL5DHeader,
     IZipkinPluginOptions,
@@ -33,9 +32,8 @@ export function ZipkinTracingExpress({
     endpoint,
     sampleRate,
     httpInterval,
-    asyncOptions,
 }: IZipkinPluginOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
+    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
     return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
         tracer.scoped(() => {
@@ -56,11 +54,11 @@ export function ZipkinTracingExpress({
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
 
-            getContextForService(localServiceName).setValue('requestContext', {
+            (req as any).__zipkin = {
                 traceId,
                 usesLinkerd: hasL5DHeader(req.headers),
                 requestHeaders: req.headers,
-            })
+            }
 
             res.on('finish', () => {
                 tracer.scoped(() => {

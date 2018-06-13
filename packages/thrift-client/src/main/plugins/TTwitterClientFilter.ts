@@ -1,10 +1,7 @@
 import {
-    getContextForService,
     getProtocol,
     getTracerForService,
     getTransport,
-    IAsyncContext,
-    IAsyncOptions,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -59,15 +56,17 @@ export interface ITTwitterFileterOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
-    asyncOptions?: IAsyncOptions
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
 
-function readRequestContext(context: IAsyncContext, tracer: Tracer): IRequestContext {
-    const asyncContext: IRequestContext | null = context.getValue<IRequestContext>('requestContext')
-    if (asyncContext !== null) {
-        return asyncContext
+function readRequestContext(context: any, tracer: Tracer): IRequestContext {
+    if (context !== undefined && context.traceId !== undefined) {
+        return {
+            traceId: context.traceId,
+            usesLinkerd: false,
+            requestHeaders: {},
+        }
 
     } else {
         const traceId: TraceId = tracer.createRootId()
@@ -108,7 +107,6 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
-    asyncOptions,
 }: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -118,10 +116,9 @@ export function TTwitterClientFilter<T>({
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
-                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, asyncOptions })
+                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-                    const asyncContext: IAsyncContext = getContextForService(localServiceName)
-                    const requestContext: IRequestContext = readRequestContext(asyncContext, tracer)
+                    const requestContext: IRequestContext = readRequestContext(context, tracer)
                     tracer.setId(requestContext.traceId)
 
                     return tracer.scoped(() => {

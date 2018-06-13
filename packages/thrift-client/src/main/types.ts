@@ -4,6 +4,10 @@ import {
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
+import {
+    TraceId,
+} from 'zipkin'
+
 import * as GenericPool from 'generic-pool'
 
 import * as request from 'request'
@@ -16,7 +20,7 @@ export interface IRequestResponse {
 }
 
 export type ThriftContext<Context> =
-    Context & { request?: { headers: IRequestHeaders} }
+    Context & { traceId?: TraceId, request?: { headers: IRequestHeaders} }
 
 export type ClientOptionsFunction<Context> =
     () => ThriftContext<Context>

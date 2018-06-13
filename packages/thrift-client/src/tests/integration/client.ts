@@ -31,10 +31,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             localServiceName: 'calculator-client',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate,
-            asyncOptions: {
-                nodeExpiration: 502,
-            },
-        })])
+        }))
     }
 
     // Create thrift client
@@ -50,9 +47,6 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         endpoint: 'http://localhost:9411/api/v1/spans',
                         sampleRate,
                         httpInterval: 0,
-                        asyncOptions: {
-                            nodeExpiration: 601,
-                        },
                     }) ] :
                     []
             ),
@@ -74,7 +68,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     }
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
-        thriftClient.ping().then(() => {
+        thriftClient.ping({ request: req }).then(() => {
             res.send('success')
         }, (err: any) => {
             console.log('err: ', err)
@@ -89,7 +83,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             op: symbolToOperation(req.query.op),
         }
 
-        thriftClient.calculate(1, work).then((val: number) => {
+        thriftClient.calculate(1, work, { request: req }).then((val: number) => {
             res.send(`result: ${val}`)
         }, (err: any) => {
             res.status(500).send(err)

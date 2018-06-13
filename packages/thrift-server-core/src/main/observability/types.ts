@@ -1,4 +1,3 @@
-import { IAsyncOptions } from '@creditkarma/async-scope'
 import { IRequestHeaders } from '../types'
 
 export interface ITraceId {
@@ -18,7 +17,6 @@ export interface IZipkinPluginOptions {
     sampleRate?: number
     headers?: IRequestHeaders
     httpInterval?: number
-    asyncOptions?: IAsyncOptions
 }
 
 export interface IZipkinTracerConfig {
@@ -27,5 +25,4 @@ export interface IZipkinTracerConfig {
     sampleRate?: number
     headers?: IRequestHeaders
     httpInterval?: number
-    asyncOptions?: IAsyncOptions
 }
