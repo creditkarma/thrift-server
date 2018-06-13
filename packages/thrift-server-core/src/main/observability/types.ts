@@ -17,6 +17,7 @@ export interface IZipkinPluginOptions {
     sampleRate?: number
     headers?: IRequestHeaders
     httpInterval?: number
+    httpTimeout?: number
 }
 
 export interface IZipkinTracerConfig {
@@ -25,4 +26,5 @@ export interface IZipkinTracerConfig {
     sampleRate?: number
     headers?: IRequestHeaders
     httpInterval?: number
+    httpTimeout?: number
 }

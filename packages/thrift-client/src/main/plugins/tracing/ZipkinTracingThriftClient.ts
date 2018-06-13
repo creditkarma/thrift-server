@@ -63,11 +63,12 @@ export function ZipkinTracingThriftClient({
     headers,
     sampleRate,
     httpInterval,
+    httpTimeout,
 }: IZipkinPluginOptions): IThriftMiddleware<CoreOptions> {
     return {
         methods: [],
         handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-            const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, headers, sampleRate, httpInterval })
+            const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
             const requestContext: IRequestContext = readRequestContext(context, tracer)
             tracer.setId(requestContext.traceId)
