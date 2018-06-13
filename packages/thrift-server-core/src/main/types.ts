@@ -5,8 +5,6 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
-export { IAsyncOptions } from '@creditkarma/async-scope'
-
 export type LogFunction = (msg: string, data?: any) => void
 
 export interface IRequestHeaders {

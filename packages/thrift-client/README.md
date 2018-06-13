@@ -494,6 +494,37 @@ const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
     })
 ```
 
+To pass tracing information along, if you are a service sitting between two services, the incoming request needs to be passed as context to client methods.
+
+```typescript
+app.get('/calculate', (req: express.Request, res: express.Response): void => {
+    thriftClient.add(1, 2, { request: req }).then((val: number) => {
+        res.send(`result: ${val}`)
+    }, (err: any) => {
+        res.status(500).send(err)
+    })
+})
+```
+
+Alternatively you can pass a traceId in the context.
+
+```typescript
+import { TraceId } from 'zipkin'
+
+function traceIdForHeaders(headers): TraceId {
+    // Do stuff
+    return traceId
+}
+
+app.get('/calculate', (req: express.Request, res: express.Response): void => {
+    thriftClient.add(1, 2, { traceId: traceIdForHeaders(req.headers) }).then((val: number) => {
+        res.send(`result: ${val}`)
+    }, (err: any) => {
+        res.status(500).send(err)
+    })
+})
+```
+
 In order for tracing to be useful the services you are communicating with will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-hapi` and `thrift-server-express`. The provided plugins in Thrift Server only support HTTP transport at the moment.
 
 #### Options

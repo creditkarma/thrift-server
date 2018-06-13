@@ -79,7 +79,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': traceId_1,
                     'x-b3-spanid': traceId_1,
                     'x-b3-parentspanid': traceId_1,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
             rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
@@ -125,7 +125,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': traceId_1,
                     'x-b3-spanid': traceId_1,
                     'x-b3-parentspanid': traceId_1,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
         ]).then((val: any) => {
@@ -262,7 +262,7 @@ describe('Tracing', () => {
                     'x-b3-traceid': trace_2.traceId,
                     'x-b3-spanid': trace_2.spanId,
                     'x-b3-parentspanid': trace_2.parentId,
-                    'x-b3-sampled': true,
+                    'x-b3-sampled': '1',
                 },
             }),
         ]).then((val: any) => {

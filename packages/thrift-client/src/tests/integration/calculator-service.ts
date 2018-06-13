@@ -49,9 +49,6 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                         endpoint: 'http://localhost:9411/api/v1/spans',
                         sampleRate,
                         httpInterval: 0,
-                        asyncOptions: {
-                            nodeExpiration: 500,
-                        },
                     }) ] :
                     []
             ),
@@ -69,10 +66,10 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
             return
         },
         add(a: number, b: number, context?: Hapi.Request): Promise<number> {
-            return addServiceClient.add(a, b)
+            return addServiceClient.add(a, b, { request: context })
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
-            return addServiceClient.addInt64(a, b)
+            return addServiceClient.addInt64(a, b, { request: context })
         },
         addWithContext(a: number, b: number, context?: Hapi.Request): number {
             if (
@@ -87,7 +84,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         calculate(logId: number, work: Work, context?: Hapi.Request): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2)
+                    return addServiceClient.add(work.num1, work.num2, { request: context })
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:
@@ -167,9 +164,6 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
                 httpInterval: 0,
-                asyncOptions: {
-                    nodeExpiration: 503,
-                },
             }),
             (err: any) => {
                 if (err) {
