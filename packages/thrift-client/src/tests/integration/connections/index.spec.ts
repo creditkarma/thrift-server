@@ -39,34 +39,235 @@ const before = lab.before
 const after = lab.after
 
 describe('createHttpClient', () => {
-    let calcServer: Hapi.Server
-    let addServer: Hapi.Server
-
-    before(async () => {
-        calcServer = calculatorService()
-        addServer = addService()
-        return Promise.all([
-            calcServer.start(),
-            addServer.start(),
-        ]).then((err) => {
-            console.log('Thrift server running')
-        })
-    })
-
-    after(async () => {
-        return Promise.all([
-            calcServer.stop(),
-            addServer.stop(),
-        ]).then((err) => {
-            console.log('Thrift server stopped')
-        })
-    })
-
     describe('Basic Usage', () => {
         let client: Calculator.Client<CoreOptions>
+        let calcServer: Hapi.Server
+        let addServer: Hapi.Server
 
         before(async () => {
             client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
+            calcServer = calculatorService()
+            addServer = addService()
+            return Promise.all([
+                calcServer.start(),
+                addServer.start(),
+            ]).then((err) => {
+                console.log('Thrift server running')
+            })
+        })
+
+        after(async () => {
+            return Promise.all([
+                calcServer.stop(),
+                addServer.stop(),
+            ]).then((err) => {
+                console.log('Thrift server stopped')
+            })
+        })
+
+        it('should corrently handle a service client request', async () => {
+            return client.add(5, 7).then((response: number) => {
+                expect(response).to.equal(12)
+            })
+        })
+
+        it('should corrently handle a void service client request', async () => {
+            return client.ping().then((response: any) => {
+                expect(response).to.equal(undefined)
+            })
+        })
+
+        it('should corrently call endpoint with binary data', async () => {
+            const word: string = 'test_binary'
+            const data: Buffer = Buffer.from(word, 'utf-8')
+            return client.echoBinary(data).then((response: string) => {
+                expect(response).to.equal(word)
+            })
+        })
+
+        it('should corrently call endpoint that string data', async () => {
+            const word: string = 'test_string'
+            return client.echoString(word).then((response: string) => {
+                expect(response).to.equal(word)
+            })
+        })
+
+        it('should correctly call endpoint with lists as parameters', async () => {
+            return client
+                .mapOneList([1, 2, 3, 4])
+                .then((response: Array<number>) => {
+                    expect<Array<number>>(response).to.equal([2, 3, 4, 5])
+                })
+        })
+
+        it('should correctly call endpoint with maps as parameters', async () => {
+            return client
+                .mapValues(new Map([['key1', 6], ['key2', 5]]))
+                .then((response: Array<number>) => {
+                    expect<Array<number>>(response).to.equal([6, 5])
+                })
+        })
+
+        it('should correctly call endpoint that returns a map', async () => {
+            return client
+                .listToMap([['key_1', 'value_1'], ['key_2', 'value_2']])
+                .then((response: Map<string, string>) => {
+                    expect(response).to.equal(
+                        new Map([['key_1', 'value_1'], ['key_2', 'value_2']]),
+                    )
+                })
+        })
+
+        it('should call an endpoint with union arguments', async () => {
+            const firstName: IChoice = { firstName: { name: 'Louis' } }
+            const lastName: IChoice = { lastName: { name: 'Smith' } }
+
+            return Promise.all([
+                client.checkName(firstName),
+                client.checkName(lastName),
+            ]).then((val: Array<string>) => {
+                expect(val[0]).to.equal('FirstName: Louis')
+                expect(val[1]).to.equal('LastName: Smith')
+            })
+        })
+
+        it('should call an endpoint with optional parameters', async () => {
+            return Promise.all([
+                client.checkOptional('test_\nfirst'),
+                client.checkOptional(),
+            ]).then((val: Array<string>) => {
+                expect(val[0]).to.equal('test_\nfirst')
+                expect(val[1]).to.equal('undefined')
+            })
+        })
+
+        it('should corrently handle a service client request that returns a struct', async () => {
+            return client.getStruct(5)
+                .then((response: ISharedStruct) => {
+                    expect(response).to.equal({ code: { status: new Int64(0) }, value: 'test' })
+                })
+        })
+
+        it('should corrently handle a service client request that returns a union', async () => {
+            return client.getUnion(1).then((response: any) => {
+                expect(response).to.equal({ option1: 'foo' })
+            })
+        })
+
+        it('should allow passing of a request context', async () => {
+            return client
+                .addWithContext(5, 7, {
+                    headers: { 'x-fake-token': 'fake-token' },
+                })
+                .then((response: number) => {
+                    expect(response).to.equal(12)
+                })
+        })
+
+        it('should reject auth request without context', async () => {
+            return client.addWithContext(5, 7).then(
+                (response: number) => {
+                    expect(false).to.equal(true)
+                },
+                (err: any) => {
+                    expect(err.message).to.equal('Unauthorized')
+                },
+            )
+        })
+
+        it('should reject for a 500 server response', async () => {
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
+                Calculator.Client,
+                {
+                    hostName: CALC_SERVER_CONFIG.hostName,
+                    port: CALC_SERVER_CONFIG.port,
+                    path: '/return500',
+                },
+            )
+
+            return badClient.add(5, 7).then(
+                (response: number) => {
+                    throw new Error('Should reject with status 500')
+                },
+                (err: any) => {
+                    expect(err.statusCode).to.equal(500)
+                },
+            )
+        })
+
+        it('should reject for a 400 server response', async () => {
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
+                Calculator.Client,
+                {
+                    hostName: CALC_SERVER_CONFIG.hostName,
+                    port: CALC_SERVER_CONFIG.port,
+                    path: '/return400',
+                },
+            )
+
+            return badClient.add(5, 7).then(
+                (response: number) => {
+                    throw new Error('Should reject with status 400')
+                },
+                (err: any) => {
+                    expect(err.statusCode).to.equal(400)
+                },
+            )
+        })
+
+        it('should reject for a request to a missing service', async () => {
+            const badClient: Calculator.Client<CoreOptions> = createHttpClient(
+                Calculator.Client,
+                {
+                    hostName: 'fakehost',
+                    port: 8080,
+                    requestOptions: {
+                        timeout: 5000,
+                    },
+                },
+            )
+
+            return badClient.add(5, 7).then(
+                (response: number) => {
+                    throw new Error('Should reject with host not found')
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    expect(err).to.exist()
+                },
+            )
+        })
+    })
+
+    describe('CompactProtocol', () => {
+        let client: Calculator.Client<CoreOptions>
+        let calcServer: Hapi.Server
+        let addServer: Hapi.Server
+
+        before(async () => {
+            client = createHttpClient(Calculator.Client, {
+                hostName: CALC_SERVER_CONFIG.hostName,
+                port: CALC_SERVER_CONFIG.port,
+                path: CALC_SERVER_CONFIG.path,
+                protocol: 'compact',
+            })
+            calcServer = calculatorService(0, 'compact')
+            addServer = addService()
+            return Promise.all([
+                calcServer.start(),
+                addServer.start(),
+            ]).then((err) => {
+                console.log('Thrift server running')
+            })
+        })
+
+        after(async () => {
+            return Promise.all([
+                calcServer.stop(),
+                addServer.stop(),
+            ]).then((err) => {
+                console.log('Thrift server stopped')
+            })
         })
 
         it('should corrently handle a service client request', async () => {
@@ -244,6 +445,29 @@ describe('createHttpClient', () => {
     })
 
     describe('IncomingMiddleware', () => {
+        let calcServer: Hapi.Server
+        let addServer: Hapi.Server
+
+        before(async () => {
+            calcServer = calculatorService()
+            addServer = addService()
+            return Promise.all([
+                calcServer.start(),
+                addServer.start(),
+            ]).then((err) => {
+                console.log('Thrift server running')
+            })
+        })
+
+        after(async () => {
+            return Promise.all([
+                calcServer.stop(),
+                addServer.stop(),
+            ]).then((err) => {
+                console.log('Thrift server stopped')
+            })
+        })
+
         it('should resolve when middleware allows', async () => {
             const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,
@@ -365,6 +589,29 @@ describe('createHttpClient', () => {
     })
 
     describe('OutgoingMiddleware', () => {
+        let calcServer: Hapi.Server
+        let addServer: Hapi.Server
+
+        before(async () => {
+            calcServer = calculatorService()
+            addServer = addService()
+            return Promise.all([
+                calcServer.start(),
+                addServer.start(),
+            ]).then((err) => {
+                console.log('Thrift server running')
+            })
+        })
+
+        after(async () => {
+            return Promise.all([
+                calcServer.stop(),
+                addServer.stop(),
+            ]).then((err) => {
+                console.log('Thrift server stopped')
+            })
+        })
+
         it('should resolve when middleware adds auth token', async () => {
             const client = createHttpClient(Calculator.Client, {
                 hostName: CALC_SERVER_CONFIG.hostName,

@@ -74,6 +74,22 @@ export interface ITransportConstructor {
     receiver(data: Buffer): TTransport
 }
 
+export abstract class ThriftClient<Context = any> {
+    protected _requestId: number
+    protected transport: ITransportConstructor
+    protected protocol: IProtocolConstructor
+    protected connection: IThriftConnection<Context>
+    constructor(connection: IThriftConnection<Context>) {
+        this._requestId = 0
+        this.transport = connection.Transport
+        this.protocol = connection.Protocol
+        this.connection = connection
+    }
+    protected incrementRequestId(): number {
+        return this._requestId += 1
+    }
+}
+
 export interface IClientConstructor<TClient, Context> {
     new(connection: ThriftConnection<Context>): TClient
 }
@@ -87,7 +103,7 @@ export interface IProcessorConstructor<TProcessor, THandler> {
 }
 
 export type ProtocolType =
-    'binary' // | 'compact' | 'json'
+    'binary' | 'compact' // | 'json'
 
 export type TransportType =
     'buffered' // | 'framed'

@@ -1,4 +1,4 @@
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
 
 import {
     createThriftServer,
@@ -33,7 +33,7 @@ import {
     ZipkinTracingThriftClient,
 } from '../../main/index'
 
-export function createServer(sampleRate: number = 0): Hapi.Server {
+export function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Hapi.Server {
     // Create thrift client
     const addServiceClient: AddService.Client<ThriftContext<CoreOptions>> =
         createHttpClient(AddService.Client, {
@@ -64,6 +64,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
             return
         },
         add(a: number, b: number, context?: Hapi.Request): Promise<number> {
+            console.log(`add ${a} + ${b}`)
             return addServiceClient.add(a, b, { request: context })
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
@@ -165,6 +166,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
+            protocol: protocolType,
         },
     })
 
