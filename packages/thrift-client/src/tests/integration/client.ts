@@ -17,12 +17,13 @@ import {
     Work,
 } from '../generated/calculator'
 
+import { ProtocolType } from '@creditkarma/thrift-server-core'
 import {
     CALC_SERVER_CONFIG,
     CLIENT_CONFIG,
 } from './config'
 
-export function createClientServer(sampleRate: number = 0): Promise<net.Server> {
+export function createClientServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<net.Server> {
     // Get express instance
     const app = express()
 
@@ -41,6 +42,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
         createHttpClient(Calculator.Client, {
             hostName: CALC_SERVER_CONFIG.hostName,
             port: CALC_SERVER_CONFIG.port,
+            protocol: protocolType,
             register: (
                 (sampleRate > 0) ?
                     [ ZipkinTracingThriftClient({

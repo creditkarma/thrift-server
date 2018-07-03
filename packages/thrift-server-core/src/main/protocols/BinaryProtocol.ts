@@ -47,7 +47,8 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            logger.warn('RequestId already set', { name })
+            logger.warn(`RequestId already set: ${name}`)
+
         } else {
             this.requestId = requestId
         }
@@ -56,6 +57,7 @@ export class BinaryProtocol extends TProtocol {
     public writeMessageEnd(): void {
         if (this.requestId !== null) {
             this.requestId = null
+
         } else {
             logger.warn('No requestId to unset')
         }

@@ -75,18 +75,18 @@ export interface ITransportConstructor {
 }
 
 export abstract class ThriftClient<Context = any> {
-    protected _requestId: number;
-    protected transport: ITransportConstructor;
-    protected protocol: IProtocolConstructor;
-    protected connection: IThriftConnection<Context>;
+    protected _requestId: number
+    protected transport: ITransportConstructor
+    protected protocol: IProtocolConstructor
+    protected connection: IThriftConnection<Context>
     constructor(connection: IThriftConnection<Context>) {
-        this._requestId = 0;
-        this.transport = connection.Transport;
-        this.protocol = connection.Protocol;
-        this.connection = connection;
+        this._requestId = 0
+        this.transport = connection.Transport
+        this.protocol = connection.Protocol
+        this.connection = connection
     }
     protected incrementRequestId(): number {
-        return this._requestId += 1;
+        return this._requestId += 1
     }
 }
 
