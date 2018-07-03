@@ -106,8 +106,8 @@ export class BinaryProtocol extends TProtocol {
         }
     }
 
-    public writeByte(b: number): void {
-        this.transport.write(Buffer.from([b]))
+    public writeByte(byte: number): void {
+        this.transport.write(Buffer.from([byte]))
     }
 
     public writeI16(i16: number): void {
@@ -130,7 +130,7 @@ export class BinaryProtocol extends TProtocol {
         this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
     }
 
-    public writeStringOrBinary(name: string, encoding: string, data: string | Buffer) {
+    public writeStringOrBinary(name: string, encoding: string, data: string | Buffer): void {
         if (typeof data === 'string') {
             this.writeI32(Buffer.byteLength(data, encoding))
             this.transport.write(Buffer.from(data, encoding))
