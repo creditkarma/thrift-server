@@ -113,7 +113,7 @@ server.start((err) => {
 * thriftOptions.serviceName (required): The name of your service. Used for logging and tracing.
 * thriftOptions.handler (required): The service Processor instance to handle service method calls.
 * thriftOptions.transport (optional): The kind of Thrift transport to use. Only 'buffered' is currently supported.
-* thriftOptions.protocol (optional): The kind of Thrift protocol to use. Only 'binary' is currently supported.
+* thriftOptions.protocol (optional): The kind of Thrift protocol to use, either 'binary' or 'compact'.
 
 ### Thrift Server Factory
 

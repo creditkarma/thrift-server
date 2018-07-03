@@ -99,7 +99,7 @@ The available options are:
 * requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
 * register (optional): A list of middleware to apply to your client. More on this later.
 
-Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary protocol. Framed transport along with compact and JSON protocol will be added soon.
+Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary or compact protocols.
 
 ```typescript
 type TransportType = 'buffered'
@@ -108,7 +108,7 @@ type TransportType = 'buffered'
 The possible protocol types are:
 
 ```typescript
-type ProtocolType = 'binary'
+type ProtocolType = 'binary' | 'compact'
 ```
 
 #### Manual Creation
@@ -417,7 +417,7 @@ Available options for ThriftContextPlugin:
 * RequestContextClass (required): A class (extending StructLike) that is to be prepended to outgoing requests.
 * ResponseContextClass (optional): A class (extending StructLike) that is prepended to incoming responses. Defaults to nothing.
 * transportType (optional): The type of transport to use. Currently only 'buffered'.
-* protocolType (optional): The type of protocol to use. Currently only 'binary'.
+* protocolType (optional): The type of protocol to use, either 'binary' or 'compact'.
 
 #### TTwitterClientFilter
 
