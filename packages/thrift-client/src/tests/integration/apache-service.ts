@@ -7,7 +7,7 @@ import {
     CommonStruct,
     Operation,
     Work,
-} from '../generated-apache/calculator'
+} from '../generated-apache/calculator-service'
 
 import {
     Code,

@@ -1,10 +1,11 @@
 import { config } from '@creditkarma/dynamic-config'
 import {
-
+    ZipkinTracingExpress,
 } from '@creditkarma/thrift-server-express'
 
 import {
     createHttpClient,
+    ZipkinTracingThriftClient,
 } from '../src/main/'
 
 import * as path from 'path'
@@ -15,19 +16,37 @@ import {
     Work,
     Operation,
     Calculator,
-} from './generated/calculator'
+} from './generated/calculator-service'
 
 (async function() {
-    const SERVER_CONFIG = await config().get('server')
+    const SERVER_CONFIG = await config().get('calculator-service')
     const CLIENT_CONFIG = await config().get('client')
 
     // Get express instance
     const app = express()
 
+    app.use(ZipkinTracingExpress({
+        localServiceName: 'calculator-client',
+        endpoint: 'http://localhost:9411/api/v1/spans',
+        httpInterval: 1000,
+        httpTimeout: 5000,
+        sampleRate: 1.0,
+    }))
+
     // Create thrift client
     const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
         hostName: SERVER_CONFIG.host,
         port: SERVER_CONFIG.port,
+        register: [
+            ZipkinTracingThriftClient({
+                localServiceName: 'calculator-client',
+                remoteServiceName: 'calculator-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                httpInterval: 1000,
+                httpTimeout: 5000,
+                sampleRate: 1.0,
+            })
+        ]
     })
 
     function symbolToOperation(sym: string): Operation {
@@ -50,7 +69,7 @@ import {
     })
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
-        thriftClient.ping().then(() => {
+        thriftClient.ping({ headers: req.headers }).then(() => {
             res.send('success')
         }, (err: any) => {
             console.log('err: ', err)
@@ -65,7 +84,7 @@ import {
             op: symbolToOperation(req.query.op)
         })
 
-        thriftClient.calculate(1, work).then((val: number) => {
+        thriftClient.calculate(1, work, { headers: req.headers }).then((val: number) => {
             res.send(`result: ${val}`)
         }, (err: any) => {
             res.status(500).send(err)

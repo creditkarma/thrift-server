@@ -1,9 +1,8 @@
 import {
     getTracerForService,
-    hasL5DHeader,
-    IRequestContext,
+    headersForTraceId,
+    IRequestHeaders,
     IZipkinPluginOptions,
-    normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
 
 import * as Hapi from 'hapi'
@@ -44,15 +43,15 @@ export function ZipkinTracingHapi({
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
-                const normalizedHeaders = normalizeHeaders(request.headers)
-                const plugins = request.plugins
+                console.log('headers 1: ', request.headers)
+                const requestHeaders = request.headers
 
                 tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
                         request.method,
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
-                            const val = normalizedHeaders[header.toLowerCase()]
+                            const val = requestHeaders[header.toLowerCase()]
                             if (val !== null && val !== undefined) {
                                 return new option.Some(val)
 
@@ -62,13 +61,10 @@ export function ZipkinTracingHapi({
                         },
                     ) as any as TraceId // Nasty but this method is incorrectly typed
 
-                    const requestContext: IRequestContext = {
-                        traceId,
-                        usesLinkerd: hasL5DHeader(normalizedHeaders),
-                        requestHeaders: normalizedHeaders,
-                    }
+                    const zipkinHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-                    plugins.zipkin = requestContext
+                    request.headers = Object.assign({}, request.headers, zipkinHeaders)
+                    request.plugins.zipkin = traceId
 
                     return reply.continue()
                 })
@@ -76,7 +72,7 @@ export function ZipkinTracingHapi({
 
             server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ReplyWithContinue) => {
                 const statusCode = readStatusCode(request)
-                const traceId: any = request.plugins.zipkin.traceId
+                const traceId: any = request.plugins.zipkin
 
                 tracer.scoped(() => {
                     instrumentation.recordResponse(traceId, `${statusCode}`)

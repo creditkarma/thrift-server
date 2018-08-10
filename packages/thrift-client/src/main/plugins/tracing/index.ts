@@ -1,1 +1,2 @@
-export { ZipkinTracingThriftClient } from './ZipkinTracingThriftClient'
+export * from './ApplyLinkerDZipkinClientFilter'
+export * from './ZipkinTracingThriftClient'

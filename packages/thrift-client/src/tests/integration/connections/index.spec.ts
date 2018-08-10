@@ -23,7 +23,7 @@ import * as Lab from 'lab'
 import {
     Calculator,
     IChoice,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 

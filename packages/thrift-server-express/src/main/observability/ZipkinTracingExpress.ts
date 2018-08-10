@@ -1,8 +1,8 @@
 import {
     getTracerForService,
-    hasL5DHeader,
+    headersForTraceId,
+    IRequestHeaders,
     IZipkinPluginOptions,
-    normalizeHeaders,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -39,9 +39,10 @@ export function ZipkinTracingExpress({
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
     return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
         tracer.scoped(() => {
-            req.headers = normalizeHeaders(req.headers)
+            const requestHeaders = req.headers
+
             function readHeader(header: string): option.IOption<string | Array<string>> {
-                const val = req.headers[header.toLocaleLowerCase()]
+                const val = requestHeaders[header.toLocaleLowerCase()]
                 if (val !== null && val !== undefined) {
                     return new option.Some(val)
                 } else {
@@ -56,11 +57,9 @@ export function ZipkinTracingExpress({
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
 
-            (req as any).__zipkin = {
-                traceId,
-                usesLinkerd: hasL5DHeader(req.headers),
-                requestHeaders: req.headers,
-            }
+            const zipkinHeaders: IRequestHeaders = headersForTraceId(traceId)
+
+            req.headers = Object.assign({}, req.headers, zipkinHeaders)
 
             res.on('finish', () => {
                 tracer.scoped(() => {

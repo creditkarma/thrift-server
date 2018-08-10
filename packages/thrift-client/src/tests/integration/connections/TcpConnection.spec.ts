@@ -22,7 +22,7 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 
 import {
     Calculator,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import {
     ISharedStruct,

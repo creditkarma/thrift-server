@@ -12,7 +12,6 @@ export interface IRequestHeaders {
 
 export interface IRequestContext {
     traceId: TraceId,
-    usesLinkerd: boolean
     requestHeaders: { [name: string]: any }
 }
 

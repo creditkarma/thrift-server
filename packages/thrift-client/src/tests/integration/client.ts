@@ -1,6 +1,10 @@
-import { ZipkinTracingExpress } from '@creditkarma/thrift-server-express'
+import {
+    ApplyLinkerDZipkinServerFilter,
+    ZipkinTracingExpress,
+} from '@creditkarma/thrift-server-express'
 
 import {
+    ApplyLinkerDZipkinClientFilter,
     createHttpClient,
     ThriftContext,
     ZipkinTracingThriftClient,
@@ -15,7 +19,7 @@ import {
     IWorkArgs,
     Operation,
     Work,
-} from '../generated/calculator'
+} from '../generated/calculator-service'
 
 import { ProtocolType } from '@creditkarma/thrift-server-core'
 import {
@@ -29,6 +33,7 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
 
     if (sampleRate > 0) {
         app.use([
+            ApplyLinkerDZipkinServerFilter(),
             ZipkinTracingExpress({
                 localServiceName: 'calculator-client',
                 endpoint: 'http://localhost:9411/api/v1/spans',
@@ -45,13 +50,16 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
             protocol: protocolType,
             register: (
                 (sampleRate > 0) ?
-                    [ ZipkinTracingThriftClient({
-                        localServiceName: 'calculator-client',
-                        remoteServiceName: 'calculator-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
-                        sampleRate,
-                        httpInterval: 0,
-                    }) ] :
+                    [
+                        ZipkinTracingThriftClient({
+                            localServiceName: 'calculator-client',
+                            remoteServiceName: 'calculator-service',
+                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            sampleRate,
+                            httpInterval: 0,
+                        }),
+                        ApplyLinkerDZipkinClientFilter(),
+                    ] :
                     []
             ),
         })

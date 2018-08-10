@@ -28,7 +28,7 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 import {
     Calculator,
     ICommonStruct,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import {
     ISharedUnion,

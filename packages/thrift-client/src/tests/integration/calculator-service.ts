@@ -1,6 +1,10 @@
-import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
+import {
+    Int64,
+    ProtocolType,
+} from '@creditkarma/thrift-server-core'
 
 import {
+    ApplyLinkerDZipkinServerFilter,
     createThriftServer,
     ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
@@ -19,15 +23,19 @@ import {
 } from './config'
 
 import {
-    AddService,
     Calculator,
     IChoice,
     ICommonStruct,
     Operation,
     Work,
-} from '../generated/calculator'
+} from '../generated/calculator-service'
 
 import {
+    AddService,
+} from '../generated/add-service'
+
+import {
+    ApplyLinkerDZipkinClientFilter,
     createHttpClient,
     ThriftContext,
     ZipkinTracingThriftClient,
@@ -41,13 +49,16 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
             port: ADD_SERVER_CONFIG.port,
             register: (
                 (sampleRate > 0) ?
-                    [ ZipkinTracingThriftClient({
-                        localServiceName: 'calculator-service',
-                        remoteServiceName: 'add-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
-                        sampleRate,
-                        httpInterval: 0,
-                    }) ] :
+                    [
+                        ZipkinTracingThriftClient({
+                            localServiceName: 'calculator-service',
+                            remoteServiceName: 'add-service',
+                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            sampleRate,
+                            httpInterval: 0,
+                        }),
+                        ApplyLinkerDZipkinClientFilter(),
+                    ] :
                     []
             ),
         })
@@ -64,7 +75,6 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
             return
         },
         add(a: number, b: number, context?: Hapi.Request): Promise<number> {
-            console.log(`add ${a} + ${b}`)
             return addServiceClient.add(a, b, { request: context })
         },
         addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
@@ -171,6 +181,16 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     })
 
     if (sampleRate > 0) {
+        server.register(
+            ApplyLinkerDZipkinServerFilter(),
+            (err: any) => {
+                if (err) {
+                    console.log('err: ', err)
+                    throw err
+                }
+            },
+        )
+
         server.register(
             ZipkinTracingHapi({
                 localServiceName: 'calculator-service',

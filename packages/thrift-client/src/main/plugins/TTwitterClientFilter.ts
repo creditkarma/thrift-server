@@ -2,6 +2,7 @@ import {
     getProtocol,
     getTracerForService,
     getTransport,
+    Int64,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -33,7 +34,7 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift'
+import * as TTwitter from '../../ttwitter/com/creditkarma/finagle/thrift'
 
 import * as logger from '../logger'
 
@@ -64,7 +65,6 @@ function readRequestContext(context: any, tracer: Tracer): IRequestContext {
     if (context !== undefined && context.traceId !== undefined) {
         return {
             traceId: context.traceId,
-            usesLinkerd: false,
             requestHeaders: {},
         }
 
@@ -72,7 +72,6 @@ function readRequestContext(context: any, tracer: Tracer): IRequestContext {
         const traceId: TraceId = tracer.createRootId()
         return {
             traceId,
-            usesLinkerd: false,
             requestHeaders: {},
         }
     }
@@ -122,12 +121,22 @@ export function TTwitterClientFilter<T>({
                     tracer.setId(requestContext.traceId)
 
                     return tracer.scoped(() => {
-                        const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                        const { headers }: any = instrumentation.recordRequest({ headers: {} }, '', 'post')
+
+                        const normalHeaders: any = Object.keys(headers).reduce((acc: any, name: string) => {
+                            acc[name.toLowerCase()] = headers[name]
+                            return acc
+                        }, {})
+
                         const requestHeader: TTwitter.IRequestHeader = {
-                            trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
-                            span_id: ((headers as any)[ZipkinHeaders.SpanId]),
-                            parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
-                            sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
+                            trace_id: new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.TraceId]}`),
+                            span_id: new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.SpanId]}`),
+                            parent_span_id: (
+                                (normalHeaders[ZipkinHeaders.ParentId] !== undefined) ?
+                                    new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.ParentId]}`) :
+                                    undefined
+                            ),
+                            sampled: ((normalHeaders as any)[ZipkinHeaders.Sampled] === '1'),
                             client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
                             contexts: [],
                             dest: destHeader,

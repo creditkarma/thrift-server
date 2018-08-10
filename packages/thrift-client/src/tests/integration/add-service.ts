@@ -1,6 +1,7 @@
 import { Int64 } from '@creditkarma/thrift-server-core'
 
 import {
+    ApplyLinkerDZipkinServerFilter,
     createThriftServer,
     ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
@@ -11,7 +12,7 @@ import { ADD_SERVER_CONFIG } from './config'
 
 import {
     AddService,
-} from '../generated/calculator'
+} from '../generated/add-service'
 
 export function createServer(sampleRate: number = 0): Hapi.Server {
     /**
@@ -46,6 +47,16 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
     })
 
     if (sampleRate > 0) {
+        server.register(
+            ApplyLinkerDZipkinServerFilter(),
+            (err: any) => {
+                if (err) {
+                    console.log('err: ', err)
+                    throw err
+                }
+            },
+        )
+
         server.register(
             ZipkinTracingHapi({
                 localServiceName: 'add-service',

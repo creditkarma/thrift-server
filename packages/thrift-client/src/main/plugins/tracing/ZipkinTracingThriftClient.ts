@@ -7,12 +7,9 @@ import {
 import { CoreOptions } from 'request'
 
 import {
-    addL5Dheaders,
     containsZipkinHeaders,
     getTracerForService,
-    hasL5DHeader,
     IRequestContext,
-    IRequestHeaders,
     IZipkinPluginOptions,
     traceIdForHeaders,
 } from '@creditkarma/thrift-server-core'
@@ -24,32 +21,28 @@ import {
     ThriftContext,
 } from '../../types'
 
-function applyL5DHeaders(requestContext: IRequestContext, headers: IRequestHeaders): IRequestHeaders {
-    if (requestContext.usesLinkerd) {
-        return addL5Dheaders(headers)
-
-    } else {
-        return headers
-    }
-}
-
 function readRequestContext(
-    thriftContext: ThriftContext<CoreOptions>,
+    requestContext: any,
     tracer: Tracer,
 ): IRequestContext {
-    if (thriftContext.request && containsZipkinHeaders(thriftContext.request.headers)) {
-        const traceId: TraceId = traceIdForHeaders(thriftContext.request.headers)
+    if (requestContext.request && containsZipkinHeaders(requestContext.request.headers)) {
+        const traceId: TraceId = traceIdForHeaders(requestContext.request.headers)
         return {
             traceId,
-            usesLinkerd: hasL5DHeader(thriftContext.request.headers),
-            requestHeaders: thriftContext.request.headers,
+            requestHeaders: requestContext.request.headers,
+        }
+
+    } else if (requestContext.headers && containsZipkinHeaders(requestContext.headers)) {
+        const traceId: TraceId = traceIdForHeaders(requestContext.headers)
+        return {
+            traceId,
+            requestHeaders: requestContext.headers,
         }
 
     } else {
-        const traceId: TraceId = thriftContext.traceId || tracer.createRootId()
+        const traceId: TraceId = requestContext.traceId || tracer.createRootId()
         return {
             traceId,
-            usesLinkerd: false,
             requestHeaders: {},
         }
     }
@@ -74,10 +67,9 @@ export function ZipkinTracingThriftClient({
             tracer.setId(requestContext.traceId)
 
             return tracer.scoped(() => {
-                const requestHeaders = instrumentation.recordRequest({ headers: {} }, '', 'post')
-                const withLD5headers = applyL5DHeaders(requestContext, requestHeaders.headers)
+                const requestHeaders = instrumentation.recordRequest({ headers: {} }, 'hi there', 'post')
 
-                return next(data, { headers: withLD5headers }).then((res: IRequestResponse) => {
+                return next(data, requestHeaders).then((res: IRequestResponse) => {
                     tracer.scoped(() => {
                         instrumentation.recordResponse((requestContext.traceId as any), `${res.statusCode}`)
                     })
