@@ -1,8 +1,13 @@
 import {
+    deepMerge,
+    getProtocol,
     getTracerForService,
+    getTransport,
     headersForTraceId,
     IRequestHeaders,
-    IZipkinPluginOptions,
+    IZipkinOptions,
+    normalizeHeaders,
+    readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -34,15 +39,19 @@ export function ZipkinTracingExpress({
     httpInterval,
     httpTimeout,
     headers,
-}: IZipkinPluginOptions): express.RequestHandler {
+    transport = 'buffered',
+    protocol = 'binary',
+}: IZipkinOptions): express.RequestHandler {
     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
-    return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
+
+    return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
         tracer.scoped(() => {
-            const requestHeaders = req.headers
+            const requestMethod: string = readThriftMethod(request.body, getTransport(transport), getProtocol(protocol))
+            const normalHeaders: IRequestHeaders = normalizeHeaders(request.headers)
 
             function readHeader(header: string): option.IOption<string | Array<string>> {
-                const val = requestHeaders[header.toLocaleLowerCase()]
+                const val = normalHeaders[header.toLocaleLowerCase()]
                 if (val !== null && val !== undefined) {
                     return new option.Some(val)
                 } else {
@@ -50,23 +59,26 @@ export function ZipkinTracingExpress({
                 }
             }
 
-            const traceId: TraceId =
-                instrumentation.recordRequest(
-                    req.method,
-                    formatRequestUrl(req),
-                    (readHeader as any),
-                ) as any as TraceId // Nasty but this method is incorrectly typed
+            const traceId: TraceId = instrumentation.recordRequest(
+                (requestMethod || request.method),
+                formatRequestUrl(request),
+                (readHeader as any),
+            ) as any as TraceId // Nasty but this method is incorrectly typed
 
-            const zipkinHeaders: IRequestHeaders = headersForTraceId(traceId)
+            const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-            req.headers = Object.assign({}, req.headers, zipkinHeaders)
+            const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders)
 
-            res.on('finish', () => {
+            request.headers = updatedHeaders;
+
+            (request as any).__zipkin = {
+                traceId,
+                requestHeaders: request.headers,
+            }
+
+            response.on('finish', () => {
                 tracer.scoped(() => {
-                    instrumentation.recordResponse(
-                        (traceId as any), // This method is also incorrectly typed
-                        `${res.statusCode}`,
-                    )
+                    instrumentation.recordResponse((traceId as any), `${response.statusCode}`)
                 })
             })
 

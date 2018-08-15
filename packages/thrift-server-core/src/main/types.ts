@@ -12,7 +12,7 @@ export interface IRequestHeaders {
 
 export interface IRequestContext {
     traceId: TraceId,
-    requestHeaders: { [name: string]: any }
+    headers: IRequestHeaders
 }
 
 /**

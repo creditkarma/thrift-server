@@ -5,11 +5,11 @@ import {
 
 import {
     createHttpClient,
-    ZipkinTracingThriftClient,
+    ZipkinClientFilter,
+    IRequest,
 } from '../src/main/'
 
 import * as path from 'path'
-import { CoreOptions } from 'request'
 import * as express from 'express'
 
 import {
@@ -34,11 +34,11 @@ import {
     }))
 
     // Create thrift client
-    const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+    const thriftClient: Calculator.Client<IRequest> = createHttpClient(Calculator.Client, {
         hostName: SERVER_CONFIG.host,
         port: SERVER_CONFIG.port,
         register: [
-            ZipkinTracingThriftClient({
+            ZipkinClientFilter({
                 localServiceName: 'calculator-client',
                 remoteServiceName: 'calculator-service',
                 endpoint: 'http://localhost:9411/api/v1/spans',

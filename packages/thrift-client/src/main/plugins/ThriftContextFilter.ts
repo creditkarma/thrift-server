@@ -6,7 +6,8 @@ import {
 
 import {
     IRequestResponse,
-    IThriftMiddlewareConfig,
+    IThriftContext,
+    IThriftTcpFilterConfig,
     NextFunction,
 } from '../types'
 
@@ -27,16 +28,16 @@ export interface IThriftContextOptions<RequestContext, ResponseContext> {
     protocolType?: ProtocolType
 }
 
-export function ThriftContextPlugin<RequestContext, ResponseContext>({
+export function ThriftContextFilter<RequestContext, ResponseContext>({
     RequestCodec,
     ResponseCodec,
     transportType = 'buffered',
     protocolType = 'binary',
-}: IThriftContextOptions<RequestContext, ResponseContext>): IThriftMiddlewareConfig<RequestContext> {
+}: IThriftContextOptions<RequestContext, ResponseContext>): IThriftTcpFilterConfig<RequestContext> {
     return {
-        handler(data: Buffer, context: RequestContext, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
-            return appendThriftObject(context, data, RequestCodec, transportType, protocolType).then((extended: Buffer) => {
-                return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
+        handler(data: Buffer, context: IThriftContext<RequestContext>, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
+            return appendThriftObject(context.request, data, RequestCodec, transportType, protocolType).then((extended: Buffer) => {
+                return next(extended, context.request).then((res: IRequestResponse): Promise<IRequestResponse> => {
                     return readThriftObject(
                         res.body,
                         ResponseCodec,

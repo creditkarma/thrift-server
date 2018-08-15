@@ -9,7 +9,7 @@ import {
 import {
     ICreateHttpClientOptions,
     ICreateTcpClientOptions,
-    ThriftContext,
+    IRequest,
 } from '../types'
 
 import { TcpConnection } from './TcpConnection'
@@ -18,8 +18,8 @@ export * from './HttpConnection'
 export * from './TcpConnection'
 
 export function createClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
-    options: ICreateHttpClientOptions<request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, IRequest>,
+    options: ICreateHttpClientOptions<IRequest>,
 ): TClient {
     console.warn(`[Deprecated]: Please use 'createHttpClient' instead`)
     return createHttpClient<TClient>(ServiceClient, options)
@@ -38,8 +38,8 @@ export function createTcpClient<TClient>(
 }
 
 export function createHttpClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
-    options: ICreateHttpClientOptions<request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, IRequest>,
+    options: ICreateHttpClientOptions<IRequest>,
 ): TClient {
     const requestClient: RequestInstance =
         request.defaults(options.requestOptions || {})

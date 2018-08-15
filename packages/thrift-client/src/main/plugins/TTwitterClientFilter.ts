@@ -22,7 +22,8 @@ import {
 
 import {
     IRequestResponse,
-    IThriftMiddlewareConfig,
+    IThriftContext,
+    IThriftTcpFilterConfig,
     NextFunction,
 } from '../types'
 
@@ -65,14 +66,14 @@ function readRequestContext(context: any, tracer: Tracer): IRequestContext {
     if (context !== undefined && context.traceId !== undefined) {
         return {
             traceId: context.traceId,
-            requestHeaders: {},
+            headers: {},
         }
 
     } else {
         const traceId: TraceId = tracer.createRootId()
         return {
             traceId,
-            requestHeaders: {},
+            headers: {},
         }
     }
 }
@@ -106,12 +107,12 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
-}: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
+}: ITTwitterFileterOptions): IThriftTcpFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
 
     return {
-        async handler(dataToSend: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
+        async handler(dataToSend: Buffer, context: IThriftContext<T>, next: NextFunction<T>): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
@@ -150,7 +151,7 @@ export function TTwitterClientFilter<T>({
                             transportType,
                             protocolType,
                         ).then((extended: Buffer) => {
-                            return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
+                            return next(extended, context.request).then((res: IRequestResponse): Promise<IRequestResponse> => {
                                 return readThriftObject<TTwitter.IResponseHeader>(
                                     res.body,
                                     TTwitter.ResponseHeaderCodec,
@@ -177,23 +178,23 @@ export function TTwitterClientFilter<T>({
                     return sendUpgradedRequest()
 
                 } else if (upgradeRequested) {
-                    return next(dataToSend, context)
+                    return next(dataToSend, context.request)
 
                 } else {
                     logger.log('Requesting TTwitter upgrade')
                     upgradeRequested = true
-                    return next(upgradeRequest(), context).then((upgradeResponse: IRequestResponse) => {
+                    return next(upgradeRequest(), context.request).then((upgradeResponse: IRequestResponse) => {
                         hasUpgraded = true
                         return sendUpgradedRequest()
 
                     }, (err: any) => {
                         logger.log('Downgrading TTwitter request: ', err)
-                        return next(dataToSend, context)
+                        return next(dataToSend, context.request)
                    })
                 }
 
             } else {
-                return next(dataToSend, context)
+                return next(dataToSend, context.request)
             }
         },
     }

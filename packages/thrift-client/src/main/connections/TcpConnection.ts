@@ -10,9 +10,9 @@ import {
 import {
     IConnectionOptions,
     IRequestResponse,
-    IThriftMiddleware,
-    IThriftMiddlewareConfig,
-    RequestHandler,
+    IThriftTcpFilter,
+    IThriftTcpFilterConfig,
+    TcpRequestHandler,
 } from '../types'
 
 import {
@@ -33,7 +33,7 @@ import {
 export type TcpContext<T> = T | void
 
 export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
-    protected readonly middleware: Array<IThriftMiddleware<T>>
+    protected readonly filters: Array<IThriftTcpFilter<T>>
     private pool: GenericPool.Pool<Connection>
 
     constructor({
@@ -49,7 +49,7 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
             getTransport(transport),
             getProtocol(protocol),
         )
-        this.middleware = []
+        this.filters = []
         this.pool = createPool({
             port,
             hostName,
@@ -57,9 +57,9 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         }, (pool || {}))
     }
 
-    public register(...middleware: Array<IThriftMiddlewareConfig<T>>): void {
-        middleware.forEach((next: IThriftMiddlewareConfig<T>) => {
-            this.middleware.push({
+    public register(...filters: Array<IThriftTcpFilterConfig<T>>): void {
+        filters.forEach((next: IThriftTcpFilterConfig<T>) => {
+            this.filters.push({
                 methods: next.methods || [],
                 handler: next.handler,
             })
@@ -71,12 +71,12 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         context: TcpContext<T> = this.emptyContext(),
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
-        const handlers: Array<RequestHandler<T>> = this.handlersForMethod(requestMethod)
+        const handlers: Array<TcpRequestHandler<T>> = this.handlersForMethod(requestMethod)
 
         const applyHandlers = (
             currentData: Buffer,
             currentContext: TcpContext<T>,
-            [ head, ...tail ]: Array<RequestHandler<T>>,
+            [ head, ...tail ]: Array<TcpRequestHandler<T>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
                 return this.write(currentData, currentContext).catch((err: any) => {
@@ -128,9 +128,9 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         return undefined
     }
 
-    private handlersForMethod(name: string): Array<RequestHandler<T>> {
-        return this.middleware
+    private handlersForMethod(name: string): Array<TcpRequestHandler<T>> {
+        return this.filters
             .filter(filterByMethod(name))
-            .map(getHandler)
+            .map((filter: IThriftTcpFilter<T>) =>  getHandler(filter))
     }
 }

@@ -1,4 +1,8 @@
-import { IRequestHeaders } from '../types'
+import {
+    IRequestHeaders,
+    ProtocolType,
+    TransportType,
+} from '../types'
 
 export interface ITraceId {
     spanId: string
@@ -8,9 +12,8 @@ export interface ITraceId {
     traceIdHigh?: boolean
 }
 
-export interface IZipkinPluginOptions {
+export interface IZipkinOptions {
     localServiceName: string
-    remoteServiceName?: string
     port?: number
     debug?: boolean
     endpoint?: string
@@ -18,6 +21,12 @@ export interface IZipkinPluginOptions {
     headers?: IRequestHeaders
     httpInterval?: number
     httpTimeout?: number
+    transport?: TransportType
+    protocol?: ProtocolType
+}
+
+export interface IZipkinClientOptions extends IZipkinOptions {
+    remoteServiceName?: string
 }
 
 export interface IZipkinTracerConfig {

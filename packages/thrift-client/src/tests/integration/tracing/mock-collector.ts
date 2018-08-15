@@ -57,6 +57,7 @@ export function createServer(): Promise<IMockCollector> {
     return new Promise((resolve, reject) => {
         const server: net.Server = app.listen(COLLECTOR_CONFIG.port, (err: any) => {
             if (err) {
+                console.error(`MockCollection unable to start: ${err.message}`)
                 reject(err)
 
             } else {

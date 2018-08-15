@@ -1,6 +1,8 @@
 import {
-    IThriftMiddleware,
+    IThriftClientFilter,
+    IThriftTcpFilter,
     RequestHandler,
+    TcpRequestHandler,
 } from '../types'
 
 export const normalizePath = (path: string = '/'): string => {
@@ -12,15 +14,19 @@ export const normalizePath = (path: string = '/'): string => {
     }
 }
 
-export const filterByMethod = <Context>(method: string): (middleware: IThriftMiddleware<Context>) => boolean => {
-    return (middleware: IThriftMiddleware<Context>): boolean => {
+export function filterByMethod<Context>(method: string): (filter: IThriftClientFilter<Context>) => boolean
+export function filterByMethod<Context>(method: string): (filter: IThriftTcpFilter<Context>) => boolean
+export function filterByMethod<Context>(method: string): (filter: any) => boolean {
+    return (filter: any): boolean => {
         return (
-            middleware.methods.length === 0 ||
-            middleware.methods.indexOf(method) > -1
+            filter.methods.length === 0 ||
+            filter.methods.indexOf(method) > -1
         )
     }
 }
 
-export const getHandler = <Context>(middleware: IThriftMiddleware<Context>): RequestHandler<Context> => {
-    return middleware.handler
+export function getHandler<Context>(filter: IThriftTcpFilter<Context>): TcpRequestHandler<Context>
+export function getHandler<Context>(filter: IThriftClientFilter<Context>): RequestHandler<Context>
+export function getHandler<Context>(filter: any): any {
+    return filter.handler
 }

@@ -1,11 +1,11 @@
 import { config } from '@creditkarma/dynamic-config'
 import { createThriftServer, ZipkinTracingHapi } from '@creditkarma/thrift-server-hapi'
 import * as Hapi from 'hapi'
-import { CoreOptions } from 'request'
 
 import {
     createHttpClient,
-    ZipkinTracingThriftClient,
+    ZipkinClientFilter,
+    IRequest,
 } from '../src/main/'
 
 import { Operation, Calculator, IWork } from './generated/calculator-service'
@@ -16,11 +16,11 @@ import { AddService } from './generated/add-service'
     const ADD_SERVER_CONFIG = await config().get('add-service')
 
     // Create thrift client
-    const thriftClient: AddService.Client<CoreOptions> = createHttpClient(AddService.Client, {
+    const thriftClient: AddService.Client<IRequest> = createHttpClient(AddService.Client, {
         hostName: ADD_SERVER_CONFIG.host,
         port: ADD_SERVER_CONFIG.port,
         register: [
-            ZipkinTracingThriftClient({
+            ZipkinClientFilter({
                 localServiceName: 'calculator-service',
                 remoteServiceName: 'add-service',
                 endpoint: 'http://localhost:9411/api/v1/spans',
