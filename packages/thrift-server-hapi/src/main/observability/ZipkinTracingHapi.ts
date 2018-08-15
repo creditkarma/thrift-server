@@ -75,7 +75,7 @@ export function ZipkinTracingHapi({
 
                     request.headers = updatedHeaders
 
-                    plugins.zipkin = traceId
+                    plugins.zipkin = { traceId }
 
                     return reply.continue()
                 })
@@ -83,7 +83,7 @@ export function ZipkinTracingHapi({
 
             server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ReplyWithContinue) => {
                 const statusCode = readStatusCode(request)
-                const traceId: any = request.plugins.zipkin
+                const traceId: any = request.plugins.zipkin.traceId
 
                 tracer.scoped(() => {
                     instrumentation.recordResponse(traceId, `${statusCode}`)

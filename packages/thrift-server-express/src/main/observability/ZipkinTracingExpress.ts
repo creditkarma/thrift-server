@@ -69,12 +69,7 @@ export function ZipkinTracingExpress({
 
             const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders)
 
-            request.headers = updatedHeaders;
-
-            (request as any).__zipkin = {
-                traceId,
-                requestHeaders: request.headers,
-            }
+            request.headers = updatedHeaders
 
             response.on('finish', () => {
                 tracer.scoped(() => {
