@@ -109,6 +109,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -143,6 +145,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -194,6 +198,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -232,6 +238,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -280,6 +288,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 })

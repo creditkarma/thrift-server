@@ -70,13 +70,13 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
         ping(): void {
             return
         },
-        add(a: number, b: number, context?: Hapi.Request): Promise<number> {
-            return addServiceClient.add(a, b, context)
+        add(a: number, b: number, context: Hapi.Request): Promise<number> {
+            return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
+        addInt64(a: Int64, b: Int64, context: Hapi.Request): Promise<Int64> {
             return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context?: Hapi.Request): number {
+        addWithContext(a: number, b: number, context: Hapi.Request): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -86,10 +86,10 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
                 throw new Error('Unauthorized')
             }
         },
-        calculate(logId: number, work: Work, context?: Hapi.Request): number | Promise<number> {
+        calculate(logId: number, work: Work, context: Hapi.Request): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2, context)
+                    return addServiceClient.add(work.num1, work.num2, { headers: context.headers })
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:

@@ -17,17 +17,15 @@ import {
 
 import {
     IHttpConnectionOptions,
-    IRequest,
     IRequestResponse,
     IThriftClientFilter,
     IThriftClientFilterConfig,
-    IThriftContext,
+    IThriftRequest,
     RequestHandler,
 } from '../types'
 
 import {
     filterByMethod,
-    getHandler,
     normalizePath,
 } from './utils'
 
@@ -37,13 +35,13 @@ export type HttpProtocol =
 export type RequestInstance =
     RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class HttpConnection extends ThriftConnection<IRequest> {
+export class HttpConnection extends ThriftConnection<CoreOptions> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
-    protected readonly filters: Array<IThriftClientFilter<IRequest>>
+    protected readonly filters: Array<IThriftClientFilter<CoreOptions>>
     private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
     constructor(request: RequestInstance, {
@@ -53,7 +51,7 @@ export class HttpConnection extends ThriftConnection<IRequest> {
         https = false,
         transport = 'buffered',
         protocol = 'binary',
-    }: IHttpConnectionOptions<IRequest>) {
+    }: IHttpConnectionOptions) {
         super(
             getTransport(transport),
             getProtocol(protocol),
@@ -67,8 +65,8 @@ export class HttpConnection extends ThriftConnection<IRequest> {
         this.filters = []
     }
 
-    public register(...filters: Array<IThriftClientFilterConfig<IRequest>>): void {
-        filters.forEach((next: IThriftClientFilterConfig<IRequest>) => {
+    public register(...filters: Array<IThriftClientFilterConfig<CoreOptions>>): void {
+        filters.forEach((next: IThriftClientFilterConfig<CoreOptions>) => {
             this.filters.push({
                 methods: next.methods || [],
                 handler: next.handler,
@@ -78,41 +76,45 @@ export class HttpConnection extends ThriftConnection<IRequest> {
 
     public send(
         dataToSend: Buffer,
-        context: IRequest = { headers: {} },
+        context: CoreOptions = {},
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
-        const handlers: Array<RequestHandler<IRequest>> = this.handlersForMethod(requestMethod)
-        const resolvedContext: IThriftContext<IRequest> = {
+        console.log('requestMethod: ', requestMethod)
+        const handlers: Array<RequestHandler<CoreOptions>> = this.handlersForMethod(requestMethod)
+        const thriftRequest: IThriftRequest<CoreOptions> = {
+            data: dataToSend,
             methodName: requestMethod,
             uri: this.url,
-            request: context,
+            context,
         }
 
-        let mergedOptions: CoreOptions = {}
-
         const applyHandlers = (
-            currentData: Buffer,
-            currentContext: IThriftContext<IRequest>,
-            [head, ...tail]: Array<RequestHandler<IRequest>>,
+            currentRequest: IThriftRequest<CoreOptions>,
+            [head, ...tail]: Array<RequestHandler<CoreOptions>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(currentData, mergedOptions)
+                return this.write(currentRequest.data, currentRequest.context)
 
             } else {
-                return head(currentData, currentContext, (nextData?: Buffer, nextOptions?: CoreOptions): Promise<IRequestResponse> => {
-                    mergedOptions = deepMerge(mergedOptions, (nextOptions || {}))
-                    return applyHandlers((nextData || currentData), currentContext, tail)
+                return head(thriftRequest, (nextData?: Buffer, nextOptions?: CoreOptions): Promise<IRequestResponse> => {
+                    return applyHandlers({
+                        data: (nextData || currentRequest.data),
+                        methodName: currentRequest.methodName,
+                        uri: currentRequest.uri,
+                        context: deepMerge(currentRequest.context, (nextOptions || {})),
+                    }, tail)
                 })
             }
         }
 
-        return applyHandlers(dataToSend, resolvedContext, handlers).then((res: IRequestResponse) => {
+        return applyHandlers(thriftRequest, handlers).then((res: IRequestResponse) => {
             return res.body
         })
     }
 
     public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<IRequestResponse> {
         // Merge user options with required options
+        console.log('options: ', options)
         const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
             method: 'POST',
             body: dataToWrite,
@@ -143,9 +145,9 @@ export class HttpConnection extends ThriftConnection<IRequest> {
         })
     }
 
-    private handlersForMethod(name: string): Array<RequestHandler<IRequest>> {
+    private handlersForMethod(name: string): Array<RequestHandler<CoreOptions>> {
         return this.filters
-            .filter((filter: IThriftClientFilter<IRequest>) => filterByMethod<IRequest>(name)(filter))
-            .map(getHandler)
+            .filter(filterByMethod<CoreOptions>(name))
+            .map((filter: IThriftClientFilter<CoreOptions>) => filter.handler)
     }
 }

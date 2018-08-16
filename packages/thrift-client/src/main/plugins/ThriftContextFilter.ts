@@ -6,8 +6,8 @@ import {
 
 import {
     IRequestResponse,
-    IThriftContext,
-    IThriftTcpFilterConfig,
+    IThriftClientFilterConfig,
+    IThriftRequest,
     NextFunction,
 } from '../types'
 
@@ -33,19 +33,19 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
     ResponseCodec,
     transportType = 'buffered',
     protocolType = 'binary',
-}: IThriftContextOptions<RequestContext, ResponseContext>): IThriftTcpFilterConfig<RequestContext> {
+}: IThriftContextOptions<RequestContext, ResponseContext>): IThriftClientFilterConfig<RequestContext> {
     return {
-        handler(data: Buffer, context: IThriftContext<RequestContext>, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
-            return appendThriftObject(context.request, data, RequestCodec, transportType, protocolType).then((extended: Buffer) => {
-                return next(extended, context.request).then((res: IRequestResponse): Promise<IRequestResponse> => {
+        handler(request: IThriftRequest<RequestContext>, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
+            return appendThriftObject(request.context, request.data, RequestCodec, transportType, protocolType).then((extended: Buffer) => {
+                return next(extended, request.context).then((response: IRequestResponse): Promise<IRequestResponse> => {
                     return readThriftObject(
-                        res.body,
+                        response.body,
                         ResponseCodec,
                         transportType,
                         protocolType,
                     ).then((result: [any, Buffer]): IRequestResponse => {
                         return {
-                            statusCode: res.statusCode,
+                            statusCode: response.statusCode,
                             headers: {
                                 thriftContext: result[0],
                             },
@@ -53,7 +53,7 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
                         }
                     }, (err: any) => {
                         logger.warn(`Error reading context from Thrift response: `, err)
-                        return res
+                        return response
                     })
                 })
             })

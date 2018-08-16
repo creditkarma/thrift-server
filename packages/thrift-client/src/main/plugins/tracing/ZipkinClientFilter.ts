@@ -21,7 +21,7 @@ import {
     IRequest,
     IRequestResponse,
     IThriftClientFilter,
-    IThriftContext,
+    IThriftRequest,
     NextFunction,
 } from '../../types'
 
@@ -52,9 +52,9 @@ function readRequestContext(
     }
 }
 
-function readRequestHeaders<Context extends IRequest>(context: IThriftContext<Context>): IRequestHeaders {
-    if (context.request && context.request.headers) {
-        return context.request.headers
+function readRequestHeaders(request: IThriftRequest<CoreOptions>): IRequestHeaders {
+    if (request.context && request.context.headers) {
+        return request.context.headers
 
     } else {
         return {}
@@ -70,34 +70,41 @@ export function ZipkinClientFilter<Context extends IRequest>({
     sampleRate,
     httpInterval,
     httpTimeout,
-}: IZipkinClientOptions): IThriftClientFilter<Context> {
+}: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout })
     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
 
     return {
         methods: [],
-        handler(data: Buffer, context: IThriftContext<Context>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-            const requestHeaders: IRequestHeaders = readRequestHeaders(context)
+        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            const requestHeaders: IRequestHeaders = readRequestHeaders(request)
+            console.log('requestHeaders: ', requestHeaders)
             const requestContext: IRequestContext = readRequestContext(requestHeaders, tracer)
             tracer.setId(requestContext.traceId)
+
+            console.log('check 2')
 
             return tracer.scoped(() => {
                 const updatedHeaders: IRequestHeaders = instrumentation.recordRequest(
                     { headers: {} },
-                    (context.uri || ''),
-                    (context.methodName || ''),
+                    (request.uri || ''),
+                    (request.methodName || ''),
                 ).headers
 
                 const traceId: TraceId = tracer.id
 
                 const withLD5Headers: IRequestHeaders = applyL5DHeaders(requestHeaders, updatedHeaders)
 
-                return next(data, { headers: withLD5Headers }).then((res: IRequestResponse) => {
+                console.log('withLD5Headers: ', withLD5Headers)
+
+                return next(request.data, { headers: withLD5Headers }).then((res: IRequestResponse) => {
+                    console.log('success')
                     instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
                     return res
 
                 }, (err: any) => {
+                    console.log('err: ', err)
                     instrumentation.recordError((traceId as any), err)
                     return Promise.reject(err)
                 })

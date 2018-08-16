@@ -74,7 +74,7 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
     }
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
-        thriftClient.ping(req).then(() => {
+        thriftClient.ping({ headers: req.headers }).then(() => {
             res.send('success')
         }, (err: any) => {
             console.log('err: ', err)
@@ -89,7 +89,7 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
             op: symbolToOperation(req.query.op),
         }
 
-        thriftClient.calculate(1, work, req).then((val: number) => {
+        thriftClient.calculate(1, work, { headers: req.headers }).then((val: number) => {
             res.send(`result: ${val}`)
         }, (err: any) => {
             res.status(500).send(err)

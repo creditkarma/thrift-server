@@ -10,9 +10,10 @@ import {
 import {
     IConnectionOptions,
     IRequestResponse,
-    IThriftTcpFilter,
-    IThriftTcpFilterConfig,
-    TcpRequestHandler,
+    IThriftClientFilter,
+    IThriftClientFilterConfig,
+    IThriftRequest,
+    RequestHandler,
 } from '../types'
 
 import {
@@ -25,16 +26,13 @@ import {
 
 import * as logger from '../logger'
 
-import {
-    filterByMethod,
-    getHandler,
-} from './utils'
+import { filterByMethod} from './utils'
 
-export type TcpContext<T> = T | void
-
-export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
-    protected readonly filters: Array<IThriftTcpFilter<T>>
+export class TcpConnection<Context = any> extends ThriftConnection<Context> {
+    protected readonly filters: Array<IThriftClientFilter<Context>>
     private pool: GenericPool.Pool<Connection>
+    private hostName: string
+    private port: number
 
     constructor({
         hostName,
@@ -49,6 +47,8 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
             getTransport(transport),
             getProtocol(protocol),
         )
+        this.hostName = hostName
+        this.port = port
         this.filters = []
         this.pool = createPool({
             port,
@@ -57,8 +57,8 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         }, (pool || {}))
     }
 
-    public register(...filters: Array<IThriftTcpFilterConfig<T>>): void {
-        filters.forEach((next: IThriftTcpFilterConfig<T>) => {
+    public register(...filters: Array<IThriftClientFilterConfig<Context>>): void {
+        filters.forEach((next: IThriftClientFilterConfig<Context>) => {
             this.filters.push({
                 methods: next.methods || [],
                 handler: next.handler,
@@ -68,31 +68,41 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
 
     public send(
         dataToSend: Buffer,
-        context: TcpContext<T> = this.emptyContext(),
+        context: any = {},
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
-        const handlers: Array<TcpRequestHandler<T>> = this.handlersForMethod(requestMethod)
+        const handlers: Array<RequestHandler<Context>> = this.handlersForMethod(requestMethod)
+        const thriftRequest: IThriftRequest<Context> = {
+            data: dataToSend,
+            methodName: requestMethod,
+            uri: `${this.hostName}:${this.port}`,
+            context,
+        }
 
         const applyHandlers = (
-            currentData: Buffer,
-            currentContext: TcpContext<T>,
-            [ head, ...tail ]: Array<TcpRequestHandler<T>>,
+            currentRequest: IThriftRequest<Context>,
+            [ head, ...tail ]: Array<RequestHandler<Context>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(currentData, currentContext).catch((err: any) => {
+                return this.write(currentRequest.data, currentRequest.context).catch((err: any) => {
                     return Promise.reject(err)
                 })
 
             } else {
-                return head(currentData, (currentContext as any), (nextData?: Buffer, nextContext?: T): Promise<IRequestResponse> => {
-                    return applyHandlers((nextData || currentData), nextContext, tail).catch((err: any) => {
+                return head(currentRequest, (nextData?: Buffer, nextContext?: Context): Promise<IRequestResponse> => {
+                    return applyHandlers({
+                        data: (nextData || currentRequest.data),
+                        methodName: currentRequest.methodName,
+                        uri: currentRequest.uri,
+                        context: (nextContext || currentRequest.context),
+                    }, tail).catch((err: any) => {
                         return Promise.reject(err)
                     })
                 })
             }
         }
 
-        return applyHandlers(dataToSend, context, handlers).then((res: IRequestResponse) => {
+        return applyHandlers(thriftRequest, handlers).then((res: IRequestResponse) => {
             return res.body
         })
     }
@@ -104,7 +114,7 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         }) as any as Promise<void>
     }
 
-    public write(dataToWrite: Buffer, options?: TcpContext<T>): Promise<IRequestResponse> {
+    public write(dataToWrite: Buffer, options?: Context): Promise<IRequestResponse> {
         return this.pool.acquire().then((connection) => {
             return connection.send(dataToWrite, this.Transport, this.Protocol).then((response: Buffer) => {
                 this.pool.release(connection)
@@ -124,13 +134,9 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
         }) as any
     }
 
-    private emptyContext(): void {
-        return undefined
-    }
-
-    private handlersForMethod(name: string): Array<TcpRequestHandler<T>> {
+    private handlersForMethod(name: string): Array<RequestHandler<Context>> {
         return this.filters
             .filter(filterByMethod(name))
-            .map((filter: IThriftTcpFilter<T>) =>  getHandler(filter))
+            .map((filter: IThriftClientFilter<Context>) => filter.handler)
     }
 }
