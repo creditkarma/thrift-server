@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.8.0"></a>
+## [0.8.0](https://github.com/creditkarma/thrift-server/compare/v0.7.3...v0.8.0) (2018-08-16)
+
+
+### BREAKING CHANGES
+
+* Change the client plugin API so that the handler function expects two arguments ([d4f38e](https://github.com/creditkarma/thrift-server/commit/d4f38e))
+
+The big change here is that the client middle ware object changed from this:
+
+```typescript
+interface IThriftMiddlewareConfig<Options> {
+    methods?: Array<string>
+    handler(data: Buffer, context: ThriftContext<Options>, next: NextFunction<Options>): Promise<IRequestResponse>
+}
+```
+
+To this:
+
+```typescript
+interface IThriftClientFilterConfig<Options> {
+    methods?: Array<string>
+    handler(request: IThriftRequest<Options>, next: NextFunction<Options>): Promise<IRequestResponse>
+}
+```
+
+The new `IThriftRequest` object contains the outgoing payload on the `data` property and the user-passed context on the `context` property. Beyond this more data about the outgoing request is present, specifically the `uri` and the service `methodName`.
+
+
+
+
 <a name="0.6.2"></a>
 ## [0.6.2](https://github.com/creditkarma/thrift-server/compare/v0.6.1...v0.6.2) (2018-03-13)
 

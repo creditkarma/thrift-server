@@ -97,7 +97,7 @@ The available options are:
 * transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
 * requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
-* register (optional): A list of middleware to apply to your client. More on this later.
+* register (optional): A list of filters to apply to your client. More on this later.
 
 Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary or compact protocols.
 
@@ -186,7 +186,7 @@ The available options are:
 * transport (optional): Name of the Thrift transport type to use. Defaults to 'buffered'.
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
 * pool (optional): Options to configure the underlying connection pool.
-* register (optional): A list of middleware to apply to your client. More on this later.
+* register (optional): A list of filters to apply to your client. More on this later.
 
 #### Manual Creation
 
@@ -261,13 +261,13 @@ app.listen(serverConfig.port, () => {
 })
 ```
 
-### Middleware
+### Client Filters
 
-Sometimes you'll want to universally filter or modify requests and/or responses. This is done with middleware. If you've used many server libraries you are probably used to the idea of plugins or middleware.
+Sometimes you'll want to universally filter or modify requests and/or responses. This is done with filters. If you've used many server libraries you are probably used to the idea of plugins or middleware.
 
-A middleware is an object that consists of a handler function and an optional list of client method names to apply the middleware to.
+A filter is an object that consists of a handler function and an optional list of client method names to apply the filter to.
 
-Middleware are applied in the order in which they are registered.
+Filters are applied in the order in which they are registered.
 
 ```typescript
 interface IRequestResponse {
@@ -279,17 +279,62 @@ interface IRequestResponse {
 type NextFunction<Options> =
     (data?: Buffer, options?: Options) => Promise<IRequestResponse>
 
-interface IThriftMiddlewareConfig<Options> {
+interface IThriftClientFilterConfig<Options> {
     methods?: Array<string>
-    handler(data: Buffer, context: ThriftContext<Options>, next: NextFunction<Options>): Promise<IRequestResponse>
+    handler(request: IThriftRequest<Options>, next: NextFunction<Options>): Promise<IRequestResponse>
 }
 ```
 
-The `handler` function receives as its arguments the outgoing Thrift data as a `Buffer`, the `ThriftContext` for the outgoing request and the next `RequestHandler` in the chain. When you are done applying your middleware you `return` the call to `next`. When calling `next` you can optionall pass along a modified Thrift data `Buffer` or new options to apply to the request. `Options` is almost always going to be `CoreOptions` for the underlying request library.
+The `handler` function receives as its arguments the `IThriftRequest` object and the next `RequestHandler` in the chain. When you are done applying your filter you `return` the call to `next`. When calling `next` you can optionally pass along a modified Thrift data `Buffer` or new options to apply to the request. `Options` is almost always going to be `CoreOptions` for the underlying request library.
 
-*Note: The difference between `ThriftContext` and the raw `CoreOptions` interface is the addition of an optional `request` parameter. This parameter represents an incoming request that spawed this outgoing request. For instance if you are a service agreagting data from other services you received a request to incite sending this client request. A common usage of middleware could be to propegate headers from the incoming requests to outgoing requests.*
+#### IThriftRequest
 
-#### Applying Middleware to Outgoing Requests
+The `IThriftRequest` object wraps the outgoing data with some useful metadata about the current request.
+
+```typescript
+export interface IThriftRequest<Context> {
+    data: Buffer
+    traceId?: TraceId
+    methodName: string
+    uri: string
+    context: Context
+}
+```
+
+The `data` attribute is the outgoing Thrift payload. The `methodName` is the name of the Thrift service method being called.
+
+The other interesting one is `context`. The context is the data passed through in the service method call.
+
+If we look back at our previous client example we find this:
+
+```typescript
+// This receives a query like "http://localhost:8080/add?left=5&right=3"
+app.get('/add', (req: express.Request, res: express.Response): void => {
+    // Request contexts allow you to do tracing and auth
+    const context: CoreOptions = {
+        headers: {
+            'x-trace-id': 'my-trace-id'
+        }
+    }
+
+    // Client methods return a Promise of the expected result
+    thriftClient.add(req.query.left, req.query.right, context).then((result: number) => {
+        res.send(result)
+    }, (err: any) => {
+        res.status(500).send(err)
+    })
+})
+```
+
+Where the context passed through is an instance of `CoreOptions`. These options are passed through to modify the outgoing request. Any filter in the filter chain can modify this data.
+
+To modify this context one needs to pass the updated context to the `next` function.
+
+```typescript
+return next(request.data, updatedContext)
+```
+
+#### Applying Filters to Outgoing Requests
 
 Something you may want to do with middlware is to apply some common HTTP headers to every outgoing request from your service. Maybe there is a token your service should attach to every outgoing request.
 
@@ -297,7 +342,8 @@ You could do something like this:
 
 ```typescript
 import {
-    createHttpClient
+    createHttpClient,
+    IThriftRequest,
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
@@ -306,8 +352,8 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-            return next(data, {
+        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+            return next(request.data, {
                 headers: {
                     'x-fake-token': 'fake-token',
                 },
@@ -319,13 +365,14 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
 
 This sends data along unaltered, but adds a header `x-fake-token` to the outgoing request. When you send along options, the options are deep merged with any previous options that were applied.
 
-#### Applying Middleware to Incoming Responses
+#### Applying Filters to Incoming Responses
 
-To apply middleware to the response you would call `.then` on the `next` function. This would allow you to inspect or modify the response before allowing it to proceed up the chain.
+To apply filters to the response you would call `.then` on the `next` function. This would allow you to inspect or modify the response before allowing it to proceed up the chain.
 
 ```typescript
 import {
-    createHttpClient
+    createHttpClient,
+    IThriftRequest
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
@@ -334,7 +381,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             return next().then((res: IRequestResponse) => {
                 if (validateResponse(res.body)) {
                     return res
@@ -347,9 +394,9 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
 })
 ```
 
-#### Adding Middleware to HttpConnection Object
+#### Adding Filters to HttpConnection Object
 
-When you're not using `createHttpClient` you can add middleware directly to the connection instance.
+When you're not using `createHttpClient` you can add filters directly to the connection instance.
 
 ```typescript
 // Create thrift client
@@ -359,8 +406,8 @@ const connection: HttpConnection =
     new HttpConnection(requestClient, clientConfig)
 
 connection.register({
-    handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-        return next(data, {
+    handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        return next(request.data, {
             headers: {
                 'x-fake-token': 'fake-token',
             },
@@ -371,20 +418,20 @@ connection.register({
 const thriftClient: Calculator.Client = new Calculator.Client(connection)
 ```
 
-The optional `register` option takes an array of middleware to apply. Unsurprisingly they are applied in the order you pass them in.
+The optional `register` option takes an array of filters to apply. Unsurprisingly they are applied in the order you pass them in.
 
-### TCP Middleware
+### TCP Filters
 
-When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two middleware for helping with this situation.
+When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two filters for helping with this situation.
 
-#### ThriftContextPlugin
+#### ThriftContextFilter
 
 This plugin writes a Thrift struct onto the head of an outgoing payload and reads a struct off of the head of an incoming payload.
 
 ```typescript
 import {
     createTcpClient,
-    ThriftContextPlugin,
+    ThriftContextFilter,
 } from '@creditkarma/thrift-client'
 
 import {
@@ -400,7 +447,7 @@ const thriftClient: Calculator.Client<RequestContext> =
     createTcpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
-        register: [ ThriftContextPlugin<RequestContext, ResponseContext>({
+        register: [ ThriftContextFilter<RequestContext, ResponseContext>({
             RequestContextClass: RequestContext,
         }) ]
     })
@@ -412,7 +459,7 @@ thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response:
 
 ##### Options
 
-Available options for ThriftContextPlugin:
+Available options for ThriftContextFilter:
 
 * RequestContextClass (required): A class (extending StructLike) that is to be prepended to outgoing requests.
 * ResponseContextClass (optional): A class (extending StructLike) that is prepended to incoming responses. Defaults to nothing.
@@ -473,12 +520,12 @@ Available options for TTwitterClientFilter:
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
 
-Zipkin tracing is added to your Thrift client through middleware.
+Zipkin tracing is added to your Thrift client through filters.
 
 ```typescript
 import {
     createHttpClient,
-    ZipkinTracingThriftClient,
+    ZipkinClientFilter,
 } from '@creditkaram/thrift-client'
 
 import { Calculator } from './codegen/calculator'
@@ -487,7 +534,7 @@ const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
     createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
-        register: [ ZipkinTracingThriftClient({
+        register: [ ZipkinClientFilter({
             localServiceName: 'calculator-client',
             remoteServiceName: 'calculator-service',
             endpoint: 'http://localhost:9411/api/v1/spans',
