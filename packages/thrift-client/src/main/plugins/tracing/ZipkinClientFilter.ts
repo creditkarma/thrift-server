@@ -79,11 +79,8 @@ export function ZipkinClientFilter<Context extends IRequest>({
         methods: [],
         handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
             const requestHeaders: IRequestHeaders = readRequestHeaders(request)
-            console.log('requestHeaders: ', requestHeaders)
             const requestContext: IRequestContext = readRequestContext(requestHeaders, tracer)
             tracer.setId(requestContext.traceId)
-
-            console.log('check 2')
 
             return tracer.scoped(() => {
                 const updatedHeaders: IRequestHeaders = instrumentation.recordRequest(
@@ -93,18 +90,13 @@ export function ZipkinClientFilter<Context extends IRequest>({
                 ).headers
 
                 const traceId: TraceId = tracer.id
-
                 const withLD5Headers: IRequestHeaders = applyL5DHeaders(requestHeaders, updatedHeaders)
 
-                console.log('withLD5Headers: ', withLD5Headers)
-
                 return next(request.data, { headers: withLD5Headers }).then((res: IRequestResponse) => {
-                    console.log('success')
                     instrumentation.recordResponse((traceId as any), `${res.statusCode}`)
                     return res
 
                 }, (err: any) => {
-                    console.log('err: ', err)
                     instrumentation.recordError((traceId as any), err)
                     return Promise.reject(err)
                 })

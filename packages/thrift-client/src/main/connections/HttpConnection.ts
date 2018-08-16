@@ -79,7 +79,6 @@ export class HttpConnection extends ThriftConnection<CoreOptions> {
         context: CoreOptions = {},
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
-        console.log('requestMethod: ', requestMethod)
         const handlers: Array<RequestHandler<CoreOptions>> = this.handlersForMethod(requestMethod)
         const thriftRequest: IThriftRequest<CoreOptions> = {
             data: dataToSend,
@@ -114,7 +113,6 @@ export class HttpConnection extends ThriftConnection<CoreOptions> {
 
     public write(dataToWrite: Buffer, options: CoreOptions = {}): Promise<IRequestResponse> {
         // Merge user options with required options
-        console.log('options: ', options)
         const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
             method: 'POST',
             body: dataToWrite,
