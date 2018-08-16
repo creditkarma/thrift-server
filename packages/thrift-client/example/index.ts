@@ -12,11 +12,13 @@ generate({
 })
 
 const clientProc = fork('./client.ts')
-const serverProc = fork('./server.ts')
+const addProc = fork('./add-service.ts')
+const calculatorProc = fork('./calculator-service.ts')
 
 function exit(code: number) {
     clientProc.kill()
-    serverProc.kill()
+    addProc.kill()
+    calculatorProc.kill()
     process.exitCode = code
 }
 

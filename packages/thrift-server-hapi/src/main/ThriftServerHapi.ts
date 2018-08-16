@@ -40,21 +40,25 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                         options.protocol,
                     )
 
+                    const buffer: Buffer = request.payload
+
                     try {
                         const method: string = readThriftMethod(
-                            request.payload,
+                            buffer,
                             Transport,
                             Protocol,
                         )
-                        request.plugins.thrift = Object.assign(
-                            {},
-                            request.plugins.thrift,
-                            { method },
-                        )
+
+                        request.plugins.thrift = {
+                            requestMethod: method,
+                            transport: options.transport || 'buffered',
+                            protocol: options.protocol || 'binary',
+                        }
+
                         reply(
                             process<Hapi.Request>({
                                 processor: options.handler,
-                                buffer: request.payload,
+                                buffer,
                                 Transport,
                                 Protocol,
                                 context: request,

@@ -4,9 +4,7 @@ import {
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
-import {
-    TraceId,
-} from 'zipkin'
+import { TraceId } from 'zipkin'
 
 import * as GenericPool from 'generic-pool'
 
@@ -19,11 +17,20 @@ export interface IRequestResponse {
     body: Buffer
 }
 
-export type ThriftContext<Context> =
-    Context & { traceId?: TraceId, request?: { headers: IRequestHeaders} }
+export interface IRequest {
+    headers: IRequestHeaders
+}
 
-export type ClientOptionsFunction<Context> =
-    () => ThriftContext<Context>
+export interface IThriftRequest<Context> {
+    data: Buffer
+    traceId?: TraceId
+    methodName: string
+    uri: string
+    context: Context
+}
+
+export type ClientOptionsFunction<Options> =
+    () => IThriftRequest<Options>
 
 export interface IConnectionOptions {
     hostName: string
@@ -37,40 +44,39 @@ export interface IConnectionOptions {
 
 export interface ICreateTcpClientOptions extends IConnectionOptions {
     serviceName?: string
-    register?: Array<IThriftMiddlewareConfig<void>>
+    register?: Array<IThriftClientFilterConfig<void>>
 }
 
-export interface IHttpConnectionOptions<Options> {
+export interface IHttpConnectionOptions {
     hostName: string
     port: number
     path?: string
     https?: boolean
     transport?: TransportType
     protocol?: ProtocolType
-    context?: ThriftContext<Options> | ClientOptionsFunction<Options>
+    context?: IThriftRequest<request.CoreOptions> | ClientOptionsFunction<request.CoreOptions>
 }
 
-export interface ICreateHttpClientOptions<Context> extends IHttpConnectionOptions<Context> {
+export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
     serviceName?: string
-    register?: Array<IThriftMiddlewareConfig<Context>>
+    register?: Array<IThriftClientFilterConfig<request.CoreOptions>>
     requestOptions?: request.CoreOptions
 }
 
-export type NextFunction<Context> =
-    (data?: Buffer, context?: Context) => Promise<IRequestResponse>
+export type NextFunction<Options> =
+    (data?: Buffer, options?: Options) => Promise<IRequestResponse>
 
 export type RequestHandler<Context> = (
-    data: Buffer,
-    context: Context,
+    request: IThriftRequest<Context>,
     next: NextFunction<Context>,
 ) => Promise<IRequestResponse>
 
-export interface IThriftMiddleware<Context> {
+export interface IThriftClientFilter<Context> {
     methods: Array<string>
     handler: RequestHandler<Context>
 }
 
-export interface IThriftMiddlewareConfig<Context> {
+export interface IThriftClientFilterConfig<Context> {
     methods?: Array<string>
     handler: RequestHandler<Context>
 }

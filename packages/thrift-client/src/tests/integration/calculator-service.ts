@@ -1,4 +1,7 @@
-import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
+import {
+    Int64,
+    ProtocolType,
+} from '@creditkarma/thrift-server-core'
 
 import {
     createThriftServer,
@@ -6,7 +9,6 @@ import {
 } from '@creditkarma/thrift-server-hapi'
 
 import * as Hapi from 'hapi'
-import { CoreOptions } from 'request'
 
 import {
     ISharedStruct,
@@ -19,35 +21,40 @@ import {
 } from './config'
 
 import {
-    AddService,
     Calculator,
     IChoice,
     ICommonStruct,
     Operation,
     Work,
-} from '../generated/calculator'
+} from '../generated/calculator-service'
+
+import {
+    AddService,
+} from '../generated/add-service'
 
 import {
     createHttpClient,
-    ThriftContext,
-    ZipkinTracingThriftClient,
+    IRequest,
+    ZipkinClientFilter,
 } from '../../main/index'
 
 export function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Hapi.Server {
     // Create thrift client
-    const addServiceClient: AddService.Client<ThriftContext<CoreOptions>> =
+    const addServiceClient: AddService.Client<IRequest> =
         createHttpClient(AddService.Client, {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
             register: (
                 (sampleRate > 0) ?
-                    [ ZipkinTracingThriftClient({
-                        localServiceName: 'calculator-service',
-                        remoteServiceName: 'add-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
-                        sampleRate,
-                        httpInterval: 0,
-                    }) ] :
+                    [
+                        ZipkinClientFilter({
+                            localServiceName: 'calculator-service',
+                            remoteServiceName: 'add-service',
+                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            sampleRate,
+                            httpInterval: 0,
+                        }),
+                    ] :
                     []
             ),
         })
@@ -63,14 +70,13 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
         ping(): void {
             return
         },
-        add(a: number, b: number, context?: Hapi.Request): Promise<number> {
-            console.log(`add ${a} + ${b}`)
-            return addServiceClient.add(a, b, { request: context })
+        add(a: number, b: number, context: Hapi.Request): Promise<number> {
+            return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context?: Hapi.Request): Promise<Int64> {
-            return addServiceClient.addInt64(a, b, { request: context })
+        addInt64(a: Int64, b: Int64, context: Hapi.Request): Promise<Int64> {
+            return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context?: Hapi.Request): number {
+        addWithContext(a: number, b: number, context: Hapi.Request): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -80,10 +86,10 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
                 throw new Error('Unauthorized')
             }
         },
-        calculate(logId: number, work: Work, context?: Hapi.Request): number | Promise<number> {
+        calculate(logId: number, work: Work, context: Hapi.Request): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2, { request: context })
+                    return addServiceClient.add(work.num1, work.num2, { headers: context.headers })
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:

@@ -1,3 +1,4 @@
+import { config } from '@creditkarma/dynamic-config'
 import { Int64 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -7,13 +8,13 @@ import {
 
 import * as Hapi from 'hapi'
 
-import { ADD_SERVER_CONFIG } from './config'
-
 import {
     AddService,
-} from '../generated/add-service'
+} from './generated/add-service'
 
-export function createServer(sampleRate: number = 0): Hapi.Server {
+(async function startService(): Promise<void> {
+    const SERVER_CONFIG = await config().get('add-service')
+
     /**
      * Implementation of our thrift service.
      *
@@ -37,42 +38,37 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = createThriftServer({
-        port: ADD_SERVER_CONFIG.port,
-        path: ADD_SERVER_CONFIG.path,
+        port: SERVER_CONFIG.port,
+        path: SERVER_CONFIG.path,
         thriftOptions: {
             serviceName: 'add-service',
             handler: impl,
         },
     })
 
-    if (sampleRate > 0) {
-        server.register(
-            ZipkinTracingHapi({
-                localServiceName: 'add-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
-                sampleRate,
-                httpInterval: 0,
-            }),
-            (err: any) => {
-                if (err) {
-                    console.log('error: ', err)
-                    throw err
-                }
-            },
-        )
-    }
+    server.register(
+        ZipkinTracingHapi({
+            localServiceName: 'add-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate: 1.0,
+            httpInterval: 1000,
+            httpTimeout: 5000,
+        }),
+        (err: any) => {
+            if (err) {
+                console.log('error: ', err)
+                throw err
+            } else {
+                server.start((err: any) => {
+                    if (err) {
+                        throw err
+                    }
 
-    /**
-     * The Hapi server can process requests that are not targeted to the thrift
-     * service
-     */
-    server.route({
-        method: 'GET',
-        path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('PASS')
+                    if (server.info !== null) {
+                        console.log(`Add service running at: ${server.info.uri}`)
+                    }
+                })
+            }
         },
-    })
-
-    return server
-}
+    )
+}())

@@ -1,3 +1,4 @@
+import * as logger from './logger'
 import { BinaryProtocol, CompactProtocol, TProtocol } from './protocols'
 import { BufferedTransport, TTransport } from './transports'
 
@@ -15,11 +16,16 @@ export function readThriftMethod(
     Transport: ITransportConstructor = BufferedTransport,
     Protocol: IProtocolConstructor = BinaryProtocol,
 ): string {
-    const transportWithData: TTransport = new Transport(buffer)
-    const input: TProtocol = new Protocol(transportWithData)
-    const { fieldName } = input.readMessageBegin()
+    try {
+        const transportWithData: TTransport = new Transport(buffer)
+        const input: TProtocol = new Protocol(transportWithData)
+        const metadata = input.readMessageBegin()
 
-    return fieldName
+        return metadata.fieldName
+    } catch (err) {
+        logger.log(`Unable to read Thrift method name. ${err.message}`)
+        return ''
+    }
 }
 
 const transports: ITransportMap = {
@@ -59,4 +65,42 @@ export function isTransportSupported(transport: TransportType): boolean {
 
 export function isProtocolSupported(protocol: ProtocolType): boolean {
     return supportedProtocols.indexOf(protocol) !== -1
+}
+
+function isObject(obj: any): boolean {
+    return (
+        obj !== null &&
+        typeof obj === 'object'
+    )
+}
+
+export function deepMerge<Base, Update>(base: Base, update: Update): Base & Update {
+    const newObj: any = {}
+    const baseKeys: Array<string> = Object.keys(base)
+    const updateKeys: Array<string> = Object.keys(update)
+
+    for (const key of updateKeys) {
+        if (baseKeys.indexOf(key) === -1) {
+            baseKeys.push(key)
+        }
+    }
+
+    for (const key of baseKeys) {
+        if (base.hasOwnProperty(key) || update.hasOwnProperty(key)) {
+            const baseValue: any = (base as any)[key]
+            const updateValue: any = (update as any)[key]
+
+            if (isObject(baseValue) && isObject(updateValue)) {
+                newObj[key] = deepMerge(baseValue, updateValue)
+
+            } else if (updateValue !== undefined) {
+                newObj[key] = updateValue
+
+            } else {
+                newObj[key] = baseValue
+            }
+        }
+    }
+
+    return (newObj as Base & Update)
 }

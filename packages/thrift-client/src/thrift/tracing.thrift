@@ -1,14 +1,19 @@
 /*
- * CHANGING THIS FILE REQUIRES MANUAL REGENERATION
- */
+		CHANGING THIS FILE REQUIRES MANUAL REGENERATION
+
+E.g.:
+
+thrift --gen java tracing.thrift
+cd gen-java
+find . -type f -print0 | cpio -pmud0 ../../java
+
+*/
 
 /**
  * Define thrift structs for thrift request tracing.
  */
 
-namespace java com.twitter.finagle.thrift.thrift
-#@namespace scala com.twitter.finagle.thrift.thriftscala
-namespace rb FinagleThrift
+namespace java com.creditkarma.finagle.thrift
 
 
 #************** Annotation.value **************
@@ -38,7 +43,6 @@ const string CLIENT_SEND = "cs"
  * recorded separately as SERVER_ADDR when CLIENT_SEND is logged.
  */
 const string CLIENT_RECV = "cr"
-const string CLIENT_RECV_ERROR = "Client Receive Error"
 /**
  * The server sent ("ss") a response to a client. There is only one response
  * per span. If there's a transport error, each attempt can be logged as a
@@ -55,7 +59,6 @@ const string CLIENT_RECV_ERROR = "Client Receive Error"
  * recorded separately as CLIENT_ADDR when SERVER_RECV is logged.
  */
 const string SERVER_SEND = "ss"
-const string SERVER_SEND_ERROR = "Server Send Error"
 /**
  * The server received ("sr") a request from a client. There is only one
  * request per span.  For example, if duplicate responses were received, each
@@ -84,7 +87,6 @@ const string WIRE_SEND = "ws"
  * and client or server receive might indicate queuing or processing delay.
  */
 const string WIRE_RECV = "wr"
-const string WIRE_RECV_ERROR = "Wire Receive Error"
 /**
  * Optionally logs progress of a (CLIENT_SEND, WIRE_SEND). For example, this
  * could be one chunk in a chunked request.
@@ -199,7 +201,7 @@ struct Span {
   1: i64 trace_id                  // unique trace id, use for all spans in trace
   3: string name,                  // span name, rpc method for example
   4: i64 id,                       // unique span id, only used for this span
-  5: optional i64 parent_id,       // parent span id
+  5: optional i64 parent_id,                // parent span id
   6: list<Annotation> annotations, // list of all annotations/events that occured, sorted by timestamp
   8: list<BinaryAnnotation> binary_annotations, // any binary annotations
   9: bool debug                    // if true, we DEMAND that this span passes all samplers
@@ -241,7 +243,7 @@ struct Delegation {
  */
 struct RequestHeader {
   1: i64 trace_id,
-  2: i64 span_id,
+  2: i64  span_id,
   3: optional i64 parent_span_id,
   5: optional bool sampled // if true we should trace the request, if not set we have not decided.
   6: optional ClientId client_id
@@ -251,7 +253,6 @@ struct RequestHeader {
   // Support for destination (partially resolved names) and delegation tables.
   9: optional string dest
   10: optional list<Delegation> delegations
-  11: optional i64 trace_id_high
 }
 
 /**

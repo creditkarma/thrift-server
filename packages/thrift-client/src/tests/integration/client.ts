@@ -2,20 +2,19 @@ import { ZipkinTracingExpress } from '@creditkarma/thrift-server-express'
 
 import {
     createHttpClient,
-    ThriftContext,
-    ZipkinTracingThriftClient,
+    IRequest,
+    ZipkinClientFilter,
 } from '../../main/'
 
 import * as express from 'express'
 import * as net from 'net'
-import { CoreOptions } from 'request'
 
 import {
     Calculator,
     IWorkArgs,
     Operation,
     Work,
-} from '../generated/calculator'
+} from '../generated/calculator-service'
 
 import { ProtocolType } from '@creditkarma/thrift-server-core'
 import {
@@ -33,25 +32,28 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
                 localServiceName: 'calculator-client',
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
+                httpInterval: 0,
             }),
         ])
     }
 
     // Create thrift client
-    const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
+    const thriftClient: Calculator.Client<IRequest> =
         createHttpClient(Calculator.Client, {
             hostName: CALC_SERVER_CONFIG.hostName,
             port: CALC_SERVER_CONFIG.port,
             protocol: protocolType,
             register: (
                 (sampleRate > 0) ?
-                    [ ZipkinTracingThriftClient({
-                        localServiceName: 'calculator-client',
-                        remoteServiceName: 'calculator-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
-                        sampleRate,
-                        httpInterval: 0,
-                    }) ] :
+                    [
+                        ZipkinClientFilter({
+                            localServiceName: 'calculator-client',
+                            remoteServiceName: 'calculator-service',
+                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            sampleRate,
+                            httpInterval: 0,
+                        }),
+                    ] :
                     []
             ),
         })
@@ -72,7 +74,7 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
     }
 
     app.get('/ping', (req: express.Request, res: express.Response): void => {
-        thriftClient.ping({ request: req }).then(() => {
+        thriftClient.ping({ headers: req.headers }).then(() => {
             res.send('success')
         }, (err: any) => {
             console.log('err: ', err)
@@ -87,7 +89,7 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
             op: symbolToOperation(req.query.op),
         }
 
-        thriftClient.calculate(1, work, { request: req }).then((val: number) => {
+        thriftClient.calculate(1, work, { headers: req.headers }).then((val: number) => {
             res.send(`result: ${val}`)
         }, (err: any) => {
             res.status(500).send(err)
@@ -102,13 +104,11 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
         })
 
         thriftClient.calculate(1, work, {
-            request: {
-                headers: {
-                    'x-b3-traceid': '411d1802c9151ded',
-                    'x-b3-spanid': 'c3ba1a6560ca0c48',
-                    'x-b3-parentspanid': '2b5189ffa013ad73',
-                    'x-b3-sampled': '1',
-                },
+            headers: {
+                'x-b3-traceid': '411d1802c9151ded',
+                'x-b3-spanid': 'c3ba1a6560ca0c48',
+                'x-b3-parentspanid': '2b5189ffa013ad73',
+                'x-b3-sampled': '1',
             },
         }).then((val: number) => {
             res.send(`result: ${val}`)

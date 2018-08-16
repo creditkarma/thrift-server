@@ -6,8 +6,8 @@ import {
     createHttpClient,
     createTcpClient,
     IRequestResponse,
+    IThriftRequest,
     NextFunction,
-    ThriftContext,
 } from '../../../main'
 
 import { CoreOptions } from 'request'
@@ -23,7 +23,7 @@ import * as Lab from 'lab'
 import {
     Calculator,
     IChoice,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 
@@ -474,16 +474,14 @@ describe('createHttpClient', () => {
                 port: CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse): Promise<IRequestResponse> => {
                                 if (readThriftMethod(res.body) === 'add') {
                                     return Promise.resolve(res)
                                 } else {
                                     return Promise.reject(
                                         new Error(
-                                            `Unrecognized method name: ${readThriftMethod(
-                                                data,
-                                            )}`,
+                                            `Unrecognized method name: ${readThriftMethod(request.data)}`,
                                         ),
                                     )
                                 }
@@ -505,13 +503,13 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['add'],
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                            return next().then((res: IRequestResponse) => {
-                                if (readThriftMethod(res.body) === 'add') {
-                                    return Promise.resolve(res)
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                            return next().then((response: IRequestResponse) => {
+                                if (readThriftMethod(response.body) === 'add') {
+                                    return Promise.resolve(response)
                                 } else {
                                     return Promise.reject(
-                                        new Error(`Unrecognized method name: ${readThriftMethod(res.body)}`),
+                                        new Error(`Unrecognized method name: ${readThriftMethod(response.body)}`),
                                     )
                                 }
                             })
@@ -531,7 +529,7 @@ describe('createHttpClient', () => {
                 port: CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse) => {
                                 if (readThriftMethod(res.body) === 'nope') {
                                     return Promise.resolve(res)
@@ -567,13 +565,11 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['nope'],
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                             return next().then(() => {
                                 return Promise.reject(
                                     new Error(
-                                        `Unrecognized method name: ${readThriftMethod(
-                                            data,
-                                        )}`,
+                                        `Unrecognized method name: ${readThriftMethod(request.data)}`,
                                     ),
                                 )
                             })
@@ -618,8 +614,8 @@ describe('createHttpClient', () => {
                 port: CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                            return next(data, {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                            return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
                                 },
@@ -641,8 +637,8 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['addWithContext'],
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                            return next(data, {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                            return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
                                 },
@@ -679,8 +675,8 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['add'],
-                        handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                            return next(data, {
+                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                            return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
                                 },

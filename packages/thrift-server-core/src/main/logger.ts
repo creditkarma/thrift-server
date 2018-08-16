@@ -1,7 +1,7 @@
 export const log = (msg: string, data?: any) => {
-    if (data !== undefined && process.env.DUBUG !== undefined) {
+    if (data !== undefined && process.env.DUBUG === 'true') {
         console.log(`[thrift-server-core:info] ${msg}`, data)
-    } else if (process.env.DUBUG !== undefined) {
+    } else if (process.env.DUBUG === 'true') {
         console.log(`[thrift-server-core:info] ${msg}`)
     }
 }

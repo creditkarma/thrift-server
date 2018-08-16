@@ -36,6 +36,7 @@ export function appendThriftObject<LooseType>(
 ): Promise<Buffer> {
     const Transport: ITransportConstructor = getTransport(transportType)
     const Protocol: IProtocolConstructor = getProtocol(protocolType)
+
     return encode<LooseType>(value, ThriftCodec, Transport, Protocol).then((encoded: Buffer) => {
         return Buffer.concat([ encoded, data ])
     })

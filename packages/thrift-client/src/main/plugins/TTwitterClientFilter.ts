@@ -2,6 +2,7 @@ import {
     getProtocol,
     getTracerForService,
     getTransport,
+    Int64,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -21,7 +22,8 @@ import {
 
 import {
     IRequestResponse,
-    IThriftMiddlewareConfig,
+    IThriftClientFilterConfig,
+    IThriftRequest,
     NextFunction,
 } from '../types'
 
@@ -33,7 +35,7 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift'
+import * as TTwitter from '../../ttwitter/com/creditkarma/finagle/thrift'
 
 import * as logger from '../logger'
 
@@ -64,16 +66,14 @@ function readRequestContext(context: any, tracer: Tracer): IRequestContext {
     if (context !== undefined && context.traceId !== undefined) {
         return {
             traceId: context.traceId,
-            usesLinkerd: false,
-            requestHeaders: {},
+            headers: {},
         }
 
     } else {
         const traceId: TraceId = tracer.createRootId()
         return {
             traceId,
-            usesLinkerd: false,
-            requestHeaders: {},
+            headers: {},
         }
     }
 }
@@ -107,27 +107,41 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
-}: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
+}: ITTwitterFileterOptions): IThriftClientFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
 
     return {
-        async handler(dataToSend: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
+        async handler(request: IThriftRequest<T>, next: NextFunction<T>): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
                     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
-                    const requestContext: IRequestContext = readRequestContext(context, tracer)
+                    const requestContext: IRequestContext = readRequestContext(request, tracer)
                     tracer.setId(requestContext.traceId)
 
                     return tracer.scoped(() => {
-                        const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                        const { headers }: any = instrumentation.recordRequest(
+                            { headers: {} },
+                            (request.uri || ''),
+                            (request.methodName || 'post'),
+                        )
+
+                        const normalHeaders: any = Object.keys(headers).reduce((acc: any, name: string) => {
+                            acc[name.toLowerCase()] = headers[name]
+                            return acc
+                        }, {})
+
                         const requestHeader: TTwitter.IRequestHeader = {
-                            trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
-                            span_id: ((headers as any)[ZipkinHeaders.SpanId]),
-                            parent_span_id: ((headers as any)[ZipkinHeaders.ParentId]),
-                            sampled: ((headers as any)[ZipkinHeaders.Sampled] === '1'),
+                            trace_id: new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.TraceId]}`),
+                            span_id: new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.SpanId]}`),
+                            parent_span_id: (
+                                (normalHeaders[ZipkinHeaders.ParentId] !== undefined) ?
+                                    new Int64(`0x${(normalHeaders as any)[ZipkinHeaders.ParentId]}`) :
+                                    undefined
+                            ),
+                            sampled: ((normalHeaders as any)[ZipkinHeaders.Sampled] === '1'),
                             client_id: (clientId !== undefined) ? new TTwitter.ClientId(clientId) : undefined,
                             contexts: [],
                             dest: destHeader,
@@ -136,12 +150,12 @@ export function TTwitterClientFilter<T>({
 
                         return appendThriftObject<TTwitter.IResponseHeaderArgs>(
                             requestHeader,
-                            dataToSend,
+                            request.data,
                             TTwitter.RequestHeaderCodec,
                             transportType,
                             protocolType,
                         ).then((extended: Buffer) => {
-                            return next(extended, context).then((res: IRequestResponse): Promise<IRequestResponse> => {
+                            return next(extended, request.context).then((res: IRequestResponse): Promise<IRequestResponse> => {
                                 return readThriftObject<TTwitter.IResponseHeader>(
                                     res.body,
                                     TTwitter.ResponseHeaderCodec,
@@ -168,23 +182,23 @@ export function TTwitterClientFilter<T>({
                     return sendUpgradedRequest()
 
                 } else if (upgradeRequested) {
-                    return next(dataToSend, context)
+                    return next(request.data, request.context)
 
                 } else {
                     logger.log('Requesting TTwitter upgrade')
                     upgradeRequested = true
-                    return next(upgradeRequest(), context).then((upgradeResponse: IRequestResponse) => {
+                    return next(upgradeRequest(), request.context).then((upgradeResponse: IRequestResponse) => {
                         hasUpgraded = true
                         return sendUpgradedRequest()
 
                     }, (err: any) => {
                         logger.log('Downgrading TTwitter request: ', err)
-                        return next(dataToSend, context)
+                        return next(request.data, request.context)
                    })
                 }
 
             } else {
-                return next(dataToSend, context)
+                return next(request.data, request.context)
             }
         },
     }

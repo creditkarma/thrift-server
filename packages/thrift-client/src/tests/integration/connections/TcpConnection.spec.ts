@@ -5,9 +5,10 @@ import * as net from 'net'
 
 import {
     IRequestResponse,
+    IThriftRequest,
     NextFunction,
     TcpConnection,
-    ThriftContextPlugin,
+    ThriftContextFilter,
     TTwitter,
     TTwitterClientFilter,
 } from '../../../main'
@@ -22,7 +23,7 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 
 import {
     Calculator,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import {
     ISharedStruct,
@@ -127,24 +128,24 @@ describe('TcpConnection', () => {
             })
 
             connection.register({
-                handler(data: Buffer, context: void, next: NextFunction<void>): Promise<IRequestResponse> {
-                    return next(data)
+                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
+                    return next(request.data)
                 },
             }, {
                 methods: ['echoString'],
-                handler(data: Buffer, context: void, next: NextFunction<void>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(data) === 'fake') {
+                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
+                    if (thrift.readThriftMethod(request.data) === 'fake') {
                         return next()
 
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
+                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(request.data)}`),
                         )
                     }
                 },
             }, {
                 methods: ['addWithContext'],
-                handler(data: Buffer, context: void, next: NextFunction<void>): Promise<IRequestResponse> {
+                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('addWithContext', thrift.MessageType.CALL, 20)
@@ -208,7 +209,7 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                ThriftContextPlugin<IMetadata, IMetadata>({
+                ThriftContextFilter<IMetadata, IMetadata>({
                     RequestCodec: MetadataCodec,
                     ResponseCodec: MetadataCodec,
                 }),
@@ -253,7 +254,7 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                ThriftContextPlugin<IMetadata, IMetadata>({
+                ThriftContextFilter<IMetadata, IMetadata>({
                     RequestCodec: MetadataCodec,
                     ResponseCodec: MetadataCodec,
                 }),

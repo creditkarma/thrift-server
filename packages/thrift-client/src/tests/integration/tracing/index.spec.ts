@@ -109,6 +109,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -136,12 +138,14 @@ describe('Tracing', () => {
                     expect(result[traceId_1]).to.exist()
                     expect(result['411d1802c9151ded']).to.exist()
                     expect(Object.keys(result[traceId_1]).length).to.equal(1)
-                    expect(Object.keys(result['411d1802c9151ded']).length).to.equal(3)
+                    expect(Object.keys(result['411d1802c9151ded']).length).to.equal(2)
                     done()
                 } catch (err) {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -193,6 +197,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -231,6 +237,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 
@@ -279,6 +287,8 @@ describe('Tracing', () => {
                     done(err)
                 }
             }, 3000)
+        }, (err: any) => {
+            done(err)
         })
     })
 })

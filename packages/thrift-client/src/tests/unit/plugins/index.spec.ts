@@ -23,7 +23,7 @@ import {
 
 import {
     Calculator,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import {
     ISharedStruct,

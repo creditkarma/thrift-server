@@ -1,7 +1,4 @@
-import {
-    IThriftMiddleware,
-    RequestHandler,
-} from '../types'
+import { IThriftClientFilter } from '../types'
 
 export const normalizePath = (path: string = '/'): string => {
     if (path.startsWith('/')) {
@@ -12,15 +9,11 @@ export const normalizePath = (path: string = '/'): string => {
     }
 }
 
-export const filterByMethod = <Context>(method: string): (middleware: IThriftMiddleware<Context>) => boolean => {
-    return (middleware: IThriftMiddleware<Context>): boolean => {
+export function filterByMethod<Context>(method: string): (filter: IThriftClientFilter<Context>) => boolean {
+    return (filter: any): boolean => {
         return (
-            middleware.methods.length === 0 ||
-            middleware.methods.indexOf(method) > -1
+            filter.methods.length === 0 ||
+            filter.methods.indexOf(method) > -1
         )
     }
-}
-
-export const getHandler = <Context>(middleware: IThriftMiddleware<Context>): RequestHandler<Context> => {
-    return middleware.handler
 }

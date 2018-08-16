@@ -1,9 +1,13 @@
 import {
+    deepMerge,
+    getProtocol,
     getTracerForService,
-    hasL5DHeader,
-    IRequestContext,
-    IZipkinPluginOptions,
+    getTransport,
+    headersForTraceId,
+    IRequestHeaders,
+    IZipkinOptions,
     normalizeHeaders,
+    readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
 import * as Hapi from 'hapi'
@@ -37,22 +41,25 @@ export function ZipkinTracingHapi({
     headers,
     httpInterval,
     httpTimeout,
-}: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
+    transport = 'buffered',
+    protocol = 'binary',
+}: IZipkinOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onRequest', (request, reply) => {
-                const normalizedHeaders = normalizeHeaders(request.headers)
+                const requestMethod: string = readThriftMethod(request.payload, getTransport(transport), getProtocol(protocol))
+                const normalHeaders = normalizeHeaders(request.headers)
                 const plugins = request.plugins
 
                 tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
-                        request.method,
+                        (requestMethod || request.method),
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
-                            const val = normalizedHeaders[header.toLowerCase()]
+                            const val = normalHeaders[header.toLowerCase()]
                             if (val !== null && val !== undefined) {
                                 return new option.Some(val)
 
@@ -62,13 +69,13 @@ export function ZipkinTracingHapi({
                         },
                     ) as any as TraceId // Nasty but this method is incorrectly typed
 
-                    const requestContext: IRequestContext = {
-                        traceId,
-                        usesLinkerd: hasL5DHeader(normalizedHeaders),
-                        requestHeaders: normalizedHeaders,
-                    }
+                    const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-                    plugins.zipkin = requestContext
+                    const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders)
+
+                    request.headers = updatedHeaders
+
+                    plugins.zipkin = { traceId }
 
                     return reply.continue()
                 })

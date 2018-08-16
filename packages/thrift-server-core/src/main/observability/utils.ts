@@ -124,6 +124,15 @@ export function traceIdFromTraceId(trace: ITraceId): TraceId {
     })
 }
 
+export function headersForTraceId(traceId: TraceId): IRequestHeaders {
+    return {
+        [ZipkinHeaders.TraceId]: traceId.traceId,
+        [ZipkinHeaders.SpanId]: traceId.spanId,
+        [ZipkinHeaders.ParentId]: traceId.parentId,
+        [ZipkinHeaders.Sampled]: traceId.sampled.getOrElse(false) ? '1' : '0',
+    }
+}
+
 export function containsZipkinHeaders(headers: IRequestHeaders): boolean {
     return (
         headers[L5D_TRACE_HDR] !== undefined ||
@@ -147,18 +156,18 @@ export function traceIdForHeaders(headers: IRequestHeaders): TraceId {
 
 export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
     if (headers[L5D_TRACE_HDR] !== undefined) {
-        const linkTrace = deserializeLinkerdHeader(headers[L5D_TRACE_HDR] as string)
+        const linkerDTrace = deserializeLinkerdHeader(headers[L5D_TRACE_HDR] as string)
         if (
             headers[ZipkinHeaders.TraceId] !== undefined &&
-            headers[ZipkinHeaders.TraceId] !== linkTrace.traceId
+            headers[ZipkinHeaders.TraceId] !== linkerDTrace.traceId
         ) {
             return headers
 
         } else {
-            headers[ZipkinHeaders.TraceId] = linkTrace.traceId
-            headers[ZipkinHeaders.SpanId] = linkTrace.spanId
-            headers[ZipkinHeaders.ParentId] = linkTrace.parentId
-            headers[ZipkinHeaders.Sampled] = linkTrace.sampled ? '1' : '0'
+            headers[ZipkinHeaders.TraceId] = linkerDTrace.traceId
+            headers[ZipkinHeaders.SpanId] = linkerDTrace.spanId
+            headers[ZipkinHeaders.ParentId] = linkerDTrace.parentId
+            headers[ZipkinHeaders.Sampled] = linkerDTrace.sampled ? '1' : '0'
             return headers
         }
 

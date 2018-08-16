@@ -5,10 +5,11 @@ import * as http from 'http'
 import {
     appendThriftObject,
     HttpConnection,
+    IRequest,
     IRequestResponse,
+    IThriftRequest,
     NextFunction,
     RequestInstance,
-    ThriftContext,
     TTwitter,
     TTwitterClientFilter,
 } from '../../../main'
@@ -28,7 +29,7 @@ import { createServer as mockCollector, IMockCollector } from '../tracing/mock-c
 import {
     Calculator,
     ICommonStruct,
-} from '../../generated/calculator'
+} from '../../generated/calculator-service'
 
 import {
     ISharedUnion,
@@ -67,7 +68,7 @@ describe('HttpConnection', () => {
 
     describe('Basic Usage', () => {
         let connection: HttpConnection
-        let client: Calculator.Client<ThriftContext<CoreOptions>>
+        let client: Calculator.Client<IRequest>
 
         before(async () => {
             const requestClient: RequestInstance = request.defaults({})
@@ -135,7 +136,7 @@ describe('HttpConnection', () => {
                     path: '/return500',
                 },
             )
-            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
+            const badClient: Calculator.Client<IRequest> =
                 new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
@@ -158,7 +159,7 @@ describe('HttpConnection', () => {
                     path: '/return400',
                 },
             )
-            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
+            const badClient: Calculator.Client<IRequest> =
                 new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
@@ -183,7 +184,7 @@ describe('HttpConnection', () => {
                     port: 8080,
                 },
             )
-            const badClient: Calculator.Client<ThriftContext<CoreOptions>> =
+            const badClient: Calculator.Client<IRequest> =
                 new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
@@ -204,15 +205,15 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(data) === 'add') {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
+                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
                         )
                     }
                 },
@@ -229,19 +230,17 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
                 methods: ['add'],
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(data) === 'add') {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
                             new Error(
-                                `Unrecognized method name: ${thrift.readThriftMethod(
-                                    data,
-                                )}`,
+                                `Unrecognized method name: ${thrift.readThriftMethod(req.data)}`,
                             ),
                         )
                     }
@@ -259,15 +258,15 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(data) === 'nope') {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    if (thrift.readThriftMethod(req.data) === 'nope') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
+                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
                         )
                     }
                 },
@@ -291,13 +290,13 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
                 methods: ['nope'],
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
                     return Promise.reject(
-                        new Error(`Unrecognized method name: ${thrift.readThriftMethod(data)}`),
+                        new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
                     )
                 },
             })
@@ -315,11 +314,11 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    return next(data, {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
                         },
@@ -338,12 +337,12 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
                 methods: ['addWithContext'],
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    return next(data, {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
                         },
@@ -362,7 +361,7 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -382,12 +381,12 @@ describe('HttpConnection', () => {
                 requestClient,
                 CALC_SERVER_CONFIG,
             )
-            const client = new Calculator.Client<ThriftContext<CoreOptions>>(connection)
+            const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
                 methods: ['add'],
-                handler(data: Buffer, context: ThriftContext<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                    return next(data, {
+                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                    return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
                         },
