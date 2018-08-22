@@ -9,6 +9,7 @@ import { CoreOptions } from 'request'
 import {
     addL5Dheaders,
     containsZipkinHeaders,
+    formatUrl,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -85,7 +86,7 @@ export function ZipkinClientFilter<Context extends IRequest>({
             return tracer.scoped(() => {
                 const updatedHeaders: IRequestHeaders = instrumentation.recordRequest(
                     { headers: {} },
-                    (request.uri || ''),
+                    formatUrl(request.uri),
                     (request.methodName || ''),
                 ).headers
 

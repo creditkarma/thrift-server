@@ -1,3 +1,4 @@
+import * as url from 'url'
 import * as logger from './logger'
 import { BinaryProtocol, CompactProtocol, TProtocol } from './protocols'
 import { BufferedTransport, TTransport } from './transports'
@@ -103,4 +104,14 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
     }
 
     return (newObj as Base & Update)
+}
+
+export function formatUrl(requestUrl: string): string {
+    const parsed = url.parse(url.format(requestUrl))
+
+    if (!parsed.pathname) {
+        return `${parsed.hostname || ''}/`
+    } else {
+        return `${parsed.hostname || ''}${parsed.pathname}`
+    }
 }
