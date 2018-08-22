@@ -1,5 +1,6 @@
 import {
     deepMerge,
+    formatUrl,
     getProtocol,
     getTracerForService,
     getTransport,
@@ -57,7 +58,7 @@ export function ZipkinTracingHapi({
                 tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
                         (requestMethod || request.method),
-                        url.format(request.url),
+                        formatUrl(url.format(request.url)),
                         (header: string): option.IOption<any> => {
                             const val = normalHeaders[header.toLowerCase()]
                             if (val !== null && val !== undefined) {

@@ -72,10 +72,7 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
         const headers: { [name: string]: any } = {}
         headers[ZipkinHeaders.TraceId] = traceId.traceId
         headers[ZipkinHeaders.SpanId] = traceId.spanId
-
-        traceId._parentId.ifPresent((val: string) => {
-            headers[ZipkinHeaders.ParentId] = val
-        })
+        headers[ZipkinHeaders.ParentId] = traceId.parentId || ''
 
         traceId.sampled.ifPresent((sampled: boolean) => {
             headers[ZipkinHeaders.Sampled] = sampled ? '1' : '0'

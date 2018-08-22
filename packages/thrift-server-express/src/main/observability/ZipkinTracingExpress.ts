@@ -25,7 +25,7 @@ function formatRequestUrl(req: express.Request): string {
     return url.format({
         protocol: req.protocol,
         host: req.get('host'),
-        pathname: parsed.pathname,
+        pathname: parsed.pathname || '/',
         search: parsed.search,
     })
 }

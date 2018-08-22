@@ -1,4 +1,5 @@
 import {
+    formatUrl,
     getProtocol,
     getTracerForService,
     getTransport,
@@ -124,7 +125,7 @@ export function TTwitterClientFilter<T>({
                     return tracer.scoped(() => {
                         const { headers }: any = instrumentation.recordRequest(
                             { headers: {} },
-                            (request.uri || ''),
+                            formatUrl(request.uri),
                             (request.methodName || 'post'),
                         )
 
