@@ -38,7 +38,7 @@ import {
     ZipkinClientFilter,
 } from '../../main/index'
 
-export function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Hapi.Server {
+export async function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<Hapi.Server> {
     // Create thrift client
     const addServiceClient: AddService.Client<IRequest> =
         createHttpClient(AddService.Client, {
@@ -166,7 +166,7 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     /**
      * Creates Hapi server with thrift endpoint.
      */
-    const server: Hapi.Server = createThriftServer({
+    const server: Hapi.Server = await createThriftServer({
         port: CALC_SERVER_CONFIG.port,
         path: CALC_SERVER_CONFIG.path,
         thriftOptions: {
@@ -177,20 +177,12 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     })
 
     if (sampleRate > 0) {
-        server.register(
-            ZipkinTracingHapi({
-                localServiceName: 'calculator-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
-                sampleRate,
-                httpInterval: 0,
-            }),
-            (err: any) => {
-                if (err) {
-                    console.log('err: ', err)
-                    throw err
-                }
-            },
-        )
+        await server.register([ ZipkinTracingHapi({
+            localServiceName: 'calculator-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate,
+            httpInterval: 0,
+        }) ])
     }
 
     const client: Calculator.Client = createHttpClient(Calculator.Client, {
@@ -203,17 +195,21 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     server.route({
         method: 'GET',
         path: '/add',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            const left: number = request.query.left
-            const right: number = request.query.right
-            client
-                .add(left, right)
-                .then((response: number) => {
-                    reply(response)
-                })
-                .catch((err: any) => {
-                    reply(err)
-                })
+        async handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Promise<Hapi.ResponseObject> {
+            if (typeof request.query === 'object') {
+                const left: number = Number(request.query['left'])
+                const right: number = Number(request.query['right'])
+                return client
+                    .add(left, right)
+                    .then((response: number) => {
+                        return reply.response(`${response}`)
+                    })
+                    .catch((err: any) => {
+                        return reply.response(err).code(500)
+                    })
+            } else {
+                return reply.response(new Error(`No arguments`)).code(400)
+            }
         },
     })
 
@@ -224,24 +220,24 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('PASS')
+        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+            return reply.response('PASS')
         },
     })
 
     server.route({
         method: 'POST',
         path: '/return500',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('NOPE').code(500)
+        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+            return reply.response('NOPE').code(500)
         },
     })
 
     server.route({
         method: 'POST',
         path: '/return400',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('NOPE').code(400)
+        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+            return reply.response('NOPE').code(400)
         },
     })
 

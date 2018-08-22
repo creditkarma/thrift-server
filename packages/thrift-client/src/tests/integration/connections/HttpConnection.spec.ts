@@ -47,8 +47,8 @@ describe('HttpConnection', () => {
     let addServer: Hapi.Server
 
     before(async () => {
-        calcServer = calculatorService()
-        addServer = addService()
+        calcServer = await calculatorService()
+        addServer = await addService()
         return Promise.all([
             calcServer.start(),
             addServer.start(),
@@ -78,6 +78,7 @@ describe('HttpConnection', () => {
 
         it('should corrently handle a service client request', async () => {
             return client.add(5, 7).then((response: number) => {
+                console.log('res: ', response)
                 expect(response).to.equal(12)
             }, (err: any) => {
                 console.log('err: ', err)
@@ -414,7 +415,7 @@ describe('HttpConnection', () => {
         let collectServer: IMockCollector
         let mockServer: http.Server
 
-        before((done) => {
+        before(async () => {
             const requestClient: RequestInstance = request.defaults({})
             connection = new HttpConnection(requestClient, {
                 hostName: 'localhost',
@@ -432,62 +433,65 @@ describe('HttpConnection', () => {
             )
 
             client = new Calculator.Client(connection)
-            mockCollector().then((collector: IMockCollector) => {
+            return mockCollector().then((collector: IMockCollector) => {
                 collectServer = collector
-                done()
             })
         })
 
-        after((done) => {
-            collectServer.close().then(() => {
-                mockServer.close(() => {
-                    console.log('HTTP server closed')
-                    mockServer.unref()
-                    done()
+        after(async () => {
+            return new Promise((resolve, reject) => {
+                collectServer.close().then(() => {
+                    mockServer.close(() => {
+                        console.log('HTTP server closed')
+                        mockServer.unref()
+                        resolve()
+                    })
                 })
             })
         })
 
-        it('should handle appending data to payload', (done) => {
-            let count: number = 0
-            collectServer.reset()
-            mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
-                if (count < 1) {
-                    count += 1
-                    const upgradeResponse: TTwitter.IUpgradeReply = {}
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
-                    output.writeMessageEnd()
-                    res.writeHead(200)
-                    res.end(writer.flush())
-
-                } else {
-                    const responseHeader: TTwitter.IResponseHeader = {}
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result = new Calculator.AddResult({ success: 61 })
-                    result.write(output)
-                    output.writeMessageEnd()
-                    const data: Buffer = writer.flush()
-
-                    appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+        it('should handle appending data to payload', async () => {
+            return new Promise((resolve, reject) => {
+                let count: number = 0
+                collectServer.reset()
+                mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
+                    if (count < 1) {
+                        count += 1
+                        const upgradeResponse: TTwitter.IUpgradeReply = {}
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
+                        output.writeMessageEnd()
                         res.writeHead(200)
-                        res.end(extended)
-                    })
-                }
-            })
+                        res.end(writer.flush())
 
-            mockServer.listen(PORT, () => {
-                console.log(`HTTP server listening on port: ${PORT}`)
-                client.add(2, 3).then((response: number) => {
-                    expect(response).to.equal(61)
-                    done()
-                }).catch((err: any) => {
-                    console.log('err: ', err)
-                    done(err)
+                    } else {
+                        const responseHeader: TTwitter.IResponseHeader = {}
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        const result = new Calculator.AddResult({ success: 61 })
+                        result.write(output)
+                        output.writeMessageEnd()
+                        const data: Buffer = writer.flush()
+
+                        appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+                            res.writeHead(200)
+                            res.end(extended)
+                        })
+                    }
+                })
+
+                mockServer.listen(PORT, () => {
+                    console.log(`HTTP server listening on port: ${PORT}`)
+                    client.add(2, 3).then((response: number) => {
+                        expect(response).to.equal(61)
+                        resolve()
+                    }).catch((err: any) => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
                 })
             })
         })

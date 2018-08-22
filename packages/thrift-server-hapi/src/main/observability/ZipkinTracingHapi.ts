@@ -19,14 +19,25 @@ import {
     TraceId,
 } from 'zipkin'
 
+import * as Boom from 'boom'
+import { ThriftHapiPlugin } from '..'
+
 const pkg: any = require('../../../package.json')
+
+function isBoom(obj: any): obj is Boom {
+    return obj.isBoom
+}
 
 function readStatusCode({ response }: Hapi.Request): number {
     if (response !== null) {
-        if (response.isBoom && response.output !== undefined) {
+        if (isBoom(response) && response.output !== undefined) {
             return response.output.statusCode
-        } else {
+
+        } else if (!isBoom(response)) {
             return response.statusCode
+
+        } else {
+            return 500
         }
     } else {
         return 500
@@ -44,18 +55,24 @@ export function ZipkinTracingHapi({
     httpTimeout,
     transport = 'buffered',
     protocol = 'binary',
-}: IZipkinOptions): Hapi.PluginRegistrationObject<never> {
-    const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
-        register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
+}: IZipkinOptions): ThriftHapiPlugin {
+    return {
+        name: 'hapi-zipkin-plugin',
+        version: pkg.version,
+        async register(server: Hapi.Server, nothing: void): Promise<void> {
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-            server.ext('onRequest', (request, reply) => {
-                const requestMethod: string = readThriftMethod(request.payload, getTransport(transport), getProtocol(protocol))
+            server.ext('onRequest', (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
+                const requestMethod: string = readThriftMethod(
+                    (request.payload as Buffer),
+                    getTransport(transport),
+                    getProtocol(protocol),
+                )
                 const normalHeaders = normalizeHeaders(request.headers)
-                const plugins = request.plugins
+                const plugins: any = request.plugins
 
-                tracer.scoped(() => {
+                return tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
                         (requestMethod || request.method),
                         formatUrl(url.format(request.url)),
@@ -72,35 +89,26 @@ export function ZipkinTracingHapi({
 
                     const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-                    const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders)
+                    const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders);
 
-                    request.headers = updatedHeaders
+                    (request as any).headers = updatedHeaders
 
                     plugins.zipkin = { traceId }
 
-                    return reply.continue()
+                    return reply.continue
                 })
             })
 
-            server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ReplyWithContinue) => {
+            server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
                 const statusCode = readStatusCode(request)
-                const traceId: any = request.plugins.zipkin.traceId
+                const traceId: any = (request.plugins as any).zipkin.traceId
 
                 tracer.scoped(() => {
                     instrumentation.recordResponse(traceId, `${statusCode}`)
                 })
 
-                return reply.continue()
+                return reply.continue
             })
-
-            next()
         },
     }
-
-    hapiZipkinPlugin.register.attributes = {
-        name: 'hapi-zipkin-plugin',
-        version: pkg.version,
-    }
-
-    return hapiZipkinPlugin
 }

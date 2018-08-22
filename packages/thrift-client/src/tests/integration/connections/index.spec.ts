@@ -46,8 +46,8 @@ describe('createHttpClient', () => {
 
         before(async () => {
             client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
-            calcServer = calculatorService()
-            addServer = addService()
+            calcServer = await calculatorService()
+            addServer = await addService()
             return Promise.all([
                 calcServer.start(),
                 addServer.start(),
@@ -251,8 +251,8 @@ describe('createHttpClient', () => {
                 path: CALC_SERVER_CONFIG.path,
                 protocol: 'compact',
             })
-            calcServer = calculatorService(0, 'compact')
-            addServer = addService()
+            calcServer = await calculatorService(0, 'compact')
+            addServer = await addService()
             return Promise.all([
                 calcServer.start(),
                 addServer.start(),
@@ -449,8 +449,8 @@ describe('createHttpClient', () => {
         let addServer: Hapi.Server
 
         before(async () => {
-            calcServer = calculatorService()
-            addServer = addService()
+            calcServer = await calculatorService()
+            addServer = await addService()
             return Promise.all([
                 calcServer.start(),
                 addServer.start(),
@@ -589,8 +589,8 @@ describe('createHttpClient', () => {
         let addServer: Hapi.Server
 
         before(async () => {
-            calcServer = calculatorService()
-            addServer = addService()
+            calcServer = await calculatorService()
+            addServer = await addService()
             return Promise.all([
                 calcServer.start(),
                 addServer.start(),
@@ -703,19 +703,23 @@ describe('createHttpClient', () => {
 describe('createTcpClient', () => {
     let apacheServer: net.Server
 
-    before((done) => {
-        apacheServer = apacheService()
-        apacheServer.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
-            console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
-            done()
+    before(async () => {
+        return new Promise((resolve, reject) => {
+            apacheServer = apacheService()
+            apacheServer.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
+                console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
+                resolve()
+            })
         })
     })
 
-    after((done) => {
-        apacheServer.close(() => {
-            apacheServer.unref()
-            console.log(`TCP server closed`)
-            done()
+    after(async () => {
+        return new Promise((resolve, reject) => {
+            apacheServer.close(() => {
+                apacheServer.unref()
+                console.log(`TCP server closed`)
+                resolve()
+            })
         })
     })
 
