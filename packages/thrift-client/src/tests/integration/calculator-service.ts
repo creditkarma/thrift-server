@@ -177,12 +177,14 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
     })
 
     if (sampleRate > 0) {
-        await server.register([ ZipkinTracingHapi({
-            localServiceName: 'calculator-service',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate,
-            httpInterval: 0,
-        }) ])
+        await server.register({
+            plugin: ZipkinTracingHapi({
+                localServiceName: 'calculator-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
+                httpInterval: 0,
+            })
+        })
     }
 
     const client: Calculator.Client = createHttpClient(Calculator.Client, {

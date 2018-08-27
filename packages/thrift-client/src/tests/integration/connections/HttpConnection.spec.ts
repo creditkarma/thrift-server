@@ -78,7 +78,6 @@ describe('HttpConnection', () => {
 
         it('should corrently handle a service client request', async () => {
             return client.add(5, 7).then((response: number) => {
-                console.log('res: ', response)
                 expect(response).to.equal(12)
             }, (err: any) => {
                 console.log('err: ', err)

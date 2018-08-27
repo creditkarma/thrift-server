@@ -46,12 +46,14 @@ export async function createServer(sampleRate: number = 0): Promise<Hapi.Server>
     })
 
     if (sampleRate > 0) {
-        await server.register([ ZipkinTracingHapi({
-            localServiceName: 'add-service',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate,
-            httpInterval: 0,
-        }) ])
+        await server.register({
+            plugin: ZipkinTracingHapi({
+                localServiceName: 'add-service',
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate,
+                httpInterval: 0,
+            })
+        })
     }
 
     /**
