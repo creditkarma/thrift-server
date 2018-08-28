@@ -8,7 +8,6 @@
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap --hoist",
-    "prebootstrap": "npm install",
     "pretest": "npm run build",
     "test": "lerna exec -- npm run test",
     "release:default": "lerna publish --conventional-commits --skip-npm --yes --force-publish=* && npm run release:push",
