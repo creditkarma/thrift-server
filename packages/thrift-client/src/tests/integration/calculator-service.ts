@@ -183,7 +183,7 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
                 httpInterval: 0,
-            })
+            }),
         })
     }
 
