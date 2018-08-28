@@ -51,5 +51,8 @@
     "node-int64": "^0.4.0",
     "zipkin": "^0.14.1",
     "zipkin-transport-http": "^0.14.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -63,5 +63,8 @@
   },
   "dependencies": {
     "zipkin": "^0.14.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
