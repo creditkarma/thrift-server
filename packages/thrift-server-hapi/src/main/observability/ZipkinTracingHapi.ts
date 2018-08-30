@@ -1,9 +1,11 @@
 import {
+    getProtocol,
     getTracerForService,
+    getTransport,
     hasL5DHeader,
-    IRequestContext,
     IZipkinPluginOptions,
     normalizeHeaders,
+    readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
 import * as Hapi from 'hapi'
@@ -37,19 +39,26 @@ export function ZipkinTracingHapi({
     httpInterval,
     httpTimeout,
     headers,
+    transport = 'buffered',
+    protocol = 'binary',
 }: IZipkinPluginOptions): Hapi.PluginRegistrationObject<never> {
     const hapiZipkinPlugin: Hapi.PluginRegistrationObject<never> = {
         register(server: Hapi.Server, nothing: never, next: (err?: Error) => void) {
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-            server.ext('onRequest', (request, reply) => {
+            server.ext('onPostAuth', (request, reply) => {
+                const methodName: string = readThriftMethod(
+                    request.payload,
+                    getTransport(transport),
+                    getProtocol(protocol),
+                )
+
                 const normalizedHeaders = normalizeHeaders(request.headers)
-                const plugins = request.plugins
 
                 tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
-                        request.method,
+                        (methodName || request.method),
                         url.format(request.url),
                         (header: string): option.IOption<any> => {
                             const val = normalizedHeaders[header.toLowerCase()]
@@ -62,13 +71,11 @@ export function ZipkinTracingHapi({
                         },
                     ) as any as TraceId // Nasty but this method is incorrectly typed
 
-                    const requestContext: IRequestContext = {
+                    request.plugins.zipkin = {
                         traceId,
                         usesLinkerd: hasL5DHeader(normalizedHeaders),
                         requestHeaders: normalizedHeaders,
                     }
-
-                    plugins.zipkin = requestContext
 
                     return reply.continue()
                 })

@@ -1,4 +1,4 @@
-import { IRequestHeaders } from '../types'
+import { IRequestHeaders, ProtocolType, TransportType } from '../types'
 
 export interface ITraceId {
     spanId: string
@@ -18,6 +18,8 @@ export interface IZipkinPluginOptions {
     httpInterval?: number
     httpTimeout?: number
     headers?: IRequestHeaders
+    transport?: TransportType
+    protocol?: ProtocolType
 }
 
 export interface IZipkinTracerConfig {

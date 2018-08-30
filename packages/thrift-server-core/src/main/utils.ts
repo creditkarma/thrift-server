@@ -10,16 +10,23 @@ import {
     TransportType,
 } from './types'
 
+import * as logger from './logger'
+
 export function readThriftMethod(
     buffer: Buffer,
     Transport: ITransportConstructor = BufferedTransport,
     Protocol: IProtocolConstructor = BinaryProtocol,
 ): string {
-    const transportWithData: TTransport = new Transport(buffer)
-    const input: TProtocol = new Protocol(transportWithData)
-    const { fieldName } = input.readMessageBegin()
+    try {
+        const transportWithData: TTransport = new Transport(buffer)
+        const input: TProtocol = new Protocol(transportWithData)
+        const metadata = input.readMessageBegin()
 
-    return fieldName
+        return metadata.fieldName
+    } catch (err) {
+        logger.log(`Unable to read Thrift method name. ${err.message}`)
+        return ''
+    }
 }
 
 const transports: ITransportMap = {

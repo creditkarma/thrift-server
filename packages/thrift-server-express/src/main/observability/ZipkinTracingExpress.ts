@@ -1,8 +1,11 @@
 import {
+    getProtocol,
     getTracerForService,
+    getTransport,
     hasL5DHeader,
     IZipkinPluginOptions,
     normalizeHeaders,
+    readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -34,11 +37,14 @@ export function ZipkinTracingExpress({
     httpInterval,
     httpTimeout,
     headers,
+    transport = 'buffered',
+    protocol = 'binary',
 }: IZipkinPluginOptions): express.RequestHandler {
     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
     return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
         tracer.scoped(() => {
+            const requestMethod: string = readThriftMethod(req.body, getTransport(transport), getProtocol(protocol))
             req.headers = normalizeHeaders(req.headers)
             function readHeader(header: string): option.IOption<string | Array<string>> {
                 const val = req.headers[header.toLocaleLowerCase()]
@@ -51,7 +57,7 @@ export function ZipkinTracingExpress({
 
             const traceId: TraceId =
                 instrumentation.recordRequest(
-                    req.method,
+                    (requestMethod || req.method),
                     formatRequestUrl(req),
                     (readHeader as any),
                 ) as any as TraceId // Nasty but this method is incorrectly typed
