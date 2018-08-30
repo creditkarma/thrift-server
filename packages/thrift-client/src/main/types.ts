@@ -18,7 +18,14 @@ export interface IRequestResponse {
 }
 
 export type ThriftContext<Context> =
-    Context & { traceId?: TraceId, request?: { headers: IRequestHeaders} }
+    Context & {
+        traceId?: TraceId,
+        methodName?: string,
+        uri?: string,
+        request?: {
+            headers: IRequestHeaders,
+        },
+    }
 
 export type ClientOptionsFunction<Context> =
     () => ThriftContext<Context>

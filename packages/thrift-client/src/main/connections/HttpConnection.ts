@@ -84,6 +84,10 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
     ): Promise<Buffer> {
         const requestMethod: string = readThriftMethod(dataToSend, this.Transport, this.Protocol)
         const handlers: Array<RequestHandler<CoreOptions>> = this.handlersForMethod(requestMethod)
+        const requestContext: ThriftContext<CoreOptions> = deepMerge(context, {
+            methodName: requestMethod,
+            uri: this.url,
+        })
 
         const applyHandlers = (
             currentData: Buffer,
@@ -101,7 +105,7 @@ export class HttpConnection extends ThriftConnection<ThriftContext<CoreOptions>>
             }
         }
 
-        return applyHandlers(dataToSend, context, handlers).then((res: IRequestResponse) => {
+        return applyHandlers(dataToSend, requestContext, handlers).then((res: IRequestResponse) => {
             return res.body
         })
     }
