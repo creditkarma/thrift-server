@@ -54,7 +54,7 @@ export function ZipkinTracingHapi({
                 const requestMethod: string = readThriftMethod(
                     request.payload,
                     getTransport(transport),
-                    getProtocol(protocol)
+                    getProtocol(protocol),
                 )
                 const normalHeaders = normalizeHeaders(request.headers)
 
