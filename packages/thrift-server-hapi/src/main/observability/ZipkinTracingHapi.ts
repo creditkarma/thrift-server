@@ -67,7 +67,7 @@ export function ZipkinTracingHapi({
                 const requestMethod: string = readThriftMethod(
                     (request.payload as Buffer),
                     getTransport(transport),
-                    getProtocol(protocol)
+                    getProtocol(protocol),
                 )
                 const normalHeaders = normalizeHeaders(request.headers)
 
@@ -90,9 +90,9 @@ export function ZipkinTracingHapi({
 
                     const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders);
 
-                    (request as any).headers = updatedHeaders
+                    (request as any).headers = updatedHeaders;
 
-                    request.plugins.zipkin = { traceId }
+                    (request.plugins as any).zipkin = { traceId }
 
                     return reply.continue
                 })
