@@ -154,7 +154,7 @@ Creating a TCP client is much like creating an HTTP client.
 * Use the `createTcpClient` factory function.
 * Manually create your own `TcpConnection` object
 
-*Note: Our TcpConnection object uses an underlying connection pool instead of all client requests reusing the same connection. This pool is configrable. We use [GenericPool](https://github.com/coopernurse/node-pool) for managing our connection pool. Pool options are passed directly through to GenericPool.*
+*Note: Our TcpConnection object uses an underlying connection pool instead of all client requests reusing the same connection. This pool is configurable. We use [GenericPool](https://github.com/coopernurse/node-pool) for managing our connection pool. Pool options are passed directly through to GenericPool.*
 
 #### `createTcpClient`
 

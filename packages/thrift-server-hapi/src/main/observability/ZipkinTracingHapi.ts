@@ -63,14 +63,13 @@ export function ZipkinTracingHapi({
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-            server.ext('onRequest', (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
+            server.ext('onPostAuth', (request, reply) => {
                 const requestMethod: string = readThriftMethod(
                     (request.payload as Buffer),
                     getTransport(transport),
-                    getProtocol(protocol),
+                    getProtocol(protocol)
                 )
                 const normalHeaders = normalizeHeaders(request.headers)
-                const plugins: any = request.plugins
 
                 return tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
@@ -93,7 +92,7 @@ export function ZipkinTracingHapi({
 
                     (request as any).headers = updatedHeaders
 
-                    plugins.zipkin = { traceId }
+                    request.plugins.zipkin = { traceId }
 
                     return reply.continue
                 })
