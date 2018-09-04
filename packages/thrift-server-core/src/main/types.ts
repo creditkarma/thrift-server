@@ -61,14 +61,14 @@ export interface IMethodAnnotations {
 }
 
 export interface IStructLike {
-    readonly _annotations: IThriftAnnotations
-    readonly _fieldAnnotations: IFieldAnnotations
+    readonly _annotations?: IThriftAnnotations
+    readonly _fieldAnnotations?: IFieldAnnotations
     write(output: TProtocol): void
 }
 
 export abstract class StructLike implements IStructLike {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _fieldAnnotations: IFieldAnnotations = {}
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _fieldAnnotations?: IFieldAnnotations = {}
     public abstract write(output: TProtocol): void
 }
 
@@ -97,8 +97,8 @@ export interface ITransportConstructor {
 }
 
 export abstract class ThriftClient<Context = any> {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _fieldAnnotatons: IFieldAnnotations = {}
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _fieldAnnotatons?: IFieldAnnotations = {}
 
     protected _requestId: number
     protected transport: ITransportConstructor
@@ -122,14 +122,14 @@ export interface IClientConstructor<TClient, Context> {
 }
 
 export interface IThriftProcessor<Context> {
-    readonly _annotations: IThriftAnnotations
-    readonly _methodAnnotations: IMethodAnnotations
+    readonly _annotations?: IThriftAnnotations
+    readonly _methodAnnotations?: IMethodAnnotations
     process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
 
 export abstract class ThriftProcessor<Context> implements IThriftProcessor<Context> {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _methodAnnotations: IMethodAnnotations = {}
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _methodAnnotations?: IMethodAnnotations = {}
 
     public abstract process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
