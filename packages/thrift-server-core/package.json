@@ -30,9 +30,6 @@
     "type": "git",
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
-  "peerDependencies": {
-    "@creditkarma/thrift-typescript": "^2.1.0-1"
-  },
   "devDependencies": {
     "@types/code": "^4.0.3",
     "@types/debug": "0.0.30",

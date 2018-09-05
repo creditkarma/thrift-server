@@ -38,14 +38,14 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "0.8.x",
-    "@creditkarma/thrift-typescript": "^2.1.0-1",
+    "@creditkarma/thrift-typescript": "^2.1.0-2",
     "@types/hapi": "^16.1.10",
     "hapi": "^16.6.2"
   },
   "devDependencies": {
     "@creditkarma/thrift-client": "^0.8.3-alpha.1",
     "@creditkarma/thrift-server-core": "^0.8.3-alpha.1",
-    "@creditkarma/thrift-typescript": "^2.1.0-1",
+    "@creditkarma/thrift-typescript": "^2.1.0-2",
     "@types/code": "^4.0.3",
     "@types/hapi": "^16.1.10",
     "@types/lab": "^11.1.0",

@@ -5,7 +5,6 @@ import {
     getTransport,
     IProtocolConstructor,
     IThriftProcessor,
-    IThriftServerOptions,
     ITransportConstructor,
     process,
     readThriftMethod,
@@ -13,6 +12,7 @@ import {
 
 import {
     IHapiPluginOptions,
+    IHapiServerOptions,
     ThriftHapiPlugin,
 } from './types'
 
@@ -30,7 +30,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
                 handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
-                    const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
+                    const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
 
                     const Transport: ITransportConstructor = getTransport(
                         options.transport,
@@ -49,8 +49,9 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                             Protocol,
                         )
 
-                        request.plugins.thrift = {
+                        server.plugins.thrift = {
                             requestMethod: method,
+                            processor: pluginOptions.thriftOptions.handler,
                             transport: options.transport || 'buffered',
                             protocol: options.protocol || 'binary',
                         }

@@ -23,7 +23,7 @@ export interface IRequestContext {
  * transport<TransportType> - name of the transport to use
  * protocol<ProtocolType> - name of the protocol to use
  */
-export interface IThriftServerOptions<TProcessor> {
+export interface IThriftServerOptions<Context, TProcessor extends IThriftProcessor<Context>> {
     serviceName: string
     handler: TProcessor
     transport?: TransportType
