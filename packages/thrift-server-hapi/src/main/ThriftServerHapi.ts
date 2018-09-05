@@ -26,34 +26,37 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
 ): ThriftHapiPlugin {
     const hapiThriftPlugin: ThriftHapiPlugin = {
         register(server: Hapi.Server, nothing: never, next) {
+            const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
+
+            const Transport: ITransportConstructor = getTransport(
+                options.transport,
+            )
+
+            const Protocol: IProtocolConstructor = getProtocol(
+                options.protocol,
+            )
+
+            server.plugins.thrift = {
+                processor: pluginOptions.thriftOptions.handler,
+                transport: options.transport || 'buffered',
+                protocol: options.protocol || 'binary',
+            }
+
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
                 handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
-                    const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
-
-                    const Transport: ITransportConstructor = getTransport(
-                        options.transport,
-                    )
-
-                    const Protocol: IProtocolConstructor = getProtocol(
-                        options.protocol,
-                    )
-
-                    const buffer: Buffer = request.payload
-
                     try {
+                        const buffer: Buffer = request.payload
+
                         const method: string = readThriftMethod(
                             buffer,
                             Transport,
                             Protocol,
                         )
 
-                        server.plugins.thrift = {
-                            requestMethod: method,
-                            processor: pluginOptions.thriftOptions.handler,
-                            transport: options.transport || 'buffered',
-                            protocol: options.protocol || 'binary',
+                        request.plugins.thrift = {
+                            requestMethod: method
                         }
 
                         reply(
