@@ -37,9 +37,13 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
             )
 
             server.plugins.thrift = {
-                processor: pluginOptions.thriftOptions.handler,
-                transport: options.transport || 'buffered',
-                protocol: options.protocol || 'binary',
+                services: {
+                    [pluginOptions.thriftOptions.serviceName]: {
+                        processor: pluginOptions.thriftOptions.handler,
+                        transport: options.transport || 'buffered',
+                        protocol: options.protocol || 'binary',
+                    },
+                },
             }
 
             server.route({
@@ -56,7 +60,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                         )
 
                         request.plugins.thrift = {
-                            requestMethod: method
+                            requestMethod: method,
                         }
 
                         reply(
