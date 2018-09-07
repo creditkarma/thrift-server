@@ -47,7 +47,7 @@ export function ZipkinTracingHapi({
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-            server.ext('onPostAuth', (request, reply) => {
+            server.ext('onRequest', (request, reply) => {
                 const methodName: string = readThriftMethod(
                     request.payload,
                     getTransport(transport),
@@ -82,12 +82,14 @@ export function ZipkinTracingHapi({
             })
 
             server.ext('onPreResponse', (request: Hapi.Request, reply: Hapi.ReplyWithContinue) => {
-                const statusCode = readStatusCode(request)
-                const traceId: any = request.plugins.zipkin.traceId
+                if (request.plugins.zipkin && request.plugins.zipkin.traceId) {
+                    const statusCode = readStatusCode(request)
+                    const traceId: any = request.plugins.zipkin.traceId
 
-                tracer.scoped(() => {
-                    instrumentation.recordResponse(traceId, `${statusCode}`)
-                })
+                    tracer.scoped(() => {
+                        instrumentation.recordResponse(traceId, `${statusCode}`)
+                    })
+                }
 
                 return reply.continue()
             })
