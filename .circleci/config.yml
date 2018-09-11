@@ -1,11 +1,11 @@
 defaults: &defaults
   working_directory: ~/thrift-server
   docker:
-    - image: circleci/node:6.12.3
+    - image: circleci/node:8.9.4
 
 version: 2
 jobs:
-  test_node_6:
+  test_node_8:
     <<: *defaults
     steps:
       - checkout
@@ -16,10 +16,10 @@ jobs:
           name: Run Test Suite
           command: npm test
 
-  test_node_8:
+  test_node_10:
     <<: *defaults
     docker:
-      - image: circleci/node:8.9.4
+      - image: circleci/node:10.9.0
     steps:
       - checkout
       - run:
@@ -84,20 +84,20 @@ workflows:
   version: 2
   build_test:
     jobs:
-      - test_node_6:
+      - test_node_8:
           filters:
             tags:
               only: /.*/
 
-      - test_node_8:
+      - test_node_10:
           filters:
             tags:
               only: /.*/
 
       - publish:
           requires:
-            - test_node_6
             - test_node_8
+            - test_node_10
           filters:
             tags:
               only: /^(v){1}(0){1}(\.[8]){1}(\.[0-9]+){1}$/
@@ -106,8 +106,8 @@ workflows:
 
       - publish_fix:
           requires:
-            - test_node_6
             - test_node_8
+            - test_node_10
           filters:
             tags:
               only: /^(v){1}(0){1}(\.[0-7]){1}(\.[0-9]+){1}$/
@@ -116,10 +116,10 @@ workflows:
 
       - publish_next:
             requires:
-            - test_node_6
             - test_node_8
+            - test_node_10
             filters:
               tags:
-                only: /^(v){1}(0){1}(\.[0-9]){1}(\.[0-9]){1}(-)[0-9]+$/
+                only: /^(v){1}(0){1}(\.[0-9]){1}(\.[0-9]){1}(-)(alpha){1}(\.[0-9]+)$/
               branches:
                 ignore: /.*/

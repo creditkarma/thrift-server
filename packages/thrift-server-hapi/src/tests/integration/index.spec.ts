@@ -36,7 +36,7 @@ describe('Thrift Server Hapi', () => {
     let client: Calculator.Client<CoreOptions>
 
     before(async () => {
-        server = createServer()
+        server = await createServer()
         client = createHttpClient(Calculator.Client, SERVER_CONFIG)
 
         return server.start().then(() => {

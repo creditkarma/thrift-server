@@ -24,12 +24,15 @@ import {
 export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
-    const hapiThriftPlugin: ThriftHapiPlugin = {
-        register(server: Hapi.Server, nothing: never, next) {
+    return {
+        name: require('../../package.json').name,
+        version: require('../../package.json').version,
+        multiple: true,
+        async register(server: Hapi.Server, nothing: void): Promise<void> {
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
-                handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
+                handler: (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
                     const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
 
                     const Transport: ITransportConstructor = getTransport(
@@ -40,51 +43,35 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                         options.protocol,
                     )
 
-                    const buffer: Buffer = request.payload
+                    const buffer: Buffer = (request.payload as Buffer)
 
-                    try {
-                        const method: string = readThriftMethod(
-                            buffer,
-                            Transport,
-                            Protocol,
-                        )
+                    const method: string = readThriftMethod(
+                        buffer,
+                        Transport,
+                        Protocol,
+                    );
 
-                        request.plugins.thrift = {
-                            requestMethod: method,
-                            transport: options.transport || 'buffered',
-                            protocol: options.protocol || 'binary',
-                        }
-
-                        reply(
-                            process<Hapi.Request>({
-                                processor: options.handler,
-                                buffer,
-                                Transport,
-                                Protocol,
-                                context: request,
-                            }),
-                        )
-                    } catch (err) {
-                        reply(err)
+                    (request.plugins as any).thrift = {
+                        requestMethod: method,
+                        transport: options.transport || 'buffered',
+                        protocol: options.protocol || 'binary',
                     }
+
+                    return process<Hapi.Request>({
+                        processor: options.handler,
+                        buffer,
+                        Transport,
+                        Protocol,
+                        context: request,
+                    })
                 },
-                config: {
+                options: {
                     payload: {
                         parse: false,
                     },
                     auth: pluginOptions.auth,
                 },
             })
-
-            next()
         },
     }
-
-    hapiThriftPlugin.register.attributes = {
-        name: require('../../package.json').name,
-        version: require('../../package.json').version,
-        multiple: true,
-    }
-
-    return hapiThriftPlugin
 }

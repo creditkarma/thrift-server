@@ -22,22 +22,22 @@ export * from './types'
  */
 export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
     options: ICreateHapiServerOptions<TProcessor>,
-): Hapi.Server {
-    const server = new Hapi.Server({ debug: { request: ['error'] } })
-    server.connection({ port: options.port })
+): Promise<Hapi.Server> {
+    const server = new Hapi.Server({
+        port: options.port,
+        debug: { request: ['error'] },
+    })
 
-    server.register(
-        ThriftServerHapi<TProcessor>({
+    return server.register({
+        plugin: ThriftServerHapi<TProcessor>({
             path: options.path,
             thriftOptions: options.thriftOptions,
         }),
-        (err: any) => {
-            if (err) {
-                logger.error('There was an error registering thrift plugin: ', err)
-                throw err
-            }
-        },
-    )
+    }).then(() => {
+        return server
 
-    return server
+    }).catch((err: any) => {
+        logger.error(`Unable to create Thrift server. ${err.message}`)
+        throw err
+    })
 }

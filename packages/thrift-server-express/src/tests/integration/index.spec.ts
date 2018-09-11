@@ -36,19 +36,24 @@ describe('Thrift Server Express', () => {
     let server: net.Server
     let client: Calculator.Client<CoreOptions>
 
-    before((done: any) => {
-        const app: express.Application = createServer()
-        client = createHttpClient(Calculator.Client, SERVER_CONFIG)
+    before(async () => {
+        return new Promise((resolve, reject) => {
+            const app: express.Application = createServer()
+            client = createHttpClient(Calculator.Client, SERVER_CONFIG)
 
-        server = app.listen(SERVER_CONFIG.port, () => {
-            console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)
-            done()
+            server = app.listen(SERVER_CONFIG.port, () => {
+                console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)
+                resolve()
+            })
         })
     })
 
-    after((done: any) => {
-        server.close()
-        done()
+    after(async () => {
+        return new Promise((resolve, reject) => {
+            server.close(() => {
+                resolve()
+            })
+        })
     })
 
     it('should corrently handle a service client request', async () => {

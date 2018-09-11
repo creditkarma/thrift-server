@@ -10,7 +10,7 @@ export interface IHandlerOptions<TProcessor> {
 
 export interface IHapiPluginOptions<TProcessor> {
     path?: string
-    auth?: false | string | Hapi.AuthOptions
+    auth?: false | string | Hapi.RouteOptionsAccess
     thriftOptions: IThriftServerOptions<TProcessor>
 }
 
@@ -19,4 +19,4 @@ export interface ICreateHapiServerOptions<TProcessor>
     port: number
 }
 
-export type ThriftHapiPlugin = Hapi.PluginRegistrationObject<never>
+export type ThriftHapiPlugin = Hapi.Plugin<void>
