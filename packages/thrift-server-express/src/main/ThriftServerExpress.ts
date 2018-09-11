@@ -18,10 +18,10 @@ type ThriftRequest =
     express.Request & {
         thrift?: {
             requestMethod: string
-            processor: Function
+            processor: IThriftProcessor<express.Request>
             transport: string
-            protocol: string
-        }
+            protocol: string,
+        },
     }
 
 export function ThriftServerExpress<TProcessor extends IThriftProcessor<express.Request>>(
