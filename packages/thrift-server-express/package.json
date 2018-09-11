@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-express",
-  "version": "0.9.0-alpha.2",
+  "version": "0.9.0-alpha.3",
   "description": "Express server middleware for the Apache Thrift protocol",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -42,8 +42,8 @@
     "express": ">=4.0.0 <5.0.0"
   },
   "devDependencies": {
-    "@creditkarma/thrift-client": "^0.9.0-alpha.2",
-    "@creditkarma/thrift-server-core": "^0.9.0-alpha.2",
+    "@creditkarma/thrift-client": "^0.9.0-alpha.3",
+    "@creditkarma/thrift-server-core": "^0.9.0-alpha.3",
     "@creditkarma/thrift-typescript": "^2.0.7",
     "@types/body-parser": "^1.16.5",
     "@types/code": "^4.0.4",
