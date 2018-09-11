@@ -2,6 +2,10 @@
 
 Hapi plugin for processing Thrift requests.
 
+### Note
+
+As of `v0.9.x` we have updated to use Hapi 17.
+
 ## Usage
 
 Adding Thrift support to Hapi is as easy as just including the provided plugin. Because we are just including a plugin it is easy for the same server to support APIs beyond Thrift RPC, such as REST.
@@ -89,20 +93,16 @@ server.register(ThriftServerHapi<Calculator.Processor>({
         serviceName: 'calculator-service',
         handler: processor,
     }
-}), err => {
-    if (err) {
-        throw err
-    }
-})
-
-/**
- * Start your hapi server
- */
-server.start((err) => {
-    if (err) {
-        throw err
-    }
-    server.log('info', `Server running on port ${port}`)
+}).then(() => {
+    /**
+     * Start your hapi server
+     */
+    server.start((err) => {
+        if (err) {
+            throw err
+        }
+        server.log('info', `Server running on port ${port}`)
+    })
 })
 ```
 
@@ -128,31 +128,33 @@ import { Calculator } from './codegen/calculator'
 
 const PORT: number = 8080
 
-const server: Hapi.Server = createThriftServer<Calculator.Processor>({
-    path: '/thrift',
-    port: PORT,
-    thriftOptions: {
-        serviceName: 'calculator-service',
-        handler: new Calculator.Processor({
-            add(left: number, right: number, context?: express.Request): number {
-                return left + right
-            },
-            subtract(left: number, right: number, context?: express.Request): number {
-                return left - right
-            },
-        })
-    }
-})
+async function startServer(): Promise<void> {
+    const server: Hapi.Server = await createThriftServer<Calculator.Processor>({
+        path: '/thrift',
+        port: PORT,
+        thriftOptions: {
+            serviceName: 'calculator-service',
+            handler: new Calculator.Processor({
+                add(left: number, right: number, context?: express.Request): number {
+                    return left + right
+                },
+                subtract(left: number, right: number, context?: express.Request): number {
+                    return left - right
+                },
+            })
+        }
+    })
 
-/**
- * Start your hapi server
- */
-server.start((err) => {
-    if (err) {
-        throw err
-    }
-    server.log('info', `Server running on port ${port}`)
-})
+    /**
+     * Start your hapi server
+     */
+    server.start((err) => {
+        if (err) {
+            throw err
+        }
+        server.log('info', `Server running on port ${port}`)
+    })
+}
 ```
 
 ### Observability
@@ -175,37 +177,33 @@ const PORT = 8080
 const HOSTNAME = 'localhost'
 const SERVICE_NAME = 'calculator-service'
 
-const server: Hapi.Server = createThriftServer({
-    port: PORT,
-    path: HOSTNAME,
-    thriftOptions: {
-        serviceName: SERVICE_NAME,
-        handler: new Calculator.Processor({
-            add(left: number, right: number, context?: express.Request): number {
-                return left + right
-            },
-            subtract(left: number, right: number, context?: express.Request): number {
-                return left - right
-            },
-        })
-    },
-})
+async function startServer(): Promise<void> {
+    const server: Hapi.Server = await createThriftServer({
+        port: PORT,
+        path: HOSTNAME,
+        thriftOptions: {
+            serviceName: SERVICE_NAME,
+            handler: new Calculator.Processor({
+                add(left: number, right: number, context?: express.Request): number {
+                    return left + right
+                },
+                subtract(left: number, right: number, context?: express.Request): number {
+                    return left - right
+                },
+            })
+        },
+    })
 
-server.register(
-    ZipkinTracingHapi({
-        localServiceName: SERVICE_NAME,
-        endpoint: 'http://localhost:9411/api/v1/spans',
-        sampleRate: 0.1
-    }),
-    (err: any) => {
-        if (err) {
-            console.log('error: ', err)
-            throw err
-        }
-    },
-)
+    await server.register({
+        plugin: ZipkinTracingHapi({
+            localServiceName: SERVICE_NAME,
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            sampleRate: 0.1
+        }),
+    })
 
-server.start()
+    server.start()
+}
 ```
 
 In order for tracing to be useful other services in your system will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-express` and `thrift-client`. The provided plugins in Thrift Server only support HTTP transport at the moment.
