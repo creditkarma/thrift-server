@@ -15,6 +15,12 @@ export interface IRequestContext {
     headers: IRequestHeaders
 }
 
+export interface IServiceDetails<T = any> {
+    processor: IThriftProcessor<T>
+    transport: TransportType
+    protocol: ProtocolType
+}
+
 /**
  * Options for any Thrift Server
  *
