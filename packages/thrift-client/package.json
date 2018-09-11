@@ -47,8 +47,8 @@
   },
   "peerDependencies": {
     "@creditkarma/thrift-server-core": "0.9.x",
-    "@types/request": "^2.47.1",
-    "request": "^2.88.0"
+    "@types/request": ">=2.0.0 <3.0.0",
+    "request": ">=2.0.0 <3.0.0"
   },
   "devDependencies": {
     "@creditkarma/dynamic-config": "~0.7.16",

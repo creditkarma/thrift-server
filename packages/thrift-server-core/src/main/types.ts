@@ -11,8 +11,14 @@ export interface IRequestHeaders {
 }
 
 export interface IRequestContext {
-    traceId: TraceId,
+    traceId: TraceId
     headers: IRequestHeaders
+}
+
+export interface IServiceDetails<T = any> {
+    processor: IThriftProcessor<T>
+    transport: TransportType
+    protocol: ProtocolType
 }
 
 /**
@@ -23,7 +29,7 @@ export interface IRequestContext {
  * transport<TransportType> - name of the transport to use
  * protocol<ProtocolType> - name of the protocol to use
  */
-export interface IThriftServerOptions<TProcessor> {
+export interface IThriftServerOptions<Context, TProcessor extends IThriftProcessor<Context>> {
     serviceName: string
     handler: TProcessor
     transport?: TransportType
@@ -45,7 +51,30 @@ export abstract class ThriftConnection<Context = void> implements IThriftConnect
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class StructLike {
+export interface IThriftAnnotations {
+    [name: string]: string
+}
+
+export interface IFieldAnnotations {
+    [fieldName: string]: IThriftAnnotations
+}
+
+export interface IMethodAnnotations {
+    [methodName: string]: {
+        annotations: IThriftAnnotations
+        fieldAnnotations: IFieldAnnotations,
+    }
+}
+
+export interface IStructLike {
+    readonly _annotations?: IThriftAnnotations
+    readonly _fieldAnnotations?: IFieldAnnotations
+    write(output: TProtocol): void
+}
+
+export abstract class StructLike implements IStructLike {
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _fieldAnnotations?: IFieldAnnotations = {}
     public abstract write(output: TProtocol): void
 }
 
@@ -74,16 +103,21 @@ export interface ITransportConstructor {
 }
 
 export abstract class ThriftClient<Context = any> {
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _fieldAnnotatons?: IFieldAnnotations = {}
+
     protected _requestId: number
     protected transport: ITransportConstructor
     protected protocol: IProtocolConstructor
     protected connection: IThriftConnection<Context>
+
     constructor(connection: IThriftConnection<Context>) {
         this._requestId = 0
         this.transport = connection.Transport
         this.protocol = connection.Protocol
         this.connection = connection
     }
+
     protected incrementRequestId(): number {
         return this._requestId += 1
     }
@@ -94,7 +128,16 @@ export interface IClientConstructor<TClient, Context> {
 }
 
 export interface IThriftProcessor<Context> {
+    readonly _annotations?: IThriftAnnotations
+    readonly _methodAnnotations?: IMethodAnnotations
     process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
+}
+
+export abstract class ThriftProcessor<Context> implements IThriftProcessor<Context> {
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _methodAnnotations?: IMethodAnnotations = {}
+
+    public abstract process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {

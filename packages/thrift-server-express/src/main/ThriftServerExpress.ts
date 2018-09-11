@@ -3,17 +3,31 @@ import {
     getTransport,
     IProtocolConstructor,
     IThriftProcessor,
-    IThriftServerOptions,
     ITransportConstructor,
     process,
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
+
 import * as express from 'express'
 
+import {
+    IExpressServerOptions,
+} from './types'
+
+type ThriftRequest =
+    express.Request & {
+        thrift?: {
+            requestMethod: string
+            processor: IThriftProcessor<express.Request>
+            transport: string
+            protocol: string,
+        },
+    }
+
 export function ThriftServerExpress<TProcessor extends IThriftProcessor<express.Request>>(
-    pluginOptions: IThriftServerOptions<TProcessor>,
+    pluginOptions: IExpressServerOptions<TProcessor>,
 ): express.RequestHandler {
-    return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
+    return (request: ThriftRequest, response: express.Response, next: express.NextFunction): void => {
         const Transport: ITransportConstructor = getTransport(pluginOptions.transport)
         const Protocol: IProtocolConstructor = getProtocol(pluginOptions.protocol)
         const buffer: Buffer = request.body
@@ -22,10 +36,11 @@ export function ThriftServerExpress<TProcessor extends IThriftProcessor<express.
             buffer,
             Transport,
             Protocol,
-        );
+        )
 
-        (request as any).__thrift = {
+        request.thrift = {
             requestMethod: method,
+            processor: pluginOptions.handler,
             transport: pluginOptions.transport || 'buffered',
             protocol: pluginOptions.protocol || 'binary',
         }

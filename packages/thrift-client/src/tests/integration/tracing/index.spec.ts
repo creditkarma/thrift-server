@@ -37,7 +37,6 @@ describe('Tracing', () => {
     let collectServer: IMockCollector
 
     before(async () => {
-        console.log('before')
         calcServer = await calculatorService(1)
         addServer = await addService(1)
         clientServer = await createClientServer(1)
@@ -51,7 +50,6 @@ describe('Tracing', () => {
     })
 
     after(async () => {
-        console.log('after')
         return new Promise((resolve, reject) => {
             clientServer.close(() => {
                 clientServer.unref()
@@ -101,11 +99,8 @@ describe('Tracing', () => {
                     },
                 }),
             ]).then((val: any) => {
-                console.log('val: ', val)
                 expect(val).to.equal(['result: 14', 'result: 17'])
-                console.log('wait')
                 setTimeout(() => {
-                    console.log('start')
                     const result = collectServer.traces()
                     expect(result[traceId_1]).to.exist()
                     expect(result[traceId_2]).to.exist()
