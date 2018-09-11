@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-core",
-  "version": "0.8.3-alpha.4",
+  "version": "0.9.0-alpha.2",
   "description": "Thrift core library in TypeScript",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -31,19 +31,17 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
   "devDependencies": {
-    "@types/code": "^4.0.3",
-    "@types/debug": "0.0.30",
+    "@types/code": "^4.0.4",
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
-    "@types/q": "^1.0.5",
-    "@types/rimraf": "0.0.28",
-    "body-parser": "^1.17.2",
-    "code": "^4.1.0",
-    "express": "^4.16.0",
-    "lab": "^14.2.0",
+    "@types/rimraf": "2.0.2",
+    "body-parser": "^1.18.3",
+    "code": "^5.2.0",
+    "express": "^4.16.3",
+    "lab": "^16.0.0",
     "rimraf": "^2.6.2",
-    "tslint": "^5.10.0",
-    "tslint-eslint-rules": "^4.1.1",
+    "tslint": "^5.11.0",
+    "tslint-eslint-rules": "^5.4.0",
     "typescript": "2.9.x"
   },
   "dependencies": {
@@ -52,6 +50,9 @@
     "bytebuffer": "^5.0.1",
     "node-int64": "^0.4.0",
     "zipkin": "^0.14.1",
-    "zipkin-transport-http": "^0.13.0"
+    "zipkin-transport-http": "^0.14.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

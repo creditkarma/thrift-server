@@ -7,8 +7,7 @@
     "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated **/generated-apache",
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
-    "postinstall": "lerna bootstrap --hoist",
-    "prebootstrap": "npm install",
+    "postinstall": "lerna bootstrap --hoist --no-ci",
     "pretest": "npm run build",
     "test": "lerna exec -- npm run test",
     "release:default": "lerna version --conventional-commits --no-push --skip-npm --yes --force-publish=* && npm run release:push",
@@ -38,16 +37,16 @@
     "url": "https://github.com/creditkarma/thrift-server"
   },
   "devDependencies": {
-    "@types/code": "^4.0.3",
+    "@types/code": "^4.0.4",
     "@types/debug": "0.0.30",
     "@types/lab": "^11.1.0",
-    "@types/node": "^8.0.23",
-    "code": "^4.1.0",
-    "lab": "^14.2.0",
+    "@types/node": "^8.0.31",
+    "code": "^5.2.0",
+    "lab": "^16.0.0",
     "lerna": "^3.1.4",
-    "rimraf": "^2.6.1",
-    "tslint": "^5.10.0",
-    "tslint-eslint-rules": "^5.3.1",
+    "rimraf": "^2.6.2",
+    "tslint": "^5.11.0",
+    "tslint-eslint-rules": "^5.4.0",
     "typescript": "2.9.x",
     "watch": "^1.0.2"
   }

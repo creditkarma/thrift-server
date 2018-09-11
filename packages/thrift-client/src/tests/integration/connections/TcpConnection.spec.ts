@@ -52,19 +52,23 @@ const frameCodec: thrift.ThriftFrameCodec = new thrift.ThriftFrameCodec()
 describe('TcpConnection', () => {
     let server: net.Server
 
-    before((done) => {
-        server = createServer()
-        server.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
-            console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
-            done()
+    before(async () => {
+        return new Promise((resolve, reject) => {
+            server = createServer()
+            server.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
+                console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
+                resolve()
+            })
         })
     })
 
-    after((done) => {
-        server.close(() => {
-            server.unref()
-            console.log(`TCP server closed`)
-            done()
+    after(async () => {
+        return new Promise((resolve, reject) => {
+            server.close(() => {
+                server.unref()
+                console.log(`TCP server closed`)
+                resolve()
+            })
         })
     })
 
@@ -192,99 +196,105 @@ describe('TcpConnection', () => {
         let client: Calculator.Client<IMetadata>
         let mockServer: net.Server
 
-        afterEach((done) => {
-            mockServer.close(() => {
-                mockServer.unref()
-                connection.destory().then(() => {
-                    console.log('Connection destroyed')
-                    done()
-                })
-            })
-        })
-
-        it('should handle appending data to payload', (done) => {
-            connection = new TcpConnection({
-                hostName: 'localhost',
-                port: PORT,
-            })
-
-            connection.register(
-                ThriftContextFilter<IMetadata, IMetadata>({
-                    RequestCodec: MetadataCodec,
-                    ResponseCodec: MetadataCodec,
-                }),
-            )
-
-            client = new Calculator.Client(connection)
-
-            mockServer = net.createServer((socket: net.Socket): void => {
-                console.log('TCP server created')
-                socket.addListener('data', (chunk: Buffer) => {
-                    const meta: IMetadata = { traceId: 9 }
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result = new Calculator.AddResult({ success: 89 })
-                    result.write(output)
-                    output.writeMessageEnd()
-                    const data: Buffer = writer.flush()
-
-                    appendThriftObject(meta, data, MetadataCodec).then((extended: Buffer) => {
-                        socket.write(frameCodec.encode(extended))
+        afterEach(async () => {
+            return new Promise((resolve, reject) => {
+                mockServer.close(() => {
+                    mockServer.unref()
+                    connection.destory().then(() => {
+                        console.log('Connection destroyed')
+                        resolve()
                     })
                 })
             })
+        })
 
-            mockServer.listen(PORT, () => {
-                console.log(`TCP server listening on port: ${PORT}`)
-                client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
-                    expect(response).to.equal(89)
-                    done()
-                }).catch((err: any) => {
-                    console.log('err: ', err)
-                    done(err)
+        it('should handle appending data to payload', async () => {
+            return new Promise((resolve, reject) => {
+                connection = new TcpConnection({
+                    hostName: 'localhost',
+                    port: PORT,
+                })
+
+                connection.register(
+                    ThriftContextFilter<IMetadata, IMetadata>({
+                        RequestCodec: MetadataCodec,
+                        ResponseCodec: MetadataCodec,
+                    }),
+                )
+
+                client = new Calculator.Client(connection)
+
+                mockServer = net.createServer((socket: net.Socket): void => {
+                    console.log('TCP server created')
+                    socket.addListener('data', (chunk: Buffer) => {
+                        const meta: IMetadata = { traceId: 9 }
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        const result = new Calculator.AddResult({ success: 89 })
+                        result.write(output)
+                        output.writeMessageEnd()
+                        const data: Buffer = writer.flush()
+
+                        appendThriftObject(meta, data, MetadataCodec).then((extended: Buffer) => {
+                            socket.write(frameCodec.encode(extended))
+                        })
+                    })
+                })
+
+                mockServer.listen(PORT, () => {
+                    console.log(`TCP server listening on port: ${PORT}`)
+                    client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
+                        expect(response).to.equal(89)
+                        resolve()
+                    }).catch((err: any) => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
                 })
             })
         })
 
-        it('should work with only a request context', (done) => {
-            connection = new TcpConnection({
-                hostName: 'localhost',
-                port: PORT,
-            })
-
-            connection.register(
-                ThriftContextFilter<IMetadata, IMetadata>({
-                    RequestCodec: MetadataCodec,
-                    ResponseCodec: MetadataCodec,
-                }),
-            )
-
-            client = new Calculator.Client(connection)
-
-            mockServer = net.createServer((socket: net.Socket): void => {
-                console.log('TCP server created')
-                socket.addListener('data', (chunk: Buffer) => {
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result: Calculator.IAddResult = { success: 102 }
-                    Calculator.AddResultCodec.encode(result, output)
-                    output.writeMessageEnd()
-                    const data: Buffer = writer.flush()
-
-                    socket.write(frameCodec.encode(data))
+        it('should work with only a request context', async () => {
+            return new Promise((resolve, reject) => {
+                connection = new TcpConnection({
+                    hostName: 'localhost',
+                    port: PORT,
                 })
-            })
 
-            mockServer.listen(PORT, () => {
-                console.log(`TCP server listening on port: ${PORT}`)
-                client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
-                    expect(response).to.equal(102)
-                    done()
-                }).catch((err: any) => {
-                    console.log('err: ', err)
-                    done(err)
+                connection.register(
+                    ThriftContextFilter<IMetadata, IMetadata>({
+                        RequestCodec: MetadataCodec,
+                        ResponseCodec: MetadataCodec,
+                    }),
+                )
+
+                client = new Calculator.Client(connection)
+
+                mockServer = net.createServer((socket: net.Socket): void => {
+                    console.log('TCP server created')
+                    socket.addListener('data', (chunk: Buffer) => {
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        const result: Calculator.IAddResult = { success: 102 }
+                        Calculator.AddResultCodec.encode(result, output)
+                        output.writeMessageEnd()
+                        const data: Buffer = writer.flush()
+
+                        socket.write(frameCodec.encode(data))
+                    })
+                })
+
+                mockServer.listen(PORT, () => {
+                    console.log(`TCP server listening on port: ${PORT}`)
+                    client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
+                        expect(response).to.equal(102)
+                        resolve()
+                    }).catch((err: any) => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
                 })
             })
         })
@@ -297,7 +307,7 @@ describe('TcpConnection', () => {
         let collectServer: IMockCollector
         let mockServer: net.Server
 
-        before((done) => {
+        before(async () => {
             connection = new TcpConnection({
                 hostName: 'localhost',
                 port: PORT,
@@ -315,65 +325,68 @@ describe('TcpConnection', () => {
 
             client = new Calculator.Client(connection)
 
-            mockCollector().then((collector: IMockCollector) => {
+            return mockCollector().then((collector: IMockCollector) => {
                 collectServer = collector
-                done()
             })
         })
 
-        after((done) => {
-            collectServer.close().then(() => {
-                mockServer.close(() => {
-                    console.log('TCP server closed')
-                    mockServer.unref()
-                    connection.destory().then(() => {
-                        console.log('Connection destroyed')
-                        done()
+        after(async () => {
+            return new Promise((resolve, reject) => {
+                collectServer.close().then(() => {
+                    mockServer.close(() => {
+                        console.log('TCP server closed')
+                        mockServer.unref()
+                        connection.destory().then(() => {
+                            console.log('Connection destroyed')
+                            resolve()
+                        })
                     })
                 })
             })
         })
 
-        it('should handle appending data to payload', (done) => {
-            let count: number = 0
-            mockServer = net.createServer((socket: net.Socket): void => {
-                console.log('TCP server created')
-                socket.addListener('data', (chunk: Buffer) => {
-                    if (count < 1) {
-                        count += 1
-                        const upgradeResponse: TTwitter.IUpgradeReply = {}
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
-                        output.writeMessageEnd()
-                        socket.write(frameCodec.encode(writer.flush()))
+        it('should handle appending data to payload', async () => {
+            return new Promise((resolve, reject) => {
+                let count: number = 0
+                mockServer = net.createServer((socket: net.Socket): void => {
+                    console.log('TCP server created')
+                    socket.addListener('data', (chunk: Buffer) => {
+                        if (count < 1) {
+                            count += 1
+                            const upgradeResponse: TTwitter.IUpgradeReply = {}
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                            output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                            TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
+                            output.writeMessageEnd()
+                            socket.write(frameCodec.encode(writer.flush()))
 
-                    } else {
-                        const responseHeader = new TTwitter.ResponseHeader({})
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result = new Calculator.AddResult({ success: 61 })
-                        result.write(output)
-                        output.writeMessageEnd()
-                        const data: Buffer = writer.flush()
+                        } else {
+                            const responseHeader = new TTwitter.ResponseHeader({})
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                            output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                            const result = new Calculator.AddResult({ success: 61 })
+                            result.write(output)
+                            output.writeMessageEnd()
+                            const data: Buffer = writer.flush()
 
-                        appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
-                            socket.write(frameCodec.encode(extended))
-                        })
-                    }
+                            appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+                                socket.write(frameCodec.encode(extended))
+                            })
+                        }
+                    })
                 })
-            })
 
-            mockServer.listen(PORT, () => {
-                console.log(`TCP server listening on port: ${PORT}`)
-                client.add(2, 3).then((response: number) => {
-                    expect(response).to.equal(61)
-                    done()
-                }).catch((err: any) => {
-                    console.log('err: ', err)
-                    done(err)
+                mockServer.listen(PORT, () => {
+                    console.log(`TCP server listening on port: ${PORT}`)
+                    client.add(2, 3).then((response: number) => {
+                        expect(response).to.equal(61)
+                        resolve()
+                    }).catch((err: any) => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
                 })
             })
         })

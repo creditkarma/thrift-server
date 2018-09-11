@@ -13,7 +13,7 @@ import {
     AddService,
 } from '../generated/add-service'
 
-export function createServer(sampleRate: number = 0): Hapi.Server {
+export async function createServer(sampleRate: number = 0): Promise<Hapi.Server> {
     /**
      * Implementation of our thrift service.
      *
@@ -36,7 +36,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
     /**
      * Creates Hapi server with thrift endpoint.
      */
-    const server: Hapi.Server = createThriftServer({
+    const server: Hapi.Server = await createThriftServer({
         port: ADD_SERVER_CONFIG.port,
         path: ADD_SERVER_CONFIG.path,
         thriftOptions: {
@@ -46,20 +46,14 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
     })
 
     if (sampleRate > 0) {
-        server.register(
-            ZipkinTracingHapi({
+        await server.register({
+            plugin: ZipkinTracingHapi({
                 localServiceName: 'add-service',
                 endpoint: 'http://localhost:9411/api/v1/spans',
                 sampleRate,
                 httpInterval: 0,
             }),
-            (err: any) => {
-                if (err) {
-                    console.log('error: ', err)
-                    throw err
-                }
-            },
-        )
+        })
     }
 
     /**
@@ -69,8 +63,8 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('PASS')
+        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+            return reply.response('PASS')
         },
     })
 

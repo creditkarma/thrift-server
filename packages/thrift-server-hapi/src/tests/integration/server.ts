@@ -16,7 +16,7 @@ import {
   Work,
 } from './generated/calculator'
 
-export function createServer(): Hapi.Server {
+export async function createServer(): Promise<Hapi.Server> {
     /**
      * Implementation of our thrift service.
      *
@@ -68,7 +68,7 @@ export function createServer(): Hapi.Server {
         },
     }
 
-    const server: Hapi.Server = createThriftServer({
+    const server: Hapi.Server = await createThriftServer({
         port: SERVER_CONFIG.port,
         path: SERVER_CONFIG.path,
         thriftOptions: {
@@ -84,8 +84,8 @@ export function createServer(): Hapi.Server {
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('PASS')
+        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit) {
+            return reply.response('PASS')
         },
     })
 

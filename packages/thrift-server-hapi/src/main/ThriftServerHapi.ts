@@ -24,19 +24,22 @@ import {
 export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
-    const hapiThriftPlugin: ThriftHapiPlugin = {
-        register(server: Hapi.Server, nothing: never, next) {
-            const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
+    const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
 
-            const Transport: ITransportConstructor = getTransport(
-                options.transport,
-            )
+    const Transport: ITransportConstructor = getTransport(
+        options.transport,
+    )
 
-            const Protocol: IProtocolConstructor = getProtocol(
-                options.protocol,
-            )
+    const Protocol: IProtocolConstructor = getProtocol(
+        options.protocol,
+    )
 
-            server.plugins.thrift = {
+    return {
+        name: require('../../package.json').name,
+        version: require('../../package.json').version,
+        multiple: true,
+        async register(server: Hapi.Server, nothing: void): Promise<void> {
+            (server.plugins as any).thrift = {
                 services: {
                     [pluginOptions.thriftOptions.serviceName]: {
                         processor: pluginOptions.thriftOptions.handler,
@@ -49,50 +52,34 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
-                handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
-                    try {
-                        const buffer: Buffer = request.payload
+                handler: (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
+                    const buffer: Buffer = (request.payload as Buffer)
 
-                        const method: string = readThriftMethod(
-                            buffer,
-                            Transport,
-                            Protocol,
-                        )
+                    const method: string = readThriftMethod(
+                        buffer,
+                        Transport,
+                        Protocol,
+                    );
 
-                        request.plugins.thrift = {
-                            requestMethod: method,
-                        }
-
-                        reply(
-                            process<Hapi.Request>({
-                                processor: options.handler,
-                                buffer,
-                                Transport,
-                                Protocol,
-                                context: request,
-                            }),
-                        )
-                    } catch (err) {
-                        reply(err)
+                    (request.plugins as any).thrift = {
+                        requestMethod: method,
                     }
+
+                    return process<Hapi.Request>({
+                        processor: options.handler,
+                        buffer,
+                        Transport,
+                        Protocol,
+                        context: request,
+                    })
                 },
-                config: {
+                options: {
                     payload: {
                         parse: false,
                     },
                     auth: pluginOptions.auth,
                 },
             })
-
-            next()
         },
     }
-
-    hapiThriftPlugin.register.attributes = {
-        name: require('../../package.json').name,
-        version: require('../../package.json').version,
-        multiple: true,
-    }
-
-    return hapiThriftPlugin
 }

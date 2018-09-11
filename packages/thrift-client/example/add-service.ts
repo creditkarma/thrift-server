@@ -46,29 +46,15 @@ import {
         },
     })
 
-    server.register(
-        ZipkinTracingHapi({
+    await server.register({
+        plugin: ZipkinTracingHapi({
             localServiceName: 'add-service',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate: 1.0,
             httpInterval: 1000,
             httpTimeout: 5000,
         }),
-        (err: any) => {
-            if (err) {
-                console.log('error: ', err)
-                throw err
-            } else {
-                server.start((err: any) => {
-                    if (err) {
-                        throw err
-                    }
+    })
 
-                    if (server.info !== null) {
-                        console.log(`Add service running at: ${server.info.uri}`)
-                    }
-                })
-            }
-        },
-    )
+    await server.start()
 }())
