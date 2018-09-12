@@ -47,7 +47,7 @@ export function ZipkinTracingHapi({
             const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-            server.ext('onPostAuth', (request, reply) => {
+            server.ext('onPreHandler', (request, reply) => {
                 const methodName: string = readThriftMethod(
                     request.payload,
                     getTransport(transport),
