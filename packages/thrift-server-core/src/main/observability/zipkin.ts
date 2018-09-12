@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events'
+
 import {
     BatchRecorder,
     ConsoleRecorder,
@@ -15,8 +17,11 @@ import { IRequestHeaders } from '../types'
 
 import { ZipkinHeaders } from './constants'
 
+import * as logger from '../logger'
+
 import {
     ErrorLogFunc,
+    IEventLoggers,
     IZipkinTracerConfig,
 } from './types'
 
@@ -49,6 +54,31 @@ type HttpLoggerOptions = {
     headers?: IRequestHeaders,
 }
 
+function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEventLoggers): void {
+    for (const key in eventLoggers) {
+        if (eventLoggers) {
+            switch (key) {
+                case 'error': {
+                    const handler = eventLoggers[key]
+                    if (handler !== undefined) {
+                        emitter.on('error', handler)
+                    }
+                    break
+                }
+                case 'success': {
+                    const handler = eventLoggers[key]
+                    if (handler !== undefined) {
+                        emitter.on('success', handler)
+                    }
+                    break
+                }
+                default:
+                    logger.warn(`Unknown Zipkin event logger for ${key}.`)
+            }
+        }
+    }
+}
+
 function recorderForOptions(options: IZipkinTracerConfig): Recorder {
     if (options.endpoint !== undefined) {
         const httpOptions: HttpLoggerOptions = {
@@ -58,13 +88,13 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
             headers: options.headers,
         }
 
-        const logger: any = new HttpLogger(httpOptions)
+        const httpLogger: any = new HttpLogger(httpOptions)
 
-        if (typeof options.logger === 'function' && typeof logger.on === 'function') {
-            logger.on('error', options.logger)
+        if (options.eventLoggers && typeof httpLogger.on === 'function') {
+            applyEventLoggers(httpLogger, options.eventLoggers)
         }
 
-        return new BatchRecorder({ logger })
+        return new BatchRecorder({ logger: httpLogger })
 
     } else {
         return new ConsoleRecorder()
@@ -80,10 +110,7 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
         const headers: { [name: string]: any } = {}
         headers[ZipkinHeaders.TraceId] = traceId.traceId
         headers[ZipkinHeaders.SpanId] = traceId.spanId
-
-        traceId._parentId.ifPresent((val: string) => {
-            headers[ZipkinHeaders.ParentId] = val
-        })
+        headers[ZipkinHeaders.ParentId] = traceId.parentId || ''
 
         traceId.sampled.ifPresent((sampled: boolean) => {
             headers[ZipkinHeaders.Sampled] = sampled ? '1' : '0'

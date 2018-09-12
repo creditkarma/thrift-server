@@ -38,6 +38,11 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             localServiceName: 'calculator-client',
             endpoint: 'http://localhost:9411/api/v1/spans',
             sampleRate,
+            eventLoggers: {
+                success: (res: any) => {
+                    console.log('success: ', res)
+                },
+            },
         }))
     }
 
@@ -54,6 +59,11 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         endpoint: 'http://localhost:9411/api/v1/spans',
                         sampleRate,
                         httpInterval: 0,
+                        eventLoggers: {
+                            success: (res: any) => {
+                                console.log('success: ', res)
+                            },
+                        },
                     }) ] :
                     []
             ),

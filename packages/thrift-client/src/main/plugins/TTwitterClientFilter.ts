@@ -11,6 +11,8 @@ import {
     TransportType,
     TTransport,
     ZipkinHeaders,
+    IEventLoggers,
+    defaultErrorLogger,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -56,6 +58,7 @@ export interface ITTwitterFileterOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    eventLoggers?: IEventLoggers
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
@@ -107,6 +110,7 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
+    eventLoggers = { error: defaultErrorLogger },
 }: ITTwitterFileterOptions): IThriftMiddlewareConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -116,13 +120,13 @@ export function TTwitterClientFilter<T>({
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
-                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
+                    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, eventLoggers })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
                     const requestContext: IRequestContext = readRequestContext(context, tracer)
                     tracer.setId(requestContext.traceId)
 
                     return tracer.scoped(() => {
-                        const { headers } = instrumentation.recordRequest({ headers: {} }, '', 'post')
+                        const { headers } = instrumentation.recordRequest({ headers: {} }, '/', 'post')
                         const requestHeader: TTwitter.RequestHeader = new TTwitter.RequestHeader({
                             trace_id: ((headers as any)[ZipkinHeaders.TraceId]),
                             span_id: ((headers as any)[ZipkinHeaders.SpanId]),
