@@ -12,8 +12,8 @@ import {
     ThriftContext,
 } from '../types'
 
-import { TcpConnection } from './TcpConnection'
 import * as logger from '../logger'
+import { TcpConnection } from './TcpConnection'
 
 export * from './HttpConnection'
 export * from './TcpConnection'
