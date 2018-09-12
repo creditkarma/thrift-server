@@ -3,7 +3,19 @@ import * as Hapi from 'hapi'
 import {
     IThriftProcessor,
     IThriftServerOptions,
+    TransportType,
+    ProtocolType,
 } from '@creditkarma/thrift-server-core'
+
+export interface IServiceDetails {
+    processor: IThriftProcessor<Hapi.Request>
+}
+
+export interface IServerDetails {
+    transport: TransportType
+    protocol: ProtocolType
+    services: IServiceDetails
+}
 
 export interface IHandlerOptions<TProcessor> {
     service: TProcessor
