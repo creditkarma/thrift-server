@@ -9,6 +9,7 @@ import { CoreOptions } from 'request'
 import {
     addL5Dheaders,
     containsZipkinHeaders,
+    defaultErrorLogger,
     getTracerForService,
     hasL5DHeader,
     IRequestContext,
@@ -64,8 +65,9 @@ export function ZipkinTracingThriftClient({
     httpInterval,
     httpTimeout,
     headers,
+    logger = defaultErrorLogger,
 }: IZipkinPluginOptions): IThriftMiddleware<CoreOptions> {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers })
+    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, logger })
     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
 
     return {

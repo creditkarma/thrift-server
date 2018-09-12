@@ -12,8 +12,13 @@ import {
 import { HttpLogger } from 'zipkin-transport-http'
 
 import { IRequestHeaders } from '../types'
+
 import { ZipkinHeaders } from './constants'
-import { IZipkinTracerConfig } from './types'
+
+import {
+    ErrorLogFunc,
+    IZipkinTracerConfig,
+} from './types'
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
@@ -53,13 +58,21 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
             headers: options.headers,
         }
 
-        return new BatchRecorder({
-            logger: new HttpLogger(httpOptions),
-        })
+        const logger: any = new HttpLogger(httpOptions)
+
+        if (typeof options.logger === 'function' && typeof logger.on === 'function') {
+            logger.on('error', options.logger)
+        }
+
+        return new BatchRecorder({ logger })
 
     } else {
         return new ConsoleRecorder()
     }
+}
+
+export const defaultErrorLogger: ErrorLogFunc = (err: Error): void => {
+    console.error(err.message)
 }
 
 export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any } {

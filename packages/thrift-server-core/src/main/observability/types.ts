@@ -1,5 +1,7 @@
 import { IRequestHeaders, ProtocolType, TransportType } from '../types'
 
+export type ErrorLogFunc = (err: Error) => void
+
 export interface ITraceId {
     spanId: string
     parentId: string
@@ -20,6 +22,7 @@ export interface IZipkinPluginOptions {
     headers?: IRequestHeaders
     transport?: TransportType
     protocol?: ProtocolType
+    logger?: ErrorLogFunc
 }
 
 export interface IZipkinTracerConfig {
@@ -29,4 +32,5 @@ export interface IZipkinTracerConfig {
     httpInterval?: number
     httpTimeout?: number
     headers?: IRequestHeaders
+    logger?: ErrorLogFunc
 }
