@@ -16,6 +16,8 @@ import {
     ThriftHapiPlugin,
 } from './types'
 
+import * as logger from './logger'
+
 /**
  * Create the thrift plugin for Hapi
  *
@@ -39,12 +41,22 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
         version: require('../../package.json').version,
         multiple: true,
         async register(server: Hapi.Server, nothing: void): Promise<void> {
+            if (
+                (server.plugins as any).thrift !== undefined &&
+                (
+                    (server.plugins as any).thrift.transport !== (options.transport || 'buffered') ||
+                    (server.plugins as any).thrift.protocol !== (options.protocol || 'binary')
+                )
+            ) {
+                logger.error(`You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`)
+            }
+
             (server.plugins as any).thrift = {
+                transport: options.transport || 'buffered',
+                protocol: options.protocol || 'binary',
                 services: {
                     [pluginOptions.thriftOptions.serviceName]: {
                         processor: pluginOptions.thriftOptions.handler,
-                        transport: options.transport || 'buffered',
-                        protocol: options.protocol || 'binary',
                     },
                 },
             }
