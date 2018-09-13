@@ -49,7 +49,8 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         server.register(
             ZipkinTracingHapi({
                 localServiceName: 'add-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
+                endpoint: process.env.ZIPKIN_ENDPOINT,
+                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
                 eventLoggers: {

@@ -58,7 +58,8 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                     [ ZipkinTracingThriftClient({
                         localServiceName: 'calculator-service',
                         remoteServiceName: 'add-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
+                        endpoint: process.env.ZIPKIN_ENDPOINT,
+                        zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                         sampleRate,
                         httpInterval: 0,
                         eventLoggers: {
@@ -178,7 +179,8 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         server.register(
             ZipkinTracingHapi({
                 localServiceName: 'calculator-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
+                endpoint: process.env.ZIPKIN_ENDPOINT,
+                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
                 eventLoggers: {
@@ -201,6 +203,23 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
         hostName: CALC_SERVER_CONFIG.hostName,
         port: CALC_SERVER_CONFIG.port,
         path: CALC_SERVER_CONFIG.path,
+        register: (
+            (sampleRate > 0) ?
+                [ ZipkinTracingThriftClient({
+                    localServiceName: 'calculator-service',
+                    remoteServiceName: 'add-service',
+                    endpoint: process.env.ZIPKIN_ENDPOINT,
+                    zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    sampleRate,
+                    httpInterval: 0,
+                    eventLoggers: {
+                        success: (res: any) => {
+                            console.log('success: ', res)
+                        },
+                    },
+                }) ] :
+                []
+        ),
     })
 
     server.route({

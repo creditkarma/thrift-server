@@ -36,7 +36,8 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
     if (sampleRate > 0) {
         app.use(ZipkinTracingExpress({
             localServiceName: 'calculator-client',
-            endpoint: 'http://localhost:9411/api/v1/spans',
+            endpoint: process.env.ZIPKIN_ENDPOINT,
+            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
             sampleRate,
             eventLoggers: {
                 success: (res: any) => {
@@ -56,7 +57,8 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                     [ ZipkinTracingThriftClient({
                         localServiceName: 'calculator-client',
                         remoteServiceName: 'calculator-service',
-                        endpoint: 'http://localhost:9411/api/v1/spans',
+                        endpoint: process.env.ZIPKIN_ENDPOINT,
+                        zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                         sampleRate,
                         httpInterval: 0,
                         eventLoggers: {

@@ -5,6 +5,8 @@ import {
     ConsoleRecorder,
     Context,
     ExplicitContext,
+    jsonEncoder,
+    JsonEncoder,
     Recorder,
     sampler,
     TraceId,
@@ -45,13 +47,12 @@ const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 /**
  * `http://localhost:9411/api/v1/spans`
  */
-
-type HttpLoggerOptions = {
+interface IHttpLoggerOptions {
     endpoint: string
     httpInterval?: number
-    httpTimeout?: number,
-} & {
-    headers?: IRequestHeaders,
+    httpTimeout?: number
+    headers?: IRequestHeaders
+    jsonEncoder?: JsonEncoder
 }
 
 function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEventLoggers): void {
@@ -72,8 +73,9 @@ function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEv
                     }
                     break
                 }
-                default:
+                default: {
                     logger.warn(`Unknown Zipkin event logger for ${key}.`)
+                }
             }
         }
     }
@@ -81,11 +83,12 @@ function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEv
 
 function recorderForOptions(options: IZipkinTracerConfig): Recorder {
     if (options.endpoint !== undefined) {
-        const httpOptions: HttpLoggerOptions = {
+        const httpOptions: IHttpLoggerOptions = {
             endpoint: options.endpoint,
             httpInterval: options.httpInterval,
             httpTimeout: options.httpTimeout,
             headers: options.headers,
+            jsonEncoder: options.zipkinVersion === 'v2' ? jsonEncoder.JSON_V2 : jsonEncoder.JSON_V1,
         }
 
         const httpLogger: any = new HttpLogger(httpOptions)

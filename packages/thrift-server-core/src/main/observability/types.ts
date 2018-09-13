@@ -17,6 +17,8 @@ export interface ITraceId {
     traceIdHigh?: boolean
 }
 
+export type ZipkinVersion = 'v1' | 'v2'
+
 export interface IZipkinPluginOptions {
     localServiceName: string
     remoteServiceName?: string
@@ -30,6 +32,7 @@ export interface IZipkinPluginOptions {
     transport?: TransportType
     protocol?: ProtocolType
     eventLoggers?: IEventLoggers
+    zipkinVersion?: ZipkinVersion
 }
 
 export interface IZipkinTracerConfig {
@@ -40,4 +43,5 @@ export interface IZipkinTracerConfig {
     httpTimeout?: number
     headers?: IRequestHeaders
     eventLoggers?: IEventLoggers
+    zipkinVersion?: ZipkinVersion
 }

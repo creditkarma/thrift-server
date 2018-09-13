@@ -1,7 +1,9 @@
 import {
+    defaultErrorLogger,
     getProtocol,
     getTracerForService,
     getTransport,
+    IEventLoggers,
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
@@ -11,8 +13,6 @@ import {
     TransportType,
     TTransport,
     ZipkinHeaders,
-    IEventLoggers,
-    defaultErrorLogger,
 } from '@creditkarma/thrift-server-core'
 
 import {
