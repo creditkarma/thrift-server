@@ -55,12 +55,14 @@ export function ZipkinTracingHapi({
     httpTimeout,
     transport = 'buffered',
     protocol = 'binary',
+    zipkinVersion,
+    eventLoggers,
 }: IZipkinOptions): ThriftHapiPlugin {
     return {
         name: 'hapi-zipkin-plugin',
         version: pkg.version,
         async register(server: Hapi.Server, nothing: void): Promise<void> {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout })
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout, zipkinVersion, eventLoggers })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onPreHandler', (request, reply) => {

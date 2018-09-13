@@ -37,6 +37,8 @@ describe('Tracing', () => {
     let collectServer: IMockCollector
 
     before(async () => {
+        process.env.ZIPKIN_ENDPOINT = 'http://localhost:9411/api/v2/spans'
+        process.env.ZIPKIN_VERSION = 'v2'
         calcServer = await calculatorService(1)
         addServer = await addService(1)
         clientServer = await createClientServer(1)

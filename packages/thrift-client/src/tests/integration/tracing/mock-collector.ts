@@ -31,24 +31,36 @@ export function createServer(): Promise<IMockCollector> {
 
     let traces: any = {}
 
+    function recordTraces(body: Array<any>): void {
+        body.forEach((next: any) => {
+            const traceId = next.traceId
+            const id = next.id
+            if (traces[traceId] === undefined) {
+                traces[traceId] = {}
+            }
+
+            // traces[traceId][id] = next
+            traces[traceId][id] = {
+                traceId: next.traceId,
+                id: next.id,
+                parentId: next.parentId,
+                duration: next.duration,
+                serviceName: serviceName(next),
+            }
+        })
+    }
+
     app.post('/api/v1/spans', (req: express.Request, res: express.Response): void => {
         if (req.body && req.body.length) {
-            req.body.forEach((next: any) => {
-                const traceId = next.traceId
-                const id = next.id
-                if (traces[traceId] === undefined) {
-                    traces[traceId] = {}
-                }
+            recordTraces(req.body)
+        }
 
-                // traces[traceId][id] = next
-                traces[traceId][id] = {
-                    traceId: next.traceId,
-                    id: next.id,
-                    parentId: next.parentId,
-                    duration: next.duration,
-                    serviceName: serviceName(next),
-                }
-            })
+        res.sendStatus(202)
+    })
+
+    app.post('/api/v2/spans', (req: express.Request, res: express.Response): void => {
+        if (req.body && req.body.length) {
+            recordTraces(req.body)
         }
 
         res.sendStatus(202)

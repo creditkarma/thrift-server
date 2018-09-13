@@ -1,7 +1,6 @@
 import {
     InputBufferUnderrunError,
     IProtocolConstructor,
-    // IThriftField,
     ITransportConstructor,
     ThriftFrameCodec,
     TProtocol,
@@ -67,11 +66,11 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
             socket.destroy()
             reject(new Error('Timed out connecting'))
         }
-        const errorHandler = (): void => {
+        const errorHandler = (err: Error): void => {
             logger.error(`Error connecting: ${config.hostName}:${config.port}`)
             removeHandlers()
             socket.destroy()
-            reject(new Error('Error connecting'))
+            reject(err)
         }
 
         const socket: net.Socket = new net.Socket()

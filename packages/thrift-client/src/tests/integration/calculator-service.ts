@@ -50,7 +50,8 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
                         ZipkinClientFilter({
                             localServiceName: 'calculator-service',
                             remoteServiceName: 'add-service',
-                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            endpoint: process.env.ZIPKIN_ENDPOINT,
+                            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                             sampleRate,
                             httpInterval: 0,
                         }),
@@ -180,7 +181,8 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
         await server.register({
             plugin: ZipkinTracingHapi({
                 localServiceName: 'calculator-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
+                endpoint: process.env.ZIPKIN_ENDPOINT,
+                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
             }),
@@ -192,6 +194,20 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
         hostName: CALC_SERVER_CONFIG.hostName,
         port: CALC_SERVER_CONFIG.port,
         path: CALC_SERVER_CONFIG.path,
+        register: (
+            (sampleRate > 0) ?
+                [
+                    ZipkinClientFilter({
+                        localServiceName: 'calculator-client',
+                        remoteServiceName: 'calculator-service',
+                        endpoint: process.env.ZIPKIN_ENDPOINT,
+                        zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                        sampleRate,
+                        httpInterval: 0,
+                    }),
+                ] :
+                []
+        ),
     })
 
     server.route({

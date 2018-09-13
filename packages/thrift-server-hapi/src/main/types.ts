@@ -3,8 +3,8 @@ import * as Hapi from 'hapi'
 import {
     IThriftProcessor,
     IThriftServerOptions,
-    TransportType,
     ProtocolType,
+    TransportType,
 } from '@creditkarma/thrift-server-core'
 
 export interface IServiceDetails {

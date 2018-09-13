@@ -30,7 +30,8 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
         app.use([
             ZipkinTracingExpress({
                 localServiceName: 'calculator-client',
-                endpoint: 'http://localhost:9411/api/v1/spans',
+                endpoint: process.env.ZIPKIN_ENDPOINT,
+                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
             }),
@@ -49,7 +50,8 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
                         ZipkinClientFilter({
                             localServiceName: 'calculator-client',
                             remoteServiceName: 'calculator-service',
-                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            endpoint: process.env.ZIPKIN_ENDPOINT,
+                            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                             sampleRate,
                             httpInterval: 0,
                         }),
