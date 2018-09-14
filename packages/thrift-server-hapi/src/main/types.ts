@@ -11,10 +11,14 @@ export interface IServiceDetails {
     processor: IThriftProcessor<Hapi.Request>
 }
 
+export interface IServiceDetailMap {
+    [serviceName: string]: IServerDetails
+}
+
 export interface IServerDetails {
     transport: TransportType
     protocol: ProtocolType
-    services: IServiceDetails
+    services: IServiceDetailMap
 }
 
 export interface IHandlerOptions<TProcessor> {
