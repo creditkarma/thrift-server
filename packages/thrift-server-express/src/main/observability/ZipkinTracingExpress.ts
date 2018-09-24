@@ -41,8 +41,9 @@ export function ZipkinTracingExpress({
     transport = 'buffered',
     protocol = 'binary',
     eventLoggers = { error: defaultErrorLogger },
+    zipkinVersion = 'v1',
 }: IZipkinPluginOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, eventLoggers })
+    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, eventLoggers, zipkinVersion })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
     return (req: express.Request, res: express.Response, next: express.NextFunction): void => {
         tracer.scoped(() => {
