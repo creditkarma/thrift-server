@@ -13,10 +13,10 @@ import * as rp from 'request-promise-native'
 
 import {
     CLIENT_CONFIG,
-} from '../config'
+} from '../../config'
 
-import { createServer as addService } from '../add-service'
-import { createServer as calculatorService } from '../calculator-service'
+import { createServer as addService } from '../../hapi-add-service'
+import { createServer as calculatorService } from '../../hapi-calculator-service'
 import { createServer as mockCollector, IMockCollector } from './mock-collector'
 
 import {

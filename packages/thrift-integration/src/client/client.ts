@@ -4,7 +4,7 @@ import {
     createHttpClient,
     IRequest,
     ZipkinClientFilter,
-} from '../../main/'
+} from '@creditkarma/thrift-client'
 
 import * as express from 'express'
 import * as net from 'net'
@@ -18,9 +18,9 @@ import {
 
 import { ProtocolType } from '@creditkarma/thrift-server-core'
 import {
-    CALC_SERVER_CONFIG,
     CLIENT_CONFIG,
-} from './config'
+    HAPI_CALC_SERVER_CONFIG,
+} from '../config'
 
 export function createClientServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<net.Server> {
     // Get express instance
@@ -41,8 +41,8 @@ export function createClientServer(sampleRate: number = 0, protocolType: Protoco
     // Create thrift client
     const thriftClient: Calculator.Client<IRequest> =
         createHttpClient(Calculator.Client, {
-            hostName: CALC_SERVER_CONFIG.hostName,
-            port: CALC_SERVER_CONFIG.port,
+            hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+            port: HAPI_CALC_SERVER_CONFIG.port,
             protocol: protocolType,
             register: (
                 (sampleRate > 0) ?

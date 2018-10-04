@@ -12,18 +12,18 @@ import {
     RequestInstance,
     TTwitter,
     TTwitterClientFilter,
-} from '../../../main'
+} from '@creditkarma/thrift-client'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'
 
-import { CALC_SERVER_CONFIG } from '../config'
+import { HAPI_CALC_SERVER_CONFIG } from '../../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
 
-import { createServer as addService } from '../add-service'
-import { createServer as calculatorService } from '../calculator-service'
+import { createServer as addService } from '../../hapi-add-service'
+import { createServer as calculatorService } from '../../hapi-calculator-service'
 import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
 
 import {
@@ -72,7 +72,7 @@ describe('HttpConnection', () => {
 
         before(async () => {
             const requestClient: RequestInstance = request.defaults({})
-            connection = new HttpConnection(requestClient, CALC_SERVER_CONFIG)
+            connection = new HttpConnection(requestClient, HAPI_CALC_SERVER_CONFIG)
             client = new Calculator.Client(connection)
         })
 
@@ -131,8 +131,8 @@ describe('HttpConnection', () => {
             const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
                 },
             )
@@ -154,8 +154,8 @@ describe('HttpConnection', () => {
             const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
                 },
             )
@@ -203,7 +203,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -228,7 +228,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -256,7 +256,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -288,7 +288,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -312,7 +312,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -335,7 +335,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -359,7 +359,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -379,7 +379,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 

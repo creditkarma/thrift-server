@@ -11,7 +11,7 @@ import { ADD_SERVER_CONFIG } from './config'
 
 import {
     AddService,
-} from '../generated/add-service'
+} from './generated/add-service'
 
 export async function createServer(sampleRate: number = 0): Promise<Hapi.Server> {
     /**

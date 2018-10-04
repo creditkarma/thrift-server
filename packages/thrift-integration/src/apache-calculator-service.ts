@@ -7,13 +7,13 @@ import {
     CommonStruct,
     Operation,
     Work,
-} from '../generated-apache/calculator-service'
+} from './generated-apache/calculator-service'
 
 import {
     Code,
     SharedStruct,
     SharedUnion,
-} from '../generated-apache/shared'
+} from './generated-apache/shared'
 
 export function createServer(): net.Server {
     const impl: Calculator.IHandler = {

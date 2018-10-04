@@ -4,6 +4,7 @@ import * as Lab from 'lab'
 import * as net from 'net'
 
 import {
+    appendThriftObject,
     IRequestResponse,
     IThriftRequest,
     NextFunction,
@@ -11,13 +12,9 @@ import {
     ThriftContextFilter,
     TTwitter,
     TTwitterClientFilter,
-} from '../../../main'
+} from '@creditkarma/thrift-client'
 
-import {
-    appendThriftObject,
-} from '../../../main/plugins/appendThriftObject'
-
-import { createServer } from '../apache-service'
+import { createServer } from '../../apache-calculator-service'
 
 import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
 
@@ -37,7 +34,7 @@ import {
 
 import {
     APACHE_SERVER_CONFIG,
-} from '../config'
+} from '../../config'
 
 export const lab = Lab.script()
 

@@ -8,14 +8,14 @@ import {
     IRequestResponse,
     IThriftRequest,
     NextFunction,
-} from '../../../main'
+} from '@creditkarma/thrift-client'
 
 import { CoreOptions } from 'request'
 
 import {
     APACHE_SERVER_CONFIG,
-    CALC_SERVER_CONFIG,
-} from '../config'
+    HAPI_CALC_SERVER_CONFIG,
+} from '../../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
@@ -27,9 +27,9 @@ import {
 
 import { ISharedStruct } from '../../generated/shared'
 
-import { createServer as addService } from '../add-service'
-import { createServer as apacheService } from '../apache-service'
-import { createServer as calculatorService } from '../calculator-service'
+import { createServer as apacheService } from '../../apache-calculator-service'
+import { createServer as addService } from '../../hapi-add-service'
+import { createServer as calculatorService } from '../../hapi-calculator-service'
 
 export const lab = Lab.script()
 
@@ -45,7 +45,7 @@ describe('createHttpClient', () => {
         let addServer: Hapi.Server
 
         before(async () => {
-            client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
+            client = createHttpClient(Calculator.Client, HAPI_CALC_SERVER_CONFIG)
             calcServer = await calculatorService()
             addServer = await addService()
             return Promise.all([
@@ -179,8 +179,8 @@ describe('createHttpClient', () => {
             const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
                 },
             )
@@ -199,8 +199,8 @@ describe('createHttpClient', () => {
             const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
                 },
             )
@@ -246,9 +246,9 @@ describe('createHttpClient', () => {
 
         before(async () => {
             client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
-                path: CALC_SERVER_CONFIG.path,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
+                path: HAPI_CALC_SERVER_CONFIG.path,
                 protocol: 'compact',
             })
             calcServer = await calculatorService(0, 'compact')
@@ -384,8 +384,8 @@ describe('createHttpClient', () => {
             const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
                 },
             )
@@ -404,8 +404,8 @@ describe('createHttpClient', () => {
             const badClient: Calculator.Client<CoreOptions> = createHttpClient(
                 Calculator.Client,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
                 },
             )
@@ -470,8 +470,8 @@ describe('createHttpClient', () => {
 
         it('should resolve when middleware allows', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
@@ -498,8 +498,8 @@ describe('createHttpClient', () => {
 
         it('should resolve when middleware passes method filter', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         methods: ['add'],
@@ -525,8 +525,8 @@ describe('createHttpClient', () => {
 
         it('should reject when middleware rejects', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
@@ -560,8 +560,8 @@ describe('createHttpClient', () => {
 
         it('should skip handler when middleware fails method filter', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         methods: ['nope'],
@@ -610,8 +610,8 @@ describe('createHttpClient', () => {
 
         it('should resolve when middleware adds auth token', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
@@ -632,8 +632,8 @@ describe('createHttpClient', () => {
 
         it('should resolve when middleware passes method filter', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         methods: ['addWithContext'],
@@ -654,7 +654,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject when middleware does not add auth token', async () => {
-            const client = createHttpClient(Calculator.Client, CALC_SERVER_CONFIG)
+            const client = createHttpClient(Calculator.Client, HAPI_CALC_SERVER_CONFIG)
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -670,8 +670,8 @@ describe('createHttpClient', () => {
 
         it('should resolve when middleware fails method filter', async () => {
             const client = createHttpClient(Calculator.Client, {
-                hostName: CALC_SERVER_CONFIG.hostName,
-                port: CALC_SERVER_CONFIG.port,
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
                         methods: ['add'],

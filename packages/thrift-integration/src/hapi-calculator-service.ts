@@ -8,16 +8,22 @@ import {
     ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
 
+import {
+    createHttpClient,
+    IRequest,
+    ZipkinClientFilter,
+} from '@creditkarma/thrift-client'
+
 import * as Hapi from 'hapi'
 
 import {
     ISharedStruct,
     ISharedUnion,
-} from '../generated/shared'
+} from './generated/shared'
 
 import {
     ADD_SERVER_CONFIG,
-    CALC_SERVER_CONFIG,
+    HAPI_CALC_SERVER_CONFIG,
 } from './config'
 
 import {
@@ -26,17 +32,11 @@ import {
     ICommonStruct,
     Operation,
     Work,
-} from '../generated/calculator-service'
+} from './generated/calculator-service'
 
 import {
     AddService,
-} from '../generated/add-service'
-
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '../../main/index'
+} from './generated/add-service'
 
 export async function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<Hapi.Server> {
     // Create thrift client
@@ -168,8 +168,8 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = await createThriftServer({
-        port: CALC_SERVER_CONFIG.port,
-        path: CALC_SERVER_CONFIG.path,
+        port: HAPI_CALC_SERVER_CONFIG.port,
+        path: HAPI_CALC_SERVER_CONFIG.path,
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
@@ -191,9 +191,9 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
 
     const client: Calculator.Client = createHttpClient(Calculator.Client, {
         serviceName: 'calculator-service',
-        hostName: CALC_SERVER_CONFIG.hostName,
-        port: CALC_SERVER_CONFIG.port,
-        path: CALC_SERVER_CONFIG.path,
+        hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+        port: HAPI_CALC_SERVER_CONFIG.port,
+        path: HAPI_CALC_SERVER_CONFIG.path,
         register: (
             (sampleRate > 0) ?
                 [
