@@ -24,8 +24,10 @@
         "@types/express": "^4.16.0",
         "@types/hapi": "^17.0.18",
         "@types/lab": "^11.1.0",
+        "code": "^5.2.0",
         "hapi": "^17.5.3",
-        "lab": "^16.0.0",
+        "lab": "^16.1.0",
+        "tslint": "^5.11.0",
         "typescript": "3.1.x"
     },
     "publishConfig": {
