@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2017",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -16,7 +16,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "example",
-    "src/tests"
+    "example"
   ]
 }
