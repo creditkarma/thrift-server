@@ -1,5 +1,6 @@
 {
     "name": "@creditkarma/thrift-integration",
+    "version": "0.9.0-alpha.8",
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
@@ -29,6 +30,5 @@
     },
     "publishConfig": {
         "access": "private"
-    },
-    "version": "0.9.0-alpha.8"
+    }
 }
