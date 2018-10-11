@@ -1,8 +1,12 @@
+import { EventEmitter } from 'events'
+
 import {
     BatchRecorder,
     ConsoleRecorder,
     Context,
     ExplicitContext,
+    JsonEncoder,
+    jsonEncoder,
     Recorder,
     sampler,
     TraceId,
@@ -16,6 +20,7 @@ import {
 import { HttpLogger } from 'zipkin-transport-http'
 
 import {
+    IEventLoggers,
     IZipkinTracerConfig,
 } from './types'
 
@@ -39,16 +44,24 @@ interface IHttpLoggerOptions {
     endpoint: string
     httpInterval?: number
     httpTimeout?: number,
-    headers?: IRequestHeaders,
+    headers?: IRequestHeaders
+    jsonEncoder?: JsonEncoder
 }
 
 // Save tracers by service name
 const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
+function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEventLoggers): void {
+    for (const key in eventLoggers) {
+        if (eventLoggers.hasOwnProperty(key)) {
+            emitter.on(key, eventLoggers[key])
+        }
+    }
+}
+
 /**
  * `http://localhost:9411/api/v1/spans`
  */
-
 function recorderForOptions(options: IZipkinTracerConfig): Recorder {
     if (options.endpoint !== undefined) {
         const httpOptions: IHttpLoggerOptions = {
@@ -56,11 +69,16 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
             headers: options.headers,
             httpInterval: options.httpInterval,
             httpTimeout: options.httpTimeout,
+            jsonEncoder: options.zipkinVersion === 'v2' ? jsonEncoder.JSON_V2 : jsonEncoder.JSON_V1,
         }
 
-        return new BatchRecorder({
-            logger: new HttpLogger(httpOptions),
-        })
+        const httpLogger: any = new HttpLogger(httpOptions)
+
+        if (options.eventLoggers) {
+            applyEventLoggers(httpLogger, options.eventLoggers)
+        }
+
+        return new BatchRecorder({ logger: httpLogger })
 
     } else {
         return new ConsoleRecorder()

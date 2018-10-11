@@ -59,25 +59,15 @@ import { AddService } from './generated/add-service'
         },
     })
 
-    server.register(ZipkinTracingHapi({
-        localServiceName: 'calculator-service',
-        endpoint: 'http://localhost:9411/api/v1/spans',
-        httpInterval: 1000,
-        httpTimeout: 5000,
-        sampleRate: 1.0,
-    }), (err: any) => {
-        if (err) {
-            console.error(`Error: `, err)
-        } else {
-            server.start((err: any) => {
-                if (err) {
-                    throw err
-                }
-
-                if (server.info !== null) {
-                    console.log(`Calculator service running at: ${server.info.uri}`)
-                }
-            })
-        }
+    await server.register({
+        plugin: ZipkinTracingHapi({
+            localServiceName: 'calculator-service',
+            endpoint: 'http://localhost:9411/api/v1/spans',
+            httpInterval: 1000,
+            httpTimeout: 5000,
+            sampleRate: 1.0,
+        })
     })
+
+    await server.start()
 }())
