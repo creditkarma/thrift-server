@@ -7,9 +7,15 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ## [0.9.0](https://github.com/creditkarma/thrift-server/compare/v0.8.2...v0.9.0) (2018-10-11)
 
 
+### BREAKING CHANGES
+
+* Update to use TypeScript v3 ([cd33cd](https://github.com/creditkarma/thrift-server/commit/cd33cd1e062c09049cd6c95a06b81b3920f29a8d))
+
+* **thrift-server-hapi:** Update to use Hapi 17 ([3844d4](https://github.com/creditkarma/thrift-server/commit/3844d472bc15f764374177c003fe2f2c950ff1f0))
+
 ### Features
 
-* **thrift-server-core:** Add types for annotations
+* **thrift-server-core:** Add types for annotations ([22804d](https://github.com/creditkarma/thrift-server/commit/22804d4821ef304ef7e7b947976b68e19c321614))
 
 <a name="0.8.0"></a>
 ## [0.8.0](https://github.com/creditkarma/thrift-server/compare/v0.7.3...v0.8.0) (2018-08-16)
