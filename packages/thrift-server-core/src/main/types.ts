@@ -96,7 +96,12 @@ export interface ITransportConstructor {
     receiver(data: Buffer): TTransport
 }
 
-export abstract class ThriftClient<Context = any> {
+export interface IThriftClient {
+    readonly _annotations?: IThriftAnnotations
+    readonly _fieldAnnotations?: IFieldAnnotations
+}
+
+export abstract class ThriftClient<Context = any> implements IThriftClient {
     public readonly _annotations?: IThriftAnnotations = {}
     public readonly _fieldAnnotatons?: IFieldAnnotations = {}
 
@@ -122,14 +127,16 @@ export interface IClientConstructor<TClient, Context> {
 }
 
 export interface IThriftProcessor<Context> {
-    readonly _annotations?: IThriftAnnotations
-    readonly _methodAnnotations?: IMethodAnnotations
+    readonly _annotations: IThriftAnnotations
+    readonly _methodAnnotations: IMethodAnnotations
+    readonly _methodNames: Array<string>
     process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftProcessor<Context> implements IThriftProcessor<Context> {
-    public readonly _annotations?: IThriftAnnotations = {}
-    public readonly _methodAnnotations?: IMethodAnnotations = {}
+export abstract class ThriftProcessor<Context, IHandler> implements IThriftProcessor<Context> {
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _methodAnnotations: IMethodAnnotations = {}
+    public readonly _methodNames: Array<string> = []
 
     public abstract process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
