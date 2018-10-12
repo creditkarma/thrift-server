@@ -48,8 +48,8 @@
     "@types/node-int64": "^0.4.29",
     "bytebuffer": "^5.0.1",
     "node-int64": "^0.4.0",
-    "zipkin": "^0.14.1",
-    "zipkin-transport-http": "^0.14.1"
+    "zipkin": "^0.14.2",
+    "zipkin-transport-http": "^0.14.2"
   },
   "publishConfig": {
     "access": "public"
