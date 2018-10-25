@@ -48,7 +48,7 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            this.logger('warn', `[BinaryProtocol] requestId already set: ${name}`)
+            this.logger([ 'warn' ], `[BinaryProtocol] requestId already set: ${name}`)
 
         } else {
             this.requestId = requestId
@@ -60,7 +60,7 @@ export class BinaryProtocol extends TProtocol {
             this.requestId = null
 
         } else {
-            this.logger('warn', '[BinaryProtocol] no requestId to unset')
+            this.logger([ 'warn' ], '[BinaryProtocol] no requestId to unset')
         }
     }
 
@@ -193,9 +193,10 @@ export class BinaryProtocol extends TProtocol {
         const type: TType = this.readByte()
         if (type === TType.STOP) {
             return { fieldName: '', fieldType: type, fieldId: 0 }
+        } else {
+            const id: number = this.readI16()
+            return { fieldName: '', fieldType: type, fieldId: id }
         }
-        const id: number = this.readI16()
-        return { fieldName: '', fieldType: type, fieldId: id }
     }
 
     public readFieldEnd(): void {}
@@ -227,10 +228,7 @@ export class BinaryProtocol extends TProtocol {
 
     public readBool(): boolean {
         const byte: number = this.readByte()
-        if (byte === 0) {
-            return false
-        }
-        return true
+        return byte !== 0
     }
 
     public readByte(): number {
@@ -258,12 +256,11 @@ export class BinaryProtocol extends TProtocol {
         const len: number = this.readI32()
         if (len === 0) {
             return Buffer.alloc(0)
-        }
-
-        if (len < 0) {
+        } else if (len < 0) {
             throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
+        } else {
+            return this.transport.read(len)
         }
-        return this.transport.read(len)
     }
 
     public readString(): string {

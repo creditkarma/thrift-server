@@ -26,7 +26,7 @@ export function readThriftMethod(
 
         return metadata.fieldName
     } catch (err) {
-        logger('info', `Unable to read Thrift method name. ${err.message}`)
+        logger([ 'info' ], `Unable to read Thrift method name. ${err.message}`)
         return ''
     }
 }

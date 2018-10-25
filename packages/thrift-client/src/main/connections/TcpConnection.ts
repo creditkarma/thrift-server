@@ -112,7 +112,7 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
     }
 
     public destory(): Promise<void> {
-        this.logger('warn', 'Destroying TCP connection')
+        this.logger([ 'warn' ], 'Destroying TCP connection')
         return this.pool.drain().then(() => {
             return this.pool.clear()
         }) as any as Promise<void>
@@ -128,12 +128,12 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
                     body: response,
                 }
             }, (err: any) => {
-                this.logger('error', `Error sending Thrift request: ${err.message}`)
+                this.logger([ 'error' ], `Error sending Thrift request: ${err.message}`)
                 this.pool.release(connection)
                 return Promise.reject(err)
             })
         }, (err: any) => {
-            this.logger('error', `Unable to acquire connection for client: ${err.message}`)
+            this.logger([ 'error' ], `Unable to acquire connection for client: ${err.message}`)
             throw new Error(`Unable to acquire connection for thrift client`)
         }) as any
     }

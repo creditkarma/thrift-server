@@ -40,7 +40,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
         return server
 
     }).catch((err: any) => {
-        logger('error', `Unable to create Thrift server. ${err.message}`)
+        logger([ 'error' ], `Unable to create Thrift server. ${err.message}`)
         throw err
     })
 }

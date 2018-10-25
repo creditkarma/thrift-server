@@ -4,7 +4,7 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
-export type LogFunction = (tag: string, data?: string | object) => void
+export type LogFunction = (tags: Array<string>, data?: string | object) => void
 
 export interface IRequestHeaders {
     [name: string]: any
