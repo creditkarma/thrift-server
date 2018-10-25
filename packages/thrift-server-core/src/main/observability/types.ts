@@ -18,16 +18,9 @@ export type ZipkinVersion = 'v1' | 'v2'
 export interface IZipkinOptions {
     localServiceName: string
     port?: number
-    debug?: boolean
-    endpoint?: string
-    sampleRate?: number
-    headers?: IRequestHeaders
-    httpInterval?: number
-    httpTimeout?: number
     transport?: TransportType
     protocol?: ProtocolType
-    zipkinVersion?: ZipkinVersion
-    logger?: LogFunction
+    tracerConfig?: IZipkinTracerConfig
 }
 
 export interface IZipkinClientOptions extends IZipkinOptions {

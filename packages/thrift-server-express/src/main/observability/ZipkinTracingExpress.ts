@@ -33,18 +33,11 @@ function formatRequestUrl(req: express.Request): string {
 export function ZipkinTracingExpress({
     localServiceName,
     port = 0,
-    debug = false,
-    endpoint,
-    sampleRate,
-    httpInterval,
-    httpTimeout,
-    headers,
     transport = 'buffered',
     protocol = 'binary',
-    zipkinVersion,
-    logger,
+    tracerConfig = {},
 }: IZipkinOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, zipkinVersion, logger })
+    const tracer: Tracer = getTracerForService(localServiceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
     return (request: express.Request, response: express.Response, next: express.NextFunction): void => {

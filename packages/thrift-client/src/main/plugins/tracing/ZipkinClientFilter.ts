@@ -65,17 +65,10 @@ function readRequestHeaders(request: IThriftRequest<CoreOptions>): IRequestHeade
 export function ZipkinClientFilter<Context extends IRequest>({
     localServiceName,
     remoteServiceName,
-    debug = false,
-    endpoint,
-    headers,
-    sampleRate,
-    httpInterval,
-    httpTimeout,
-    zipkinVersion,
-    logger,
+    tracerConfig = {},
 }: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
     const serviceName: string = remoteServiceName || localServiceName
-    const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout, zipkinVersion, logger })
+    const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
 
     return {

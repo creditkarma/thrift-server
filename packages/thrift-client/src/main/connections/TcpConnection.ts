@@ -43,7 +43,6 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
         transport = 'buffered',
         protocol = 'binary',
         logger = defaultLogger,
-        tls,
         pool,
     }: IConnectionOptions) {
         super(

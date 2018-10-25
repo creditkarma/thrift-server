@@ -47,22 +47,15 @@ function readStatusCode({ response }: Hapi.Request): number {
 export function ZipkinTracingHapi({
     localServiceName,
     port = 0,
-    debug = false,
-    endpoint,
-    sampleRate,
-    headers,
-    httpInterval,
-    httpTimeout,
     transport = 'buffered',
     protocol = 'binary',
-    zipkinVersion,
-    logger,
+    tracerConfig = {},
 }: IZipkinOptions): ThriftHapiPlugin {
     return {
         name: 'hapi-zipkin-plugin',
         version: pkg.version,
         async register(server: Hapi.Server, nothing: void): Promise<void> {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout, zipkinVersion, logger })
+            const tracer = getTracerForService(localServiceName, tracerConfig)
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onPreHandler', (request, reply) => {
