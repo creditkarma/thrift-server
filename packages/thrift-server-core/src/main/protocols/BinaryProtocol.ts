@@ -11,7 +11,6 @@ import {
     TProtocolExceptionType,
 } from '../errors'
 
-import * as logger from '../logger'
 import { TTransport } from '../transports'
 
 import {
@@ -22,10 +21,12 @@ import {
     IThriftMessage,
     IThriftSet,
     IThriftStruct,
+    LogFunction,
     MessageType,
     TType,
 } from '../types'
 
+import { defaultLogger } from '../logger'
 import { TProtocol } from './TProtocol'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
@@ -37,8 +38,8 @@ const VERSION_1: number = -2147418112  // 0x80010000
 const TYPE_MASK: number = 0x000000ff
 
 export class BinaryProtocol extends TProtocol {
-    constructor(trans: TTransport) {
-        super(trans)
+    constructor(trans: TTransport, logger: LogFunction = defaultLogger) {
+        super(trans, logger)
     }
 
     public writeMessageBegin(name: string, type: MessageType, requestId: number): void {
@@ -47,7 +48,7 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            logger.warn(`RequestId already set: ${name}`)
+            this.logger('warn', `[BinaryProtocol] requestId already set: ${name}`)
 
         } else {
             this.requestId = requestId
@@ -59,7 +60,7 @@ export class BinaryProtocol extends TProtocol {
             this.requestId = null
 
         } else {
-            logger.warn('No requestId to unset')
+            this.logger('warn', '[BinaryProtocol] no requestId to unset')
         }
     }
 
@@ -157,7 +158,6 @@ export class BinaryProtocol extends TProtocol {
             const version = size & VERSION_MASK
 
             if (version !== VERSION_1) {
-                logger.error(`BAD: ${version}`)
                 throw new TProtocolException(
                     TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
                 )

@@ -9,7 +9,7 @@ import {
     TProtocolExceptionType,
 } from '../errors'
 
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 import { TTransport } from '../transports'
 
 import {
@@ -20,6 +20,7 @@ import {
     IThriftMessage,
     IThriftSet,
     IThriftStruct,
+    LogFunction,
     MessageType,
     TType,
 } from '../types'
@@ -114,8 +115,8 @@ export class CompactProtocol extends TProtocol {
     private _booleanField: any
     private _boolValue: any
 
-    constructor(trans: TTransport) {
-        super(trans)
+    constructor(trans: TTransport, logger: LogFunction = defaultLogger) {
+        super(trans, logger)
         this._lastField = []
         this._lastFieldId = 0
         this._booleanField = {
@@ -172,7 +173,7 @@ export class CompactProtocol extends TProtocol {
 
         // Record client seqid to find callback again
         if (this.requestId) {
-          logger.warn(`RequestId already set: ${name}`)
+          this.logger('warn', `[CompactProtocol] requestId already set: ${name}`)
 
         } else {
           this.requestId = requestId
@@ -184,7 +185,7 @@ export class CompactProtocol extends TProtocol {
             this.requestId = null
 
         } else {
-            logger.warn('No requestId to unset')
+            this.logger('warn', '[CompactProtocol] no requestId to unset')
         }
     }
 

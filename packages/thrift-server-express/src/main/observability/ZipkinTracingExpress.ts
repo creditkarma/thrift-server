@@ -42,9 +42,9 @@ export function ZipkinTracingExpress({
     transport = 'buffered',
     protocol = 'binary',
     zipkinVersion,
-    eventLoggers,
+    logger,
 }: IZipkinOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, zipkinVersion, eventLoggers })
+    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, zipkinVersion, logger })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
     return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
@@ -65,7 +65,7 @@ export function ZipkinTracingExpress({
                 (requestMethod || request.method),
                 formatRequestUrl(request),
                 (readHeader as any),
-            ) as any as TraceId // Nasty but this method is incorrectly typed
+            )
 
             const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 

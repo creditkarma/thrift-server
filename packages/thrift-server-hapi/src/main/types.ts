@@ -33,8 +33,9 @@ export interface IHapiPluginOptions<TProcessor extends IThriftProcessor<Hapi.Req
     thriftOptions: IHapiServerOptions<TProcessor>
 }
 
-export interface ICreateHapiServerOptions<TProcessor extends IThriftProcessor<Hapi.Request>>
-    extends IHapiPluginOptions<TProcessor> {
+export interface ICreateHapiServerOptions<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+> extends IHapiPluginOptions<TProcessor> {
     port: number
 }
 

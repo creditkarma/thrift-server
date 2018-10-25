@@ -2,6 +2,7 @@ import {
     InputBufferUnderrunError,
     IProtocolConstructor,
     ITransportConstructor,
+    LogFunction,
     ThriftFrameCodec,
     TProtocol,
     TTransport,
@@ -10,7 +11,7 @@ import {
 
 import * as net from 'net'
 import * as tls from 'tls'
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 
 export interface IConnectionConfig {
     port: number
@@ -50,24 +51,27 @@ const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: 
     }
 }
 
-const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.Socket> => {
+const createSocket = (
+    config: IConnectionConfig,
+    logger: LogFunction,
+): Promise<tls.TLSSocket | net.Socket> => {
     return new Promise((resolve, reject) => {
         const removeHandlers = (): void => {
             socket.removeAllListeners()
         }
         const connectHandler = (): void => {
-            logger.log(`Connected to: ${config.hostName}:${config.port}`)
+            logger('info', `Connected to: ${config.hostName}:${config.port}`)
             removeHandlers()
             resolve(socket)
         }
         const timeoutHandler = (): void => {
-            logger.error(`Timed out connecting: ${config.hostName}:${config.port}`)
+            logger('error', `Timed out connecting: ${config.hostName}:${config.port}`)
             removeHandlers()
             socket.destroy()
             reject(new Error('Timed out connecting'))
         }
         const errorHandler = (err: Error): void => {
-            logger.error(`Error connecting: ${config.hostName}:${config.port}`)
+            logger('error', `Error connecting: ${config.hostName}:${config.port}`)
             removeHandlers()
             socket.destroy()
             reject(err)
@@ -88,12 +92,14 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
 }
 
 export class Connection {
+    protected logger: LogFunction
     private socket: tls.TLSSocket | net.Socket
     private frameCodec: ThriftFrameCodec
     private _hasSession: boolean
 
-    constructor(socket: tls.TLSSocket | net.Socket) {
+    constructor(socket: tls.TLSSocket | net.Socket, logger: LogFunction) {
         this._hasSession = false
+        this.logger = logger
         this.socket = socket
         this.frameCodec = new ThriftFrameCodec()
         this.initializeSocket()
@@ -127,7 +133,7 @@ export class Connection {
                 reject(new Error('Thrift connection ended'))
             }
             const errorHandler = (err: Error) => {
-                logger.error('Error sending data to thrift service: ', err)
+                this.logger('error', `Error sending data to thrift service: ${err.message}`)
                 removeHandlers()
                 reject(new Error('Thrift connection error'))
             }
@@ -153,7 +159,7 @@ export class Connection {
                     }
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
-                        logger.error('Error reading data from connection: ', err)
+                        this.logger('error', `Error reading data from connection: ${err.message}`)
                         removeHandlers()
                         reject(err)
                     }
@@ -190,7 +196,7 @@ export class Connection {
     }
 }
 
-export const createConnection = (config: IConnectionConfig): Promise<Connection> =>
-    createSocket(config).then((socket) => {
-        return new Connection(socket)
+export const createConnection = (config: IConnectionConfig, logger: LogFunction = defaultLogger): Promise<Connection> =>
+    createSocket(config, logger).then((socket) => {
+        return new Connection(socket, logger)
     })

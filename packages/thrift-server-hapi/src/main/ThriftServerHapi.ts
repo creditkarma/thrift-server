@@ -6,6 +6,7 @@ import {
     IProtocolConstructor,
     IThriftProcessor,
     ITransportConstructor,
+    LogFunction,
     process,
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
@@ -16,7 +17,7 @@ import {
     ThriftHapiPlugin,
 } from './types'
 
-import * as logger from './logger'
+import { defaultLogger } from './logger'
 
 /**
  * Create the thrift plugin for Hapi
@@ -27,6 +28,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
     const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
+    const logger: LogFunction = options.logger || defaultLogger
 
     const Transport: ITransportConstructor = getTransport(
         options.transport,
@@ -48,7 +50,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
                     (server.plugins as any).thrift.protocol !== (options.protocol || 'binary')
                 )
             ) {
-                logger.error(`You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`)
+                logger('error', `You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`)
             }
 
             (server.plugins as any).thrift = {

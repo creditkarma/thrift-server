@@ -7,6 +7,7 @@ import {
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
+    LogFunction,
     MessageType,
     ProtocolType,
     TProtocol,
@@ -38,7 +39,7 @@ import {
 
 import * as TTwitter from '../../ttwitter/com/creditkarma/finagle/thrift'
 
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 
 // Exported generated Twitter types...
 export { TTwitter }
@@ -59,6 +60,7 @@ export interface ITTwitterFileterOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    logger?: LogFunction
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
@@ -108,6 +110,7 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
+    logger = defaultLogger,
 }: ITTwitterFileterOptions): IThriftClientFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -116,7 +119,7 @@ export function TTwitterClientFilter<T>({
         async handler(request: IThriftRequest<T>, next: NextFunction<T>): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
-                    logger.log('TTwitter upgraded')
+                    logger('info', 'TTwitter upgraded')
                     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
                     const requestContext: IRequestContext = readRequestContext(request, tracer)
@@ -171,7 +174,7 @@ export function TTwitterClientFilter<T>({
                                         body: result[1],
                                     }
                                 }, (err: any) => {
-                                    logger.warn(`Error reading context from Thrift response: `, err)
+                                    logger('warn', `Error reading context from Thrift response: ${err.message}`)
                                     return res
                                 })
                             })
@@ -186,14 +189,14 @@ export function TTwitterClientFilter<T>({
                     return next(request.data, request.context)
 
                 } else {
-                    logger.log('Requesting TTwitter upgrade')
+                    logger('info', 'Requesting TTwitter upgrade')
                     upgradeRequested = true
                     return next(upgradeRequest(), request.context).then((upgradeResponse: IRequestResponse) => {
                         hasUpgraded = true
                         return sendUpgradedRequest()
 
                     }, (err: any) => {
-                        logger.log('Downgrading TTwitter request: ', err)
+                        logger('info', `Downgrading TTwitter request: ${err.message}`)
                         return next(request.data, request.context)
                    })
                 }

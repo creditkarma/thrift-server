@@ -1,5 +1,6 @@
 import {
     IRequestHeaders,
+    LogFunction,
     ProtocolType,
     TransportType,
 } from '../types'
@@ -14,12 +15,6 @@ export interface ITraceId {
 
 export type ZipkinVersion = 'v1' | 'v2'
 
-export type EventHandler = (...args: Array<any>) => void
-
-export interface IEventLoggers {
-    [eventName: string]: EventHandler
-}
-
 export interface IZipkinOptions {
     localServiceName: string
     port?: number
@@ -32,7 +27,7 @@ export interface IZipkinOptions {
     transport?: TransportType
     protocol?: ProtocolType
     zipkinVersion?: ZipkinVersion
-    eventLoggers?: IEventLoggers
+    logger?: LogFunction
 }
 
 export interface IZipkinClientOptions extends IZipkinOptions {
@@ -47,5 +42,5 @@ export interface IZipkinTracerConfig {
     httpInterval?: number
     httpTimeout?: number
     zipkinVersion?: ZipkinVersion
-    eventLoggers?: IEventLoggers
+    logger?: LogFunction
 }

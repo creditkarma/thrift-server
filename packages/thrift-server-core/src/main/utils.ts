@@ -1,5 +1,5 @@
 import * as url from 'url'
-import * as logger from './logger'
+import { defaultLogger } from './logger'
 import { BinaryProtocol, CompactProtocol, TProtocol } from './protocols'
 import { BufferedTransport, TTransport } from './transports'
 
@@ -8,6 +8,7 @@ import {
     IProtocolMap,
     ITransportConstructor,
     ITransportMap,
+    LogFunction,
     ProtocolType,
     TransportType,
 } from './types'
@@ -16,6 +17,7 @@ export function readThriftMethod(
     buffer: Buffer,
     Transport: ITransportConstructor = BufferedTransport,
     Protocol: IProtocolConstructor = BinaryProtocol,
+    logger: LogFunction = defaultLogger,
 ): string {
     try {
         const transportWithData: TTransport = new Transport(buffer)
@@ -24,7 +26,7 @@ export function readThriftMethod(
 
         return metadata.fieldName
     } catch (err) {
-        logger.log(`Unable to read Thrift method name. ${err.message}`)
+        logger('info', `Unable to read Thrift method name. ${err.message}`)
         return ''
     }
 }

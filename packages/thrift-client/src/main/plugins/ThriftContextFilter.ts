@@ -1,5 +1,6 @@
 import {
     IStructCodec,
+    LogFunction,
     ProtocolType,
     TransportType,
 } from '@creditkarma/thrift-server-core'
@@ -19,13 +20,14 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 
 export interface IThriftContextOptions<RequestContext, ResponseContext> {
     RequestCodec: IStructCodec<RequestContext, any>
     ResponseCodec: IStructCodec<ResponseContext, any>
     transportType?: TransportType
     protocolType?: ProtocolType
+    logger?: LogFunction
 }
 
 export function ThriftContextFilter<RequestContext, ResponseContext>({
@@ -33,6 +35,7 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
     ResponseCodec,
     transportType = 'buffered',
     protocolType = 'binary',
+    logger = defaultLogger,
 }: IThriftContextOptions<RequestContext, ResponseContext>): IThriftClientFilterConfig<RequestContext> {
     return {
         handler(request: IThriftRequest<RequestContext>, next: NextFunction<RequestContext>): Promise<IRequestResponse> {
@@ -52,7 +55,7 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
                             body: result[1],
                         }
                     }, (err: any) => {
-                        logger.warn(`Error reading context from Thrift response: `, err)
+                        logger('warn', `Error reading context from Thrift response: ${err.message}`)
                         return response
                     })
                 })

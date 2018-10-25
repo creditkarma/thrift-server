@@ -146,7 +146,8 @@ I save this file in my project as `thrift/calculator.thrift`.
 
 We generate TypeScript from our Thrift IDL using [thrift-typescript](https://github.com/creditkarma/thrift-typescript). In my `package.json` I add something like this:
 
-*v0.7 and higher of this library requires thrift-typescript v2.x*
+**v0.9.x of this library requires thrift-typescript v3.x**
+**v0.7.x - 0.8.x of this library requires thrift-typescript v2.x**
 
 ```json
 "scripts": {

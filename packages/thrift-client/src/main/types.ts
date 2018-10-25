@@ -1,5 +1,6 @@
 import {
     IRequestHeaders,
+    LogFunction,
     ProtocolType,
     TransportType,
 } from '@creditkarma/thrift-server-core'
@@ -40,6 +41,7 @@ export interface IConnectionOptions {
     protocol?: ProtocolType
     tls?: tls.TlsOptions
     pool?: GenericPool.Options
+    logger?: LogFunction
 }
 
 export interface ICreateTcpClientOptions extends IConnectionOptions {

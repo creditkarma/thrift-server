@@ -4,7 +4,7 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
-export type LogFunction = (msg: string, data?: any) => void
+export type LogFunction = (tag: string, data?: string | object) => void
 
 export interface IRequestHeaders {
     [name: string]: any
@@ -28,6 +28,7 @@ export interface IThriftServerOptions<Context, TProcessor extends IThriftProcess
     handler: TProcessor
     transport?: TransportType
     protocol?: ProtocolType
+    logger?: LogFunction
 }
 
 export interface IThriftConnection<Context = void> {
@@ -88,7 +89,7 @@ export interface IStructCodec<LooseType, StrictType> {
 }
 
 export interface IProtocolConstructor {
-    new(trans: TTransport, strictRead?: boolean, strictWrite?: boolean): TProtocol
+    new(trans: TTransport, logger?: LogFunction): TProtocol
 }
 
 export interface ITransportConstructor {

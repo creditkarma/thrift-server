@@ -72,10 +72,10 @@ export function ZipkinClientFilter<Context extends IRequest>({
     httpInterval,
     httpTimeout,
     zipkinVersion,
-    eventLoggers,
+    logger,
 }: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
     const serviceName: string = remoteServiceName || localServiceName
-    const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout, zipkinVersion, eventLoggers })
+    const tracer: Tracer = getTracerForService(serviceName, { debug, endpoint, headers, sampleRate, httpInterval, httpTimeout, zipkinVersion, logger })
     const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
 
     return {

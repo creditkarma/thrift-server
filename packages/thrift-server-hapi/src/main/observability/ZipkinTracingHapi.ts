@@ -20,7 +20,7 @@ import {
 } from 'zipkin'
 
 import * as Boom from 'boom'
-import { ThriftHapiPlugin } from '..'
+import { ThriftHapiPlugin } from '../types'
 
 const pkg: any = require('../../../package.json')
 
@@ -56,13 +56,13 @@ export function ZipkinTracingHapi({
     transport = 'buffered',
     protocol = 'binary',
     zipkinVersion,
-    eventLoggers,
+    logger,
 }: IZipkinOptions): ThriftHapiPlugin {
     return {
         name: 'hapi-zipkin-plugin',
         version: pkg.version,
         async register(server: Hapi.Server, nothing: void): Promise<void> {
-            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout, zipkinVersion, eventLoggers })
+            const tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, headers, httpInterval, httpTimeout, zipkinVersion, logger })
             const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
             server.ext('onPreHandler', (request, reply) => {
@@ -71,7 +71,8 @@ export function ZipkinTracingHapi({
                     getTransport(transport),
                     getProtocol(protocol),
                 )
-                const normalHeaders = normalizeHeaders(request.headers)
+
+                const normalHeaders: IRequestHeaders = normalizeHeaders(request.headers)
 
                 return tracer.scoped(() => {
                     const traceId: TraceId = instrumentation.recordRequest(
