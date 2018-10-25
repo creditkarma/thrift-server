@@ -8,14 +8,16 @@ export const makeLogger = (name: string): LogFunction => {
             } else {
                 console.error(`[${name}:error]`)
             }
+
         } else if (tags.includes('warn')) {
             if (data !== undefined) {
                 console.warn(`[${name}:warn] `, data)
             } else {
                 console.warn(`[${name}:warn]`)
             }
+
         } else {
-            if (data !== undefined && process.env.DUBUG !== 'true') {
+            if (data !== undefined && process.env.DUBUG !== undefined) {
                 console.log(`[${name}:info] `, data)
             } else if (process.env.DUBUG !== undefined) {
                 console.log(`[${name}:info]`)
