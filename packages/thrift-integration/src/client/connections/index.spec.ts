@@ -154,6 +154,22 @@ describe('createHttpClient', () => {
             })
         })
 
+        it('should corrently handle a service client request that returns a map containing a struct', async () => {
+            return client.getMappedStruct(1).then((response: any) => {
+                const map = new Map<string, ISharedStruct>()
+                map.set('one', {
+                    code: {
+                        status: new Int64(5),
+                    },
+                    value: 'test',
+                })
+
+                expect(response).to.equal({
+                    data: map,
+                })
+            })
+        })
+
         it('should allow passing of a request context', async () => {
             return client
                 .addWithContext(5, 7, {
