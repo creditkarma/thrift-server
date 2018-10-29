@@ -11,6 +11,7 @@ import {
 
 import {
     Code,
+    MappedStruct,
     SharedStruct,
     SharedUnion,
 } from './generated-apache/shared'
@@ -56,6 +57,19 @@ export function createServer(): net.Server {
             } else {
                 return SharedUnion.fromOption2('bar')
             }
+        },
+        getMappedStruct(index: number): MappedStruct {
+            const map = new Map()
+            map.set('one', {
+                code: {
+                    status: 5,
+                },
+                value: 'test',
+            })
+
+            return new MappedStruct({
+                data: map,
+            })
         },
         echoBinary(word: Buffer): string {
             return word.toString('utf-8')
