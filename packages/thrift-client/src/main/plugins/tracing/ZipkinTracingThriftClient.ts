@@ -69,7 +69,7 @@ export function ZipkinTracingThriftClient({
     zipkinVersion = 'v1',
 }: IZipkinPluginOptions): IThriftMiddleware<CoreOptions> {
     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, eventLoggers, zipkinVersion })
-    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+    const instrumentation = new Instrumentation.HttpClient({ tracer, serviceName: localServiceName, remoteServiceName })
 
     return {
         methods: [],

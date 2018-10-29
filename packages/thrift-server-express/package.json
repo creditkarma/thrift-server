@@ -68,6 +68,6 @@
     "typescript": "2.9.x"
   },
   "dependencies": {
-    "zipkin": "^0.14.1"
+    "zipkin": "^0.14.3"
   }
 }
