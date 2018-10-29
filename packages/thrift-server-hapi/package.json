@@ -63,6 +63,6 @@
     "watch": "^1.0.2"
   },
   "dependencies": {
-    "zipkin": "^0.14.1"
+    "zipkin": "^0.14.3"
   }
 }

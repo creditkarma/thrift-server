@@ -118,7 +118,7 @@ export function TTwitterClientFilter<T>({
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
                     logger.log('TTwitter upgraded')
                     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval })
-                    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+                    const instrumentation = new Instrumentation.HttpClient({ tracer, serviceName: localServiceName, remoteServiceName })
                     const requestContext: IRequestContext = readRequestContext(request, tracer)
                     tracer.setId(requestContext.traceId)
 
