@@ -69,7 +69,7 @@ export function ZipkinClientFilter<Context extends IRequest>({
 }: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
-    const instrumentation = new Instrumentation.HttpClient({ tracer, remoteServiceName })
+    const instrumentation = new Instrumentation.HttpClient({ tracer, serviceName: localServiceName, remoteServiceName })
 
     return {
         methods: [],

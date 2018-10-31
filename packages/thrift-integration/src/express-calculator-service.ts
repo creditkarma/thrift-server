@@ -15,6 +15,7 @@ import {
 } from '@creditkarma/thrift-client'
 
 import {
+    IMappedStruct,
     ISharedStruct,
     ISharedUnion,
 } from './generated/shared'
@@ -104,6 +105,19 @@ export function createServer(sampleRate: number = 0): express.Application {
                 return { option1: 'foo' }
             } else {
                 return { option2: 'bar' }
+            }
+        },
+        getMappedStruct(index: number): IMappedStruct {
+            const map = new Map()
+            map.set('one', {
+                code: {
+                    status: 5,
+                },
+                value: 'test',
+            })
+
+            return {
+                data: map,
             }
         },
         echoBinary(word: Buffer): string {

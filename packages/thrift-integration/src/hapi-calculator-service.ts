@@ -17,6 +17,7 @@ import {
 import * as Hapi from 'hapi'
 
 import {
+    IMappedStruct,
     ISharedStruct,
     ISharedUnion,
 } from './generated/shared'
@@ -117,6 +118,19 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
                 return { option1: 'foo' }
             } else {
                 return { option2: 'bar' }
+            }
+        },
+        getMappedStruct(index: number): IMappedStruct {
+            const map = new Map()
+            map.set('one', {
+                code: {
+                    status: 5,
+                },
+                value: 'test',
+            })
+
+            return {
+                data: map,
             }
         },
         echoBinary(word: Buffer): string {

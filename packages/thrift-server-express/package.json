@@ -50,7 +50,7 @@
     "typescript": "3.1.x"
   },
   "dependencies": {
-    "zipkin": "^0.14.2"
+    "zipkin": "^0.14.3"
   },
   "publishConfig": {
     "access": "public"

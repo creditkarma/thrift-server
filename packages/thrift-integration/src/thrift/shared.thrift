@@ -18,6 +18,10 @@ struct SharedStruct {
   2: required string value
 }
 
+struct MappedStruct {
+    1: required map<string,SharedStruct> data
+}
+
 union SharedUnion {
   1: string option1
   2: string option2
@@ -26,4 +30,5 @@ union SharedUnion {
 service SharedService {
   SharedStruct getStruct(1: i32 key)
   SharedUnion getUnion(1: i32 index)
+  MappedStruct getMappedStruct(1: i32 index)
 }

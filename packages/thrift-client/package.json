@@ -42,7 +42,7 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client"
   },
   "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.9.x",
+    "@creditkarma/thrift-server-core": "0.10.x",
     "@types/request": ">=2.0.0 <3.0.0",
     "request": ">=2.0.0 <3.0.0"
   },
@@ -70,7 +70,7 @@
   "dependencies": {
     "@types/generic-pool": "^3.1.4",
     "generic-pool": "^3.4.2",
-    "zipkin": "^0.14.2"
+    "zipkin": "^0.14.3"
   },
   "publishConfig": {
     "access": "public"
