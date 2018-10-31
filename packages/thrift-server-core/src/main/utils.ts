@@ -1,6 +1,6 @@
 import * as url from 'url'
 import * as logger from './logger'
-import { BinaryProtocol, CompactProtocol, TProtocol } from './protocols'
+import { BinaryProtocol, CompactProtocol, JSONProtocol, TProtocol } from './protocols'
 import { BufferedTransport, TTransport } from './transports'
 
 import {
@@ -39,7 +39,7 @@ export const supportedTransports: Array<string> = Object.keys(transports)
 const protocols: IProtocolMap = {
     binary: BinaryProtocol,
     compact: CompactProtocol,
-    // json: JSONProtocol,
+    json: JSONProtocol,
 }
 
 export const supportedProtocols: Array<string> = Object.keys(protocols)

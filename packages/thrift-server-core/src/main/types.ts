@@ -146,7 +146,7 @@ export interface IProcessorConstructor<TProcessor, THandler> {
 }
 
 export type ProtocolType =
-    'binary' | 'compact' // | 'json'
+    'binary' | 'compact' | 'json'
 
 export type TransportType =
     'buffered' // | 'framed'
