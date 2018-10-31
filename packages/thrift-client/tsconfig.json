@@ -1,21 +1,22 @@
 {
-  "compilerOptions": {
-    "target": "es2017",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "declaration": true,
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "noEmitOnError": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "pretty": true,
-    "removeComments": true
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "example"
-  ]
+    "compilerOptions": {
+        "lib": ["es2017"],
+        "target": "es2017",
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "declaration": true,
+        "rootDir": "./src",
+        "outDir": "./dist",
+        "noEmitOnError": true,
+        "strict": true,
+        "noUnusedLocals": true,
+        "pretty": true,
+        "removeComments": true
+    },
+    "exclude": [
+        "node_modules",
+        "dist",
+        "example"
+    ]
 }

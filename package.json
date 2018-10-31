@@ -7,7 +7,7 @@
     "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated **/generated-apache",
     "lint": "lerna exec -- npm run lint",
     "updated": "lerna updated",
-    "postinstall": "lerna bootstrap --hoist --no-ci",
+    "postinstall": "lerna bootstrap --no-ci",
     "pretest": "npm run build",
     "test": "lerna exec -- npm run test",
     "release:default": "lerna version --conventional-commits --no-push --skip-npm --yes --force-publish=* && npm run release:push",

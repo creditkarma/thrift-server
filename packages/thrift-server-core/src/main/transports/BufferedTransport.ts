@@ -75,7 +75,7 @@ export class BufferedTransport extends TTransport {
 
     public read(len: number): Buffer {
         this.ensureAvailable(len)
-        const buf = new Buffer(len)
+        const buf = Buffer.alloc(len)
         this.buffer.copy(buf, 0, this.readCursor, this.readCursor + len)
         this.readCursor += len
         return buf
