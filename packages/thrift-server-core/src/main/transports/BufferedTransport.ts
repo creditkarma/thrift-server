@@ -114,6 +114,10 @@ export class BufferedTransport extends TTransport {
         return str
     }
 
+    public readAll(): string {
+        return this.readString(this.buffer.length - this.readCursor)
+    }
+
     public consume(len: number): void {
         this.readCursor += len
     }
