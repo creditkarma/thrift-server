@@ -25,9 +25,9 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
     const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
-    const thriftPath = pluginOptions.path || '/thrift'
-    const handler = options.handler
-    const serviceName = handler.serviceName || '<nope>'
+    const thriftPath: string = pluginOptions.path || '/thrift'
+    const handler: any = options.handler
+    const serviceName: string = handler.serviceName || '<nope>'
     const hapiThriftPlugin: ThriftHapiPlugin = {
         register(server: Hapi.Server, nothing: never, next) {
             // This is a compatibility filter with Finagle that creates an endpoint for each Thrift method.
