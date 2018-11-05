@@ -74,11 +74,13 @@ export interface ITransportConstructor {
 }
 
 export abstract class ThriftClient<Context = any> {
+    public readonly serviceName: string
     protected _requestId: number
     protected transport: ITransportConstructor
     protected protocol: IProtocolConstructor
     protected connection: IThriftConnection<Context>
-    constructor(connection: IThriftConnection<Context>) {
+    constructor(serviceName: string, connection: IThriftConnection<Context>) {
+        this.serviceName = serviceName
         this._requestId = 0
         this.transport = connection.Transport
         this.protocol = connection.Protocol
@@ -94,6 +96,7 @@ export interface IClientConstructor<TClient, Context> {
 }
 
 export interface IThriftProcessor<Context> {
+    serviceName?: string
     process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
 }
 
