@@ -12,18 +12,18 @@ import {
     RequestInstance,
     TTwitter,
     TTwitterClientFilter,
-} from '../../../main'
+} from '@creditkarma/thrift-client'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'
 
-import { CALC_SERVER_CONFIG } from '../config'
+import { HAPI_CALC_SERVER_CONFIG } from '../../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
 
-import { createServer as addService } from '../add-service'
-import { createServer as calculatorService } from '../calculator-service'
+import { createServer as addService } from '../../hapi-add-service'
+import { createServer as calculatorService } from '../../hapi-calculator-service'
 import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
 
 import {
@@ -47,8 +47,8 @@ describe('HttpConnection', () => {
     let addServer: Hapi.Server
 
     before(async () => {
-        calcServer = calculatorService()
-        addServer = addService()
+        calcServer = await calculatorService()
+        addServer = await addService()
         return Promise.all([
             calcServer.start(),
             addServer.start(),
@@ -72,7 +72,7 @@ describe('HttpConnection', () => {
 
         before(async () => {
             const requestClient: RequestInstance = request.defaults({})
-            connection = new HttpConnection(requestClient, CALC_SERVER_CONFIG)
+            connection = new HttpConnection(requestClient, HAPI_CALC_SERVER_CONFIG)
             client = new Calculator.Client(connection)
         })
 
@@ -131,8 +131,8 @@ describe('HttpConnection', () => {
             const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
                 },
             )
@@ -154,8 +154,8 @@ describe('HttpConnection', () => {
             const badConnection: HttpConnection = new HttpConnection(
                 requestClient,
                 {
-                    hostName: CALC_SERVER_CONFIG.hostName,
-                    port: CALC_SERVER_CONFIG.port,
+                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                    port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
                 },
             )
@@ -203,7 +203,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -228,7 +228,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -256,7 +256,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -288,7 +288,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -312,7 +312,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -335,7 +335,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -359,7 +359,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -379,7 +379,7 @@ describe('HttpConnection', () => {
             const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
                 requestClient,
-                CALC_SERVER_CONFIG,
+                HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
 
@@ -414,7 +414,7 @@ describe('HttpConnection', () => {
         let collectServer: IMockCollector
         let mockServer: http.Server
 
-        before((done) => {
+        before(async () => {
             const requestClient: RequestInstance = request.defaults({})
             connection = new HttpConnection(requestClient, {
                 hostName: 'localhost',
@@ -432,62 +432,65 @@ describe('HttpConnection', () => {
             )
 
             client = new Calculator.Client(connection)
-            mockCollector().then((collector: IMockCollector) => {
+            return mockCollector().then((collector: IMockCollector) => {
                 collectServer = collector
-                done()
             })
         })
 
-        after((done) => {
-            collectServer.close().then(() => {
-                mockServer.close(() => {
-                    console.log('HTTP server closed')
-                    mockServer.unref()
-                    done()
+        after(async () => {
+            return new Promise((resolve, reject) => {
+                collectServer.close().then(() => {
+                    mockServer.close(() => {
+                        console.log('HTTP server closed')
+                        mockServer.unref()
+                        resolve()
+                    })
                 })
             })
         })
 
-        it('should handle appending data to payload', (done) => {
-            let count: number = 0
-            collectServer.reset()
-            mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
-                if (count < 1) {
-                    count += 1
-                    const upgradeResponse: TTwitter.IUpgradeReply = {}
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
-                    output.writeMessageEnd()
-                    res.writeHead(200)
-                    res.end(writer.flush())
-
-                } else {
-                    const responseHeader: TTwitter.IResponseHeader = {}
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                    const result = new Calculator.AddResult({ success: 61 })
-                    result.write(output)
-                    output.writeMessageEnd()
-                    const data: Buffer = writer.flush()
-
-                    appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+        it('should handle appending data to payload', async () => {
+            return new Promise((resolve, reject) => {
+                let count: number = 0
+                collectServer.reset()
+                mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
+                    if (count < 1) {
+                        count += 1
+                        const upgradeResponse: TTwitter.IUpgradeReply = {}
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
+                        output.writeMessageEnd()
                         res.writeHead(200)
-                        res.end(extended)
-                    })
-                }
-            })
+                        res.end(writer.flush())
 
-            mockServer.listen(PORT, () => {
-                console.log(`HTTP server listening on port: ${PORT}`)
-                client.add(2, 3).then((response: number) => {
-                    expect(response).to.equal(61)
-                    done()
-                }).catch((err: any) => {
-                    console.log('err: ', err)
-                    done(err)
+                    } else {
+                        const responseHeader: TTwitter.IResponseHeader = {}
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
+                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
+                        const result = new Calculator.AddResult({ success: 61 })
+                        result.write(output)
+                        output.writeMessageEnd()
+                        const data: Buffer = writer.flush()
+
+                        appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+                            res.writeHead(200)
+                            res.end(extended)
+                        })
+                    }
+                })
+
+                mockServer.listen(PORT, () => {
+                    console.log(`HTTP server listening on port: ${PORT}`)
+                    client.add(2, 3).then((response: number) => {
+                        expect(response).to.equal(61)
+                        resolve()
+                    }).catch((err: any) => {
+                        console.log('err: ', err)
+                        reject(err)
+                    })
                 })
             })
         })

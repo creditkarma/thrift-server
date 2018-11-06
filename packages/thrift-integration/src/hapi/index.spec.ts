@@ -1,29 +1,36 @@
-import { expect } from 'code'
-import * as express from 'express'
-import * as Lab from 'lab'
-import * as net from 'net'
-import { CoreOptions } from 'request'
-import * as rp from 'request-promise-native'
-
 import {
     createHttpClient,
 } from '@creditkarma/thrift-client'
 
 import {
-    SERVER_CONFIG,
-} from './config'
+    Int64,
+} from '@creditkarma/thrift-server-core'
+
+import { expect } from 'code'
+import * as Hapi from 'hapi'
+import * as Lab from 'lab'
+import { CoreOptions } from 'request'
+import * as rp from 'request-promise-native'
+
+import {
+    HAPI_CALC_SERVER_CONFIG,
+} from '../config'
 
 import {
     Calculator,
-} from './generated/calculator'
+} from '../generated/calculator-service'
 
 import {
     ISharedStruct,
-} from './generated/shared'
+} from '../generated/shared'
 
 import {
-    createServer,
-} from './server'
+    createServer as createCalcServer,
+} from '../hapi-calculator-service'
+
+import {
+    createServer as createAddServer,
+} from '../hapi-add-service'
 
 export const lab = Lab.script()
 
@@ -32,23 +39,31 @@ const it = lab.it
 const before = lab.before
 const after = lab.after
 
-describe('Thrift Server Express', () => {
-    let server: net.Server
+describe('Thrift Server Hapi', () => {
+    let calcServer: Hapi.Server
+    let addServer: Hapi.Server
     let client: Calculator.Client<CoreOptions>
 
-    before((done: any) => {
-        const app: express.Application = createServer()
-        client = createHttpClient(Calculator.Client, SERVER_CONFIG)
+    before(async () => {
+        calcServer = await createCalcServer()
+        addServer = await createAddServer()
+        client = createHttpClient(Calculator.Client, HAPI_CALC_SERVER_CONFIG)
 
-        server = app.listen(SERVER_CONFIG.port, () => {
-            console.log(`Express server listening on port: ${SERVER_CONFIG.port}`)
-            done()
+        return Promise.all([
+            calcServer.start(),
+            addServer.start(),
+        ]).then(() => {
+            console.log('Thrift server started')
         })
     })
 
-    after((done: any) => {
-        server.close()
-        done()
+    after(async () => {
+        return Promise.all([
+            calcServer.stop(),
+            addServer.stop(),
+        ]).then(() => {
+            console.log('Thrift server stopped')
+        })
     })
 
     it('should corrently handle a service client request', async () => {
@@ -62,7 +77,9 @@ describe('Thrift Server Express', () => {
         return client.getStruct(1)
             .then((response: ISharedStruct) => {
                 const expected = {
-                    key: 0,
+                    code: {
+                        status: new Int64(0),
+                    },
                     value: 'test',
                 }
                 expect(response).to.equal(expected)
@@ -79,14 +96,14 @@ describe('Thrift Server Express', () => {
     it('should reject service call with incorrect context', async () => {
         return client.addWithContext(5, 7, { headers: { 'x-fake-token': 'wrong' } })
             .then((response: number) => {
-                throw new Error('Should reject for incorrect context')
+                throw new Error('Should reject with incorrect context')
             }, (err: any) => {
                 expect(err.message).to.equal('Unauthorized')
             })
     })
 
     it('should handle requests not pointed to thrift service', async () => {
-        return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`).then((val) => {
+        return rp(`http://${HAPI_CALC_SERVER_CONFIG.hostName}:${HAPI_CALC_SERVER_CONFIG.port}/control`).then((val) => {
             expect(val).to.equal('PASS')
         })
     })

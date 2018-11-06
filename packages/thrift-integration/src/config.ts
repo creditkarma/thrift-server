@@ -3,9 +3,15 @@ export const APACHE_SERVER_CONFIG = {
     port: 8888,
 }
 
-export const CALC_SERVER_CONFIG = {
+export const HAPI_CALC_SERVER_CONFIG = {
     hostName: 'localhost',
     port: 8090,
+    path: '/thrift',
+}
+
+export const EXPRESS_CALC_SERVER_CONFIG = {
+    hostName: 'localhost',
+    port: 8091,
     path: '/thrift',
 }
 

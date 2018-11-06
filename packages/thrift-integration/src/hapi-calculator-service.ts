@@ -8,16 +8,23 @@ import {
     ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
 
+import {
+    createHttpClient,
+    IRequest,
+    ZipkinClientFilter,
+} from '@creditkarma/thrift-client'
+
 import * as Hapi from 'hapi'
 
 import {
+    IMappedStruct,
     ISharedStruct,
     ISharedUnion,
-} from '../generated/shared'
+} from './generated/shared'
 
 import {
     ADD_SERVER_CONFIG,
-    CALC_SERVER_CONFIG,
+    HAPI_CALC_SERVER_CONFIG,
 } from './config'
 
 import {
@@ -26,19 +33,13 @@ import {
     ICommonStruct,
     Operation,
     Work,
-} from '../generated/calculator-service'
+} from './generated/calculator-service'
 
 import {
     AddService,
-} from '../generated/add-service'
+} from './generated/add-service'
 
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '../../main/index'
-
-export function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Hapi.Server {
+export async function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<Hapi.Server> {
     // Create thrift client
     const addServiceClient: AddService.Client<IRequest> =
         createHttpClient(AddService.Client, {
@@ -50,7 +51,7 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
                         ZipkinClientFilter({
                             localServiceName: 'calculator-service',
                             remoteServiceName: 'add-service',
-                            endpoint: 'http://localhost:9411/api/v1/spans',
+                            endpoint: process.env.ZIPKIN_ENDPOINT,
                             sampleRate,
                             httpInterval: 0,
                         }),
@@ -116,6 +117,19 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
                 return { option2: 'bar' }
             }
         },
+        getMappedStruct(index: number): IMappedStruct {
+            const map = new Map()
+            map.set('one', {
+                code: {
+                    status: 5,
+                },
+                value: 'test',
+            })
+
+            return {
+                data: map,
+            }
+        },
         echoBinary(word: Buffer): string {
             return word.toString('utf-8')
         },
@@ -166,9 +180,9 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     /**
      * Creates Hapi server with thrift endpoint.
      */
-    const server: Hapi.Server = createThriftServer({
-        port: CALC_SERVER_CONFIG.port,
-        path: CALC_SERVER_CONFIG.path,
+    const server: Hapi.Server = await createThriftServer({
+        port: HAPI_CALC_SERVER_CONFIG.port,
+        path: HAPI_CALC_SERVER_CONFIG.path,
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
@@ -180,7 +194,7 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
         server.register(
             ZipkinTracingHapi({
                 localServiceName: 'calculator-service',
-                endpoint: 'http://localhost:9411/api/v1/spans',
+                endpoint: process.env.ZIPKIN_ENDPOINT,
                 sampleRate,
                 httpInterval: 0,
             }),
@@ -195,25 +209,42 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
 
     const client: Calculator.Client = createHttpClient(Calculator.Client, {
         serviceName: 'calculator-service',
-        hostName: CALC_SERVER_CONFIG.hostName,
-        port: CALC_SERVER_CONFIG.port,
-        path: CALC_SERVER_CONFIG.path,
+        hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+        port: HAPI_CALC_SERVER_CONFIG.port,
+        path: HAPI_CALC_SERVER_CONFIG.path,
+        register: (
+            (sampleRate > 0) ?
+                [
+                    ZipkinClientFilter({
+                        localServiceName: 'calculator-client',
+                        remoteServiceName: 'calculator-service',
+                        endpoint: process.env.ZIPKIN_ENDPOINT,
+                        sampleRate,
+                        httpInterval: 0,
+                    }),
+                ] :
+                []
+        ),
     })
 
     server.route({
         method: 'GET',
         path: '/add',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            const left: number = request.query.left
-            const right: number = request.query.right
-            client
-                .add(left, right)
-                .then((response: number) => {
-                    reply(response)
-                })
-                .catch((err: any) => {
-                    reply(err)
-                })
+        async handler(request: Hapi.Request, reply: Hapi.ReplyNoContinue): Promise<Hapi.Response> {
+            if (typeof request.query === 'object') {
+                const left: number = Number(request.query['left'])
+                const right: number = Number(request.query['right'])
+                return client
+                    .add(left, right)
+                    .then((response: number) => {
+                        return reply.response(`${response}`)
+                    })
+                    .catch((err: any) => {
+                        return reply.response(err).code(500)
+                    })
+            } else {
+                return reply.response(new Error(`No arguments`)).code(400)
+            }
         },
     })
 
@@ -224,24 +255,24 @@ export function createServer(sampleRate: number = 0, protocolType: ProtocolType 
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('PASS')
+        handler(request: Hapi.Request, reply: Hapi.ReplyNoContinue): Hapi.Response {
+            return reply.response('PASS')
         },
     })
 
     server.route({
         method: 'POST',
         path: '/return500',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('NOPE').code(500)
+        handler(request: Hapi.Request, reply: Hapi.ReplyNoContinue): Hapi.Response {
+            return reply.response('NOPE').code(500)
         },
     })
 
     server.route({
         method: 'POST',
         path: '/return400',
-        handler(request: Hapi.Request, reply: Hapi.ReplyWithContinue) {
-            reply('NOPE').code(400)
+        handler(request: Hapi.Request, reply: Hapi.ReplyNoContinue): Hapi.Response {
+            return reply.response('NOPE').code(400)
         },
     })
 
