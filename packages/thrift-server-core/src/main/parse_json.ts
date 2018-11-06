@@ -113,10 +113,30 @@ class JsonParser {
             case '-':
                 return this.number()
             default:
-                return this.getCh() >= '0' && this.getCh() <= '9'
-                    ? this.number()
-                    : this.word()
+            return this.isNumber() ? this.number() : this.word()
         }
+    }
+
+    private isNumber() {
+        const char = this.getCh()
+        if (char >= '0' && char <= '9') {
+            return true
+        }
+
+        if (char !== '.') {
+            return false
+        }
+
+        const nextChar = this.peekNext()
+        if (!nextChar) {
+            return false
+        }
+
+        return nextChar >= '0' && nextChar <= '9'
+    }
+
+    private peekNext() {
+        return this.text.charAt(this.at)
     }
 
     private next(c?: string) {
