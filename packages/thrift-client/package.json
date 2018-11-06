@@ -49,10 +49,11 @@
   "devDependencies": {
     "@creditkarma/thrift-server-core": "^0.9.2",
     "@creditkarma/thrift-typescript": "^3.0.0",
+    "@types/code": "^4.0.4",
     "@types/lab": "^11.1.0",
     "@types/node": "^8.0.31",
     "@types/request": "^2.47.1",
-    "code": "^5.2.0",
+    "code": "^5.2.3",
     "lab": "^16.1.0",
     "request": "^2.88.0",
     "rimraf": "^2.6.2",
