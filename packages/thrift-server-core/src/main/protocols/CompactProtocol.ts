@@ -263,7 +263,7 @@ export class CompactProtocol extends TProtocol {
     }
 
     public writeByte(byte: number): void {
-        this.transport.write(new Buffer([byte]))
+        this.transport.write(Buffer.from([byte]))
     }
 
     public writeI16(i16: number): void {
@@ -280,7 +280,7 @@ export class CompactProtocol extends TProtocol {
 
     // Little-endian, unlike TBinaryProtocol
     public writeDouble(dub: number): void {
-        const buff = new Buffer(8)
+        const buff = Buffer.alloc(8)
         let m
         let e
         let c
@@ -345,7 +345,7 @@ export class CompactProtocol extends TProtocol {
     public writeStringOrBinary(name: string, encoding: string, data: string | Buffer): void {
         if (typeof data === 'string') {
             this.writeVarint32(Buffer.byteLength(data, encoding))
-            this.transport.write(new Buffer(data, encoding))
+            this.transport.write(Buffer.from(data, encoding))
 
         } else if (data instanceof Buffer || Object.prototype.toString.call(data) === '[object Uint8Array]') {
             // Buffers in Node.js under Browserify may extend UInt8Array instead of
@@ -566,7 +566,7 @@ export class CompactProtocol extends TProtocol {
     public readBinary(): Buffer {
         const size: number = this.readVarint32()
         if (size === 0) {
-            return new Buffer(0)
+            return Buffer.alloc(0)
         }
 
         if (size < 0) {
@@ -795,7 +795,7 @@ export class CompactProtocol extends TProtocol {
             throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Expected Int64 or Number, found: ${i64}`)
         }
 
-        const buf: Buffer = new Buffer(10)
+        const buf: Buffer = Buffer.alloc(10)
         let wsize: number = 0
         let hi: number = i64.buffer.readUInt32BE(0, true)
         let lo: number = i64.buffer.readUInt32BE(4, true)
