@@ -13,7 +13,6 @@
         "test": "lab --timeout 60000 --verbose -l -S -P spec dist"
     },
     "devDependencies": {
-        "@creditkarma/dynamic-config": "~0.7.16",
         "@creditkarma/thrift-client": "^0.8.4",
         "@creditkarma/thrift-server-core": "^0.8.4",
         "@creditkarma/thrift-server-express": "^0.8.4",
@@ -25,12 +24,14 @@
         "@types/hapi": "^16.1.10",
         "@types/lab": "^11.1.0",
         "@types/node": "^8.0.31",
+        "@types/request-promise-native": "^1.0.15",
         "@types/thrift": "^0.10.7",
         "body-parser": "^1.18.3",
         "code": "^5.2.0",
         "express": "^4.16.4",
         "hapi": "^16.6.2",
         "lab": "^16.1.0",
+        "request-promise-native": "^1.0.5",
         "rimraf": "^2.6.2",
         "thrift": "^0.11.0",
         "tslint": "^5.11.0",
