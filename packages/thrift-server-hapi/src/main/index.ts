@@ -1,13 +1,9 @@
 import { IThriftProcessor } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
-import {
-    ThriftServerHapi,
-} from './ThriftServerHapi'
+import { ThriftServerHapi } from './ThriftServerHapi'
 
-import {
-    ICreateHapiServerOptions,
-} from './types'
+import { ICreateHapiServerOptions } from './types'
 
 import * as logger from './logger'
 
@@ -20,24 +16,26 @@ export * from './types'
  *
  * @param options
  */
-export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    options: ICreateHapiServerOptions<TProcessor>,
-): Promise<Hapi.Server> {
+export function createThriftServer<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+>(options: ICreateHapiServerOptions<TProcessor>): Promise<Hapi.Server> {
     const server = new Hapi.Server({
         port: options.port,
         debug: { request: ['error'] },
     })
 
-    return server.register({
-        plugin: ThriftServerHapi<TProcessor>({
-            path: options.path,
-            thriftOptions: options.thriftOptions,
-        }),
-    }).then(() => {
-        return server
-
-    }).catch((err: any) => {
-        logger.error(`Unable to create Thrift server. ${err.message}`)
-        throw err
-    })
+    return server
+        .register({
+            plugin: ThriftServerHapi<TProcessor>({
+                path: options.path,
+                thriftOptions: options.thriftOptions,
+            }),
+        })
+        .then(() => {
+            return server
+        })
+        .catch((err: any) => {
+            logger.error(`Unable to create Thrift server. ${err.message}`)
+            throw err
+        })
 }

@@ -16,11 +16,11 @@ class JsonParser {
         '"': '"',
         '\\': '\\',
         '/': '/',
-        'b': '\b',
-        'f': '\f',
-        'n': '\n',
-        'r': '\r',
-        't': '\t',
+        b: '\b',
+        f: '\f',
+        n: '\n',
+        r: '\r',
+        t: '\t',
     }
     private text = ''
 
@@ -113,7 +113,7 @@ class JsonParser {
             case '-':
                 return this.number()
             default:
-            return this.isNumber() ? this.number() : this.word()
+                return this.isNumber() ? this.number() : this.word()
         }
     }
 
@@ -142,7 +142,9 @@ class JsonParser {
     private next(c?: string) {
         // If a c parameter is provided, verify that it matches the current character.
         if (c && c !== this.getCh()) {
-            throw new SyntaxError("Expected '" + c + "' instead of '" + this.getCh() + "'")
+            throw new SyntaxError(
+                "Expected '" + c + "' instead of '" + this.getCh() + "'",
+            )
         }
 
         // Get the next character. When there are no more characters,

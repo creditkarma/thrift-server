@@ -4,11 +4,12 @@
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write src/**/*.ts",
         "codegen-ts": "thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./generated",
         "codegen-apache": "thrift-typescript --target apache --rootDir ./src --sourceDir ./thrift --outDir ./generated-apache",
         "codegen": "npm run codegen-ts && npm run codegen-apache",
-        "prebuild": "npm run clean && npm run lint && npm run codegen",
-        "build": "tsc -p tsconfig.json",
+        "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
+        "build": "tsc",
         "pretest": "npm run build",
         "test": "lab --timeout 60000 --verbose -l -S -P spec dist"
     },
@@ -32,6 +33,7 @@
         "express": "^4.16.4",
         "hapi": "^17.5.3",
         "lab": "^16.1.0",
+        "prettier": "^1.15.1",
         "request": "^2.88.0",
         "request-promise-native": "^1.0.5",
         "rimraf": "^2.6.2",
