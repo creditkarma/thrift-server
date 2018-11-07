@@ -40,10 +40,7 @@
     "@creditkarma/thrift-typescript": "^3.0.0",
     "@types/hapi": "^17.0.19",
     "@types/node": "^8.0.31",
-    "@types/request": "^2.47.1",
     "hapi": "^17.5.3",
-    "request": "^2.88.0",
-    "request-promise-native": "^1.0.5",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
     "typescript": "3.1.x"

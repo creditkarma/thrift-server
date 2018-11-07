@@ -31,6 +31,7 @@ export abstract class TTransport {
     public abstract readI32(): number
     public abstract readDouble(): number
     public abstract readString(len: number): string
+    public abstract readAll(): string
 
     /**
      * Writes buffer to the output

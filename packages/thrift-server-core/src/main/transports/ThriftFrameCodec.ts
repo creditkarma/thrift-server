@@ -4,7 +4,7 @@ const MAX_PACKETS: number = 10
 
 export class ThriftFrameCodec {
     public encode(dateToSend: Buffer): Buffer {
-        const msg = new Buffer(dateToSend.length + 4)
+        const msg = Buffer.alloc(dateToSend.length + 4)
         binary.writeI32(msg, dateToSend.length)
         dateToSend.copy(msg, 4, 0, dateToSend.length)
 
