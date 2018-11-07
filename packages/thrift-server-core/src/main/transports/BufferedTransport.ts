@@ -25,7 +25,7 @@ export class BufferedTransport extends TTransport {
     constructor(buffer?: Buffer) {
         super(buffer || Buffer.alloc(DEFAULT_READ_BUFFER_SIDE))
         this.readCursor = 0
-        this.writeCursor = (buffer !== undefined) ? buffer.length : 0
+        this.writeCursor = buffer !== undefined ? buffer.length : 0
         this.outBuffers = []
         this.outCount = 0
     }
@@ -34,18 +34,22 @@ export class BufferedTransport extends TTransport {
         const remainingSize = this.writeCursor - this.readCursor
         const remainingBuffer = Buffer.alloc(remainingSize)
         if (remainingSize > 0) {
-            this.buffer.copy(remainingBuffer, 0, this.readCursor, this.writeCursor)
+            this.buffer.copy(
+                remainingBuffer,
+                0,
+                this.readCursor,
+                this.writeCursor,
+            )
         }
         return remainingBuffer
     }
 
     public commitPosition(): void {
         const unreadSize: number = this.writeCursor - this.readCursor
-        const bufSize: number = (
-            (unreadSize * 2 > DEFAULT_READ_BUFFER_SIDE) ?
-                unreadSize * 2 :
-                DEFAULT_READ_BUFFER_SIDE
-        )
+        const bufSize: number =
+            unreadSize * 2 > DEFAULT_READ_BUFFER_SIDE
+                ? unreadSize * 2
+                : DEFAULT_READ_BUFFER_SIDE
         const buf: Buffer = Buffer.alloc(bufSize)
 
         if (unreadSize > 0) {
@@ -109,7 +113,11 @@ export class BufferedTransport extends TTransport {
 
     public readString(len: number): string {
         this.ensureAvailable(len)
-        const str: string = this.buffer.toString('utf8', this.readCursor, this.readCursor + len)
+        const str: string = this.buffer.toString(
+            'utf8',
+            this.readCursor,
+            this.readCursor + len,
+        )
         this.readCursor += len
         return str
     }
@@ -135,10 +143,12 @@ export class BufferedTransport extends TTransport {
         const msg: Buffer = Buffer.alloc(this.outCount)
         let pos: number = 0
 
-        this.outBuffers.forEach((buf: Buffer): void => {
-            buf.copy(msg, pos, 0)
-            pos += buf.length
-        })
+        this.outBuffers.forEach(
+            (buf: Buffer): void => {
+                buf.copy(msg, pos, 0)
+                pos += buf.length
+            },
+        )
 
         this.outBuffers = []
         this.outCount = 0

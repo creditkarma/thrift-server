@@ -9,11 +9,11 @@ import * as Hapi from 'hapi'
 
 import { ADD_SERVER_CONFIG } from './config'
 
-import {
-    AddService,
-} from './generated/add-service'
+import { AddService } from './generated/add-service'
 
-export async function createServer(sampleRate: number = 0): Promise<Hapi.Server> {
+export async function createServer(
+    sampleRate: number = 0,
+): Promise<Hapi.Server> {
     /**
      * Implementation of our thrift service.
      *
@@ -50,7 +50,8 @@ export async function createServer(sampleRate: number = 0): Promise<Hapi.Server>
             plugin: ZipkinTracingHapi({
                 localServiceName: 'add-service',
                 endpoint: process.env.ZIPKIN_ENDPOINT,
-                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                zipkinVersion:
+                    process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
             }),
@@ -64,7 +65,10 @@ export async function createServer(sampleRate: number = 0): Promise<Hapi.Server>
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+        handler(
+            request: Hapi.Request,
+            reply: Hapi.ResponseToolkit,
+        ): Hapi.ResponseObject {
             return reply.response('PASS')
         },
     })

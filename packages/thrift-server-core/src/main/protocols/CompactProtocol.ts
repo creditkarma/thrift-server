@@ -4,10 +4,7 @@
  * The orginal project can be found here:
  * https://github.com/apache/thrift/blob/master/lib/nodejs/lib/thrift/compact_protocol.js
  */
-import {
-    TProtocolException,
-    TProtocolExceptionType,
-} from '../errors'
+import { TProtocolException, TProtocolExceptionType } from '../errors'
 
 import * as logger from '../logger'
 import { TTransport } from '../transports'
@@ -35,7 +32,7 @@ const POW_52 = Math.pow(2, 52)
 const POW_1022 = Math.pow(2, 1022)
 
 // Compact Protocol ID number.
-const PROTOCOL_ID = -126  // 1000 0010
+const PROTOCOL_ID = -126 // 1000 0010
 
 // Compact Protocol version number.
 const VERSION_N = 1
@@ -44,7 +41,7 @@ const VERSION_N = 1
 const VERSION_MASK = 0x1f // 0001 1111
 
 // Compact Protocol message type mask for combining protocol version and message type in one byte.
-const TYPE_MASK = -32     // 1110 0000
+const TYPE_MASK = -32 // 1110 0000
 
 // Compact Protocol message type bits for ensuring message type bit size.
 const TYPE_BITS = 7 // 0000 0111
@@ -70,19 +67,19 @@ const TYPE_SHIFT_AMOUNT = 5
  * @property {number}  STRUCT        - A multifield type.
  */
 export enum CompactType {
-    STOP =           0x00,
-    BOOLEAN_TRUE =   0x01,
-    BOOLEAN_FALSE =  0x02,
-    BYTE =           0x03,
-    I16 =            0x04,
-    I32 =            0x05,
-    I64 =            0x06,
-    DOUBLE =         0x07,
-    BINARY =         0x08,
-    LIST =           0x09,
-    SET =            0x0A,
-    MAP =            0x0B,
-    STRUCT =         0x0C,
+    STOP = 0x00,
+    BOOLEAN_TRUE = 0x01,
+    BOOLEAN_FALSE = 0x02,
+    BYTE = 0x03,
+    I16 = 0x04,
+    I32 = 0x05,
+    I64 = 0x06,
+    DOUBLE = 0x07,
+    BINARY = 0x08,
+    LIST = 0x09,
+    SET = 0x0a,
+    MAP = 0x0b,
+    STRUCT = 0x0c,
 }
 
 /**
@@ -90,22 +87,22 @@ export enum CompactType {
  * @readonly
  */
 const TTypeToCType: Array<CompactType> = [
-    CompactType.STOP,         // T_STOP
-    0,                                      // unused
+    CompactType.STOP, // T_STOP
+    0, // unused
     CompactType.BOOLEAN_TRUE, // T_BOOL
-    CompactType.BYTE,         // T_BYTE
-    CompactType.DOUBLE,       // T_DOUBLE
-    0,                                      // unused
-    CompactType.I16,          // T_I16
-    0,                                      // unused
-    CompactType.I32,          // T_I32
-    0,                                      // unused
-    CompactType.I64,          // T_I64
-    CompactType.BINARY,       // T_STRING
-    CompactType.STRUCT,       // T_STRUCT
-    CompactType.MAP,          // T_MAP
-    CompactType.SET,          // T_SET
-    CompactType.LIST,         // T_LIST
+    CompactType.BYTE, // T_BYTE
+    CompactType.DOUBLE, // T_DOUBLE
+    0, // unused
+    CompactType.I16, // T_I16
+    0, // unused
+    CompactType.I32, // T_I32
+    0, // unused
+    CompactType.I64, // T_I64
+    CompactType.BINARY, // T_STRING
+    CompactType.STRUCT, // T_STRUCT
+    CompactType.MAP, // T_MAP
+    CompactType.SET, // T_SET
+    CompactType.LIST, // T_LIST
 ]
 
 export class CompactProtocol extends TProtocol {
@@ -160,29 +157,37 @@ export class CompactProtocol extends TProtocol {
             case CompactType.STRUCT:
                 return TType.STRUCT
             default:
-                throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Unknown type: ${type}`)
+                throw new TProtocolException(
+                    TProtocolExceptionType.INVALID_DATA,
+                    `Unknown type: ${type}`,
+                )
         }
     }
 
-    public writeMessageBegin(name: string, type: MessageType, requestId: number): void {
+    public writeMessageBegin(
+        name: string,
+        type: MessageType,
+        requestId: number,
+    ): void {
         this.writeByte(PROTOCOL_ID)
-        this.writeByte((VERSION_N & VERSION_MASK) | ((type << TYPE_SHIFT_AMOUNT) & TYPE_MASK))
+        this.writeByte(
+            (VERSION_N & VERSION_MASK) |
+                ((type << TYPE_SHIFT_AMOUNT) & TYPE_MASK),
+        )
         this.writeVarint32(requestId)
         this.writeString(name)
 
         // Record client seqid to find callback again
         if (this.requestId) {
-          logger.warn(`RequestId already set: ${name}`)
-
+            logger.warn(`RequestId already set: ${name}`)
         } else {
-          this.requestId = requestId
+            this.requestId = requestId
         }
     }
 
     public writeMessageEnd(): void {
         if (this.requestId !== null) {
             this.requestId = null
-
         } else {
             logger.warn('No requestId to unset')
         }
@@ -206,7 +211,6 @@ export class CompactProtocol extends TProtocol {
     public writeFieldBegin(name: string, type: TType, id: number): void {
         if (type !== TType.BOOL) {
             return this.writeFieldBeginInternal(name, type, id, -1)
-
         } else {
             this._booleanField.name = name
             this._booleanField.fieldType = type
@@ -223,10 +227,12 @@ export class CompactProtocol extends TProtocol {
     public writeMapBegin(keyType: TType, valueType: TType, size: number): void {
         if (size === 0) {
             this.writeByte(0)
-
         } else {
             this.writeVarint32(size)
-            this.writeByte(this.getCompactType(keyType) << 4 | this.getCompactType(valueType))
+            this.writeByte(
+                (this.getCompactType(keyType) << 4) |
+                    this.getCompactType(valueType),
+            )
         }
     }
 
@@ -251,14 +257,15 @@ export class CompactProtocol extends TProtocol {
                 this._booleanField.name,
                 this._booleanField.fieldType,
                 this._booleanField.fieldId,
-                (bool ? CompactType.BOOLEAN_TRUE : CompactType.BOOLEAN_FALSE),
+                bool ? CompactType.BOOLEAN_TRUE : CompactType.BOOLEAN_FALSE,
             )
 
             this._booleanField.name = null
-
         } else {
-          // we're not part of a field, so just write the value
-          this.writeByte((bool ? CompactType.BOOLEAN_TRUE : CompactType.BOOLEAN_FALSE))
+            // we're not part of a field, so just write the value
+            this.writeByte(
+                bool ? CompactType.BOOLEAN_TRUE : CompactType.BOOLEAN_FALSE,
+            )
         }
     }
 
@@ -285,18 +292,16 @@ export class CompactProtocol extends TProtocol {
         let e
         let c
 
-        buff[7] = (dub < 0 ? 0x80 : 0x00)
+        buff[7] = dub < 0 ? 0x80 : 0x00
 
         dub = Math.abs(dub)
         if (dub !== dub) {
             // NaN, use QNaN IEEE format
             m = 2251799813685248
             e = 2047
-
         } else if (dub === Infinity) {
             m = 0
             e = 2047
-
         } else {
             e = Math.floor(Math.log(dub) / Math.LN2)
             c = Math.pow(2, -e)
@@ -309,15 +314,13 @@ export class CompactProtocol extends TProtocol {
                 // Overflow
                 m = 0
                 e = 2047
-
             } else if (e + 1023 >= 1) {
                 // Normalized - term order matters, as Math.pow(2, 52-e) and v*Math.pow(2, 52) can overflow
-                m = ((dub * c) - 1) * POW_52
+                m = (dub * c - 1) * POW_52
                 e += 1023
-
             } else {
                 // Denormalized - also catches the '0' case, somewhat by chance
-                m = (dub * POW_1022) * POW_52
+                m = dub * POW_1022 * POW_52
                 e = 0
             }
         }
@@ -342,20 +345,27 @@ export class CompactProtocol extends TProtocol {
         this.transport.write(buff)
     }
 
-    public writeStringOrBinary(name: string, encoding: string, data: string | Buffer): void {
+    public writeStringOrBinary(
+        name: string,
+        encoding: string,
+        data: string | Buffer,
+    ): void {
         if (typeof data === 'string') {
             this.writeVarint32(Buffer.byteLength(data, encoding))
             this.transport.write(Buffer.from(data, encoding))
-
-        } else if (data instanceof Buffer || Object.prototype.toString.call(data) === '[object Uint8Array]') {
+        } else if (
+            data instanceof Buffer ||
+            Object.prototype.toString.call(data) === '[object Uint8Array]'
+        ) {
             // Buffers in Node.js under Browserify may extend UInt8Array instead of
             // defining a new object. We detect them here so we can write them
             // correctly
             this.writeVarint32(data.length)
             this.transport.write(data)
-
         } else {
-            throw new Error(`${name} called without a string/Buffer argument: ${data}`)
+            throw new Error(
+                `${name} called without a string/Buffer argument: ${data}`,
+            )
         }
     }
 
@@ -371,18 +381,25 @@ export class CompactProtocol extends TProtocol {
         // Read protocol ID
         const protocolId: number = this.transport.readByte()
         if (protocolId !== PROTOCOL_ID) {
-            throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, `Bad protocol identifier ${protocolId}`)
+            throw new TProtocolException(
+                TProtocolExceptionType.BAD_VERSION,
+                `Bad protocol identifier ${protocolId}`,
+            )
         }
 
         // Read Version and Type
         const versionAndType: number = this.transport.readByte()
-        const version: number = (versionAndType & VERSION_MASK)
+        const version: number = versionAndType & VERSION_MASK
 
         if (version !== VERSION_N) {
-            throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, `Bad protocol version ${version}`)
+            throw new TProtocolException(
+                TProtocolExceptionType.BAD_VERSION,
+                `Bad protocol version ${version}`,
+            )
         }
 
-        const messageType: number = ((versionAndType >> TYPE_SHIFT_AMOUNT) & TYPE_BITS)
+        const messageType: number =
+            (versionAndType >> TYPE_SHIFT_AMOUNT) & TYPE_BITS
 
         // Read SeqId
         const requestId: number = this.readVarint32()
@@ -412,7 +429,7 @@ export class CompactProtocol extends TProtocol {
     public readFieldBegin(): IThriftField {
         let fieldId: number = 0
         const byte: number = this.transport.readByte()
-        const type: number = (byte & 0x0f)
+        const type: number = byte & 0x0f
 
         if (type === CompactType.STOP) {
             return {
@@ -423,23 +440,25 @@ export class CompactProtocol extends TProtocol {
         }
 
         // Mask off the 4 MSB of the type header to check for field id delta.
-        const modifier: number = ((byte & 0x000000f0) >>> 4)
+        const modifier: number = (byte & 0x000000f0) >>> 4
         if (modifier === 0) {
             // If not a delta read the field id.
             fieldId = this.readI16()
-
         } else {
             // Recover the field id from the delta
-            fieldId = (this._lastFieldId + modifier)
+            fieldId = this._lastFieldId + modifier
         }
 
         const fieldType: number = this.getTType(type)
 
         // Boolean are encoded with the type
-        if (type === CompactType.BOOLEAN_TRUE || type === CompactType.BOOLEAN_FALSE) {
+        if (
+            type === CompactType.BOOLEAN_TRUE ||
+            type === CompactType.BOOLEAN_FALSE
+        ) {
             this._boolValue.hasBoolValue = true
             this._boolValue.boolValue =
-            (type === CompactType.BOOLEAN_TRUE ? true : false)
+                type === CompactType.BOOLEAN_TRUE ? true : false
         }
 
         // Save the new field for the next delta computation.
@@ -457,7 +476,10 @@ export class CompactProtocol extends TProtocol {
     public readMapBegin(): IThriftMap {
         const size: number = this.readVarint32()
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative map size`)
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative map size`,
+            )
         }
 
         let kvType: number = 0
@@ -482,7 +504,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative list size`)
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative list size`,
+            )
         }
 
         const elementType = this.getTType(sizeType & 0x0000000f)
@@ -506,36 +531,36 @@ export class CompactProtocol extends TProtocol {
         } else {
             const res: number = this.transport.readByte()
             // value = (res.value === CompactType.BOOLEAN_TRUE);
-            value = (res === CompactType.BOOLEAN_TRUE)
+            value = res === CompactType.BOOLEAN_TRUE
         }
 
         return value
     }
 
-      public readByte(): number {
+    public readByte(): number {
         return this.transport.readByte()
-      }
+    }
 
-      public readI16(): number {
+    public readI16(): number {
         return this.readI32()
-      }
+    }
 
-      public readI32(): number {
+    public readI32(): number {
         return this.zigzagToI32(this.readVarint32())
-      }
+    }
 
-      public readI64(): Int64 {
+    public readI64(): Int64 {
         return this.zigzagToI64(this.readVarint64())
-      }
+    }
 
-      // Little-endian, unlike TBinaryProtocol
-      public readDouble(): number {
+    // Little-endian, unlike TBinaryProtocol
+    public readDouble(): number {
         const buff: Buffer = this.transport.read(8)
         const off: number = 0
 
         const signed: number = buff[off + 7] & 0x80
-        let e: number = (buff[off + 6] & 0xF0) >> 4
-        e += (buff[off + 7] & 0x7F) << 4
+        let e: number = (buff[off + 6] & 0xf0) >> 4
+        e += (buff[off + 7] & 0x7f) << 4
 
         let m = buff[off]
         m += buff[off + 1] << 8
@@ -543,14 +568,14 @@ export class CompactProtocol extends TProtocol {
         m += buff[off + 3] * POW_24
         m += buff[off + 4] * POW_32
         m += buff[off + 5] * POW_40
-        m += (buff[off + 6] & 0x0F) * POW_48
+        m += (buff[off + 6] & 0x0f) * POW_48
 
         switch (e) {
             case 0:
                 e = -1022
                 break
             case 2047:
-                return m ? NaN : (signed ? -Infinity : Infinity)
+                return m ? NaN : signed ? -Infinity : Infinity
             default:
                 m += POW_52
                 e -= 1023
@@ -570,7 +595,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative binary size`)
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative binary size`,
+            )
         }
 
         return this.transport.read(size)
@@ -586,7 +614,10 @@ export class CompactProtocol extends TProtocol {
 
         // Catch error cases
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative string size`)
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative string size`,
+            )
         }
 
         return this.transport.readString(size)
@@ -652,7 +683,7 @@ export class CompactProtocol extends TProtocol {
                 this.readListEnd()
                 break
             default:
-                throw new  Error('Invalid type: ' + type)
+                throw new Error('Invalid type: ' + type)
         }
     }
 
@@ -682,9 +713,9 @@ export class CompactProtocol extends TProtocol {
         const hiNeg = neg.buffer.readUInt32BE(0, true)
         const loNeg = neg.buffer.readUInt32BE(4, true)
 
-        const hiLo = (hi << 31)
-        hi = (hi >>> 1) ^ (hiNeg)
-        lo = ((lo >>> 1) | hiLo) ^ (loNeg)
+        const hiLo = hi << 31
+        hi = (hi >>> 1) ^ hiNeg
+        lo = ((lo >>> 1) | hiLo) ^ loNeg
         return new Int64(hi, lo)
     }
 
@@ -708,7 +739,7 @@ export class CompactProtocol extends TProtocol {
 
         while (true) {
             const b: number = this.transport.readByte()
-            rsize ++
+            rsize++
 
             if (shift <= 25) {
                 lo = lo | ((b & 0x7f) << shift)
@@ -726,21 +757,30 @@ export class CompactProtocol extends TProtocol {
             }
 
             if (rsize >= 10) {
-                throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Variable-length int over 10 bytes.`)
+                throw new TProtocolException(
+                    TProtocolExceptionType.INVALID_DATA,
+                    `Variable-length int over 10 bytes.`,
+                )
             }
         }
 
         return new Int64(hi, lo)
     }
 
-    private writeFieldBeginInternal(name: string, fieldType: TType, fieldId: number, typeOverride: number): void {
+    private writeFieldBeginInternal(
+        name: string,
+        fieldType: TType,
+        fieldId: number,
+        typeOverride: number,
+    ): void {
         // If there's a type override, use that.
-        const typeToWrite = (typeOverride === -1 ? this.getCompactType(fieldType) : typeOverride)
+        const typeToWrite =
+            typeOverride === -1 ? this.getCompactType(fieldType) : typeOverride
 
         // Check if we can delta encode the field id
         if (fieldId > this._lastFieldId && fieldId - this._lastFieldId <= 15) {
             // Include the type delta with the field ID
-            this.writeByte((fieldId - this._lastFieldId) << 4 | typeToWrite)
+            this.writeByte(((fieldId - this._lastFieldId) << 4) | typeToWrite)
         } else {
             // Write separate type and ID values
             this.writeByte(typeToWrite)
@@ -752,8 +792,7 @@ export class CompactProtocol extends TProtocol {
     private writeCollectionBegin(elementType: TType, size: number): void {
         if (size <= 14) {
             // Combine size and type in one byte if possible
-            this.writeByte(size << 4 | this.getCompactType(elementType))
-
+            this.writeByte((size << 4) | this.getCompactType(elementType))
         } else {
             this.writeByte(0xf0 | this.getCompactType(elementType))
             this.writeVarint32(size)
@@ -767,12 +806,11 @@ export class CompactProtocol extends TProtocol {
         const buf: Buffer = Buffer.alloc(5)
         let wsize: number = 0
         while (true) {
-            if ((i32 & ~0x7F) === 0) {
+            if ((i32 & ~0x7f) === 0) {
                 buf[wsize++] = i32
                 break
-
             } else {
-                buf[wsize++] = ((i32 & 0x7F) | 0x80)
+                buf[wsize++] = (i32 & 0x7f) | 0x80
                 i32 = i32 >>> 7
             }
         }
@@ -792,7 +830,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (!(i64 instanceof Int64)) {
-            throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Expected Int64 or Number, found: ${i64}`)
+            throw new TProtocolException(
+                TProtocolExceptionType.INVALID_DATA,
+                `Expected Int64 or Number, found: ${i64}`,
+            )
         }
 
         const buf: Buffer = Buffer.alloc(10)
@@ -802,12 +843,11 @@ export class CompactProtocol extends TProtocol {
         let mask: number = 0
 
         while (true) {
-            if (((lo & ~0x7F) === 0) && (hi === 0)) {
+            if ((lo & ~0x7f) === 0 && hi === 0) {
                 buf[wsize++] = lo
                 break
-
             } else {
-                buf[wsize++] = ((lo & 0x7F) | 0x80)
+                buf[wsize++] = (lo & 0x7f) | 0x80
                 mask = hi << 25
                 lo = lo >>> 7
                 hi = hi >>> 7
@@ -827,21 +867,23 @@ export class CompactProtocol extends TProtocol {
     private i64ToZigzag(i64: number | Int64): Int64 {
         if (typeof i64 === 'string') {
             i64 = new Int64(parseInt(i64, 10))
-
         } else if (typeof i64 === 'number') {
             i64 = new Int64(i64)
         }
 
         if (!(i64 instanceof Int64)) {
-            throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Expected Int64 or Number, found: ${i64}`)
+            throw new TProtocolException(
+                TProtocolExceptionType.INVALID_DATA,
+                `Expected Int64 or Number, found: ${i64}`,
+            )
         }
 
         let hi: number = i64.buffer.readUInt32BE(0, true)
         let lo: number = i64.buffer.readUInt32BE(4, true)
         const sign: number = hi >>> 31
 
-        hi = ((hi << 1) | (lo >>> 31)) ^ ((!!sign) ? 0xFFFFFFFF : 0)
-        lo = (lo << 1) ^ ((!!sign) ? 0xFFFFFFFF : 0)
+        hi = ((hi << 1) | (lo >>> 31)) ^ (!!sign ? 0xffffffff : 0)
+        lo = (lo << 1) ^ (!!sign ? 0xffffffff : 0)
 
         return new Int64(hi, lo)
     }
@@ -851,6 +893,6 @@ export class CompactProtocol extends TProtocol {
      * represented compactly as a varint.
      */
     private i32ToZigzag(i32: number): number {
-        return (i32 << 1) ^ ((i32 & 0x80000000) ? 0xFFFFFFFF : 0)
+        return (i32 << 1) ^ (i32 & 0x80000000 ? 0xffffffff : 0)
     }
 }

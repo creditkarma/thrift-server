@@ -11,17 +11,13 @@ import * as Lab from 'lab'
 import * as net from 'net'
 import * as rp from 'request-promise-native'
 
-import {
-    CLIENT_CONFIG,
-} from '../../config'
+import { CLIENT_CONFIG } from '../../config'
 
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'
 import { createServer as mockCollector, IMockCollector } from './mock-collector'
 
-import {
-    createClientServer,
-} from '../client'
+import { createClientServer } from '../client'
 
 export const lab = Lab.script()
 
@@ -43,12 +39,11 @@ describe('Tracing', () => {
         addServer = await addService(1)
         clientServer = await createClientServer(1)
         collectServer = await mockCollector()
-        return Promise.all([
-            calcServer.start(),
-            addServer.start(),
-        ]).then((err) => {
-            console.log('Thrift server running')
-        })
+        return Promise.all([calcServer.start(), addServer.start()]).then(
+            (err) => {
+                console.log('Thrift server running')
+            },
+        )
     })
 
     after(async () => {
@@ -56,13 +51,12 @@ describe('Tracing', () => {
             clientServer.close(() => {
                 clientServer.unref()
                 collectServer.close().then(() => {
-                    Promise.all([
-                        calcServer.stop(),
-                        addServer.stop(),
-                    ]).then((err) => {
-                        console.log('Thrift server stopped')
-                        resolve()
-                    })
+                    Promise.all([calcServer.stop(), addServer.stop()]).then(
+                        (err) => {
+                            console.log('Thrift server stopped')
+                            resolve()
+                        },
+                    )
                 })
             })
         })
@@ -74,46 +68,63 @@ describe('Tracing', () => {
             const traceId_1: string = '4808dde1609f5673'
             const traceId_2: string = 'b82ba1422cf1ec6c'
             Promise.all([
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 5,
-                        op: 'add',
-                        right: 9,
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'x-b3-traceid': traceId_1,
+                            'x-b3-spanid': traceId_1,
+                            'x-b3-parentspanid': traceId_1,
+                            'x-b3-sampled': '1',
+                        },
                     },
-                    headers: {
-                        'x-b3-traceid': traceId_1,
-                        'x-b3-spanid': traceId_1,
-                        'x-b3-parentspanid': traceId_1,
-                        'x-b3-sampled': '1',
+                ),
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 8,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'x-b3-traceid': traceId_2,
+                            'x-b3-spanid': traceId_2,
+                            'x-b3-parentspanid': traceId_2,
+                            'x-b3-sampled': '1',
+                        },
                     },
-                }),
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 8,
-                        op: 'add',
-                        right: 9,
-                    },
-                    headers: {
-                        'x-b3-traceid': traceId_2,
-                        'x-b3-spanid': traceId_2,
-                        'x-b3-parentspanid': traceId_2,
-                        'x-b3-sampled': '1',
-                    },
-                }),
-            ]).then((val: any) => {
-                expect(val).to.equal(['result: 14', 'result: 17'])
-                setTimeout(() => {
-                    const result = collectServer.traces()
-                    expect(result[traceId_1]).to.exist()
-                    expect(result[traceId_2]).to.exist()
-                    expect(Object.keys(result[traceId_1]).length).to.equal(3)
-                    expect(Object.keys(result[traceId_2]).length).to.equal(3)
-                    resolve()
-                }, 3000)
-            }, (err: any) => {
-                console.log('err: ', err)
-                reject(err)
-            })
+                ),
+            ]).then(
+                (val: any) => {
+                    expect(val).to.equal(['result: 14', 'result: 17'])
+                    setTimeout(() => {
+                        const result = collectServer.traces()
+                        expect(result[traceId_1]).to.exist()
+                        expect(result[traceId_2]).to.exist()
+                        expect(Object.keys(result[traceId_1]).length).to.equal(
+                            3,
+                        )
+                        expect(Object.keys(result[traceId_2]).length).to.equal(
+                            3,
+                        )
+                        resolve()
+                    }, 3000)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    reject(err)
+                },
+            )
         })
     })
 
@@ -121,33 +132,45 @@ describe('Tracing', () => {
         return new Promise((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             Promise.all([
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite`, {
-                    qs: {
-                        left: 5,
-                        op: 'add',
-                        right: 9,
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate-overwrite`,
+                    {
+                        qs: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'x-b3-traceid': traceId_1,
+                            'x-b3-spanid': traceId_1,
+                            'x-b3-parentspanid': traceId_1,
+                            'x-b3-sampled': true,
+                        },
                     },
-                    headers: {
-                        'x-b3-traceid': traceId_1,
-                        'x-b3-spanid': traceId_1,
-                        'x-b3-parentspanid': traceId_1,
-                        'x-b3-sampled': true,
-                    },
-                }),
-            ]).then((val: any) => {
-                expect(val).to.equal(['result: 14'])
-                setTimeout(() => {
-                    const result = collectServer.traces()
-                    expect(result[traceId_1]).to.exist()
-                    expect(result['411d1802c9151ded']).to.exist()
-                    expect(Object.keys(result[traceId_1]).length).to.equal(1)
-                    expect(Object.keys(result['411d1802c9151ded']).length).to.equal(2)
-                    resolve()
-                }, 3000)
-            }, (err: any) => {
-                console.log('err: ', err)
-                reject(err)
-            })
+                ),
+            ]).then(
+                (val: any) => {
+                    expect(val).to.equal(['result: 14'])
+                    setTimeout(() => {
+                        const result = collectServer.traces()
+                        expect(result[traceId_1]).to.exist()
+                        expect(result['411d1802c9151ded']).to.exist()
+                        expect(Object.keys(result[traceId_1]).length).to.equal(
+                            1,
+                        )
+                        expect(
+                            Object.keys(result['411d1802c9151ded']).length,
+                        ).to.equal(2)
+                        resolve()
+                    }, 3000)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    reject(err)
+                },
+            )
         })
     })
 
@@ -156,50 +179,71 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 5,
-                        op: 'add',
-                        right: 9,
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'l5d-ctx-trace': serializeLinkerdHeader(
+                                traceIdFromTraceId({
+                                    traceId: traceId_1,
+                                    spanId: traceId_1,
+                                    parentId: traceId_1,
+                                    sampled: true,
+                                }),
+                            ),
+                        },
                     },
-                    headers: {
-                        'l5d-ctx-trace': serializeLinkerdHeader(traceIdFromTraceId({
-                            traceId: traceId_1,
-                            spanId: traceId_1,
-                            parentId: traceId_1,
-                            sampled: true,
-                        })),
+                ),
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 7,
+                            op: 'add',
+                            right: 22,
+                        },
+                        headers: {
+                            'l5d-ctx-trace': serializeLinkerdHeader(
+                                traceIdFromTraceId({
+                                    traceId: traceId_2,
+                                    spanId: traceId_2,
+                                    parentId: traceId_2,
+                                    sampled: true,
+                                }),
+                            ),
+                        },
                     },
-                }),
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 7,
-                        op: 'add',
-                        right: 22,
-                    },
-                    headers: {
-                        'l5d-ctx-trace': serializeLinkerdHeader(traceIdFromTraceId({
-                            traceId: traceId_2,
-                            spanId: traceId_2,
-                            parentId: traceId_2,
-                            sampled: true,
-                        })),
-                    },
-                }),
-            ]).then((val: any) => {
-                expect(val).to.equal(['result: 14', 'result: 29'])
-                setTimeout(() => {
-                    const result = collectServer.traces()
-                    expect(result[traceId_1]).to.exist()
-                    expect(result[traceId_2]).to.exist()
-                    expect(Object.keys(result[traceId_1]).length).to.equal(3)
-                    expect(Object.keys(result[traceId_2]).length).to.equal(3)
-                    resolve()
-                }, 3000)
-            }, (err: any) => {
-                console.log('err: ', err)
-                reject(err)
-            })
+                ),
+            ]).then(
+                (val: any) => {
+                    expect(val).to.equal(['result: 14', 'result: 29'])
+                    setTimeout(() => {
+                        const result = collectServer.traces()
+                        expect(result[traceId_1]).to.exist()
+                        expect(result[traceId_2]).to.exist()
+                        expect(Object.keys(result[traceId_1]).length).to.equal(
+                            3,
+                        )
+                        expect(Object.keys(result[traceId_2]).length).to.equal(
+                            3,
+                        )
+                        resolve()
+                    }, 3000)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    reject(err)
+                },
+            )
         })
     })
 
@@ -208,37 +252,49 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 5,
-                        op: 'add',
-                        right: 9,
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'l5d-ctx-trace': serializeLinkerdHeader(
+                                traceIdFromTraceId({
+                                    traceId: traceId_1,
+                                    spanId: traceId_1,
+                                    parentId: traceId_1,
+                                    sampled: true,
+                                }),
+                            ),
+                            'x-b3-traceid': traceId_2,
+                            'x-b3-spanid': traceId_2,
+                            'x-b3-parentspanid': traceId_2,
+                            'x-b3-sampled': '1',
+                        },
                     },
-                    headers: {
-                        'l5d-ctx-trace': serializeLinkerdHeader(traceIdFromTraceId({
-                            traceId: traceId_1,
-                            spanId: traceId_1,
-                            parentId: traceId_1,
-                            sampled: true,
-                        })),
-                        'x-b3-traceid': traceId_2,
-                        'x-b3-spanid': traceId_2,
-                        'x-b3-parentspanid': traceId_2,
-                        'x-b3-sampled': '1',
-                    },
-                }),
-            ]).then((val: any) => {
-                expect(val).to.equal(['result: 14'])
-                setTimeout(() => {
-                    const result = collectServer.traces()
-                    expect(Object.keys(result)[0]).to.equal(traceId_2)
-                    expect(Object.keys(result[traceId_2]).length).to.equal(3)
-                    resolve()
-                }, 3000)
-            }, (err: any) => {
-                console.log('err: ', err)
-                reject(err)
-            })
+                ),
+            ]).then(
+                (val: any) => {
+                    expect(val).to.equal(['result: 14'])
+                    setTimeout(() => {
+                        const result = collectServer.traces()
+                        expect(Object.keys(result)[0]).to.equal(traceId_2)
+                        expect(Object.keys(result[traceId_2]).length).to.equal(
+                            3,
+                        )
+                        resolve()
+                    }, 3000)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    reject(err)
+                },
+            )
         })
     })
 
@@ -258,36 +314,44 @@ describe('Tracing', () => {
                 sampled: true,
             }
             Promise.all([
-                rp(`http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`, {
-                    qs: {
-                        left: 5,
-                        op: 'add',
-                        right: 9,
+                rp(
+                    `http://${CLIENT_CONFIG.hostName}:${
+                        CLIENT_CONFIG.port
+                    }/calculate`,
+                    {
+                        qs: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
+                        headers: {
+                            'l5d-ctx-trace': serializeLinkerdHeader(
+                                traceIdFromTraceId(trace_1),
+                            ),
+                            'x-b3-traceid': trace_2.traceId,
+                            'x-b3-spanid': trace_2.spanId,
+                            'x-b3-parentspanid': trace_2.parentId,
+                            'x-b3-sampled': true,
+                        },
                     },
-                    headers: {
-                        'l5d-ctx-trace': serializeLinkerdHeader(
-                            traceIdFromTraceId(trace_1),
-                        ),
-                        'x-b3-traceid': trace_2.traceId,
-                        'x-b3-spanid': trace_2.spanId,
-                        'x-b3-parentspanid': trace_2.parentId,
-                        'x-b3-sampled': true,
-                    },
-                }),
-            ]).then((val: any) => {
-                expect(val).to.equal(['result: 14'])
-                setTimeout(() => {
-                    const result = collectServer.traces()
-                    const piece = result[trace_1.traceId][trace_1.spanId]
-                    expect(piece.traceId).to.equal(trace_1.traceId)
-                    expect(piece.id).to.equal(trace_1.spanId)
-                    expect(piece.parentId).to.equal(trace_1.parentId)
-                    resolve()
-                }, 3000)
-            }, (err: any) => {
-                console.log('err: ', err)
-                reject(err)
-            })
+                ),
+            ]).then(
+                (val: any) => {
+                    expect(val).to.equal(['result: 14'])
+                    setTimeout(() => {
+                        const result = collectServer.traces()
+                        const piece = result[trace_1.traceId][trace_1.spanId]
+                        expect(piece.traceId).to.equal(trace_1.traceId)
+                        expect(piece.id).to.equal(trace_1.spanId)
+                        expect(piece.parentId).to.equal(trace_1.parentId)
+                        resolve()
+                    }, 3000)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    reject(err)
+                },
+            )
         })
     })
 })

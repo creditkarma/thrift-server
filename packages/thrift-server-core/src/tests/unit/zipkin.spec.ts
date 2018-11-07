@@ -33,17 +33,23 @@ describe('Zipkin', () => {
         traceIdHigh: true,
     })
 
-    const serializedTraceId: string = 'w7oaZWDKDEgrUYn/oBOtc0EdGALJFR3tAAAAAAAAAAY='
+    const serializedTraceId: string =
+        'w7oaZWDKDEgrUYn/oBOtc0EdGALJFR3tAAAAAAAAAAY='
 
-    const serializedTraceId128: string = 'w7oaZWDKDEgrUYn/oBOtc0EdGALJFR3tAAAAAAAAAAYrUYn/oBOtcw=='
+    const serializedTraceId128: string =
+        'w7oaZWDKDEgrUYn/oBOtc0EdGALJFR3tAAAAAAAAAAYrUYn/oBOtcw=='
 
     describe('deserializeLikerdHeader', () => {
         it('should correctly deserialize TraceId object with 64-bit ids', async () => {
-            expect(traceId).to.equal(deserializeLinkerdHeader(serializedTraceId))
+            expect(traceId).to.equal(
+                deserializeLinkerdHeader(serializedTraceId),
+            )
         })
 
         it('should correctly deserialize TraceId object with 128-bit ids', async () => {
-            expect(traceId128).to.equal(deserializeLinkerdHeader(serializedTraceId128))
+            expect(traceId128).to.equal(
+                deserializeLinkerdHeader(serializedTraceId128),
+            )
         })
     })
 
@@ -53,7 +59,9 @@ describe('Zipkin', () => {
         })
 
         it('should correctly serialize TraceId object with 128-bit ids', async () => {
-            expect(serializeLinkerdHeader(traceId128)).to.equal(serializedTraceId128)
+            expect(serializeLinkerdHeader(traceId128)).to.equal(
+                serializedTraceId128,
+            )
         })
     })
 
@@ -74,7 +82,11 @@ describe('Zipkin', () => {
                 'l5d-ctx-trace': 'w7oaZWDKDEgrUYn/oBOtc0EdGALJFR3tAAAAAAAAAAY=',
             })
 
-            expect<any>(traceIdValues(deserializeLinkerdHeader(actual['l5d-ctx-trace'] as string))).to.equal({
+            expect<any>(
+                traceIdValues(
+                    deserializeLinkerdHeader(actual['l5d-ctx-trace'] as string),
+                ),
+            ).to.equal({
                 traceId: '411d1802c9151ded',
                 spanId: 'c3ba1a6560ca0c48',
                 parentId: '2b5189ffa013ad73',

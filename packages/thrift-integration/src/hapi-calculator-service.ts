@@ -1,7 +1,4 @@
-import {
-    Int64,
-    ProtocolType,
-} from '@creditkarma/thrift-server-core'
+import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
 
 import {
     createThriftServer,
@@ -16,16 +13,9 @@ import {
 
 import * as Hapi from 'hapi'
 
-import {
-    IMappedStruct,
-    ISharedStruct,
-    ISharedUnion,
-} from './generated/shared'
+import { IMappedStruct, ISharedStruct, ISharedUnion } from './generated/shared'
 
-import {
-    ADD_SERVER_CONFIG,
-    HAPI_CALC_SERVER_CONFIG,
-} from './config'
+import { ADD_SERVER_CONFIG, HAPI_CALC_SERVER_CONFIG } from './config'
 
 import {
     Calculator,
@@ -35,31 +25,36 @@ import {
     Work,
 } from './generated/calculator-service'
 
-import {
-    AddService,
-} from './generated/add-service'
+import { AddService } from './generated/add-service'
 
-export async function createServer(sampleRate: number = 0, protocolType: ProtocolType = 'binary'): Promise<Hapi.Server> {
+export async function createServer(
+    sampleRate: number = 0,
+    protocolType: ProtocolType = 'binary',
+): Promise<Hapi.Server> {
     // Create thrift client
-    const addServiceClient: AddService.Client<IRequest> =
-        createHttpClient(AddService.Client, {
+    const addServiceClient: AddService.Client<IRequest> = createHttpClient(
+        AddService.Client,
+        {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
-            register: (
-                (sampleRate > 0) ?
-                    [
-                        ZipkinClientFilter({
-                            localServiceName: 'calculator-service',
-                            remoteServiceName: 'add-service',
-                            endpoint: process.env.ZIPKIN_ENDPOINT,
-                            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                            sampleRate,
-                            httpInterval: 0,
-                        }),
-                    ] :
-                    []
-            ),
-        })
+            register:
+                sampleRate > 0
+                    ? [
+                          ZipkinClientFilter({
+                              localServiceName: 'calculator-service',
+                              remoteServiceName: 'add-service',
+                              endpoint: process.env.ZIPKIN_ENDPOINT,
+                              zipkinVersion:
+                                  process.env.ZIPKIN_VERSION === 'v2'
+                                      ? 'v2'
+                                      : 'v1',
+                              sampleRate,
+                              httpInterval: 0,
+                          }),
+                      ]
+                    : [],
+        },
+    )
 
     /**
      * Implementation of our thrift service.
@@ -88,10 +83,16 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
                 throw new Error('Unauthorized')
             }
         },
-        calculate(logId: number, work: Work, context: Hapi.Request): number | Promise<number> {
+        calculate(
+            logId: number,
+            work: Work,
+            context: Hapi.Request,
+        ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2, { headers: context.headers })
+                    return addServiceClient.add(work.num1, work.num2, {
+                        headers: context.headers,
+                    })
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:
@@ -196,7 +197,8 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
             plugin: ZipkinTracingHapi({
                 localServiceName: 'calculator-service',
                 endpoint: process.env.ZIPKIN_ENDPOINT,
-                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                zipkinVersion:
+                    process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                 sampleRate,
                 httpInterval: 0,
             }),
@@ -208,26 +210,29 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
         hostName: HAPI_CALC_SERVER_CONFIG.hostName,
         port: HAPI_CALC_SERVER_CONFIG.port,
         path: HAPI_CALC_SERVER_CONFIG.path,
-        register: (
-            (sampleRate > 0) ?
-                [
-                    ZipkinClientFilter({
-                        localServiceName: 'calculator-client',
-                        remoteServiceName: 'calculator-service',
-                        endpoint: process.env.ZIPKIN_ENDPOINT,
-                        zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                        sampleRate,
-                        httpInterval: 0,
-                    }),
-                ] :
-                []
-        ),
+        register:
+            sampleRate > 0
+                ? [
+                      ZipkinClientFilter({
+                          localServiceName: 'calculator-client',
+                          remoteServiceName: 'calculator-service',
+                          endpoint: process.env.ZIPKIN_ENDPOINT,
+                          zipkinVersion:
+                              process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                          sampleRate,
+                          httpInterval: 0,
+                      }),
+                  ]
+                : [],
     })
 
     server.route({
         method: 'GET',
         path: '/add',
-        async handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Promise<Hapi.ResponseObject> {
+        async handler(
+            request: Hapi.Request,
+            reply: Hapi.ResponseToolkit,
+        ): Promise<Hapi.ResponseObject> {
             if (typeof request.query === 'object') {
                 const left: number = Number(request.query['left'])
                 const right: number = Number(request.query['right'])
@@ -252,7 +257,10 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
     server.route({
         method: 'GET',
         path: '/control',
-        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+        handler(
+            request: Hapi.Request,
+            reply: Hapi.ResponseToolkit,
+        ): Hapi.ResponseObject {
             return reply.response('PASS')
         },
     })
@@ -260,7 +268,10 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
     server.route({
         method: 'POST',
         path: '/return500',
-        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+        handler(
+            request: Hapi.Request,
+            reply: Hapi.ResponseToolkit,
+        ): Hapi.ResponseObject {
             return reply.response('NOPE').code(500)
         },
     })
@@ -268,7 +279,10 @@ export async function createServer(sampleRate: number = 0, protocolType: Protoco
     server.route({
         method: 'POST',
         path: '/return400',
-        handler(request: Hapi.Request, reply: Hapi.ResponseToolkit): Hapi.ResponseObject {
+        handler(
+            request: Hapi.Request,
+            reply: Hapi.ResponseToolkit,
+        ): Hapi.ResponseObject {
             return reply.response('NOPE').code(400)
         },
     })

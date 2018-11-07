@@ -27,7 +27,10 @@ export class TApplicationException extends Error {
     }
 }
 
-export const TApplicationExceptionCodec: IStructCodec<TApplicationException, TApplicationException> = {
+export const TApplicationExceptionCodec: IStructCodec<
+    TApplicationException,
+    TApplicationException
+> = {
     encode(obj: TApplicationException, output: TProtocol): void {
         output.writeStructBegin('TApplicationException')
 

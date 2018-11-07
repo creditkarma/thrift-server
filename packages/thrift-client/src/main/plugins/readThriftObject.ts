@@ -23,6 +23,6 @@ export function readThriftObject<StrictType>(
         const receiver: TTransport = new Transport(data)
         const input: TProtocol = new Protocol(receiver)
         const decoded = ThriftCodec.decode(input)
-        resolve([ decoded, receiver.remaining() ])
+        resolve([decoded, receiver.remaining()])
     })
 }

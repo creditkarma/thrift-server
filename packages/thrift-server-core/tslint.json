@@ -1,6 +1,11 @@
 {
-    "extends": "tslint:recommended",
+    "extends": [
+        "tslint:recommended",
+        "tslint-config-prettier",
+        "tslint-plugin-prettier"
+      ],
     "rules": {
+        "prettier": true,
         "variable-name": false,
         "only-arrow-functions": false,
         "max-classes-per-file": false,
@@ -14,14 +19,7 @@
             true,
             "generic"
         ],
-        "semicolon": [
-            true,
-            "never"
-        ],
-        "quotemark": [
-            true,
-            "single",
-            "avoid-escape"
-        ]
+        "semicolon": false,
+        "quotemark": false
     }
 }

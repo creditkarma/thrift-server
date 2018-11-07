@@ -116,7 +116,11 @@ export function createServer(): net.Server {
         },
     }
 
-    return thrift.createServer<Calculator.Processor, Calculator.IHandler>(Calculator.Processor, impl, {
-        transport: thrift.TFramedTransport,
-    })
+    return thrift.createServer<Calculator.Processor, Calculator.IHandler>(
+        Calculator.Processor,
+        impl,
+        {
+            transport: thrift.TFramedTransport,
+        },
+    )
 }

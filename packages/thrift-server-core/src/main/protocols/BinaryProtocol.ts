@@ -6,10 +6,7 @@
  */
 import * as binary from '../binary'
 
-import {
-    TProtocolException,
-    TProtocolExceptionType,
-} from '../errors'
+import { TProtocolException, TProtocolExceptionType } from '../errors'
 
 import * as logger from '../logger'
 import { TTransport } from '../transports'
@@ -32,8 +29,8 @@ import { TProtocol } from './TProtocol'
 // The largest integer value which can be represented in JavaScript is +/-2^53.
 // Bitwise operations convert numbers to 32 bit integers but perform sign extension
 // upon assigning values back to variables.
-const VERSION_MASK: number = -65536  // 0xffff0000
-const VERSION_1: number = -2147418112  // 0x80010000
+const VERSION_MASK: number = -65536 // 0xffff0000
+const VERSION_1: number = -2147418112 // 0x80010000
 const TYPE_MASK: number = 0x000000ff
 
 export class BinaryProtocol extends TProtocol {
@@ -41,14 +38,17 @@ export class BinaryProtocol extends TProtocol {
         super(trans)
     }
 
-    public writeMessageBegin(name: string, type: MessageType, requestId: number): void {
+    public writeMessageBegin(
+        name: string,
+        type: MessageType,
+        requestId: number,
+    ): void {
         this.writeI32(VERSION_1 | type)
         this.writeString(name)
         this.writeI32(requestId)
 
         if (this.requestId) {
             logger.warn(`RequestId already set: ${name}`)
-
         } else {
             this.requestId = requestId
         }
@@ -57,7 +57,6 @@ export class BinaryProtocol extends TProtocol {
     public writeMessageEnd(): void {
         if (this.requestId !== null) {
             this.requestId = null
-
         } else {
             logger.warn('No requestId to unset')
         }
@@ -132,7 +131,11 @@ export class BinaryProtocol extends TProtocol {
         this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
     }
 
-    public writeStringOrBinary(name: string, encoding: string, data: string | Buffer): void {
+    public writeStringOrBinary(
+        name: string,
+        encoding: string,
+        data: string | Buffer,
+    ): void {
         if (typeof data === 'string') {
             this.writeI32(Buffer.byteLength(data, encoding))
             this.transport.write(Buffer.from(data, encoding))
@@ -159,16 +162,16 @@ export class BinaryProtocol extends TProtocol {
             if (version !== VERSION_1) {
                 logger.error(`BAD: ${version}`)
                 throw new TProtocolException(
-                    TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
+                    TProtocolExceptionType.BAD_VERSION,
+                    `Bad version in readMessageBegin: ${size}`,
                 )
             }
 
             return {
                 fieldName: this.readString(),
-                messageType: (size & TYPE_MASK),
+                messageType: size & TYPE_MASK,
                 requestId: this.readI32(),
             }
-
         } else {
             // if (this.strictRead) {
             //   throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, "No protocol version header")
@@ -261,7 +264,10 @@ export class BinaryProtocol extends TProtocol {
         }
 
         if (len < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                'Negative binary size',
+            )
         }
         return this.transport.read(len)
     }
@@ -273,7 +279,10 @@ export class BinaryProtocol extends TProtocol {
         }
 
         if (len < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative string size')
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                'Negative string size',
+            )
         }
         return this.transport.readString(len)
     }
@@ -354,7 +363,7 @@ export class BinaryProtocol extends TProtocol {
                 break
 
             default:
-                throw new  Error('Invalid type: ' + type)
+                throw new Error('Invalid type: ' + type)
         }
     }
 }

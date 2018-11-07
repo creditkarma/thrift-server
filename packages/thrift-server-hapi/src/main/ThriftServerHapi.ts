@@ -73,7 +73,6 @@ export function ThriftServerHapi<
                         Transport,
                         Protocol,
                     )
-
                     ;(request.plugins as any).thrift = {
                         requestMethod: method,
                     }
