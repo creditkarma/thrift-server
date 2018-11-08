@@ -24,7 +24,7 @@
     "clean-dist": "rimraf ./dist",
     "clean-twitter": "rimraf ./src/ttwitter",
     "lint": "tslint --fix './src/**/*.ts'",
-    "format": "prettier --write src/**/*.ts",
+    "format": "prettier --write 'src/**/*.ts'",
     "codegen-twitter": "npm run clean-twitter && thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./ttwitter",
     "codegen-ts": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
     "codegen": "npm run codegen-ts && npm run codegen-twitter",

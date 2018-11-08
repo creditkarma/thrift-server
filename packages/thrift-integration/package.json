@@ -4,7 +4,7 @@
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
-        "format": "prettier --write src/**/*.ts",
+        "format": "prettier --write 'src/**/*.ts'",
         "codegen-ts": "thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./generated",
         "codegen-apache": "thrift-typescript --target apache --rootDir ./src --sourceDir ./thrift --outDir ./generated-apache",
         "codegen": "npm run codegen-ts && npm run codegen-apache",
@@ -41,7 +41,7 @@
         "thrift": "^0.11.0",
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
-    "tslint-plugin-prettier": "^2.0.0",
+        "tslint-plugin-prettier": "^2.0.0",
         "typescript": "3.1.x"
     },
     "publishConfig": {

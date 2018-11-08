@@ -1,6 +1,10 @@
 {
   "lerna": "3.4.3",
+<<<<<<< HEAD
   "version": "0.10.0-alpha.2",
+=======
+  "version": "0.9.3",
+>>>>>>> origin/master
   "loglevel": "verbose",
   "packages": [
     "packages/*"
