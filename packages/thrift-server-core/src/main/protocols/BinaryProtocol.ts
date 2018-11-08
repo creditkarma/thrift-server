@@ -62,7 +62,10 @@ export class BinaryProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(['warn', 'thrift-server-core'], '[BinaryProtocol] no requestId to unset')
+            this.logger(
+                ['warn', 'thrift-server-core'],
+                '[BinaryProtocol] no requestId to unset',
+            )
         }
     }
 

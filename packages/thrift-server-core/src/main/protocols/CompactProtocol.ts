@@ -193,7 +193,10 @@ export class CompactProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(['warn', 'thrift-server-core'], '[CompactProtocol] no requestId to unset')
+            this.logger(
+                ['warn', 'thrift-server-core'],
+                '[CompactProtocol] no requestId to unset',
+            )
         }
     }
 

@@ -113,7 +113,10 @@ export function TTwitterClientFilter<T>({
         ): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
-                    logger(['info', 'thrift-client', 'ttwitter-client-filter'], 'TTwitter upgraded')
+                    logger(
+                        ['info', 'thrift-client', 'ttwitter-client-filter'],
+                        'TTwitter upgraded',
+                    )
                     const tracer: Tracer = getTracerForService(
                         localServiceName,
                         { debug, endpoint, sampleRate, httpInterval },
@@ -216,7 +219,11 @@ export function TTwitterClientFilter<T>({
                                         },
                                         (err: any) => {
                                             logger(
-                                                ['warn', 'thrift-client', 'ttwitter-client-filter'],
+                                                [
+                                                    'warn',
+                                                    'thrift-client',
+                                                    'ttwitter-client-filter',
+                                                ],
                                                 `Error reading context from Thrift response: ${
                                                     err.message
                                                 }`,
@@ -235,7 +242,10 @@ export function TTwitterClientFilter<T>({
                 } else if (upgradeRequested) {
                     return next(request.data, request.context)
                 } else {
-                    logger(['info', 'thrift-client', 'ttwitter-client-filter'], 'Requesting TTwitter upgrade')
+                    logger(
+                        ['info', 'thrift-client', 'ttwitter-client-filter'],
+                        'Requesting TTwitter upgrade',
+                    )
                     upgradeRequested = true
                     return next(upgradeRequest(), request.context).then(
                         (upgradeResponse: IRequestResponse) => {
@@ -244,7 +254,11 @@ export function TTwitterClientFilter<T>({
                         },
                         (err: any) => {
                             logger(
-                                ['info', 'thrift-client', 'ttwitter-client-filter'],
+                                [
+                                    'info',
+                                    'thrift-client',
+                                    'ttwitter-client-filter',
+                                ],
                                 `Downgrading TTwitter request: ${err.message}`,
                             )
                             return next(request.data, request.context)

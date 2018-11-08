@@ -63,7 +63,10 @@ const createSocket = (
             socket.removeAllListeners()
         }
         const connectHandler = (): void => {
-            logger(['info', 'thrift-client'], `Connected to: ${config.hostName}:${config.port}`)
+            logger(
+                ['info', 'thrift-client'],
+                `Connected to: ${config.hostName}:${config.port}`,
+            )
             removeHandlers()
             resolve(socket)
         }
