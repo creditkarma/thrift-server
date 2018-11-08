@@ -1,12 +1,8 @@
 import * as express from 'express'
 
-import {
-    createThriftServer,
-} from '@creditkarma/thrift-server-express'
+import { createThriftServer } from '@creditkarma/thrift-server-express'
 
-import {
-    Int64,
-} from '@creditkarma/thrift-server-core'
+import { Int64 } from '@creditkarma/thrift-server-core'
 
 import {
     createHttpClient,
@@ -14,11 +10,7 @@ import {
     ZipkinClientFilter,
 } from '@creditkarma/thrift-client'
 
-import {
-    IMappedStruct,
-    ISharedStruct,
-    ISharedUnion,
-} from './generated/shared'
+import { IMappedStruct, ISharedStruct, ISharedUnion } from './generated/shared'
 
 import {
     Calculator,
@@ -28,32 +20,34 @@ import {
     Work,
 } from './generated/calculator-service'
 
-import {
-    AddService,
-} from './generated/add-service'
+import { AddService } from './generated/add-service'
 
 import { ADD_SERVER_CONFIG, EXPRESS_CALC_SERVER_CONFIG } from './config'
 
 export function createServer(sampleRate: number = 0): express.Application {
     // Create thrift client
-    const addServiceClient: AddService.Client<IRequest> =
-        createHttpClient(AddService.Client, {
+    const addServiceClient: AddService.Client<IRequest> = createHttpClient(
+        AddService.Client,
+        {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
-            register: (
-                (sampleRate > 0) ?
-                    [
-                        ZipkinClientFilter({
-                            localServiceName: 'calculator-service',
-                            remoteServiceName: 'add-service',
-                            endpoint: process.env.ZIPKIN_ENDPOINT,
-                            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                            httpInterval: 0,
-                        }),
-                    ] :
-                    []
-            ),
-        })
+            register:
+                sampleRate > 0
+                    ? [
+                          ZipkinClientFilter({
+                              localServiceName: 'calculator-service',
+                              remoteServiceName: 'add-service',
+                              endpoint: process.env.ZIPKIN_ENDPOINT,
+                              zipkinVersion:
+                                  process.env.ZIPKIN_VERSION === 'v2'
+                                      ? 'v2'
+                                      : 'v1',
+                              httpInterval: 0,
+                          }),
+                      ]
+                    : [],
+        },
+    )
 
     const serviceHandlers: Calculator.IHandler<express.Request> = {
         ping(): void {
@@ -75,10 +69,16 @@ export function createServer(sampleRate: number = 0): express.Application {
                 throw new Error('Unauthorized')
             }
         },
-        calculate(logId: number, work: Work, context: express.Request): number | Promise<number> {
+        calculate(
+            logId: number,
+            work: Work,
+            context: express.Request,
+        ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
-                    return addServiceClient.add(work.num1, work.num2, { headers: context.headers })
+                    return addServiceClient.add(work.num1, work.num2, {
+                        headers: context.headers,
+                    })
                 case Operation.SUBTRACT:
                     return work.num1 - work.num2
                 case Operation.DIVIDE:

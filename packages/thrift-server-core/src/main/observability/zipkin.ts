@@ -13,16 +13,11 @@ import {
     Tracer,
 } from 'zipkin'
 
-import {
-    ZipkinHeaders,
-} from './constants'
+import { ZipkinHeaders } from './constants'
 
 import { HttpLogger } from 'zipkin-transport-http'
 
-import {
-    IEventLoggers,
-    IZipkinTracerConfig,
-} from './types'
+import { IEventLoggers, IZipkinTracerConfig } from './types'
 
 import { IRequestHeaders } from '../types'
 
@@ -33,7 +28,6 @@ class MaybeMap<K, V> extends Map<K, V> {
             const newValue: V = orElse()
             this.set(key, newValue)
             return newValue
-
         } else {
             return value
         }
@@ -43,7 +37,7 @@ class MaybeMap<K, V> extends Map<K, V> {
 interface IHttpLoggerOptions {
     endpoint: string
     httpInterval?: number
-    httpTimeout?: number,
+    httpTimeout?: number
     headers?: IRequestHeaders
     jsonEncoder?: JsonEncoder
 }
@@ -51,7 +45,10 @@ interface IHttpLoggerOptions {
 // Save tracers by service name
 const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
-function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEventLoggers): void {
+function applyEventLoggers<T extends EventEmitter>(
+    emitter: T,
+    eventLoggers: IEventLoggers,
+): void {
     for (const key in eventLoggers) {
         if (eventLoggers.hasOwnProperty(key)) {
             emitter.on(key, eventLoggers[key])
@@ -69,7 +66,10 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
             headers: options.headers,
             httpInterval: options.httpInterval,
             httpTimeout: options.httpTimeout,
-            jsonEncoder: options.zipkinVersion === 'v2' ? jsonEncoder.JSON_V2 : jsonEncoder.JSON_V1,
+            jsonEncoder:
+                options.zipkinVersion === 'v2'
+                    ? jsonEncoder.JSON_V2
+                    : jsonEncoder.JSON_V1,
         }
 
         const httpLogger: any = new HttpLogger(httpOptions)
@@ -79,13 +79,14 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
         }
 
         return new BatchRecorder({ logger: httpLogger })
-
     } else {
         return new ConsoleRecorder()
     }
 }
 
-export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any } {
+export function getHeadersForTraceId(
+    traceId?: TraceId,
+): { [name: string]: any } {
     if (traceId !== null && traceId !== undefined) {
         const headers: { [name: string]: any } = {}
         headers[ZipkinHeaders.TraceId] = traceId.traceId
@@ -102,7 +103,10 @@ export function getHeadersForTraceId(traceId?: TraceId): { [name: string]: any }
     }
 }
 
-export function getTracerForService(serviceName: string, options: IZipkinTracerConfig = {}): Tracer {
+export function getTracerForService(
+    serviceName: string,
+    options: IZipkinTracerConfig = {},
+): Tracer {
     return TRACER_CACHE.getOrElse(serviceName, () => {
         const ctxImpl: Context<TraceId> = new ExplicitContext()
         const recorder: Recorder = recorderForOptions(options)
@@ -110,11 +114,11 @@ export function getTracerForService(serviceName: string, options: IZipkinTracerC
             ctxImpl,
             recorder,
             sampler: new sampler.CountingSampler(
-                (options.debug) ?
-                    100 :
-                    (options.sampleRate !== undefined) ?
-                        options.sampleRate :
-                        0.1,
+                options.debug
+                    ? 100
+                    : options.sampleRate !== undefined
+                    ? options.sampleRate
+                    : 0.1,
             ),
             localServiceName: serviceName, // name of this application
         })

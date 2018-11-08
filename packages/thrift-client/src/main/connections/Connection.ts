@@ -18,7 +18,7 @@ export interface IConnectionConfig {
     timeout?: number
     auth?: {
         username: string
-        password: string,
+        password: string
     }
     ca?: Array<string>
     https?: boolean
@@ -26,7 +26,11 @@ export interface IConnectionConfig {
     tlsHostname?: string
 }
 
-const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Buffer => {
+const skipStruct = (
+    buffer: Buffer,
+    Transport: ITransportConstructor,
+    Protocol: IProtocolConstructor,
+): Buffer => {
     try {
         const transport: TTransport = new Transport(buffer)
         const input: TProtocol = new Protocol(transport)
@@ -44,13 +48,14 @@ const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: 
 
         input.readStructEnd()
         return transport.remaining()
-
     } catch (err) {
         return buffer
     }
 }
 
-const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.Socket> => {
+const createSocket = (
+    config: IConnectionConfig,
+): Promise<tls.TLSSocket | net.Socket> => {
     return new Promise((resolve, reject) => {
         const removeHandlers = (): void => {
             socket.removeAllListeners()
@@ -61,7 +66,9 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
             resolve(socket)
         }
         const timeoutHandler = (): void => {
-            logger.error(`Timed out connecting: ${config.hostName}:${config.port}`)
+            logger.error(
+                `Timed out connecting: ${config.hostName}:${config.port}`,
+            )
             removeHandlers()
             socket.destroy()
             reject(new Error('Timed out connecting'))
@@ -83,7 +90,10 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
 
         socket.once('connect', connectHandler)
 
-        socket.connect(config.port, config.hostName)
+        socket.connect(
+            config.port,
+            config.hostName,
+        )
     })
 }
 
@@ -107,7 +117,11 @@ export class Connection {
         this.socket.destroy()
     }
 
-    public send(dataToSend: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
+    public send(
+        dataToSend: Buffer,
+        Transport: ITransportConstructor,
+        Protocol: IProtocolConstructor,
+    ): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             let saved: Buffer = Buffer.alloc(0)
 
@@ -133,7 +147,7 @@ export class Connection {
             }
 
             const dataHandler = (chunk: Buffer) => {
-                saved = Buffer.concat([ saved, chunk ])
+                saved = Buffer.concat([saved, chunk])
                 const buffer: Buffer = this.frameCodec.decode(saved)
                 const stripped: Buffer = skipStruct(buffer, Transport, Protocol)
 
@@ -153,7 +167,10 @@ export class Connection {
                     }
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
-                        logger.error('Error reading data from connection: ', err)
+                        logger.error(
+                            'Error reading data from connection: ',
+                            err,
+                        )
                         removeHandlers()
                         reject(err)
                     }
@@ -190,7 +207,9 @@ export class Connection {
     }
 }
 
-export const createConnection = (config: IConnectionConfig): Promise<Connection> =>
+export const createConnection = (
+    config: IConnectionConfig,
+): Promise<Connection> =>
     createSocket(config).then((socket) => {
         return new Connection(socket)
     })

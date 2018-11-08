@@ -394,7 +394,7 @@ describe('JSONProtocol', () => {
             protocol.writeFieldEnd()
 
             protocol.writeFieldBegin('upper', TType.DOUBLE, 3)
-            protocol.writeDouble(1.7976931348623157e+308)
+            protocol.writeDouble(1.7976931348623157e308)
             protocol.writeFieldEnd()
 
             protocol.writeFieldStop()

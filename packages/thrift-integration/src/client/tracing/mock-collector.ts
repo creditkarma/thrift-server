@@ -2,9 +2,7 @@ import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import * as net from 'net'
 
-import {
-    COLLECTOR_CONFIG,
-} from './config'
+import { COLLECTOR_CONFIG } from './config'
 
 // http://localhost:9411/api/v1/spans
 
@@ -50,51 +48,65 @@ export function createServer(): Promise<IMockCollector> {
         })
     }
 
-    app.post('/api/v1/spans', (req: express.Request, res: express.Response): void => {
-        if (req.body && req.body.length) {
-            recordTraces(req.body)
-        }
+    app.post(
+        '/api/v1/spans',
+        (req: express.Request, res: express.Response): void => {
+            if (req.body && req.body.length) {
+                recordTraces(req.body)
+            }
 
-        res.sendStatus(202)
-    })
+            res.sendStatus(202)
+        },
+    )
 
-    app.post('/api/v2/spans', (req: express.Request, res: express.Response): void => {
-        if (req.body && req.body.length) {
-            recordTraces(req.body)
-        }
+    app.post(
+        '/api/v2/spans',
+        (req: express.Request, res: express.Response): void => {
+            if (req.body && req.body.length) {
+                recordTraces(req.body)
+            }
 
-        res.sendStatus(202)
-    })
+            res.sendStatus(202)
+        },
+    )
 
     return new Promise((resolve, reject) => {
-        const server: net.Server = app.listen(COLLECTOR_CONFIG.port, (err: any) => {
-            if (err) {
-                console.error(`MockCollection unable to start: ${err.message}`)
-                reject(err)
-
-            } else {
-                console.log(`MockCollector listening on port[${COLLECTOR_CONFIG.port}]`)
-                resolve({
-                    server,
-                    reset() {
-                        traces = {}
-                    },
-                    traces(): any {
-                        const tracesToReturn = traces
-                        traces = {}
-                        return tracesToReturn
-                    },
-                    close(): Promise<void> {
-                        return new Promise((res, rej) => {
-                            server.close(() => {
-                                console.log('MockCollector closed')
-                                server.unref()
-                                res()
+        const server: net.Server = app.listen(
+            COLLECTOR_CONFIG.port,
+            (err: any) => {
+                if (err) {
+                    console.error(
+                        `MockCollection unable to start: ${err.message}`,
+                    )
+                    reject(err)
+                } else {
+                    console.log(
+                        `MockCollector listening on port[${
+                            COLLECTOR_CONFIG.port
+                        }]`,
+                    )
+                    resolve({
+                        server,
+                        reset() {
+                            traces = {}
+                        },
+                        traces(): any {
+                            const tracesToReturn = traces
+                            traces = {}
+                            return tracesToReturn
+                        },
+                        close(): Promise<void> {
+                            return new Promise((res, rej) => {
+                                server.close(() => {
+                                    console.log('MockCollector closed')
+                                    server.unref()
+                                    res()
+                                })
                             })
-                        })
-                    },
-                })
-            }
-        })
+                        },
+                    })
+                }
+            },
+        )
     })
 }

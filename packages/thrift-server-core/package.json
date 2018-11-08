@@ -16,8 +16,9 @@
   "scripts": {
     "clean": "rimraf ./dist",
     "lint": "tslint --fix './src/**/*.ts'",
+    "format": "prettier --write src/**/*.ts",
     "prebuild": "npm run clean",
-    "build": "npm run lint && tsc",
+    "build": "npm run lint && npm run format && tsc",
     "watch": "tsc --watch",
     "pretest": "npm run build",
     "test": "npm run test:only --",
@@ -37,8 +38,11 @@
     "@types/rimraf": "2.0.2",
     "code": "^5.2.0",
     "lab": "^16.1.0",
+    "prettier": "^1.15.1",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-plugin-prettier": "^2.0.0",
     "typescript": "3.1.x"
   },
   "dependencies": {

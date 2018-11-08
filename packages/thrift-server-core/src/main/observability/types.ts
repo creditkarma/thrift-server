@@ -1,8 +1,4 @@
-import {
-    IRequestHeaders,
-    ProtocolType,
-    TransportType,
-} from '../types'
+import { IRequestHeaders, ProtocolType, TransportType } from '../types'
 
 export interface ITraceId {
     spanId: string

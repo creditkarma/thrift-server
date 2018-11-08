@@ -16,25 +16,18 @@ import {
 
 import { createServer } from '../../apache-calculator-service'
 
-import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
-
 import {
-    Calculator,
-} from '../../generated/calculator-service'
+    createServer as mockCollector,
+    IMockCollector,
+} from '../tracing/mock-collector'
 
-import {
-    ISharedStruct,
-    ISharedUnion,
-} from '../../generated/shared'
+import { Calculator } from '../../generated/calculator-service'
 
-import {
-    IMetadata,
-    MetadataCodec,
-} from '../../generated/common'
+import { ISharedStruct, ISharedUnion } from '../../generated/shared'
 
-import {
-    APACHE_SERVER_CONFIG,
-} from '../../config'
+import { IMetadata, MetadataCodec } from '../../generated/common'
+
+import { APACHE_SERVER_CONFIG } from '../../config'
 
 export const lab = Lab.script()
 
@@ -53,7 +46,9 @@ describe('TcpConnection', () => {
         return new Promise((resolve, reject) => {
             server = createServer()
             server.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
-                console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
+                console.log(
+                    `TCP server running on port[${APACHE_SERVER_CONFIG.port}]`,
+                )
                 resolve()
             })
         })
@@ -128,34 +123,58 @@ describe('TcpConnection', () => {
                 port: 8888,
             })
 
-            connection.register({
-                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
-                    return next(request.data)
+            connection.register(
+                {
+                    handler(
+                        request: IThriftRequest<void>,
+                        next: NextFunction<void>,
+                    ): Promise<IRequestResponse> {
+                        return next(request.data)
+                    },
                 },
-            }, {
-                methods: ['echoString'],
-                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
-                    if (thrift.readThriftMethod(request.data) === 'fake') {
-                        return next()
-
-                    } else {
-                        return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(request.data)}`),
+                {
+                    methods: ['echoString'],
+                    handler(
+                        request: IThriftRequest<void>,
+                        next: NextFunction<void>,
+                    ): Promise<IRequestResponse> {
+                        if (thrift.readThriftMethod(request.data) === 'fake') {
+                            return next()
+                        } else {
+                            return Promise.reject(
+                                new Error(
+                                    `Unrecognized method name: ${thrift.readThriftMethod(
+                                        request.data,
+                                    )}`,
+                                ),
+                            )
+                        }
+                    },
+                },
+                {
+                    methods: ['addWithContext'],
+                    handler(
+                        request: IThriftRequest<void>,
+                        next: NextFunction<void>,
+                    ): Promise<IRequestResponse> {
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                            writer,
                         )
-                    }
+                        output.writeMessageBegin(
+                            'addWithContext',
+                            thrift.MessageType.CALL,
+                            20,
+                        )
+                        const args: Calculator.AddWithContextArgs = new Calculator.AddWithContextArgs(
+                            { num1: 20, num2: 60 },
+                        )
+                        args.write(output)
+                        output.writeMessageEnd()
+                        return next(writer.flush())
+                    },
                 },
-            }, {
-                methods: ['addWithContext'],
-                handler(request: IThriftRequest<void>, next: NextFunction<void>): Promise<IRequestResponse> {
-                    const writer: thrift.TTransport = new thrift.BufferedTransport()
-                    const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                    output.writeMessageBegin('addWithContext', thrift.MessageType.CALL, 20)
-                    const args: Calculator.AddWithContextArgs = new Calculator.AddWithContextArgs({ num1: 20, num2: 60 })
-                    args.write(output)
-                    output.writeMessageEnd()
-                    return next(writer.flush())
-                },
-            })
+            )
 
             client = new Calculator.Client(connection)
         })
@@ -179,11 +198,16 @@ describe('TcpConnection', () => {
         })
 
         it('should reject when middleware rejects', async () => {
-            return client.echoString('fake').then((response: string) => {
-                throw new Error('Should reject')
-            }, (err: any) => {
-                expect(err.message).to.equal('Unrecognized method name: echoString')
-            })
+            return client.echoString('fake').then(
+                (response: string) => {
+                    throw new Error('Should reject')
+                },
+                (err: any) => {
+                    expect(err.message).to.equal(
+                        'Unrecognized method name: echoString',
+                    )
+                },
+            )
         })
     })
 
@@ -221,33 +245,48 @@ describe('TcpConnection', () => {
 
                 client = new Calculator.Client(connection)
 
-                mockServer = net.createServer((socket: net.Socket): void => {
-                    console.log('TCP server created')
-                    socket.addListener('data', (chunk: Buffer) => {
-                        const meta: IMetadata = { traceId: 9 }
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result = new Calculator.AddResult({ success: 89 })
-                        result.write(output)
-                        output.writeMessageEnd()
-                        const data: Buffer = writer.flush()
+                mockServer = net.createServer(
+                    (socket: net.Socket): void => {
+                        console.log('TCP server created')
+                        socket.addListener('data', (chunk: Buffer) => {
+                            const meta: IMetadata = { traceId: 9 }
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
+                            output.writeMessageBegin(
+                                'add',
+                                thrift.MessageType.CALL,
+                                1,
+                            )
+                            const result = new Calculator.AddResult({
+                                success: 89,
+                            })
+                            result.write(output)
+                            output.writeMessageEnd()
+                            const data: Buffer = writer.flush()
 
-                        appendThriftObject(meta, data, MetadataCodec).then((extended: Buffer) => {
-                            socket.write(frameCodec.encode(extended))
+                            appendThriftObject(meta, data, MetadataCodec).then(
+                                (extended: Buffer) => {
+                                    socket.write(frameCodec.encode(extended))
+                                },
+                            )
                         })
-                    })
-                })
+                    },
+                )
 
                 mockServer.listen(PORT, () => {
                     console.log(`TCP server listening on port: ${PORT}`)
-                    client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
-                        expect(response).to.equal(89)
-                        resolve()
-                    }).catch((err: any) => {
-                        console.log('err: ', err)
-                        reject(err)
-                    })
+                    client
+                        .add(2, 3, { traceId: 1, clientId: 2 })
+                        .then((response: number) => {
+                            expect(response).to.equal(89)
+                            resolve()
+                        })
+                        .catch((err: any) => {
+                            console.log('err: ', err)
+                            reject(err)
+                        })
                 })
             })
         })
@@ -268,30 +307,43 @@ describe('TcpConnection', () => {
 
                 client = new Calculator.Client(connection)
 
-                mockServer = net.createServer((socket: net.Socket): void => {
-                    console.log('TCP server created')
-                    socket.addListener('data', (chunk: Buffer) => {
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result: Calculator.IAddResult = { success: 102 }
-                        Calculator.AddResultCodec.encode(result, output)
-                        output.writeMessageEnd()
-                        const data: Buffer = writer.flush()
+                mockServer = net.createServer(
+                    (socket: net.Socket): void => {
+                        console.log('TCP server created')
+                        socket.addListener('data', (chunk: Buffer) => {
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
+                            output.writeMessageBegin(
+                                'add',
+                                thrift.MessageType.CALL,
+                                1,
+                            )
+                            const result: Calculator.IAddResult = {
+                                success: 102,
+                            }
+                            Calculator.AddResultCodec.encode(result, output)
+                            output.writeMessageEnd()
+                            const data: Buffer = writer.flush()
 
-                        socket.write(frameCodec.encode(data))
-                    })
-                })
+                            socket.write(frameCodec.encode(data))
+                        })
+                    },
+                )
 
                 mockServer.listen(PORT, () => {
                     console.log(`TCP server listening on port: ${PORT}`)
-                    client.add(2, 3, { traceId: 1, clientId: 2 }).then((response: number) => {
-                        expect(response).to.equal(102)
-                        resolve()
-                    }).catch((err: any) => {
-                        console.log('err: ', err)
-                        reject(err)
-                    })
+                    client
+                        .add(2, 3, { traceId: 1, clientId: 2 })
+                        .then((response: number) => {
+                            expect(response).to.equal(102)
+                            resolve()
+                        })
+                        .catch((err: any) => {
+                            console.log('err: ', err)
+                            reject(err)
+                        })
                 })
             })
         })
@@ -345,45 +397,72 @@ describe('TcpConnection', () => {
         it('should handle appending data to payload', async () => {
             return new Promise((resolve, reject) => {
                 let count: number = 0
-                mockServer = net.createServer((socket: net.Socket): void => {
-                    console.log('TCP server created')
-                    socket.addListener('data', (chunk: Buffer) => {
-                        if (count < 1) {
-                            count += 1
-                            const upgradeResponse: TTwitter.IUpgradeReply = {}
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                            output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                            TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
-                            output.writeMessageEnd()
-                            socket.write(frameCodec.encode(writer.flush()))
+                mockServer = net.createServer(
+                    (socket: net.Socket): void => {
+                        console.log('TCP server created')
+                        socket.addListener('data', (chunk: Buffer) => {
+                            if (count < 1) {
+                                count += 1
+                                const upgradeResponse: TTwitter.IUpgradeReply = {}
+                                const writer: thrift.TTransport = new thrift.BufferedTransport()
+                                const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                    writer,
+                                )
+                                output.writeMessageBegin(
+                                    'add',
+                                    thrift.MessageType.CALL,
+                                    1,
+                                )
+                                TTwitter.UpgradeReplyCodec.encode(
+                                    upgradeResponse,
+                                    output,
+                                )
+                                output.writeMessageEnd()
+                                socket.write(frameCodec.encode(writer.flush()))
+                            } else {
+                                const responseHeader = new TTwitter.ResponseHeader(
+                                    {},
+                                )
+                                const writer: thrift.TTransport = new thrift.BufferedTransport()
+                                const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                    writer,
+                                )
+                                output.writeMessageBegin(
+                                    'add',
+                                    thrift.MessageType.CALL,
+                                    1,
+                                )
+                                const result = new Calculator.AddResult({
+                                    success: 61,
+                                })
+                                result.write(output)
+                                output.writeMessageEnd()
+                                const data: Buffer = writer.flush()
 
-                        } else {
-                            const responseHeader = new TTwitter.ResponseHeader({})
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                            output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                            const result = new Calculator.AddResult({ success: 61 })
-                            result.write(output)
-                            output.writeMessageEnd()
-                            const data: Buffer = writer.flush()
-
-                            appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
-                                socket.write(frameCodec.encode(extended))
-                            })
-                        }
-                    })
-                })
+                                appendThriftObject(
+                                    responseHeader,
+                                    data,
+                                    TTwitter.ResponseHeaderCodec,
+                                ).then((extended: Buffer) => {
+                                    socket.write(frameCodec.encode(extended))
+                                })
+                            }
+                        })
+                    },
+                )
 
                 mockServer.listen(PORT, () => {
                     console.log(`TCP server listening on port: ${PORT}`)
-                    client.add(2, 3).then((response: number) => {
-                        expect(response).to.equal(61)
-                        resolve()
-                    }).catch((err: any) => {
-                        console.log('err: ', err)
-                        reject(err)
-                    })
+                    client
+                        .add(2, 3)
+                        .then((response: number) => {
+                            expect(response).to.equal(61)
+                            resolve()
+                        })
+                        .catch((err: any) => {
+                            console.log('err: ', err)
+                            reject(err)
+                        })
                 })
             })
         })

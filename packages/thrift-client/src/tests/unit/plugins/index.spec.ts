@@ -9,26 +9,15 @@ import {
     TTransport,
 } from '@creditkarma/thrift-server-core'
 
-import {
-    appendThriftObject,
-    readThriftObject,
-} from '../../../main/plugins'
+import { appendThriftObject, readThriftObject } from '../../../main/plugins'
 
 import { encode } from '../../../main/plugins/appendThriftObject'
 
-import {
-    IMetadata,
-    MetadataCodec,
-} from '../../generated/common'
+import { IMetadata, MetadataCodec } from '../../generated/common'
 
-import {
-    Calculator,
-} from '../../generated/calculator-service'
+import { Calculator } from '../../generated/calculator-service'
 
-import {
-    ISharedStruct,
-    SharedStructCodec,
-} from '../../generated/shared'
+import { ISharedStruct, SharedStructCodec } from '../../generated/shared'
 
 export const lab = Lab.script()
 
@@ -46,15 +35,20 @@ describe('Plugins', () => {
             Calculator.PingArgsCodec.encode(args, output)
             output.writeMessageEnd()
             const data: Buffer = writer.flush()
-            const totalLength: number = (await encode(meta, MetadataCodec)).length + data.length
+            const totalLength: number =
+                (await encode(meta, MetadataCodec)).length + data.length
 
-            return appendThriftObject(meta, data, MetadataCodec).then((val: Buffer) => {
-                expect(val.length).to.equal(totalLength)
+            return appendThriftObject(meta, data, MetadataCodec).then(
+                (val: Buffer) => {
+                    expect(val.length).to.equal(totalLength)
 
-                return readThriftObject(val, MetadataCodec).then((result: [IMetadata, Buffer]) => {
-                    expect(result[1].length).to.equal(data.length)
-                })
-            })
+                    return readThriftObject(val, MetadataCodec).then(
+                        (result: [IMetadata, Buffer]) => {
+                            expect(result[1].length).to.equal(data.length)
+                        },
+                    )
+                },
+            )
         })
     })
 
@@ -62,17 +56,25 @@ describe('Plugins', () => {
         it('should reject when unable to read thrift object from Buffer', async () => {
             const meta: IMetadata = { traceId: 7 }
             const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
-            const totalLength: number = (await encode(meta, MetadataCodec)).length + data.length
+            const totalLength: number =
+                (await encode(meta, MetadataCodec)).length + data.length
 
-            return appendThriftObject(meta, data, MetadataCodec).then((val: Buffer) => {
-                expect(val.length).to.equal(totalLength)
+            return appendThriftObject(meta, data, MetadataCodec).then(
+                (val: Buffer) => {
+                    expect(val.length).to.equal(totalLength)
 
-                return readThriftObject(val, SharedStructCodec).then((result: [ISharedStruct, Buffer]) => {
-                    throw new Error('Should reject')
-                }, (err: any) => {
-                    expect(err.message).to.equal('Unable to read SharedStruct from input')
-                })
-            })
+                    return readThriftObject(val, SharedStructCodec).then(
+                        (result: [ISharedStruct, Buffer]) => {
+                            throw new Error('Should reject')
+                        },
+                        (err: any) => {
+                            expect(err.message).to.equal(
+                                'Unable to read SharedStruct from input',
+                            )
+                        },
+                    )
+                },
+            )
         })
     })
 })

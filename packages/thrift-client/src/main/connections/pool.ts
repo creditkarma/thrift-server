@@ -1,10 +1,6 @@
 import * as GenericPool from 'generic-pool'
 import * as logger from '../logger'
-import {
-    Connection,
-    createConnection,
-    IConnectionConfig,
-} from './Connection'
+import { Connection, createConnection, IConnectionConfig } from './Connection'
 
 const defaultOptions: GenericPool.Options = {
     min: 0,
@@ -15,7 +11,10 @@ const defaultOptions: GenericPool.Options = {
     testOnBorrow: true,
 }
 
-export const createPool = (config: IConnectionConfig, options?: GenericPool.Options) => {
+export const createPool = (
+    config: IConnectionConfig,
+    options?: GenericPool.Options,
+) => {
     const resolvedOptions = Object.assign(defaultOptions, options)
     const factory: GenericPool.Factory<Connection> = {
         create: async () => {

@@ -4,7 +4,7 @@ import * as Lab from 'lab'
 import { parseJson } from '../../main/parse_json'
 
 export const lab = Lab.script()
-const {describe, it} = lab
+const { describe, it } = lab
 
 describe('parse_json', () => {
     describe('objects', () => {
@@ -13,7 +13,7 @@ describe('parse_json', () => {
         })
 
         it('parse when containing strings', () => {
-            expect(parseJson('{"foo": "bar"}')).to.equal({foo: 'bar'})
+            expect(parseJson('{"foo": "bar"}')).to.equal({ foo: 'bar' })
         })
     })
 
@@ -27,7 +27,11 @@ describe('parse_json', () => {
         })
 
         it('parse when containing strings', () => {
-            expect(parseJson('["foo", "bar","baz"]')).to.equal(['foo', 'bar', 'baz'])
+            expect(parseJson('["foo", "bar","baz"]')).to.equal([
+                'foo',
+                'bar',
+                'baz',
+            ])
         })
     })
 
@@ -44,7 +48,7 @@ describe('parse_json', () => {
     describe('numbers', () => {
         it('parse when negative', () => {
             expect(parseJson('-1')).to.equal(-1)
-            expect(parseJson('-.1')).to.equal(-.1)
+            expect(parseJson('-.1')).to.equal(-0.1)
         })
 
         it('parse when positive', () => {

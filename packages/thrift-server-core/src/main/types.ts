@@ -23,7 +23,10 @@ export interface IRequestContext {
  * transport<TransportType> - name of the transport to use
  * protocol<ProtocolType> - name of the protocol to use
  */
-export interface IThriftServerOptions<Context, TProcessor extends IThriftProcessor<Context>> {
+export interface IThriftServerOptions<
+    Context,
+    TProcessor extends IThriftProcessor<Context>
+> {
     serviceName: string
     handler: TProcessor
     transport?: TransportType
@@ -36,7 +39,8 @@ export interface IThriftConnection<Context = void> {
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = void> implements IThriftConnection<Context> {
+export abstract class ThriftConnection<Context = void>
+    implements IThriftConnection<Context> {
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
@@ -56,7 +60,7 @@ export interface IFieldAnnotations {
 export interface IMethodAnnotations {
     [methodName: string]: {
         annotations: IThriftAnnotations
-        fieldAnnotations: IFieldAnnotations,
+        fieldAnnotations: IFieldAnnotations
     }
 }
 
@@ -73,7 +77,7 @@ export abstract class StructLike implements IStructLike {
 }
 
 export interface IStructConstructor<T extends StructLike> {
-    new(args?: any): T
+    new (args?: any): T
     read(input: TProtocol): T
     write(data: T, output: TProtocol): void
 }
@@ -88,11 +92,15 @@ export interface IStructCodec<LooseType, StrictType> {
 }
 
 export interface IProtocolConstructor {
-    new(trans: TTransport, strictRead?: boolean, strictWrite?: boolean): TProtocol
+    new (
+        trans: TTransport,
+        strictRead?: boolean,
+        strictWrite?: boolean,
+    ): TProtocol
 }
 
 export interface ITransportConstructor {
-    new(buffer?: Buffer): TTransport
+    new (buffer?: Buffer): TTransport
     receiver(data: Buffer): TTransport
 }
 
@@ -118,38 +126,45 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
     }
 
     protected incrementRequestId(): number {
-        return this._requestId += 1
+        return (this._requestId += 1)
     }
 }
 
 export interface IClientConstructor<TClient, Context> {
-    new(connection: ThriftConnection<Context>): TClient
+    new (connection: ThriftConnection<Context>): TClient
 }
 
 export interface IThriftProcessor<Context> {
     readonly _annotations: IThriftAnnotations
     readonly _methodAnnotations: IMethodAnnotations
     readonly _methodNames: Array<string>
-    process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
+    process(
+        input: TProtocol,
+        output: TProtocol,
+        context?: Context,
+    ): Promise<Buffer>
 }
 
-export abstract class ThriftProcessor<Context, IHandler> implements IThriftProcessor<Context> {
+export abstract class ThriftProcessor<Context, IHandler>
+    implements IThriftProcessor<Context> {
     public readonly _annotations: IThriftAnnotations = {}
     public readonly _methodAnnotations: IMethodAnnotations = {}
     public readonly _methodNames: Array<string> = []
 
-    public abstract process(input: TProtocol, output: TProtocol, context?: Context): Promise<Buffer>
+    public abstract process(
+        input: TProtocol,
+        output: TProtocol,
+        context?: Context,
+    ): Promise<Buffer>
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
-    new(handler: THandler): TProcessor
+    new (handler: THandler): TProcessor
 }
 
-export type ProtocolType =
-    'binary' | 'compact' | 'json'
+export type ProtocolType = 'binary' | 'compact' | 'json'
 
-export type TransportType =
-    'buffered' // | 'framed'
+export type TransportType = 'buffered' // | 'framed'
 
 export interface ITransportMap {
     [name: string]: ITransportConstructor

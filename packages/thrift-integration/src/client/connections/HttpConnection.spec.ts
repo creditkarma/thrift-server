@@ -24,16 +24,14 @@ import * as Lab from 'lab'
 
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'
-import { createServer as mockCollector, IMockCollector } from '../tracing/mock-collector'
-
 import {
-    Calculator,
-    ICommonStruct,
-} from '../../generated/calculator-service'
+    createServer as mockCollector,
+    IMockCollector,
+} from '../tracing/mock-collector'
 
-import {
-    ISharedUnion,
-} from '../../generated/shared'
+import { Calculator, ICommonStruct } from '../../generated/calculator-service'
+
+import { ISharedUnion } from '../../generated/shared'
 
 export const lab = Lab.script()
 
@@ -49,21 +47,19 @@ describe('HttpConnection', () => {
     before(async () => {
         calcServer = await calculatorService()
         addServer = await addService()
-        return Promise.all([
-            calcServer.start(),
-            addServer.start(),
-        ]).then((err) => {
-            console.log('Thrift server running')
-        })
+        return Promise.all([calcServer.start(), addServer.start()]).then(
+            (err) => {
+                console.log('Thrift server running')
+            },
+        )
     })
 
     after(async () => {
-        return Promise.all([
-            calcServer.stop(),
-            addServer.stop(),
-        ]).then((err) => {
-            console.log('Thrift server stopped')
-        })
+        return Promise.all([calcServer.stop(), addServer.stop()]).then(
+            (err) => {
+                console.log('Thrift server stopped')
+            },
+        )
     })
 
     describe('Basic Usage', () => {
@@ -72,17 +68,23 @@ describe('HttpConnection', () => {
 
         before(async () => {
             const requestClient: RequestInstance = request.defaults({})
-            connection = new HttpConnection(requestClient, HAPI_CALC_SERVER_CONFIG)
+            connection = new HttpConnection(
+                requestClient,
+                HAPI_CALC_SERVER_CONFIG,
+            )
             client = new Calculator.Client(connection)
         })
 
         it('should corrently handle a service client request', async () => {
-            return client.add(5, 7).then((response: number) => {
-                expect(response).to.equal(12)
-            }, (err: any) => {
-                console.log('err: ', err)
-                throw err
-            })
+            return client.add(5, 7).then(
+                (response: number) => {
+                    expect(response).to.equal(12)
+                },
+                (err: any) => {
+                    console.log('err: ', err)
+                    throw err
+                },
+            )
         })
 
         it('should corrently handle a void service client request', async () => {
@@ -92,11 +94,12 @@ describe('HttpConnection', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client
-                .getStruct(5)
-                .then((response: ICommonStruct) => {
-                    expect(response).to.equal({ code: { status: new thrift.Int64(0) }, value: 'test' })
+            return client.getStruct(5).then((response: ICommonStruct) => {
+                expect(response).to.equal({
+                    code: { status: new thrift.Int64(0) },
+                    value: 'test',
                 })
+            })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
@@ -136,8 +139,9 @@ describe('HttpConnection', () => {
                     path: '/return500',
                 },
             )
-            const badClient: Calculator.Client<IRequest> =
-                new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<
+                IRequest
+            > = new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -159,8 +163,9 @@ describe('HttpConnection', () => {
                     path: '/return400',
                 },
             )
-            const badClient: Calculator.Client<IRequest> =
-                new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<
+                IRequest
+            > = new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -184,8 +189,9 @@ describe('HttpConnection', () => {
                     port: 8080,
                 },
             )
-            const badClient: Calculator.Client<IRequest> =
-                new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<
+                IRequest
+            > = new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -208,12 +214,19 @@ describe('HttpConnection', () => {
             const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
+                            new Error(
+                                `Unrecognized method name: ${thrift.readThriftMethod(
+                                    req.data,
+                                )}`,
+                            ),
                         )
                     }
                 },
@@ -234,13 +247,18 @@ describe('HttpConnection', () => {
 
             connection.register({
                 methods: ['add'],
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
                     } else {
                         return Promise.reject(
                             new Error(
-                                `Unrecognized method name: ${thrift.readThriftMethod(req.data)}`,
+                                `Unrecognized method name: ${thrift.readThriftMethod(
+                                    req.data,
+                                )}`,
                             ),
                         )
                     }
@@ -261,12 +279,19 @@ describe('HttpConnection', () => {
             const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'nope') {
                         return next()
                     } else {
                         return Promise.reject(
-                            new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
+                            new Error(
+                                `Unrecognized method name: ${thrift.readThriftMethod(
+                                    req.data,
+                                )}`,
+                            ),
                         )
                     }
                 },
@@ -279,7 +304,9 @@ describe('HttpConnection', () => {
                     )
                 },
                 (err: any) => {
-                    expect(err.message).to.equal('Unrecognized method name: add')
+                    expect(err.message).to.equal(
+                        'Unrecognized method name: add',
+                    )
                 },
             )
         })
@@ -294,9 +321,16 @@ describe('HttpConnection', () => {
 
             connection.register({
                 methods: ['nope'],
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     return Promise.reject(
-                        new Error(`Unrecognized method name: ${thrift.readThriftMethod(req.data)}`),
+                        new Error(
+                            `Unrecognized method name: ${thrift.readThriftMethod(
+                                req.data,
+                            )}`,
+                        ),
                     )
                 },
             })
@@ -317,7 +351,10 @@ describe('HttpConnection', () => {
             const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
@@ -341,7 +378,10 @@ describe('HttpConnection', () => {
 
             connection.register({
                 methods: ['addWithContext'],
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
@@ -385,7 +425,10 @@ describe('HttpConnection', () => {
 
             connection.register({
                 methods: ['add'],
-                handler(req: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                handler(
+                    req: IThriftRequest<CoreOptions>,
+                    next: NextFunction<CoreOptions>,
+                ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
                             'x-fake-token': 'fake-token',
@@ -453,44 +496,72 @@ describe('HttpConnection', () => {
             return new Promise((resolve, reject) => {
                 let count: number = 0
                 collectServer.reset()
-                mockServer = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
-                    if (count < 1) {
-                        count += 1
-                        const upgradeResponse: TTwitter.IUpgradeReply = {}
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        TTwitter.UpgradeReplyCodec.encode(upgradeResponse, output)
-                        output.writeMessageEnd()
-                        res.writeHead(200)
-                        res.end(writer.flush())
-
-                    } else {
-                        const responseHeader: TTwitter.IResponseHeader = {}
-                        const writer: thrift.TTransport = new thrift.BufferedTransport()
-                        const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
-                        output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result = new Calculator.AddResult({ success: 61 })
-                        result.write(output)
-                        output.writeMessageEnd()
-                        const data: Buffer = writer.flush()
-
-                        appendThriftObject(responseHeader, data, TTwitter.ResponseHeaderCodec).then((extended: Buffer) => {
+                mockServer = http.createServer(
+                    (
+                        req: http.IncomingMessage,
+                        res: http.ServerResponse,
+                    ): void => {
+                        if (count < 1) {
+                            count += 1
+                            const upgradeResponse: TTwitter.IUpgradeReply = {}
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
+                            output.writeMessageBegin(
+                                'add',
+                                thrift.MessageType.CALL,
+                                1,
+                            )
+                            TTwitter.UpgradeReplyCodec.encode(
+                                upgradeResponse,
+                                output,
+                            )
+                            output.writeMessageEnd()
                             res.writeHead(200)
-                            res.end(extended)
-                        })
-                    }
-                })
+                            res.end(writer.flush())
+                        } else {
+                            const responseHeader: TTwitter.IResponseHeader = {}
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
+                            output.writeMessageBegin(
+                                'add',
+                                thrift.MessageType.CALL,
+                                1,
+                            )
+                            const result = new Calculator.AddResult({
+                                success: 61,
+                            })
+                            result.write(output)
+                            output.writeMessageEnd()
+                            const data: Buffer = writer.flush()
+
+                            appendThriftObject(
+                                responseHeader,
+                                data,
+                                TTwitter.ResponseHeaderCodec,
+                            ).then((extended: Buffer) => {
+                                res.writeHead(200)
+                                res.end(extended)
+                            })
+                        }
+                    },
+                )
 
                 mockServer.listen(PORT, () => {
                     console.log(`HTTP server listening on port: ${PORT}`)
-                    client.add(2, 3).then((response: number) => {
-                        expect(response).to.equal(61)
-                        resolve()
-                    }).catch((err: any) => {
-                        console.log('err: ', err)
-                        reject(err)
-                    })
+                    client
+                        .add(2, 3)
+                        .then((response: number) => {
+                            expect(response).to.equal(61)
+                            resolve()
+                        })
+                        .catch((err: any) => {
+                            console.log('err: ', err)
+                            reject(err)
+                        })
                 })
             })
         })

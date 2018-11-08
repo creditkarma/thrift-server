@@ -10,12 +10,7 @@ import {
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
-import {
-    Instrumentation,
-    option,
-    TraceId,
-    Tracer,
-} from 'zipkin'
+import { Instrumentation, option, TraceId, Tracer } from 'zipkin'
 
 import * as express from 'express'
 import * as url from 'url'
@@ -44,15 +39,36 @@ export function ZipkinTracingExpress({
     zipkinVersion,
     eventLoggers,
 }: IZipkinOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, httpTimeout, headers, zipkinVersion, eventLoggers })
+    const tracer: Tracer = getTracerForService(localServiceName, {
+        debug,
+        endpoint,
+        sampleRate,
+        httpInterval,
+        httpTimeout,
+        headers,
+        zipkinVersion,
+        eventLoggers,
+    })
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
-    return (request: express.Request, response: express.Response, next: express.NextFunction): void => {
+    return (
+        request: express.Request,
+        response: express.Response,
+        next: express.NextFunction,
+    ): void => {
         tracer.scoped(() => {
-            const requestMethod: string = readThriftMethod(request.body, getTransport(transport), getProtocol(protocol))
-            const normalHeaders: IRequestHeaders = normalizeHeaders(request.headers)
+            const requestMethod: string = readThriftMethod(
+                request.body,
+                getTransport(transport),
+                getProtocol(protocol),
+            )
+            const normalHeaders: IRequestHeaders = normalizeHeaders(
+                request.headers,
+            )
 
-            function readHeader(header: string): option.IOption<string | Array<string>> {
+            function readHeader(
+                header: string,
+            ): option.IOption<string | Array<string>> {
                 const val = normalHeaders[header.toLocaleLowerCase()]
                 if (val !== null && val !== undefined) {
                     return new option.Some(val)
@@ -61,21 +77,27 @@ export function ZipkinTracingExpress({
                 }
             }
 
-            const traceId: TraceId = instrumentation.recordRequest(
-                (requestMethod || request.method),
+            const traceId: TraceId = (instrumentation.recordRequest(
+                requestMethod || request.method,
                 formatRequestUrl(request),
-                (readHeader as any),
-            ) as any as TraceId // Nasty but this method is incorrectly typed
+                readHeader as any,
+            ) as any) as TraceId // Nasty but this method is incorrectly typed
 
             const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-            const updatedHeaders: IRequestHeaders = deepMerge(normalHeaders, traceHeaders)
+            const updatedHeaders: IRequestHeaders = deepMerge(
+                normalHeaders,
+                traceHeaders,
+            )
 
             request.headers = updatedHeaders
 
             response.on('finish', () => {
                 tracer.scoped(() => {
-                    instrumentation.recordResponse((traceId as any), `${response.statusCode}`)
+                    instrumentation.recordResponse(
+                        traceId as any,
+                        `${response.statusCode}`,
+                    )
                 })
             })
 
