@@ -181,7 +181,7 @@ export class CompactProtocol extends TProtocol {
         // Record client seqid to find callback again
         if (this.requestId) {
             this.logger(
-                ['warn'],
+                ['warn', 'thrift-server-core'],
                 `[CompactProtocol] requestId already set: ${name}`,
             )
         } else {
@@ -193,7 +193,7 @@ export class CompactProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(['warn'], '[CompactProtocol] no requestId to unset')
+            this.logger(['warn', 'thrift-server-core'], '[CompactProtocol] no requestId to unset')
         }
     }
 

@@ -63,13 +63,13 @@ const createSocket = (
             socket.removeAllListeners()
         }
         const connectHandler = (): void => {
-            logger(['info'], `Connected to: ${config.hostName}:${config.port}`)
+            logger(['info', 'thrift-client'], `Connected to: ${config.hostName}:${config.port}`)
             removeHandlers()
             resolve(socket)
         }
         const timeoutHandler = (): void => {
             logger(
-                ['error'],
+                ['error', 'thrift-client'],
                 `Timed out connecting: ${config.hostName}:${config.port}`,
             )
             removeHandlers()
@@ -78,7 +78,7 @@ const createSocket = (
         }
         const errorHandler = (err: Error): void => {
             logger(
-                ['error'],
+                ['error', 'thrift-client'],
                 `Error connecting: ${config.hostName}:${config.port}`,
             )
             removeHandlers()
@@ -150,7 +150,7 @@ export class Connection {
             }
             const errorHandler = (err: Error) => {
                 this.logger(
-                    ['error'],
+                    ['error', 'thrift-client'],
                     `Error sending data to thrift service: ${err.message}`,
                 )
                 removeHandlers()
@@ -179,7 +179,7 @@ export class Connection {
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
                         this.logger(
-                            ['error'],
+                            ['error', 'thrift-client'],
                             `Error reading data from connection: ${
                                 err.message
                             }`,

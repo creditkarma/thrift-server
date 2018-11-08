@@ -65,7 +65,7 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
         if (logger !== undefined) {
             httpLogger.on('error', (err: Error) => {
                 logger(
-                    ['error'],
+                    ['error', 'thrift-server-core'],
                     `[Zipkin] an error occurred logging trace: ${err.message}`,
                 )
             })
