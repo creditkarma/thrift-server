@@ -1,13 +1,9 @@
 import { IThriftProcessor, LogFunction } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
-import {
-    ThriftServerHapi,
-} from './ThriftServerHapi'
+import { ThriftServerHapi } from './ThriftServerHapi'
 
-import {
-    ICreateHapiServerOptions,
-} from './types'
+import { ICreateHapiServerOptions } from './types'
 
 import { defaultLogger } from './logger'
 
@@ -20,9 +16,9 @@ export * from './types'
  *
  * @param options
  */
-export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    options: ICreateHapiServerOptions<TProcessor>,
-): Promise<Hapi.Server> {
+export function createThriftServer<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+>(options: ICreateHapiServerOptions<TProcessor>): Promise<Hapi.Server> {
     const server = new Hapi.Server({
         port: options.port,
         debug: { request: ['error'] },

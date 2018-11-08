@@ -1,25 +1,18 @@
 import ByteBuffer = require('bytebuffer')
 import { option, TraceId } from 'zipkin'
 
-import {
-    ITraceId,
-} from './types'
+import { ITraceId } from './types'
 
-import {
-    L5D_TRACE_HDR,
-    ZipkinHeaders,
-} from './constants'
+import { L5D_TRACE_HDR, ZipkinHeaders } from './constants'
 
-import {
-    IRequestHeaders,
-} from '../types'
+import { IRequestHeaders } from '../types'
 
 function isFlagSet(flags: number, field: number): boolean {
     return (flags & field) === field
 }
 
-export const SAMPLING_KNOWN: number = (1 << 1)
-export const SAMPLED: number = (1 << 2)
+export const SAMPLING_KNOWN: number = 1 << 1
+export const SAMPLED: number = 1 << 2
 
 export function randomTraceId(): string {
     // needs to be a hex digit
@@ -38,7 +31,6 @@ function getFlagBytes(traceId: TraceId): Uint8Array {
     const value = traceId.sampled.getOrElse(false)
     if (value !== true) {
         return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0])
-
     } else {
         return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 6])
     }
@@ -58,9 +50,9 @@ export function serializeLinkerdHeader(traceId: TraceId): string {
         ByteBuffer.fromHex(traceId.parentId),
         ByteBuffer.fromHex(traceId.traceId.substring(0, 16)),
         getFlagBytes(traceId),
-        (is128bit(traceId)) ?
-            ByteBuffer.fromHex(traceId.traceId.substring(16, 32)) :
-            new Uint8Array([]),
+        is128bit(traceId)
+            ? ByteBuffer.fromHex(traceId.traceId.substring(16, 32))
+            : new Uint8Array([]),
     ])
 
     return serialized.toBase64()
@@ -71,7 +63,6 @@ export function deserializeLinkerdHeader(trace: string): TraceId {
 
     if (bytes.length !== 64 && bytes.length !== 80) {
         throw new Error('TraceId headers must be 64 or 128-bit')
-
     } else {
         const spanId = bytes.substring(0, 16)
         const parentId = bytes.substring(16, 32)
@@ -111,7 +102,7 @@ export function traceIdValues(traceId: TraceId): ITraceId {
         spanId: traceId.spanId,
         parentId: traceId.parentId,
         sampled: traceId.sampled.getOrElse(false),
-        traceIdHigh: (traceId.traceId.length > 16),
+        traceIdHigh: traceId.traceId.length > 16,
     }
 }
 
@@ -136,7 +127,8 @@ export function headersForTraceId(traceId: TraceId): IRequestHeaders {
 export function containsZipkinHeaders(headers: IRequestHeaders): boolean {
     return (
         headers[L5D_TRACE_HDR] !== undefined ||
-        (headers[ZipkinHeaders.TraceId] !== undefined && headers[ZipkinHeaders.SpanId] !== undefined)
+        (headers[ZipkinHeaders.TraceId] !== undefined &&
+            headers[ZipkinHeaders.SpanId] !== undefined)
     )
 }
 
@@ -150,19 +142,20 @@ export function traceIdForHeaders(headers: IRequestHeaders): TraceId {
         traceId,
         spanId,
         parentId,
-        sampled: (sampled === '1') ? true : false,
+        sampled: sampled === '1' ? true : false,
     })
 }
 
 export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
     if (headers[L5D_TRACE_HDR] !== undefined) {
-        const linkerDTrace = deserializeLinkerdHeader(headers[L5D_TRACE_HDR] as string)
+        const linkerDTrace = deserializeLinkerdHeader(headers[
+            L5D_TRACE_HDR
+        ] as string)
         if (
             headers[ZipkinHeaders.TraceId] !== undefined &&
             headers[ZipkinHeaders.TraceId] !== linkerDTrace.traceId
         ) {
             return headers
-
         } else {
             headers[ZipkinHeaders.TraceId] = linkerDTrace.traceId
             headers[ZipkinHeaders.SpanId] = linkerDTrace.spanId
@@ -170,7 +163,6 @@ export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
             headers[ZipkinHeaders.Sampled] = linkerDTrace.sampled ? '1' : '0'
             return headers
         }
-
     } else {
         return headers
     }
@@ -186,12 +178,14 @@ export function addL5Dheaders(headers: IRequestHeaders): IRequestHeaders {
         return acc
     }, {})
 
-    newHeaders[L5D_TRACE_HDR] = serializeLinkerdHeader(traceIdFromTraceId({
-        traceId: newHeaders[ZipkinHeaders.TraceId] as string,
-        spanId: newHeaders[ZipkinHeaders.SpanId] as string,
-        parentId: newHeaders[ZipkinHeaders.ParentId] as string,
-        sampled: (newHeaders[ZipkinHeaders.Sampled] === '1') ? true : false,
-    }))
+    newHeaders[L5D_TRACE_HDR] = serializeLinkerdHeader(
+        traceIdFromTraceId({
+            traceId: newHeaders[ZipkinHeaders.TraceId] as string,
+            spanId: newHeaders[ZipkinHeaders.SpanId] as string,
+            parentId: newHeaders[ZipkinHeaders.ParentId] as string,
+            sampled: newHeaders[ZipkinHeaders.Sampled] === '1' ? true : false,
+        }),
+    )
 
     return newHeaders
 }

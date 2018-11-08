@@ -30,8 +30,7 @@ export interface IThriftRequest<Context> {
     context: Context
 }
 
-export type ClientOptionsFunction<Options> =
-    () => IThriftRequest<Options>
+export type ClientOptionsFunction<Options> = () => IThriftRequest<Options>
 
 export interface IConnectionOptions {
     hostName: string
@@ -56,7 +55,9 @@ export interface IHttpConnectionOptions {
     https?: boolean
     transport?: TransportType
     protocol?: ProtocolType
-    context?: IThriftRequest<request.CoreOptions> | ClientOptionsFunction<request.CoreOptions>
+    context?:
+        | IThriftRequest<request.CoreOptions>
+        | ClientOptionsFunction<request.CoreOptions>
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
@@ -65,8 +66,10 @@ export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
     requestOptions?: request.CoreOptions
 }
 
-export type NextFunction<Options> =
-    (data?: Buffer, options?: Options) => Promise<IRequestResponse>
+export type NextFunction<Options> = (
+    data?: Buffer,
+    options?: Options,
+) => Promise<IRequestResponse>
 
 export type RequestHandler<Context> = (
     request: IThriftRequest<Context>,

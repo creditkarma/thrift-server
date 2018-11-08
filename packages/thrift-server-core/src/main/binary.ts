@@ -14,7 +14,7 @@ const POW_52 = Math.pow(2, 52)
 const POW_1022 = Math.pow(2, 1022)
 
 export function readByte(byte: number): number {
-    return byte > 127 ? (byte - 256) : byte
+    return byte > 127 ? byte - 256 : byte
 }
 
 export function readI16(buf: Buffer, offset: number = 0): number {
@@ -40,8 +40,8 @@ export function readI32(buf: Buffer, offset: number = 0): number {
 
 export function readDouble(buf: Buffer, offset: number = 0): number {
     const signed: number = buf[offset] & 0x80
-    let e: number = (buf[offset + 1] & 0xF0) >> 4
-    e += (buf[offset] & 0x7F) << 4
+    let e: number = (buf[offset + 1] & 0xf0) >> 4
+    e += (buf[offset] & 0x7f) << 4
 
     let m: number = buf[offset + 7]
     m += buf[offset + 6] << 8
@@ -49,7 +49,7 @@ export function readDouble(buf: Buffer, offset: number = 0): number {
     m += buf[offset + 4] * POW_24
     m += buf[offset + 3] * POW_32
     m += buf[offset + 2] * POW_40
-    m += (buf[offset + 1] & 0x0F) * POW_48
+    m += (buf[offset + 1] & 0x0f) * POW_48
 
     switch (e) {
         case 0:
@@ -57,7 +57,7 @@ export function readDouble(buf: Buffer, offset: number = 0): number {
             break
 
         case 2047:
-            return m ? NaN : (signed ? -Infinity : Infinity)
+            return m ? NaN : signed ? -Infinity : Infinity
 
         default:
             m += POW_52
@@ -98,7 +98,7 @@ export function writeDouble(buf: Buffer, dub: number): Buffer {
     let e: number
     let c: number
 
-    buf[0] = (dub < 0 ? 0x80 : 0x00)
+    buf[0] = dub < 0 ? 0x80 : 0x00
 
     dub = Math.abs(dub)
     if (dub !== dub) {
@@ -127,7 +127,7 @@ export function writeDouble(buf: Buffer, dub: number): Buffer {
             e = e + 1023
         } else {
             // Denormalized - also catches the '0' case, somewhat by chance
-            m = (dub * POW_1022) * POW_52
+            m = dub * POW_1022 * POW_52
             e = 0
         }
     }

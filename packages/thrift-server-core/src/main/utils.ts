@@ -47,17 +47,29 @@ const protocols: IProtocolMap = {
 
 export const supportedProtocols: Array<string> = Object.keys(protocols)
 
-export function getTransport(transport: TransportType = 'buffered'): ITransportConstructor {
+export function getTransport(
+    transport: TransportType = 'buffered',
+): ITransportConstructor {
     if (!isTransportSupported(transport)) {
-        throw new Error(`Invalid transport specified. Supported values: ${supportedTransports.join(', ')}`)
+        throw new Error(
+            `Invalid transport specified. Supported values: ${supportedTransports.join(
+                ', ',
+            )}`,
+        )
     }
 
     return transports[transport]
 }
 
-export function getProtocol(protocol: ProtocolType = 'binary'): IProtocolConstructor {
+export function getProtocol(
+    protocol: ProtocolType = 'binary',
+): IProtocolConstructor {
     if (protocol && !isProtocolSupported(protocol)) {
-        throw new Error(`Invalid protocol specified. Supported values: ${supportedProtocols.join(', ')}`)
+        throw new Error(
+            `Invalid protocol specified. Supported values: ${supportedProtocols.join(
+                ', ',
+            )}`,
+        )
     }
 
     return protocols[protocol]
@@ -72,13 +84,13 @@ export function isProtocolSupported(protocol: ProtocolType): boolean {
 }
 
 function isObject(obj: any): boolean {
-    return (
-        obj !== null &&
-        typeof obj === 'object'
-    )
+    return obj !== null && typeof obj === 'object'
 }
 
-export function deepMerge<Base, Update>(base: Base, update: Update): Base & Update {
+export function deepMerge<Base, Update>(
+    base: Base,
+    update: Update,
+): Base & Update {
     const newObj: any = {}
     const baseKeys: Array<string> = Object.keys(base)
     const updateKeys: Array<string> = Object.keys(update)
@@ -96,17 +108,15 @@ export function deepMerge<Base, Update>(base: Base, update: Update): Base & Upda
 
             if (isObject(baseValue) && isObject(updateValue)) {
                 newObj[key] = deepMerge(baseValue, updateValue)
-
             } else if (updateValue !== undefined) {
                 newObj[key] = updateValue
-
             } else {
                 newObj[key] = baseValue
             }
         }
     }
 
-    return (newObj as Base & Update)
+    return newObj as Base & Update
 }
 
 export function formatUrl(requestUrl: string): string {

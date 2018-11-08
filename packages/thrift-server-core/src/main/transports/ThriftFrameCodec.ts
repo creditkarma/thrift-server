@@ -12,7 +12,7 @@ export class ThriftFrameCodec {
     }
 
     public decode(dataToRead: Buffer): Buffer {
-        const dataToReturn: Buffer = Buffer.alloc((dataToRead.length - 4))
+        const dataToReturn: Buffer = Buffer.alloc(dataToRead.length - 4)
         let writeCursor: number = 0
         let count: number = 0
 
@@ -20,7 +20,6 @@ export class ThriftFrameCodec {
             // We don't have enough to read frame size, something is wrong
             if (dataToRead.length < 4) {
                 return Buffer.alloc(0)
-
             } else {
                 const frameSize: number = binary.readI32(dataToRead, 0)
                 if (dataToRead.length < 4 + frameSize) {

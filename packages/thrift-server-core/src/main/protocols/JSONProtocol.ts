@@ -109,8 +109,9 @@ export class JSONProtocol extends TProtocol {
         const value = this.tstack.pop()
         const fieldInfo = this.tstack.pop()
 
-        this.tstack[this.tstack.length - 1][fieldInfo.fieldId] =
-            `{${fieldInfo.fieldType}:${value}}`
+        this.tstack[this.tstack.length - 1][fieldInfo.fieldId] = `{${
+            fieldInfo.fieldType
+        }:${value}}`
         this.tpos.pop()
     }
 
@@ -280,7 +281,9 @@ export class JSONProtocol extends TProtocol {
                 str += String.fromCharCode(arr[i])
             }
         } else {
-            throw new TypeError('writeBinary only accepts String or Uint8Array.')
+            throw new TypeError(
+                'writeBinary only accepts String or Uint8Array.',
+            )
         }
         this.tstack.push(`"${Buffer.from(str).toString('base64')}"`)
     }
@@ -559,7 +562,9 @@ export class JSONProtocol extends TProtocol {
                 return null
 
             default:
-                throw new TProtocolException(TProtocolExceptionType.INVALID_DATA)
+                throw new TProtocolException(
+                    TProtocolExceptionType.INVALID_DATA,
+                )
         }
     }
 

@@ -19,7 +19,7 @@ export interface IConnectionConfig {
     timeout?: number
     auth?: {
         username: string
-        password: string,
+        password: string
     }
     ca?: Array<string>
     https?: boolean
@@ -27,7 +27,11 @@ export interface IConnectionConfig {
     tlsHostname?: string
 }
 
-const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Buffer => {
+const skipStruct = (
+    buffer: Buffer,
+    Transport: ITransportConstructor,
+    Protocol: IProtocolConstructor,
+): Buffer => {
     try {
         const transport: TTransport = new Transport(buffer)
         const input: TProtocol = new Protocol(transport)
@@ -45,7 +49,6 @@ const skipStruct = (buffer: Buffer, Transport: ITransportConstructor, Protocol: 
 
         input.readStructEnd()
         return transport.remaining()
-
     } catch (err) {
         return buffer
     }
@@ -87,7 +90,10 @@ const createSocket = (
 
         socket.once('connect', connectHandler)
 
-        socket.connect(config.port, config.hostName)
+        socket.connect(
+            config.port,
+            config.hostName,
+        )
     })
 }
 
@@ -113,7 +119,11 @@ export class Connection {
         this.socket.destroy()
     }
 
-    public send(dataToSend: Buffer, Transport: ITransportConstructor, Protocol: IProtocolConstructor): Promise<Buffer> {
+    public send(
+        dataToSend: Buffer,
+        Transport: ITransportConstructor,
+        Protocol: IProtocolConstructor,
+    ): Promise<Buffer> {
         return new Promise((resolve, reject) => {
             let saved: Buffer = Buffer.alloc(0)
 
@@ -139,7 +149,7 @@ export class Connection {
             }
 
             const dataHandler = (chunk: Buffer) => {
-                saved = Buffer.concat([ saved, chunk ])
+                saved = Buffer.concat([saved, chunk])
                 const buffer: Buffer = this.frameCodec.decode(saved)
                 const stripped: Buffer = skipStruct(buffer, Transport, Protocol)
 

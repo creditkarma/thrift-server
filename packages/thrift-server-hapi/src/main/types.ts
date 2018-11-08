@@ -25,9 +25,13 @@ export interface IHandlerOptions<TProcessor> {
     service: TProcessor
 }
 
-export type IHapiServerOptions<TProcessor extends IThriftProcessor<Hapi.Request>> = IThriftServerOptions<Hapi.Request, TProcessor>
+export type IHapiServerOptions<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+> = IThriftServerOptions<Hapi.Request, TProcessor>
 
-export interface IHapiPluginOptions<TProcessor extends IThriftProcessor<Hapi.Request>> {
+export interface IHapiPluginOptions<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+> {
     path?: string
     auth?: false | string | Hapi.RouteOptionsAccess
     thriftOptions: IHapiServerOptions<TProcessor>

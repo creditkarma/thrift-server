@@ -24,19 +24,15 @@ import { defaultLogger } from './logger'
  *
  * @param pluginOptions
  */
-export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
-    pluginOptions: IHapiPluginOptions<TProcessor>,
-): ThriftHapiPlugin {
+export function ThriftServerHapi<
+    TProcessor extends IThriftProcessor<Hapi.Request>
+>(pluginOptions: IHapiPluginOptions<TProcessor>): ThriftHapiPlugin {
     const options: IHapiServerOptions<TProcessor> = pluginOptions.thriftOptions
     const logger: LogFunction = options.logger || defaultLogger
 
-    const Transport: ITransportConstructor = getTransport(
-        options.transport,
-    )
+    const Transport: ITransportConstructor = getTransport(options.transport)
 
-    const Protocol: IProtocolConstructor = getProtocol(
-        options.protocol,
-    )
+    const Protocol: IProtocolConstructor = getProtocol(options.protocol)
 
     return {
         name: require('../../package.json').name,
@@ -45,15 +41,15 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
         async register(server: Hapi.Server, nothing: void): Promise<void> {
             if (
                 (server.plugins as any).thrift !== undefined &&
-                (
-                    (server.plugins as any).thrift.transport !== (options.transport || 'buffered') ||
-                    (server.plugins as any).thrift.protocol !== (options.protocol || 'binary')
-                )
+                ((server.plugins as any).thrift.transport !==
+                    (options.transport || 'buffered') ||
+                    (server.plugins as any).thrift.protocol !==
+                        (options.protocol || 'binary'))
             ) {
                 logger([ 'error' ], `You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`)
             }
 
-            (server.plugins as any).thrift = {
+            ;(server.plugins as any).thrift = {
                 transport: options.transport || 'buffered',
                 protocol: options.protocol || 'binary',
                 services: {
@@ -66,16 +62,18 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
             server.route({
                 method: 'POST',
                 path: pluginOptions.path || '/thrift',
-                handler: (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
-                    const buffer: Buffer = (request.payload as Buffer)
+                handler: (
+                    request: Hapi.Request,
+                    reply: Hapi.ResponseToolkit,
+                ) => {
+                    const buffer: Buffer = request.payload as Buffer
 
                     const method: string = readThriftMethod(
                         buffer,
                         Transport,
                         Protocol,
-                    );
-
-                    (request.plugins as any).thrift = {
+                    )
+                    ;(request.plugins as any).thrift = {
                         requestMethod: method,
                     }
 

@@ -12,18 +12,12 @@ import {
 
 import { CoreOptions } from 'request'
 
-import {
-    APACHE_SERVER_CONFIG,
-    HAPI_CALC_SERVER_CONFIG,
-} from '../../config'
+import { APACHE_SERVER_CONFIG, HAPI_CALC_SERVER_CONFIG } from '../../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
 
-import {
-    Calculator,
-    IChoice,
-} from '../../generated/calculator-service'
+import { Calculator, IChoice } from '../../generated/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 
@@ -45,24 +39,25 @@ describe('createHttpClient', () => {
         let addServer: Hapi.Server
 
         before(async () => {
-            client = createHttpClient(Calculator.Client, HAPI_CALC_SERVER_CONFIG)
+            client = createHttpClient(
+                Calculator.Client,
+                HAPI_CALC_SERVER_CONFIG,
+            )
             calcServer = await calculatorService()
             addServer = await addService()
-            return Promise.all([
-                calcServer.start(),
-                addServer.start(),
-            ]).then((err) => {
-                console.log('Thrift server running')
-            })
+            return Promise.all([calcServer.start(), addServer.start()]).then(
+                (err) => {
+                    console.log('Thrift server running')
+                },
+            )
         })
 
         after(async () => {
-            return Promise.all([
-                calcServer.stop(),
-                addServer.stop(),
-            ]).then((err) => {
-                console.log('Thrift server stopped')
-            })
+            return Promise.all([calcServer.stop(), addServer.stop()]).then(
+                (err) => {
+                    console.log('Thrift server stopped')
+                },
+            )
         })
 
         it('should corrently handle a service client request', async () => {
@@ -142,10 +137,12 @@ describe('createHttpClient', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5)
-                .then((response: ISharedStruct) => {
-                    expect(response).to.equal({ code: { status: new Int64(0) }, value: 'test' })
+            return client.getStruct(5).then((response: ISharedStruct) => {
+                expect(response).to.equal({
+                    code: { status: new Int64(0) },
+                    value: 'test',
                 })
+            })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
@@ -269,21 +266,19 @@ describe('createHttpClient', () => {
             })
             calcServer = await calculatorService(0, 'compact')
             addServer = await addService()
-            return Promise.all([
-                calcServer.start(),
-                addServer.start(),
-            ]).then((err) => {
-                console.log('Thrift server running')
-            })
+            return Promise.all([calcServer.start(), addServer.start()]).then(
+                (err) => {
+                    console.log('Thrift server running')
+                },
+            )
         })
 
         after(async () => {
-            return Promise.all([
-                calcServer.stop(),
-                addServer.stop(),
-            ]).then((err) => {
-                console.log('Thrift server stopped')
-            })
+            return Promise.all([calcServer.stop(), addServer.stop()]).then(
+                (err) => {
+                    console.log('Thrift server stopped')
+                },
+            )
         })
 
         it('should corrently handle a service client request', async () => {
@@ -363,10 +358,12 @@ describe('createHttpClient', () => {
         })
 
         it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5)
-                .then((response: ISharedStruct) => {
-                    expect(response).to.equal({ code: { status: new Int64(0) }, value: 'test' })
+            return client.getStruct(5).then((response: ISharedStruct) => {
+                expect(response).to.equal({
+                    code: { status: new Int64(0) },
+                    value: 'test',
                 })
+            })
         })
 
         it('should corrently handle a service client request that returns a union', async () => {
@@ -467,21 +464,19 @@ describe('createHttpClient', () => {
         before(async () => {
             calcServer = await calculatorService()
             addServer = await addService()
-            return Promise.all([
-                calcServer.start(),
-                addServer.start(),
-            ]).then((err) => {
-                console.log('Thrift server running')
-            })
+            return Promise.all([calcServer.start(), addServer.start()]).then(
+                (err) => {
+                    console.log('Thrift server running')
+                },
+            )
         })
 
         after(async () => {
-            return Promise.all([
-                calcServer.stop(),
-                addServer.stop(),
-            ]).then((err) => {
-                console.log('Thrift server stopped')
-            })
+            return Promise.all([calcServer.stop(), addServer.stop()]).then(
+                (err) => {
+                    console.log('Thrift server stopped')
+                },
+            )
         })
 
         it('should resolve when middleware allows', async () => {
@@ -490,18 +485,27 @@ describe('createHttpClient', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
-                            return next().then((res: IRequestResponse): Promise<IRequestResponse> => {
-                                if (readThriftMethod(res.body) === 'add') {
-                                    return Promise.resolve(res)
-                                } else {
-                                    return Promise.reject(
-                                        new Error(
-                                            `Unrecognized method name: ${readThriftMethod(request.data)}`,
-                                        ),
-                                    )
-                                }
-                            })
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
+                            return next().then(
+                                (
+                                    res: IRequestResponse,
+                                ): Promise<IRequestResponse> => {
+                                    if (readThriftMethod(res.body) === 'add') {
+                                        return Promise.resolve(res)
+                                    } else {
+                                        return Promise.reject(
+                                            new Error(
+                                                `Unrecognized method name: ${readThriftMethod(
+                                                    request.data,
+                                                )}`,
+                                            ),
+                                        )
+                                    }
+                                },
+                            )
                         },
                     },
                 ],
@@ -519,13 +523,20 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['add'],
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next().then((response: IRequestResponse) => {
                                 if (readThriftMethod(response.body) === 'add') {
                                     return Promise.resolve(response)
                                 } else {
                                     return Promise.reject(
-                                        new Error(`Unrecognized method name: ${readThriftMethod(response.body)}`),
+                                        new Error(
+                                            `Unrecognized method name: ${readThriftMethod(
+                                                response.body,
+                                            )}`,
+                                        ),
                                     )
                                 }
                             })
@@ -545,13 +556,20 @@ describe('createHttpClient', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse) => {
                                 if (readThriftMethod(res.body) === 'nope') {
                                     return Promise.resolve(res)
                                 } else {
                                     return Promise.reject(
-                                        new Error(`Unrecognized method name: ${readThriftMethod(res.body)}`),
+                                        new Error(
+                                            `Unrecognized method name: ${readThriftMethod(
+                                                res.body,
+                                            )}`,
+                                        ),
                                     )
                                 }
                             })
@@ -581,11 +599,16 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['nope'],
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next().then(() => {
                                 return Promise.reject(
                                     new Error(
-                                        `Unrecognized method name: ${readThriftMethod(request.data)}`,
+                                        `Unrecognized method name: ${readThriftMethod(
+                                            request.data,
+                                        )}`,
                                     ),
                                 )
                             })
@@ -607,21 +630,19 @@ describe('createHttpClient', () => {
         before(async () => {
             calcServer = await calculatorService()
             addServer = await addService()
-            return Promise.all([
-                calcServer.start(),
-                addServer.start(),
-            ]).then((err) => {
-                console.log('Thrift server running')
-            })
+            return Promise.all([calcServer.start(), addServer.start()]).then(
+                (err) => {
+                    console.log('Thrift server running')
+                },
+            )
         })
 
         after(async () => {
-            return Promise.all([
-                calcServer.stop(),
-                addServer.stop(),
-            ]).then((err) => {
-                console.log('Thrift server stopped')
-            })
+            return Promise.all([calcServer.stop(), addServer.stop()]).then(
+                (err) => {
+                    console.log('Thrift server stopped')
+                },
+            )
         })
 
         it('should resolve when middleware adds auth token', async () => {
@@ -630,7 +651,10 @@ describe('createHttpClient', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 register: [
                     {
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
@@ -653,7 +677,10 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['addWithContext'],
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
@@ -670,7 +697,10 @@ describe('createHttpClient', () => {
         })
 
         it('should reject when middleware does not add auth token', async () => {
-            const client = createHttpClient(Calculator.Client, HAPI_CALC_SERVER_CONFIG)
+            const client = createHttpClient(
+                Calculator.Client,
+                HAPI_CALC_SERVER_CONFIG,
+            )
 
             return client.addWithContext(5, 7).then(
                 (response: number) => {
@@ -691,7 +721,10 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         methods: ['add'],
-                        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+                        handler(
+                            request: IThriftRequest<CoreOptions>,
+                            next: NextFunction<CoreOptions>,
+                        ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
                                     'x-fake-token': 'fake-token',
@@ -723,7 +756,9 @@ describe('createTcpClient', () => {
         return new Promise((resolve, reject) => {
             apacheServer = apacheService()
             apacheServer.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
-                console.log(`TCP server running on port[${APACHE_SERVER_CONFIG.port}]`)
+                console.log(
+                    `TCP server running on port[${APACHE_SERVER_CONFIG.port}]`,
+                )
                 resolve()
             })
         })
@@ -832,7 +867,10 @@ describe('createTcpClient', () => {
 
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: ISharedStruct) => {
-                expect(response).to.equal({ code: { status: new Int64(5) }, value: 'test' })
+                expect(response).to.equal({
+                    code: { status: new Int64(5) },
+                    value: 'test',
+                })
             })
         })
 
@@ -843,21 +881,18 @@ describe('createTcpClient', () => {
         })
 
         it('should allow passing of a request context', async () => {
-            return client
-                .addWithContext(5, 7)
-                .then((response: number) => {
-                    expect(response).to.equal(12)
-                })
+            return client.addWithContext(5, 7).then((response: number) => {
+                expect(response).to.equal(12)
+            })
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<void> = createTcpClient<Calculator.Client>(
-                Calculator.Client,
-                {
-                    hostName: 'fakehost',
-                    port: 8888,
-                },
-            )
+            const badClient: Calculator.Client<void> = createTcpClient<
+                Calculator.Client
+            >(Calculator.Client, {
+                hostName: 'fakehost',
+                port: 8888,
+            })
 
             return badClient.add(5, 7).then(
                 (response: number) => {

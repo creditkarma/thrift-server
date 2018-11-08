@@ -1,6 +1,4 @@
-import {
-    TTransport,
-} from '../transports'
+import { TTransport } from '../transports'
 
 import { defaultLogger } from '../logger'
 import {
@@ -35,7 +33,11 @@ export abstract class TProtocol {
         return this.transport.flush()
     }
 
-    public abstract writeMessageBegin(name: string, type: MessageType, seqid: number): void
+    public abstract writeMessageBegin(
+        name: string,
+        type: MessageType,
+        seqid: number,
+    ): void
 
     public abstract writeMessageEnd(): void
 
@@ -49,7 +51,11 @@ export abstract class TProtocol {
 
     public abstract writeFieldStop(): void
 
-    public abstract writeMapBegin(keyType: TType, valueType: TType, size: number): void
+    public abstract writeMapBegin(
+        keyType: TType,
+        valueType: TType,
+        size: number,
+    ): void
 
     public abstract writeMapEnd(): void
 
