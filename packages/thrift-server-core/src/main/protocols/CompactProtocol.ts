@@ -180,8 +180,10 @@ export class CompactProtocol extends TProtocol {
 
         // Record client seqid to find callback again
         if (this.requestId) {
-          this.logger([ 'warn' ], `[CompactProtocol] requestId already set: ${name}`)
-
+            this.logger(
+                ['warn'],
+                `[CompactProtocol] requestId already set: ${name}`,
+            )
         } else {
             this.requestId = requestId
         }
@@ -191,7 +193,7 @@ export class CompactProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger([ 'warn' ], '[CompactProtocol] no requestId to unset')
+            this.logger(['warn'], '[CompactProtocol] no requestId to unset')
         }
     }
 
@@ -383,18 +385,24 @@ export class CompactProtocol extends TProtocol {
         // Read protocol ID
         const protocolId: number = this.transport.readByte()
         if (protocolId !== PROTOCOL_ID) {
-            throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, `Bad protocol identifier ${protocolId}`)
-
+            throw new TProtocolException(
+                TProtocolExceptionType.BAD_VERSION,
+                `Bad protocol identifier ${protocolId}`,
+            )
         } else {
             // Read Version and Type
             const versionAndType: number = this.transport.readByte()
-            const version: number = (versionAndType & VERSION_MASK)
+            const version: number = versionAndType & VERSION_MASK
 
             if (version !== VERSION_N) {
-                throw new TProtocolException(TProtocolExceptionType.BAD_VERSION, `Bad protocol version ${version}`)
+                throw new TProtocolException(
+                    TProtocolExceptionType.BAD_VERSION,
+                    `Bad protocol version ${version}`,
+                )
             }
 
-            const messageType: number = ((versionAndType >> TYPE_SHIFT_AMOUNT) & TYPE_BITS)
+            const messageType: number =
+                (versionAndType >> TYPE_SHIFT_AMOUNT) & TYPE_BITS
 
             // Read SeqId
             const requestId: number = this.readVarint32()
@@ -433,26 +441,27 @@ export class CompactProtocol extends TProtocol {
                 fieldType: TType.STOP,
                 fieldId,
             }
-
         } else {
             // Mask off the 4 MSB of the type header to check for field id delta.
-            const modifier: number = ((byte & 0x000000f0) >>> 4)
+            const modifier: number = (byte & 0x000000f0) >>> 4
             if (modifier === 0) {
                 // If not a delta read the field id.
                 fieldId = this.readI16()
-
             } else {
                 // Recover the field id from the delta
-                fieldId = (this._lastFieldId + modifier)
+                fieldId = this._lastFieldId + modifier
             }
 
             const fieldType: number = this.getTType(type)
 
             // Boolean are encoded with the type
-            if (type === CompactType.BOOLEAN_TRUE || type === CompactType.BOOLEAN_FALSE) {
+            if (
+                type === CompactType.BOOLEAN_TRUE ||
+                type === CompactType.BOOLEAN_FALSE
+            ) {
                 this._boolValue.hasBoolValue = true
                 this._boolValue.boolValue =
-                (type === CompactType.BOOLEAN_TRUE ? true : false)
+                    type === CompactType.BOOLEAN_TRUE ? true : false
             }
 
             // Save the new field for the next delta computation.
@@ -471,8 +480,10 @@ export class CompactProtocol extends TProtocol {
     public readMapBegin(): IThriftMap {
         const size: number = this.readVarint32()
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative map size`)
-
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative map size`,
+            )
         } else {
             let kvType: number = 0
             if (size !== 0) {
@@ -497,8 +508,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative list size`)
-
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative list size`,
+            )
         } else {
             const elementType = this.getTType(sizeType & 0x0000000f)
             return { elementType, size }
@@ -518,7 +531,6 @@ export class CompactProtocol extends TProtocol {
         if (this._boolValue.hasBoolValue === true) {
             value = this._boolValue.boolValue
             this._boolValue.hasBoolValue = false
-
         } else {
             const res: number = this.transport.readByte()
             // value = (res.value === CompactType.BOOLEAN_TRUE);
@@ -586,7 +598,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (size < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative binary size`)
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                `Negative binary size`,
+            )
         } else {
             return this.transport.read(size)
         }
@@ -598,11 +613,13 @@ export class CompactProtocol extends TProtocol {
         // Catch empty string case
         if (size === 0) {
             return ''
-
         } else {
             // Catch error cases
             if (size < 0) {
-                throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, `Negative string size`)
+                throw new TProtocolException(
+                    TProtocolExceptionType.NEGATIVE_SIZE,
+                    `Negative string size`,
+                )
             }
 
             return this.transport.readString(size)
@@ -816,8 +833,10 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (!(i64 instanceof Int64)) {
-            throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Expected Int64 or Number, found: ${i64}`)
-
+            throw new TProtocolException(
+                TProtocolExceptionType.INVALID_DATA,
+                `Expected Int64 or Number, found: ${i64}`,
+            )
         } else {
             const buf: Buffer = new Buffer(10)
             let wsize: number = 0
@@ -826,12 +845,11 @@ export class CompactProtocol extends TProtocol {
             let mask: number = 0
 
             while (true) {
-                if (((lo & ~0x7F) === 0) && (hi === 0)) {
+                if ((lo & ~0x7f) === 0 && hi === 0) {
                     buf[wsize++] = lo
                     break
-
                 } else {
-                    buf[wsize++] = ((lo & 0x7F) | 0x80)
+                    buf[wsize++] = (lo & 0x7f) | 0x80
                     mask = hi << 25
                     lo = lo >>> 7
                     hi = hi >>> 7
@@ -857,15 +875,17 @@ export class CompactProtocol extends TProtocol {
         }
 
         if (!(i64 instanceof Int64)) {
-            throw new TProtocolException(TProtocolExceptionType.INVALID_DATA, `Expected Int64 or Number, found: ${i64}`)
-
+            throw new TProtocolException(
+                TProtocolExceptionType.INVALID_DATA,
+                `Expected Int64 or Number, found: ${i64}`,
+            )
         } else {
             let hi: number = i64.buffer.readUInt32BE(0, true)
             let lo: number = i64.buffer.readUInt32BE(4, true)
             const sign: number = hi >>> 31
 
-            hi = ((hi << 1) | (lo >>> 31)) ^ ((!!sign) ? 0xFFFFFFFF : 0)
-            lo = (lo << 1) ^ ((!!sign) ? 0xFFFFFFFF : 0)
+            hi = ((hi << 1) | (lo >>> 31)) ^ (!!sign ? 0xffffffff : 0)
+            lo = (lo << 1) ^ (!!sign ? 0xffffffff : 0)
 
             return new Int64(hi, lo)
         }

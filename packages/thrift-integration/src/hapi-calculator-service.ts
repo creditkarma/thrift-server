@@ -37,23 +37,26 @@ export async function createServer(
         {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
-            register: (
-                (sampleRate > 0) ?
-                    [
-                        ZipkinClientFilter({
-                            localServiceName: 'calculator-service',
-                            remoteServiceName: 'add-service',
-                            tracerConfig: {
-                                endpoint: process.env.ZIPKIN_ENDPOINT,
-                                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                                sampleRate,
-                                httpInterval: 0,
-                            },
-                        }),
-                    ] :
-                    []
-            ),
-        })
+            register:
+                sampleRate > 0
+                    ? [
+                          ZipkinClientFilter({
+                              localServiceName: 'calculator-service',
+                              remoteServiceName: 'add-service',
+                              tracerConfig: {
+                                  endpoint: process.env.ZIPKIN_ENDPOINT,
+                                  zipkinVersion:
+                                      process.env.ZIPKIN_VERSION === 'v2'
+                                          ? 'v2'
+                                          : 'v1',
+                                  sampleRate,
+                                  httpInterval: 0,
+                              },
+                          }),
+                      ]
+                    : [],
+        },
+    )
 
     /**
      * Implementation of our thrift service.
@@ -197,7 +200,8 @@ export async function createServer(
                 localServiceName: 'calculator-service',
                 tracerConfig: {
                     endpoint: process.env.ZIPKIN_ENDPOINT,
-                    zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    zipkinVersion:
+                        process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                     sampleRate,
                     httpInterval: 0,
                 },
@@ -210,22 +214,24 @@ export async function createServer(
         hostName: HAPI_CALC_SERVER_CONFIG.hostName,
         port: HAPI_CALC_SERVER_CONFIG.port,
         path: HAPI_CALC_SERVER_CONFIG.path,
-        register: (
-            (sampleRate > 0) ?
-                [
-                    ZipkinClientFilter({
-                        localServiceName: 'calculator-client',
-                        remoteServiceName: 'calculator-service',
-                        tracerConfig: {
-                            endpoint: process.env.ZIPKIN_ENDPOINT,
-                            zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                            sampleRate,
-                            httpInterval: 0,
-                        },
-                    }),
-                ] :
-                []
-        ),
+        register:
+            sampleRate > 0
+                ? [
+                      ZipkinClientFilter({
+                          localServiceName: 'calculator-client',
+                          remoteServiceName: 'calculator-service',
+                          tracerConfig: {
+                              endpoint: process.env.ZIPKIN_ENDPOINT,
+                              zipkinVersion:
+                                  process.env.ZIPKIN_VERSION === 'v2'
+                                      ? 'v2'
+                                      : 'v1',
+                              sampleRate,
+                              httpInterval: 0,
+                          },
+                      }),
+                  ]
+                : [],
     })
 
     server.route({

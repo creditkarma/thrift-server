@@ -64,7 +64,7 @@ export function ZipkinTracingExpress({
             const traceId: TraceId = instrumentation.recordRequest(
                 requestMethod || request.method,
                 formatRequestUrl(request),
-                (readHeader as any),
+                readHeader as any,
             )
 
             const traceHeaders: IRequestHeaders = headersForTraceId(traceId)

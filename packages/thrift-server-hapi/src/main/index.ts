@@ -26,17 +26,18 @@ export function createThriftServer<
 
     const logger: LogFunction = options.thriftOptions.logger || defaultLogger
 
-    return server.register({
-        plugin: ThriftServerHapi<TProcessor>({
-            path: options.path,
-            thriftOptions: options.thriftOptions,
-        }),
-
-    }).then(() => {
-        return server
-
-    }).catch((err: any) => {
-        logger([ 'error' ], `Unable to create Thrift server. ${err.message}`)
-        throw err
-    })
+    return server
+        .register({
+            plugin: ThriftServerHapi<TProcessor>({
+                path: options.path,
+                thriftOptions: options.thriftOptions,
+            }),
+        })
+        .then(() => {
+            return server
+        })
+        .catch((err: any) => {
+            logger(['error'], `Unable to create Thrift server. ${err.message}`)
+            throw err
+        })
 }

@@ -1,7 +1,12 @@
 import * as url from 'url'
 
 import { defaultLogger } from './logger'
-import { BinaryProtocol, CompactProtocol, JSONProtocol, TProtocol } from './protocols'
+import {
+    BinaryProtocol,
+    CompactProtocol,
+    JSONProtocol,
+    TProtocol,
+} from './protocols'
 import { BufferedTransport, TTransport } from './transports'
 
 import {
@@ -27,7 +32,7 @@ export function readThriftMethod(
 
         return metadata.fieldName
     } catch (err) {
-        logger([ 'info' ], `Unable to read Thrift method name. ${err.message}`)
+        logger(['info'], `Unable to read Thrift method name. ${err.message}`)
         return ''
     }
 }

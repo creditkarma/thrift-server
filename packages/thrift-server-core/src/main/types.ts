@@ -93,7 +93,7 @@ export interface IStructCodec<LooseType, StrictType> {
 }
 
 export interface IProtocolConstructor {
-    new(trans: TTransport, logger?: LogFunction): TProtocol
+    new (trans: TTransport, logger?: LogFunction): TProtocol
 }
 
 export interface ITransportConstructor {

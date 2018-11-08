@@ -46,11 +46,15 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
         this.port = port
         this.filters = []
         this.logger = logger
-        this.pool = createPool({
-            port,
-            hostName,
-            timeout,
-        }, this.logger, (pool || {}))
+        this.pool = createPool(
+            {
+                port,
+                hostName,
+                timeout,
+            },
+            this.logger,
+            pool || {},
+        )
     }
 
     public register(
@@ -122,30 +126,49 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
     }
 
     public destory(): Promise<void> {
-        this.logger([ 'warn' ], 'Destroying TCP connection')
+        this.logger(['warn'], 'Destroying TCP connection')
         return (this.pool.drain().then(() => {
             return this.pool.clear()
         }) as any) as Promise<void>
     }
 
-    public write(dataToWrite: Buffer, options?: Context): Promise<IRequestResponse> {
-        return this.pool.acquire().then((connection) => {
-            return connection.send(dataToWrite, this.Transport, this.Protocol).then((response: Buffer) => {
-                this.pool.release(connection)
-                return {
-                    statusCode: 200,
-                    headers: {},
-                    body: response,
-                }
-            }, (err: any) => {
-                this.logger([ 'error' ], `Error sending Thrift request: ${err.message}`)
-                this.pool.release(connection)
-                return Promise.reject(err)
-            })
-        }, (err: any) => {
-            this.logger([ 'error' ], `Unable to acquire connection for client: ${err.message}`)
-            throw new Error(`Unable to acquire connection for thrift client`)
-        }) as any
+    public write(
+        dataToWrite: Buffer,
+        options?: Context,
+    ): Promise<IRequestResponse> {
+        return this.pool.acquire().then(
+            (connection) => {
+                return connection
+                    .send(dataToWrite, this.Transport, this.Protocol)
+                    .then(
+                        (response: Buffer) => {
+                            this.pool.release(connection)
+                            return {
+                                statusCode: 200,
+                                headers: {},
+                                body: response,
+                            }
+                        },
+                        (err: any) => {
+                            this.logger(
+                                ['error'],
+                                `Error sending Thrift request: ${err.message}`,
+                            )
+                            this.pool.release(connection)
+                            return Promise.reject(err)
+                        },
+                    )
+            },
+            (err: any) => {
+                this.logger(
+                    ['error'],
+                    `Unable to acquire connection for client: ${err.message}`,
+                )
+                throw new Error(
+                    `Unable to acquire connection for thrift client`,
+                )
+            },
+        ) as any
     }
 
     private handlersForMethod(name: string): Array<RequestHandler<Context>> {

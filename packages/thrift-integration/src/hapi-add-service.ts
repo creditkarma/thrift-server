@@ -51,7 +51,8 @@ export async function createServer(
                 localServiceName: 'add-service',
                 tracerConfig: {
                     endpoint: process.env.ZIPKIN_ENDPOINT,
-                    zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    zipkinVersion:
+                        process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                     sampleRate,
                     httpInterval: 0,
                 },

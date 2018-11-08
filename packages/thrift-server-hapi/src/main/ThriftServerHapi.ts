@@ -46,7 +46,10 @@ export function ThriftServerHapi<
                     (server.plugins as any).thrift.protocol !==
                         (options.protocol || 'binary'))
             ) {
-                logger([ 'error' ], `You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`)
+                logger(
+                    ['error'],
+                    `You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`,
+                )
             }
 
             ;(server.plugins as any).thrift = {

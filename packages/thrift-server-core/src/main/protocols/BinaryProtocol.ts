@@ -49,8 +49,10 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            this.logger([ 'warn' ], `[BinaryProtocol] requestId already set: ${name}`)
-
+            this.logger(
+                ['warn'],
+                `[BinaryProtocol] requestId already set: ${name}`,
+            )
         } else {
             this.requestId = requestId
         }
@@ -60,7 +62,7 @@ export class BinaryProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger([ 'warn' ], '[BinaryProtocol] no requestId to unset')
+            this.logger(['warn'], '[BinaryProtocol] no requestId to unset')
         }
     }
 
@@ -261,7 +263,10 @@ export class BinaryProtocol extends TProtocol {
         if (len === 0) {
             return Buffer.alloc(0)
         } else if (len < 0) {
-            throw new TProtocolException(TProtocolExceptionType.NEGATIVE_SIZE, 'Negative binary size')
+            throw new TProtocolException(
+                TProtocolExceptionType.NEGATIVE_SIZE,
+                'Negative binary size',
+            )
         } else {
             return this.transport.read(len)
         }

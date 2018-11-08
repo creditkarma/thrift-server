@@ -15,14 +15,9 @@ import { ZipkinHeaders } from './constants'
 
 import { HttpLogger } from 'zipkin-transport-http'
 
-import {
-    IZipkinTracerConfig,
-} from './types'
+import { IZipkinTracerConfig } from './types'
 
-import {
-    IRequestHeaders,
-    LogFunction,
-} from '../types'
+import { IRequestHeaders, LogFunction } from '../types'
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
@@ -69,7 +64,10 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
 
         if (logger !== undefined) {
             httpLogger.on('error', (err: Error) => {
-                logger([ 'error' ], `[Zipkin] an error occurred logging trace: ${err.message}`)
+                logger(
+                    ['error'],
+                    `[Zipkin] an error occurred logging trace: ${err.message}`,
+                )
             })
         }
 

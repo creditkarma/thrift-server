@@ -32,7 +32,10 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
     transportType = 'buffered',
     protocolType = 'binary',
     logger = defaultLogger,
-}: IThriftContextOptions<RequestContext, ResponseContext>): IThriftClientFilterConfig<RequestContext> {
+}: IThriftContextOptions<
+    RequestContext,
+    ResponseContext
+>): IThriftClientFilterConfig<RequestContext> {
     return {
         handler(
             request: IThriftRequest<RequestContext>,
@@ -63,7 +66,12 @@ export function ThriftContextFilter<RequestContext, ResponseContext>({
                                 }
                             },
                             (err: any) => {
-                                logger([ 'warn' ], `Error reading context from Thrift response: ${err.message}`)
+                                logger(
+                                    ['warn'],
+                                    `Error reading context from Thrift response: ${
+                                        err.message
+                                    }`,
+                                )
                                 return response
                             },
                         )

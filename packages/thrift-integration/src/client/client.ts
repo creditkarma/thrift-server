@@ -32,7 +32,8 @@ export function createClientServer(
                 localServiceName: 'calculator-client',
                 tracerConfig: {
                     endpoint: process.env.ZIPKIN_ENDPOINT,
-                    zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    zipkinVersion:
+                        process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
                     sampleRate,
                     httpInterval: 0,
                 },
@@ -47,23 +48,26 @@ export function createClientServer(
             hostName: HAPI_CALC_SERVER_CONFIG.hostName,
             port: HAPI_CALC_SERVER_CONFIG.port,
             protocol: protocolType,
-            register: (
-                (sampleRate > 0) ?
-                    [
-                        ZipkinClientFilter({
-                            localServiceName: 'calculator-client',
-                            remoteServiceName: 'calculator-service',
-                            tracerConfig: {
-                                endpoint: process.env.ZIPKIN_ENDPOINT,
-                                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                                sampleRate,
-                                httpInterval: 0,
-                            },
-                        }),
-                    ] :
-                    []
-            ),
-        })
+            register:
+                sampleRate > 0
+                    ? [
+                          ZipkinClientFilter({
+                              localServiceName: 'calculator-client',
+                              remoteServiceName: 'calculator-service',
+                              tracerConfig: {
+                                  endpoint: process.env.ZIPKIN_ENDPOINT,
+                                  zipkinVersion:
+                                      process.env.ZIPKIN_VERSION === 'v2'
+                                          ? 'v2'
+                                          : 'v1',
+                                  sampleRate,
+                                  httpInterval: 0,
+                              },
+                          }),
+                      ]
+                    : [],
+        },
+    )
 
     function symbolToOperation(sym: string): Operation {
         switch (sym) {

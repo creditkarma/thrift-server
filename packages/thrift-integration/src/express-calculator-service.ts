@@ -31,22 +31,25 @@ export function createServer(sampleRate: number = 0): express.Application {
         {
             hostName: ADD_SERVER_CONFIG.hostName,
             port: ADD_SERVER_CONFIG.port,
-            register: (
-                (sampleRate > 0) ?
-                    [
-                        ZipkinClientFilter({
-                            localServiceName: 'calculator-service',
-                            remoteServiceName: 'add-service',
-                            tracerConfig: {
-                                endpoint: process.env.ZIPKIN_ENDPOINT,
-                                zipkinVersion: process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                                httpInterval: 0,
-                            },
-                        }),
-                    ] :
-                    []
-            ),
-        })
+            register:
+                sampleRate > 0
+                    ? [
+                          ZipkinClientFilter({
+                              localServiceName: 'calculator-service',
+                              remoteServiceName: 'add-service',
+                              tracerConfig: {
+                                  endpoint: process.env.ZIPKIN_ENDPOINT,
+                                  zipkinVersion:
+                                      process.env.ZIPKIN_VERSION === 'v2'
+                                          ? 'v2'
+                                          : 'v1',
+                                  httpInterval: 0,
+                              },
+                          }),
+                      ]
+                    : [],
+        },
+    )
 
     const serviceHandlers: Calculator.IHandler<express.Request> = {
         ping(): void {

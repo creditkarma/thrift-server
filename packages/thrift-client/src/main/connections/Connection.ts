@@ -63,18 +63,24 @@ const createSocket = (
             socket.removeAllListeners()
         }
         const connectHandler = (): void => {
-            logger([ 'info' ], `Connected to: ${config.hostName}:${config.port}`)
+            logger(['info'], `Connected to: ${config.hostName}:${config.port}`)
             removeHandlers()
             resolve(socket)
         }
         const timeoutHandler = (): void => {
-            logger([ 'error' ], `Timed out connecting: ${config.hostName}:${config.port}`)
+            logger(
+                ['error'],
+                `Timed out connecting: ${config.hostName}:${config.port}`,
+            )
             removeHandlers()
             socket.destroy()
             reject(new Error('Timed out connecting'))
         }
         const errorHandler = (err: Error): void => {
-            logger([ 'error' ], `Error connecting: ${config.hostName}:${config.port}`)
+            logger(
+                ['error'],
+                `Error connecting: ${config.hostName}:${config.port}`,
+            )
             removeHandlers()
             socket.destroy()
             reject(err)
@@ -143,7 +149,10 @@ export class Connection {
                 reject(new Error('Thrift connection ended'))
             }
             const errorHandler = (err: Error) => {
-                this.logger([ 'error' ], `Error sending data to thrift service: ${err.message}`)
+                this.logger(
+                    ['error'],
+                    `Error sending data to thrift service: ${err.message}`,
+                )
                 removeHandlers()
                 reject(new Error('Thrift connection error'))
             }
@@ -169,7 +178,12 @@ export class Connection {
                     }
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
-                        this.logger([ 'error' ], `Error reading data from connection: ${err.message}`)
+                        this.logger(
+                            ['error'],
+                            `Error reading data from connection: ${
+                                err.message
+                            }`,
+                        )
                         removeHandlers()
                         reject(err)
                     }
@@ -206,7 +220,10 @@ export class Connection {
     }
 }
 
-export const createConnection = (config: IConnectionConfig, logger: LogFunction = defaultLogger): Promise<Connection> =>
+export const createConnection = (
+    config: IConnectionConfig,
+    logger: LogFunction = defaultLogger,
+): Promise<Connection> =>
     createSocket(config, logger).then((socket) => {
         return new Connection(socket, logger)
     })

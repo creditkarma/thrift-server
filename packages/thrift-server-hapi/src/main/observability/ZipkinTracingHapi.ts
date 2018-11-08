@@ -50,7 +50,10 @@ export function ZipkinTracingHapi({
         version: pkg.version,
         async register(server: Hapi.Server, nothing: void): Promise<void> {
             const tracer = getTracerForService(localServiceName, tracerConfig)
-            const instrumentation = new Instrumentation.HttpServer({ tracer, port })
+            const instrumentation = new Instrumentation.HttpServer({
+                tracer,
+                port,
+            })
 
             server.ext('onPreHandler', (request, reply) => {
                 const requestMethod: string = readThriftMethod(
@@ -59,7 +62,9 @@ export function ZipkinTracingHapi({
                     getProtocol(protocol),
                 )
 
-                const normalHeaders: IRequestHeaders = normalizeHeaders(request.headers)
+                const normalHeaders: IRequestHeaders = normalizeHeaders(
+                    request.headers,
+                )
 
                 return tracer.scoped(() => {
                     const traceId: TraceId = (instrumentation.recordRequest(

@@ -1,10 +1,6 @@
 import { LogFunction } from '@creditkarma/thrift-server-core'
 import * as GenericPool from 'generic-pool'
-import {
-    Connection,
-    createConnection,
-    IConnectionConfig,
-} from './Connection'
+import { Connection, createConnection, IConnectionConfig } from './Connection'
 
 const defaultOptions: GenericPool.Options = {
     min: 0,
@@ -15,15 +11,19 @@ const defaultOptions: GenericPool.Options = {
     testOnBorrow: true,
 }
 
-export const createPool = (config: IConnectionConfig, logger: LogFunction, options?: GenericPool.Options) => {
+export const createPool = (
+    config: IConnectionConfig,
+    logger: LogFunction,
+    options?: GenericPool.Options,
+) => {
     const resolvedOptions = Object.assign(defaultOptions, options)
     const factory: GenericPool.Factory<Connection> = {
         create: async () => {
-            logger([ 'info' ], 'Creating new client connection')
+            logger(['info'], 'Creating new client connection')
             return await createConnection(config)
         },
         destroy: async (connection) => {
-            logger([ 'info' ], 'Destroying client connection')
+            logger(['info'], 'Destroying client connection')
             return connection.destroy().then(() => undefined)
         },
         validate: async (connection) => {
