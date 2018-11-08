@@ -4,7 +4,7 @@
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
-        "format": "prettier --write src/**/*.ts",
+        "format": "prettier --write 'src/**/*.ts'",
         "codegen-ts": "thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./generated",
         "codegen-apache": "thrift-typescript --target apache --rootDir ./src --sourceDir ./thrift --outDir ./generated-apache",
         "codegen": "npm run codegen-ts && npm run codegen-apache",
