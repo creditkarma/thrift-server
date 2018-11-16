@@ -3,6 +3,7 @@ import * as GenericPool from 'generic-pool'
 import {
     getProtocol,
     getTransport,
+    LogFunction,
     readThriftMethod,
     ThriftConnection,
 } from '@creditkarma/thrift-server-core'
@@ -20,12 +21,13 @@ import { Connection } from './Connection'
 
 import { createPool } from './pool'
 
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 
 import { filterByMethod } from './utils'
 
 export class TcpConnection<Context = any> extends ThriftConnection<Context> {
     protected readonly filters: Array<IThriftClientFilter<Context>>
+    protected readonly logger: LogFunction
     private pool: GenericPool.Pool<Connection>
     private hostName: string
     private port: number
@@ -36,19 +38,21 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
         timeout = 5000,
         transport = 'buffered',
         protocol = 'binary',
-        tls,
+        logger = defaultLogger,
         pool,
     }: IConnectionOptions) {
         super(getTransport(transport), getProtocol(protocol))
         this.hostName = hostName
         this.port = port
         this.filters = []
+        this.logger = logger
         this.pool = createPool(
             {
                 port,
                 hostName,
                 timeout,
             },
+            this.logger,
             pool || {},
         )
     }
@@ -122,7 +126,7 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
     }
 
     public destory(): Promise<void> {
-        logger.warn('Destroying TCP connection')
+        this.logger(['warn', 'thrift-client'], 'Destroying TCP connection')
         return (this.pool.drain().then(() => {
             return this.pool.clear()
         }) as any) as Promise<void>
@@ -146,14 +150,20 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
                             }
                         },
                         (err: any) => {
-                            logger.error('Error sending Thrift request: ', err)
+                            this.logger(
+                                ['error', 'thrift-client'],
+                                `Error sending Thrift request: ${err.message}`,
+                            )
                             this.pool.release(connection)
                             return Promise.reject(err)
                         },
                     )
             },
             (err: any) => {
-                logger.error(`Unable to acquire connection for client: `, err)
+                this.logger(
+                    ['error', 'thrift-client'],
+                    `Unable to acquire connection for client: ${err.message}`,
+                )
                 throw new Error(
                     `Unable to acquire connection for thrift client`,
                 )

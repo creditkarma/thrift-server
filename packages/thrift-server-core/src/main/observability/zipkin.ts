@@ -1,5 +1,3 @@
-import { EventEmitter } from 'events'
-
 import {
     BatchRecorder,
     ConsoleRecorder,
@@ -17,9 +15,9 @@ import { ZipkinHeaders } from './constants'
 
 import { HttpLogger } from 'zipkin-transport-http'
 
-import { IEventLoggers, IZipkinTracerConfig } from './types'
+import { IZipkinTracerConfig } from './types'
 
-import { IRequestHeaders } from '../types'
+import { IRequestHeaders, LogFunction } from '../types'
 
 class MaybeMap<K, V> extends Map<K, V> {
     public getOrElse(key: K, orElse: () => V): V {
@@ -45,17 +43,6 @@ interface IHttpLoggerOptions {
 // Save tracers by service name
 const TRACER_CACHE: MaybeMap<string, Tracer> = new MaybeMap()
 
-function applyEventLoggers<T extends EventEmitter>(
-    emitter: T,
-    eventLoggers: IEventLoggers,
-): void {
-    for (const key in eventLoggers) {
-        if (eventLoggers.hasOwnProperty(key)) {
-            emitter.on(key, eventLoggers[key])
-        }
-    }
-}
-
 /**
  * `http://localhost:9411/api/v1/spans`
  */
@@ -72,10 +59,16 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
                     : jsonEncoder.JSON_V1,
         }
 
+        const logger: LogFunction | undefined = options.logger
         const httpLogger: any = new HttpLogger(httpOptions)
 
-        if (options.eventLoggers) {
-            applyEventLoggers(httpLogger, options.eventLoggers)
+        if (logger !== undefined) {
+            httpLogger.on('error', (err: Error) => {
+                logger(
+                    ['error', 'thrift-server-core'],
+                    `[Zipkin] an error occurred logging trace: ${err.message}`,
+                )
+            })
         }
 
         return new BatchRecorder({ logger: httpLogger })

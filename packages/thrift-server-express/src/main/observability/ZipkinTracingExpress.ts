@@ -28,27 +28,11 @@ function formatRequestUrl(req: express.Request): string {
 export function ZipkinTracingExpress({
     localServiceName,
     port = 0,
-    debug = false,
-    endpoint,
-    sampleRate,
-    httpInterval,
-    httpTimeout,
-    headers,
     transport = 'buffered',
     protocol = 'binary',
-    zipkinVersion,
-    eventLoggers,
+    tracerConfig = {},
 }: IZipkinOptions): express.RequestHandler {
-    const tracer: Tracer = getTracerForService(localServiceName, {
-        debug,
-        endpoint,
-        sampleRate,
-        httpInterval,
-        httpTimeout,
-        headers,
-        zipkinVersion,
-        eventLoggers,
-    })
+    const tracer: Tracer = getTracerForService(localServiceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpServer({ tracer, port })
 
     return (
@@ -77,11 +61,11 @@ export function ZipkinTracingExpress({
                 }
             }
 
-            const traceId: TraceId = (instrumentation.recordRequest(
+            const traceId: TraceId = instrumentation.recordRequest(
                 requestMethod || request.method,
                 formatRequestUrl(request),
                 readHeader as any,
-            ) as any) as TraceId // Nasty but this method is incorrectly typed
+            )
 
             const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 

@@ -1,5 +1,6 @@
 import { TTransport } from '../transports'
 
+import { defaultLogger } from '../logger'
 import {
     Int64,
     IThriftField,
@@ -8,16 +9,19 @@ import {
     IThriftMessage,
     IThriftSet,
     IThriftStruct,
+    LogFunction,
     MessageType,
     TType,
 } from '../types'
 
 export abstract class TProtocol {
     protected transport: TTransport
+    protected logger: LogFunction
     protected requestId: number | null
 
-    constructor(trans: TTransport) {
+    constructor(trans: TTransport, logger: LogFunction = defaultLogger) {
         this.transport = trans
+        this.logger = logger
         this.requestId = null
     }
 

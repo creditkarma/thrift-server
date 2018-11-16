@@ -49,11 +49,13 @@ export async function createServer(
         await server.register({
             plugin: ZipkinTracingHapi({
                 localServiceName: 'add-service',
-                endpoint: process.env.ZIPKIN_ENDPOINT,
-                zipkinVersion:
-                    process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                sampleRate,
-                httpInterval: 0,
+                tracerConfig: {
+                    endpoint: process.env.ZIPKIN_ENDPOINT,
+                    zipkinVersion:
+                        process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    sampleRate,
+                    httpInterval: 0,
+                },
             }),
         })
     }

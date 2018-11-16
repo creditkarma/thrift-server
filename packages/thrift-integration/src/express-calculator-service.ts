@@ -37,12 +37,14 @@ export function createServer(sampleRate: number = 0): express.Application {
                           ZipkinClientFilter({
                               localServiceName: 'calculator-service',
                               remoteServiceName: 'add-service',
-                              endpoint: process.env.ZIPKIN_ENDPOINT,
-                              zipkinVersion:
-                                  process.env.ZIPKIN_VERSION === 'v2'
-                                      ? 'v2'
-                                      : 'v1',
-                              httpInterval: 0,
+                              tracerConfig: {
+                                  endpoint: process.env.ZIPKIN_ENDPOINT,
+                                  zipkinVersion:
+                                      process.env.ZIPKIN_VERSION === 'v2'
+                                          ? 'v2'
+                                          : 'v1',
+                                  httpInterval: 0,
+                              },
                           }),
                       ]
                     : [],

@@ -1,4 +1,9 @@
-import { IRequestHeaders, ProtocolType, TransportType } from '../types'
+import {
+    IRequestHeaders,
+    LogFunction,
+    ProtocolType,
+    TransportType,
+} from '../types'
 
 export interface ITraceId {
     spanId: string
@@ -10,25 +15,12 @@ export interface ITraceId {
 
 export type ZipkinVersion = 'v1' | 'v2'
 
-export type EventHandler = (...args: Array<any>) => void
-
-export interface IEventLoggers {
-    [eventName: string]: EventHandler
-}
-
 export interface IZipkinOptions {
     localServiceName: string
     port?: number
-    debug?: boolean
-    endpoint?: string
-    sampleRate?: number
-    headers?: IRequestHeaders
-    httpInterval?: number
-    httpTimeout?: number
     transport?: TransportType
     protocol?: ProtocolType
-    zipkinVersion?: ZipkinVersion
-    eventLoggers?: IEventLoggers
+    tracerConfig?: IZipkinTracerConfig
 }
 
 export interface IZipkinClientOptions extends IZipkinOptions {
@@ -43,5 +35,5 @@ export interface IZipkinTracerConfig {
     httpInterval?: number
     httpTimeout?: number
     zipkinVersion?: ZipkinVersion
-    eventLoggers?: IEventLoggers
+    logger?: LogFunction
 }

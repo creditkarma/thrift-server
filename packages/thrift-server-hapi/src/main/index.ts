@@ -1,11 +1,11 @@
-import { IThriftProcessor } from '@creditkarma/thrift-server-core'
+import { IThriftProcessor, LogFunction } from '@creditkarma/thrift-server-core'
 import * as Hapi from 'hapi'
 
 import { ThriftServerHapi } from './ThriftServerHapi'
 
 import { ICreateHapiServerOptions } from './types'
 
-import * as logger from './logger'
+import { defaultLogger } from './logger'
 
 export * from './observability'
 export * from './ThriftServerHapi'
@@ -24,6 +24,8 @@ export function createThriftServer<
         debug: { request: ['error'] },
     })
 
+    const logger: LogFunction = options.thriftOptions.logger || defaultLogger
+
     return server
         .register({
             plugin: ThriftServerHapi<TProcessor>({
@@ -35,7 +37,10 @@ export function createThriftServer<
             return server
         })
         .catch((err: any) => {
-            logger.error(`Unable to create Thrift server. ${err.message}`)
+            logger(
+                ['error', 'thrift-server-core'],
+                `Unable to create Thrift server. ${err.message}`,
+            )
             throw err
         })
 }

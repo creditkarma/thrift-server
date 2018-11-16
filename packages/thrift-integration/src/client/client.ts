@@ -30,11 +30,13 @@ export function createClientServer(
         app.use([
             ZipkinTracingExpress({
                 localServiceName: 'calculator-client',
-                endpoint: process.env.ZIPKIN_ENDPOINT,
-                zipkinVersion:
-                    process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
-                sampleRate,
-                httpInterval: 0,
+                tracerConfig: {
+                    endpoint: process.env.ZIPKIN_ENDPOINT,
+                    zipkinVersion:
+                        process.env.ZIPKIN_VERSION === 'v2' ? 'v2' : 'v1',
+                    sampleRate,
+                    httpInterval: 0,
+                },
             }),
         ])
     }
@@ -52,13 +54,15 @@ export function createClientServer(
                           ZipkinClientFilter({
                               localServiceName: 'calculator-client',
                               remoteServiceName: 'calculator-service',
-                              endpoint: process.env.ZIPKIN_ENDPOINT,
-                              zipkinVersion:
-                                  process.env.ZIPKIN_VERSION === 'v2'
-                                      ? 'v2'
-                                      : 'v1',
-                              sampleRate,
-                              httpInterval: 0,
+                              tracerConfig: {
+                                  endpoint: process.env.ZIPKIN_ENDPOINT,
+                                  zipkinVersion:
+                                      process.env.ZIPKIN_VERSION === 'v2'
+                                          ? 'v2'
+                                          : 'v1',
+                                  sampleRate,
+                                  httpInterval: 0,
+                              },
                           }),
                       ]
                     : [],

@@ -8,7 +8,6 @@ import * as binary from '../binary'
 
 import { TProtocolException, TProtocolExceptionType } from '../errors'
 
-import * as logger from '../logger'
 import { TTransport } from '../transports'
 
 import {
@@ -19,10 +18,12 @@ import {
     IThriftMessage,
     IThriftSet,
     IThriftStruct,
+    LogFunction,
     MessageType,
     TType,
 } from '../types'
 
+import { defaultLogger } from '../logger'
 import { TProtocol } from './TProtocol'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
@@ -34,8 +35,8 @@ const VERSION_1: number = -2147418112 // 0x80010000
 const TYPE_MASK: number = 0x000000ff
 
 export class BinaryProtocol extends TProtocol {
-    constructor(trans: TTransport) {
-        super(trans)
+    constructor(trans: TTransport, logger: LogFunction = defaultLogger) {
+        super(trans, logger)
     }
 
     public writeMessageBegin(
@@ -48,7 +49,10 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            logger.warn(`RequestId already set: ${name}`)
+            this.logger(
+                ['warn', 'thrift-server-core'],
+                `[BinaryProtocol] requestId already set: ${name}`,
+            )
         } else {
             this.requestId = requestId
         }
@@ -58,7 +62,10 @@ export class BinaryProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            logger.warn('No requestId to unset')
+            this.logger(
+                ['warn', 'thrift-server-core'],
+                '[BinaryProtocol] no requestId to unset',
+            )
         }
     }
 
@@ -160,7 +167,6 @@ export class BinaryProtocol extends TProtocol {
             const version = size & VERSION_MASK
 
             if (version !== VERSION_1) {
-                logger.error(`BAD: ${version}`)
                 throw new TProtocolException(
                     TProtocolExceptionType.BAD_VERSION,
                     `Bad version in readMessageBegin: ${size}`,
@@ -196,9 +202,10 @@ export class BinaryProtocol extends TProtocol {
         const type: TType = this.readByte()
         if (type === TType.STOP) {
             return { fieldName: '', fieldType: type, fieldId: 0 }
+        } else {
+            const id: number = this.readI16()
+            return { fieldName: '', fieldType: type, fieldId: id }
         }
-        const id: number = this.readI16()
-        return { fieldName: '', fieldType: type, fieldId: id }
     }
 
     public readFieldEnd(): void {}
@@ -230,10 +237,7 @@ export class BinaryProtocol extends TProtocol {
 
     public readBool(): boolean {
         const byte: number = this.readByte()
-        if (byte === 0) {
-            return false
-        }
-        return true
+        return byte !== 0
     }
 
     public readByte(): number {
@@ -261,15 +265,14 @@ export class BinaryProtocol extends TProtocol {
         const len: number = this.readI32()
         if (len === 0) {
             return Buffer.alloc(0)
-        }
-
-        if (len < 0) {
+        } else if (len < 0) {
             throw new TProtocolException(
                 TProtocolExceptionType.NEGATIVE_SIZE,
                 'Negative binary size',
             )
+        } else {
+            return this.transport.read(len)
         }
-        return this.transport.read(len)
     }
 
     public readString(): string {

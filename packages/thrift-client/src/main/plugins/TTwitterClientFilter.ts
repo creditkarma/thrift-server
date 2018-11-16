@@ -7,6 +7,7 @@ import {
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
+    LogFunction,
     MessageType,
     ProtocolType,
     TProtocol,
@@ -30,7 +31,7 @@ import { readThriftObject } from './readThriftObject'
 
 import * as TTwitter from '../../ttwitter/com/creditkarma/finagle/thrift'
 
-import * as logger from '../logger'
+import { defaultLogger } from '../logger'
 
 // Exported generated Twitter types...
 export { TTwitter }
@@ -51,6 +52,7 @@ export interface ITTwitterFileterOptions {
     endpoint?: string
     sampleRate?: number
     httpInterval?: number
+    logger?: LogFunction
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
@@ -99,6 +101,7 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     httpInterval,
+    logger = defaultLogger,
 }: ITTwitterFileterOptions): IThriftClientFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -110,7 +113,10 @@ export function TTwitterClientFilter<T>({
         ): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
-                    logger.log('TTwitter upgraded')
+                    logger(
+                        ['info', 'thrift-client', 'ttwitter-client-filter'],
+                        'TTwitter upgraded',
+                    )
                     const tracer: Tracer = getTracerForService(
                         localServiceName,
                         { debug, endpoint, sampleRate, httpInterval },
@@ -212,9 +218,15 @@ export function TTwitterClientFilter<T>({
                                             }
                                         },
                                         (err: any) => {
-                                            logger.warn(
-                                                `Error reading context from Thrift response: `,
-                                                err,
+                                            logger(
+                                                [
+                                                    'warn',
+                                                    'thrift-client',
+                                                    'ttwitter-client-filter',
+                                                ],
+                                                `Error reading context from Thrift response: ${
+                                                    err.message
+                                                }`,
                                             )
                                             return res
                                         },
@@ -230,7 +242,10 @@ export function TTwitterClientFilter<T>({
                 } else if (upgradeRequested) {
                     return next(request.data, request.context)
                 } else {
-                    logger.log('Requesting TTwitter upgrade')
+                    logger(
+                        ['info', 'thrift-client', 'ttwitter-client-filter'],
+                        'Requesting TTwitter upgrade',
+                    )
                     upgradeRequested = true
                     return next(upgradeRequest(), request.context).then(
                         (upgradeResponse: IRequestResponse) => {
@@ -238,7 +253,14 @@ export function TTwitterClientFilter<T>({
                             return sendUpgradedRequest()
                         },
                         (err: any) => {
-                            logger.log('Downgrading TTwitter request: ', err)
+                            logger(
+                                [
+                                    'info',
+                                    'thrift-client',
+                                    'ttwitter-client-filter',
+                                ],
+                                `Downgrading TTwitter request: ${err.message}`,
+                            )
                             return next(request.data, request.context)
                         },
                     )
