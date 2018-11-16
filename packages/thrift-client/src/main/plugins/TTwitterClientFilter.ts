@@ -7,6 +7,7 @@ import {
     IProtocolConstructor,
     IRequestContext,
     ITransportConstructor,
+    IZipkinTracerConfig,
     LogFunction,
     MessageType,
     ProtocolType,
@@ -14,7 +15,6 @@ import {
     TransportType,
     TTransport,
     ZipkinHeaders,
-    IZipkinTracerConfig,
 } from '@creditkarma/thrift-server-core'
 
 import { Instrumentation, TraceId, Tracer } from 'zipkin'
@@ -96,7 +96,7 @@ export function TTwitterClientFilter<T>({
     transportType = 'buffered',
     protocolType = 'binary',
     logger = defaultLogger,
-    tracerConfig
+    tracerConfig,
 }: ITTwitterFileterOptions): IThriftClientFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -112,7 +112,10 @@ export function TTwitterClientFilter<T>({
                         ['info', 'thrift-client', 'ttwitter-client-filter'],
                         'TTwitter upgraded',
                     )
-                    const tracer: Tracer = getTracerForService(localServiceName, tracerConfig)
+                    const tracer: Tracer = getTracerForService(
+                        localServiceName,
+                        tracerConfig,
+                    )
                     const instrumentation = new Instrumentation.HttpClient({
                         tracer,
                         serviceName: localServiceName,

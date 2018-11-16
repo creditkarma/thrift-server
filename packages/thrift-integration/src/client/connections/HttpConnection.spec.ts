@@ -468,9 +468,11 @@ describe('HttpConnection', () => {
                 TTwitterClientFilter({
                     localServiceName: 'http-calculator-client',
                     remoteServiceName: 'calculator-service',
-                    endpoint: 'http://localhost:9411/api/v1/spans',
-                    sampleRate: 1,
-                    httpInterval: 0,
+                    tracerConfig: {
+                        endpoint: 'http://localhost:9411/api/v1/spans',
+                        sampleRate: 1,
+                        httpInterval: 0,
+                    },
                 }),
             )
 
