@@ -14,6 +14,7 @@ import {
     TransportType,
     TTransport,
     ZipkinHeaders,
+    IZipkinTracerConfig,
 } from '@creditkarma/thrift-server-core'
 
 import { Instrumentation, TraceId, Tracer } from 'zipkin'
@@ -48,11 +49,8 @@ export interface ITTwitterFileterOptions {
     clientId?: IClientId
     transportType?: TransportType
     protocolType?: ProtocolType
-    debug?: boolean
-    endpoint?: string
-    sampleRate?: number
-    httpInterval?: number
     logger?: LogFunction
+    tracerConfig?: IZipkinTracerConfig
 }
 
 const CAN_TRACE_METHOD_NAME: string = '__can__finagle__trace__v3__'
@@ -95,13 +93,10 @@ export function TTwitterClientFilter<T>({
     destHeader = remoteServiceName,
     isUpgraded = true,
     clientId,
-    debug = false,
-    endpoint,
-    sampleRate,
     transportType = 'buffered',
     protocolType = 'binary',
-    httpInterval,
     logger = defaultLogger,
+    tracerConfig
 }: ITTwitterFileterOptions): IThriftClientFilterConfig<T> {
     let hasUpgraded: boolean = false
     let upgradeRequested: boolean = false
@@ -117,10 +112,7 @@ export function TTwitterClientFilter<T>({
                         ['info', 'thrift-client', 'ttwitter-client-filter'],
                         'TTwitter upgraded',
                     )
-                    const tracer: Tracer = getTracerForService(
-                        localServiceName,
-                        { debug, endpoint, sampleRate, httpInterval },
-                    )
+                    const tracer: Tracer = getTracerForService(localServiceName, tracerConfig)
                     const instrumentation = new Instrumentation.HttpClient({
                         tracer,
                         serviceName: localServiceName,
