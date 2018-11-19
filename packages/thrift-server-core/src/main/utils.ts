@@ -12,12 +12,32 @@ import { BufferedTransport, TTransport } from './transports'
 import {
     IProtocolConstructor,
     IProtocolMap,
+    IThriftMessage,
     ITransportConstructor,
     ITransportMap,
     LogFunction,
     ProtocolType,
     TransportType,
 } from './types'
+
+export function readThriftMetadata(
+    buffer: Buffer,
+    Transport: ITransportConstructor,
+    Protocol: IProtocolConstructor,
+    logger: LogFunction,
+): IThriftMessage {
+    try {
+        const transportWithData: TTransport = new Transport(buffer)
+        const input: TProtocol = new Protocol(transportWithData)
+        return input.readMessageBegin()
+    } catch (err) {
+        logger(
+            ['error', 'thrift-server-core'],
+            `Unable to read Thrift message. ${err.message}`,
+        )
+        throw err
+    }
+}
 
 export function readThriftMethod(
     buffer: Buffer,
@@ -26,17 +46,42 @@ export function readThriftMethod(
     logger: LogFunction = defaultLogger,
 ): string {
     try {
-        const transportWithData: TTransport = new Transport(buffer)
-        const input: TProtocol = new Protocol(transportWithData)
-        const metadata = input.readMessageBegin()
-
-        return metadata.fieldName
+        const { fieldName } = readThriftMetadata(
+            buffer,
+            Transport,
+            Protocol,
+            logger,
+        )
+        return fieldName
     } catch (err) {
         logger(
-            ['info', 'thrift-server-core'],
+            ['error', 'thrift-server-core'],
             `Unable to read Thrift method name. ${err.message}`,
         )
         return ''
+    }
+}
+
+export function readRequestId(
+    buffer: Buffer,
+    Transport: ITransportConstructor,
+    Protocol: IProtocolConstructor,
+    logger: LogFunction = defaultLogger,
+): number {
+    try {
+        const { requestId } = readThriftMetadata(
+            buffer,
+            Transport,
+            Protocol,
+            logger,
+        )
+        return requestId
+    } catch (err) {
+        logger(
+            ['error', 'thrift-server-core'],
+            `Unable to read Thrift requestId. ${err.message}`,
+        )
+        return 0
     }
 }
 
