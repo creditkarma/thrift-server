@@ -2,13 +2,13 @@ import { LogFunction } from './types'
 
 export const makeLogger = (name: string): LogFunction => {
     return (tags: Array<string>, data?: string | object): void => {
-        if (tags.includes('error')) {
+        if (tags.indexOf('error') > -1) {
             if (data !== undefined) {
                 console.error(`[${name}:error] `, data)
             } else {
                 console.error(`[${name}:error]`)
             }
-        } else if (tags.includes('warn')) {
+        } else if (tags.indexOf('warn') > -1) {
             if (data !== undefined) {
                 console.warn(`[${name}:warn] `, data)
             } else {
