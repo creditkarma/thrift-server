@@ -12,7 +12,7 @@ Adding Thrift support to Hapi is as easy as just including the provided plugin. 
 
 ### Codegen
 
-Requires @creditkarma/thrift-typescript >= v2.0.0
+Requires @creditkarma/thrift-typescript >= v3.0.0
 
 The easiest way to get started is to generate your Thrift services using @creditkarma/thrift-typescript.
 

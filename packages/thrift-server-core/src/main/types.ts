@@ -102,8 +102,10 @@ export interface ITransportConstructor {
 }
 
 export interface IThriftClient {
+    readonly _serviceName?: string
     readonly _annotations?: IThriftAnnotations
     readonly _fieldAnnotations?: IFieldAnnotations
+    readonly _methodNames?: Array<string>
 }
 
 export abstract class ThriftClient<Context = any> implements IThriftClient {
@@ -132,9 +134,10 @@ export interface IClientConstructor<TClient, Context> {
 }
 
 export interface IThriftProcessor<Context> {
-    readonly _annotations: IThriftAnnotations
-    readonly _methodAnnotations: IMethodAnnotations
-    readonly _methodNames: Array<string>
+    readonly _serviceName?: string
+    readonly _annotations?: IThriftAnnotations
+    readonly _methodAnnotations?: IMethodAnnotations
+    readonly _methodNames?: Array<string>
     process(
         input: TProtocol,
         output: TProtocol,
@@ -144,9 +147,10 @@ export interface IThriftProcessor<Context> {
 
 export abstract class ThriftProcessor<Context, IHandler>
     implements IThriftProcessor<Context> {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _methodAnnotations: IMethodAnnotations = {}
-    public readonly _methodNames: Array<string> = []
+    public readonly _serviceName?: string
+    public readonly _annotations?: IThriftAnnotations = {}
+    public readonly _methodAnnotations?: IMethodAnnotations = {}
+    public readonly _methodNames?: Array<string> = []
 
     public abstract process(
         input: TProtocol,

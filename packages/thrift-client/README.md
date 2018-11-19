@@ -38,7 +38,7 @@ service Calculator {
 
 ### Codegen
 
-Requires @creditkarma/thrift-typescript >= v2.0.0
+Requires @creditkarma/thrift-typescript >= v3.0.0
 
 Add a script to your package.json to codegen. The 'target' option is important to make thrift-typescript generate for this library instead of the Apache libraries.
 
