@@ -22,7 +22,6 @@ export interface IRequest {
 
 export interface IThriftRequest<Context> {
     data: Buffer
-    traceId?: string
     methodName: string
     uri: string
     context: Context

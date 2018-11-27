@@ -22,8 +22,8 @@
 
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": ">=0.10.0 <0.11.0",
-        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0"
+        "@creditkarma/thrift-client": "0.10.x",
+        "@creditkarma/thrift-server-core": "0.10.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.10.4",

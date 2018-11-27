@@ -25,10 +25,10 @@
         "zipkin": "^0.14.3"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": ">=0.10.0 <0.11.0",
-        "@creditkarma/thrift-context-filter": ">=0.10.0 <0.11.0",
-        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0",
-        "@creditkarma/thrift-zipkin-core": ">=0.10.0 <0.11.0"
+        "@creditkarma/thrift-client": "0.10.x",
+        "@creditkarma/thrift-context-filter": "0.10.x",
+        "@creditkarma/thrift-server-core": "0.10.x",
+        "@creditkarma/thrift-zipkin-core": "0.10.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.10.4",
