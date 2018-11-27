@@ -80,7 +80,7 @@ export function ZipkinTracingHapi({
                 )
 
                 return tracer.scoped(() => {
-                    const traceId: TraceId = (instrumentation.recordRequest(
+                    const traceId: TraceId = instrumentation.recordRequest(
                         requestMethod || request.method,
                         formatUrl(url.format(request.url)),
                         (header: string): option.IOption<any> => {
@@ -91,7 +91,7 @@ export function ZipkinTracingHapi({
                                 return option.None
                             }
                         },
-                    ) as any) as TraceId // Nasty but this method is incorrectly typed
+                    )
 
                     const traceHeaders: IRequestHeaders = headersForTraceId(
                         traceId,
