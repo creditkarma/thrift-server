@@ -4,6 +4,14 @@ One of the problems that arise in microservice architectures is tracing the life
 
 This filter for [@creditkarma/thrift-client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client) helps to solve this problem by adding support for distributed tracing with [Zipkin](https://github.com/openzipkin/zipkin-js).
 
+## Installation
+
+```sh
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-client
+npm install --save @creditkarma/zipkin-client-filter
+```
+
 ## Usage
 
 Zipkin tracing is added to your Thrift client through filters.
@@ -11,8 +19,11 @@ Zipkin tracing is added to your Thrift client through filters.
 ```typescript
 import {
     createHttpClient,
-    ZipkinClientFilter,
 } from '@creditkaram/thrift-client'
+
+import {
+    ZipkinClientFilter,
+} from '@creditkarma/zipkin-client-filter'
 
 import { Calculator } from './codegen/calculator'
 

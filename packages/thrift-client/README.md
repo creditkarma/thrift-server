@@ -418,6 +418,14 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 The optional `register` option takes an array of filters to apply. Unsurprisingly they are applied in the order you pass them in.
 
+#### Available Filters
+
+These client filters are maintained as part of this repository:
+
+* [ThriftContextFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-context-filter) - This is useful for TCP clients. It is a filter for appending Thrift objects onto an existing Thrift payload.
+* [TTwitterClientFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/ttwitter-client-filter) - This is for appending a TTwitter context onto an existing Thrift payload. This is for compatibility with Twitter's [Finagle](https://twitter.github.io/finagle/) framework.
+* [ZipkinClientFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/zipkin-client-filter) - This is for supporting distributed tracing with [Zipkin](https://github.com/openzipkin/zipkin-js).
+
 ## Contributing
 
 For more information about contributing new features and bug fixes, see our [Contribution Guidelines](../../CONTRIBUTING.md).

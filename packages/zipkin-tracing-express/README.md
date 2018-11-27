@@ -4,6 +4,15 @@ One of the problems that arise in microservice architectures is tracing the life
 
 This middleware for [@creditkarma/thrift-server-express](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express) helps to solve this problem by adding support for distributed tracing with [Zipkin](https://github.com/openzipkin/zipkin-js).
 
+## Installation
+
+```sh
+npm install --save @types/express express
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-server-express
+npm install --save @creditkarma/zipkin-tracing-express
+```
+
 ## Usage
 
 Zipkin tracing is added to your Express server through middleware.
@@ -13,8 +22,11 @@ import * as express from 'express'
 
 import {
     createThriftServer,
-    ZipkinTracingExpress,
 } from '@creditkarma/thrift-server-express'
+
+import {
+    ZipkinTracingExpress,
+} from '@creditkarma/zipkin-tracing-express'
 
 import { Calculator } from './codegen/calculator'
 

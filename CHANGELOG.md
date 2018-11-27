@@ -4,6 +4,52 @@ All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
 
+<a name="0.11.0"></a>
+## [0.11.0](https://github.com/creditkarma/thrift-server/compare/v0.10.4...v0.11.0) (2018-11-27)
+
+### BREAKING CHANGES
+
+* Splits plugins/middleware into their own packages ([f5f344](https://github.com/creditkarma/thrift-server/commit/f5f344))
+
+The APIs for plugins is unchanged. It's just that the plugins are no longer included with their given client/server.
+
+For example if you want to include Zipkin tracing for [thrift-client](./packages/thrift-client) you know have to also install the [zipkin-client-filter](./packages/zipkin-client-filter).
+
+```sh
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-client
+npm install --save @creditkarma/thrift-zipkin-core
+npm install --save @creditkarma/zipkin-client-filter
+```
+
+And then use it as such:
+
+```typescript
+import {
+    createHttpClient,
+} from '@creditkaram/thrift-client'
+
+import {
+    ZipkinClientFilter,
+} from '@creditkarma/zipkin-client-filter'
+
+import { Calculator } from './codegen/calculator'
+
+const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
+    createHttpClient(Calculator.Client, {
+        hostName: 'localhost',
+        port: 8080,
+        register: [ ZipkinClientFilter({
+            localServiceName: 'calculator-client',
+            remoteServiceName: 'calculator-service',
+            tracerConfig: {
+                endpoint: 'http://localhost:9411/api/v1/spans',
+                sampleRate: 0.1,
+            }
+        }) ]
+    })
+```
+
 <a name="0.10.0"></a>
 ## [0.10.0](https://github.com/creditkarma/thrift-server/compare/v0.9.3...v0.10.0) (2018-11-16)
 

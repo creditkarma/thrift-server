@@ -1,16 +1,27 @@
-### TCP Filters
+# Thrift Context Filter
 
 When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two filters for helping with this situation.
 
-#### ThriftContextFilter
+## Installation
+
+```sh
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-client
+npm install --save @creditkarma/thrift-context-filter
+```
+
+## Usage
 
 This plugin writes a Thrift struct onto the head of an outgoing payload and reads a struct off of the head of an incoming payload.
 
 ```typescript
 import {
     createTcpClient,
-    ThriftContextFilter,
 } from '@creditkarma/thrift-client'
+
+import {
+    ThriftContextFilter,
+} from '@creditkarma/thrift-context-filter'
 
 import {
     RequestContext,
@@ -35,7 +46,7 @@ thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response:
 })
 ```
 
-##### Options
+### Options
 
 Available options for ThriftContextFilter:
 

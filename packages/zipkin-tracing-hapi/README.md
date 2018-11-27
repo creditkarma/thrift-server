@@ -4,6 +4,15 @@ One of the problems that arise in microservice architectures is tracing the life
 
 This plugin for [@creditkarma/thrift-server-hapi](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi) helps to solve this problem by adding support for distributed tracing with [Zipkin](https://github.com/openzipkin/zipkin-js).
 
+## Installation
+
+```sh
+npm install --save @types/hapi hapi
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-server-hapi
+npm install --save @creditkarma/zipkin-tracing-hapi
+```
+
 ## Usage
 
 Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
@@ -15,8 +24,11 @@ import * as hapi from 'hapi'
 
 import {
     createThriftServer,
-    ZipkinTracingHapi,
 } from '@creditkarma/thrift-server-hapi'
+
+import {
+    ZipkinTracingHapi,
+} from '@creditkarma/zipkin-tracing-hapi'
 
 import { Calculator } from './codegen/calculator'
 
