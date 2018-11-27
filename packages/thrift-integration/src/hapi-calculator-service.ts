@@ -1,15 +1,12 @@
 import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
 
-import {
-    createThriftServer,
-    ZipkinTracingHapi,
-} from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '@creditkarma/thrift-client'
+import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
+
+import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
+
+import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
 import * as Hapi from 'hapi'
 

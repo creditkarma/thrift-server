@@ -1,4 +1,3 @@
-import { TraceId } from 'zipkin'
 import { TProtocol } from './protocols'
 import { TTransport } from './transports'
 
@@ -10,8 +9,16 @@ export interface IRequestHeaders {
     [name: string]: any
 }
 
+export interface ITraceId {
+    readonly spanId: string
+    readonly parentId: string
+    readonly traceId: string
+    readonly sampled?: boolean
+    readonly traceIdHigh?: boolean
+}
+
 export interface IRequestContext {
-    traceId: TraceId
+    traceId: ITraceId
     headers: IRequestHeaders
 }
 

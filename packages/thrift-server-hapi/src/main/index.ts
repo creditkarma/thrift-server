@@ -7,7 +7,6 @@ import { ICreateHapiServerOptions } from './types'
 
 import { defaultLogger } from './logger'
 
-export * from './observability'
 export * from './ThriftServerHapi'
 export * from './types'
 

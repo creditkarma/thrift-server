@@ -1,0 +1,42 @@
+{
+    "name": "@creditkarma/zipkin-tracing-express",
+    "version": "0.10.4",
+    "description": "Express server middleware for the Apache Thrift protocol",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main"
+    ],
+    "keywords": [
+    ],
+    "scripts": {
+        "clean": "rimraf ./dist",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "prebuild": "npm run clean && npm run lint && npm run format",
+        "build": "tsc",
+        "test": "echo 'No tests for zipkin-tracing-express'; exit 0;"
+    },
+    "dependencies": {
+        "zipkin": "^0.14.3"
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-zipkin-core": ">=0.10.0 <0.11.0",
+        "@types/express": "^4.16.0",
+        "express": "^4.16.4"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-server-core": "^0.10.4",
+        "@creditkarma/thrift-zipkin-core": "^0.10.4",
+        "@types/express": "^4.16.0",
+        "@types/node": "^8.10.38",
+        "express": "^4.16.4",
+        "prettier": "^1.15.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.1.x"
+    }
+}

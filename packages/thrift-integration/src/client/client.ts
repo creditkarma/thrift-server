@@ -1,10 +1,8 @@
-import { ZipkinTracingExpress } from '@creditkarma/thrift-server-express'
+import { ZipkinTracingExpress } from '@creditkarma/zipkin-tracing-express'
 
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '@creditkarma/thrift-client'
+import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
+
+import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
 import * as express from 'express'
 import * as net from 'net'

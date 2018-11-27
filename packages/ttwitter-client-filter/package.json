@@ -1,0 +1,47 @@
+{
+    "name": "@creditkarma/ttwitter-client-filter",
+    "version": "0.10.4",
+    "description": "Express server middleware for the Apache Thrift protocol",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main"
+    ],
+    "keywords": [
+    ],
+    "scripts": {
+        "clean": "npm run clean-dist && npm run clean-gen",
+        "clean-dist": "rimraf ./dist",
+        "clean-gen": "rimraf ./src/ttwitter",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "precodegen": "npm run clean-gen",
+        "codegen": "thrift-typescript --target thrift-server --rootDir ./src --sourceDir ./thrift --outDir ./ttwitter",
+        "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
+        "build": "tsc",
+        "test": "echo 'No tests for ttwitter-client-filter'; exit 0;"
+    },
+    "dependencies": {
+        "zipkin": "^0.14.3"
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-client": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-context-filter": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-zipkin-core": ">=0.10.0 <0.11.0"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-client": "^0.10.4",
+        "@creditkarma/thrift-context-filter": "^0.10.4",
+        "@creditkarma/thrift-server-core": "^0.10.4",
+        "@creditkarma/thrift-zipkin-core": "^0.10.4",
+        "@creditkarma/thrift-typescript": "^3.0.2",
+        "@types/node": "^8.10.38",
+        "prettier": "^1.15.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.1.x"
+    }
+}

@@ -9,7 +9,6 @@ import {
 export * from './types'
 export * from './protocols'
 export * from './transports'
-export * from './observability'
 export * from './errors'
 export * from './utils'
 export { makeLogger } from './logger'

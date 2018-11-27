@@ -4,11 +4,9 @@ import { createThriftServer } from '@creditkarma/thrift-server-express'
 
 import { Int64 } from '@creditkarma/thrift-server-core'
 
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '@creditkarma/thrift-client'
+import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
+
+import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
 import { IMappedStruct, ISharedStruct, ISharedUnion } from './generated/shared'
 

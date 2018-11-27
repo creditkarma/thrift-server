@@ -4,15 +4,21 @@ import * as Lab from 'lab'
 import * as net from 'net'
 
 import {
-    appendThriftObject,
     IRequestResponse,
     IThriftRequest,
     NextFunction,
     TcpConnection,
+} from '@creditkarma/thrift-client'
+
+import {
+    appendThriftObject,
     ThriftContextFilter,
+} from '@creditkarma/thrift-context-filter'
+
+import {
     TTwitter,
     TTwitterClientFilter,
-} from '@creditkarma/thrift-client'
+} from '@creditkarma/ttwitter-client-filter'
 
 import { createServer } from '../../apache-calculator-service'
 

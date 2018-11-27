@@ -1,0 +1,44 @@
+{
+    "name": "@creditkarma/zipkin-tracing-hapi",
+    "version": "0.10.4",
+    "description": "Express server middleware for the Apache Thrift protocol",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main"
+    ],
+    "keywords": [
+    ],
+    "scripts": {
+        "clean": "rimraf ./dist",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "prebuild": "npm run clean && npm run lint && npm run format",
+        "build": "tsc",
+        "test": "echo 'No tests for zipkin-tracing-hapi'; exit 0;"
+    },
+    "dependencies": {
+        "zipkin": "^0.14.3"
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-server-hapi": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-zipkin-core": ">=0.10.0 <0.11.0",
+        "@types/hapi": ">=17.0.0 <18.0.0",
+        "hapi": ">=17.0.0 <18.0.0"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-server-core": "^0.10.4",
+        "@creditkarma/thrift-server-hapi": "^0.10.4",
+        "@creditkarma/thrift-zipkin-core": "^0.10.4",
+        "@types/hapi": "^17.6.4",
+        "@types/node": "^8.10.38",
+        "lab": "^18.0.0",
+        "prettier": "^1.15.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.1.x"
+    }
+}

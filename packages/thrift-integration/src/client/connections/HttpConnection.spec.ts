@@ -3,16 +3,20 @@ import * as Hapi from 'hapi'
 import * as http from 'http'
 
 import {
-    appendThriftObject,
     HttpConnection,
     IRequest,
     IRequestResponse,
     IThriftRequest,
     NextFunction,
     RequestInstance,
+} from '@creditkarma/thrift-client'
+
+import { appendThriftObject } from '@creditkarma/thrift-context-filter'
+
+import {
     TTwitter,
     TTwitterClientFilter,
-} from '@creditkarma/thrift-client'
+} from '@creditkarma/ttwitter-client-filter'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'

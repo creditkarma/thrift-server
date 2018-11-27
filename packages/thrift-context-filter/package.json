@@ -1,0 +1,43 @@
+{
+    "name": "@creditkarma/thrift-context-filter",
+    "version": "0.10.4",
+    "description": "Express server middleware for the Apache Thrift protocol",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main"
+    ],
+    "keywords": [
+    ],
+    "scripts": {
+        "clean": "rimraf ./dist ./src/tests/generated",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
+        "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
+        "build": "tsc",
+        "test": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
+    },
+    "dependencies": {
+
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-client": ">=0.10.0 <0.11.0",
+        "@creditkarma/thrift-server-core": ">=0.10.0 <0.11.0"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-client": "^0.10.4",
+        "@creditkarma/thrift-server-core": "^0.10.4",
+        "@creditkarma/thrift-typescript": "^3.0.2",
+        "@types/code": "^4.0.5",
+        "@types/node": "^8.10.38",
+        "code": "^5.2.4",
+        "lab": "^18.0.0",
+        "prettier": "^1.15.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.1.x"
+    }
+}
