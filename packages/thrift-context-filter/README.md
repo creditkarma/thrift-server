@@ -4,6 +4,8 @@ When using Thrift over HTTP we can use HTTP headers to pass context/metadata bet
 
 ## Installation
 
+`ThriftContextFilter` has a few `peerDependencies`.
+
 ```sh
 npm install --save @creditkarma/thrift-server-core
 npm install --save @creditkarma/thrift-client

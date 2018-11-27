@@ -2,11 +2,27 @@
 
 This plugin can be used in conjuction with Twitter's open source [Finagle](https://github.com/twitter/finagle) project to add and receive the headers that project expects.
 
+## Installation
+
+`TTwitterClientFilter` has a few `peerDependencies`.
+
+```sh
+npm install --save @creditkarma/thrift-server-core
+npm install --save @creditkarma/thrift-client
+npm install --save @creditkarma/thrift-context-filter
+npm install --save @creditkarma/ttwitter-client-filter
+```
+
+## Usage
+
 ```typescript
 import {
     createTcpClient,
-    TTwitterClientFilter,
 } from '@creditkarma/thrift-client'
+
+import {
+    TTwitterClientFilter,
+} from '@creditkarma/ttwitter-client-filter'
 
 import {
     Calculator,

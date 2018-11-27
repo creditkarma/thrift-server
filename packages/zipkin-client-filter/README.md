@@ -6,9 +6,12 @@ This filter for [@creditkarma/thrift-client](https://github.com/creditkarma/thri
 
 ## Installation
 
+`ZipkinClientFilter` has a few `peerDependencies`.
+
 ```sh
 npm install --save @creditkarma/thrift-server-core
 npm install --save @creditkarma/thrift-client
+npm install --save @creditkarma/thrift-zipkin-core
 npm install --save @creditkarma/zipkin-client-filter
 ```
 

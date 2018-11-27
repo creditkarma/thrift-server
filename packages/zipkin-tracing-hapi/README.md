@@ -6,10 +6,13 @@ This plugin for [@creditkarma/thrift-server-hapi](https://github.com/creditkarma
 
 ## Installation
 
+`ZipkinTracingHapi` has a few `peerDependencies`.
+
 ```sh
 npm install --save @types/hapi hapi
 npm install --save @creditkarma/thrift-server-core
 npm install --save @creditkarma/thrift-server-hapi
+npm install --save @creditkarma/thrift-zipkin-core
 npm install --save @creditkarma/zipkin-tracing-hapi
 ```
 
