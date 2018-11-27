@@ -13,7 +13,6 @@ We're going to go through this step-by-step.
 * Run codegen on our Thrift IDL
 * Create a client
 * Make service calls with our client
-* Add observability with [Zipkin](https://github.com/openzipkin/zipkin-js)
 
 ### Install
 
@@ -44,7 +43,7 @@ Add a script to your package.json to codegen. The 'target' option is important t
 
 ```json
 "scripts": {
-  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen
+  "codegen": "thrift-typescript --target thrift-server --sourceDir thrift --outDir codegen"
 }
 ```
 
@@ -294,7 +293,6 @@ The `IThriftRequest` object wraps the outgoing data with some useful metadata ab
 ```typescript
 export interface IThriftRequest<Context> {
     data: Buffer
-    traceId?: TraceId
     methodName: string
     uri: string
     context: Context
@@ -420,200 +418,9 @@ const thriftClient: Calculator.Client = new Calculator.Client(connection)
 
 The optional `register` option takes an array of filters to apply. Unsurprisingly they are applied in the order you pass them in.
 
-### TCP Filters
-
-When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two filters for helping with this situation.
-
-#### ThriftContextFilter
-
-This plugin writes a Thrift struct onto the head of an outgoing payload and reads a struct off of the head of an incoming payload.
-
-```typescript
-import {
-    createTcpClient,
-    ThriftContextFilter,
-} from '@creditkarma/thrift-client'
-
-import {
-    RequestContext,
-    ResponseContext,
-} from './codegen/metadata'
-
-import {
-    Calculator,
-} from './codegen/calculator'
-
-const thriftClient: Calculator.Client<RequestContext> =
-    createTcpClient(Calculator.Client, {
-        hostName: 'localhost',
-        port: 8080,
-        register: [ ThriftContextFilter<RequestContext, ResponseContext>({
-            RequestContextClass: RequestContext,
-        }) ]
-    })
-
-thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response: number) => {
-    // Do stuff...
-})
-```
-
-##### Options
-
-Available options for ThriftContextFilter:
-
-* RequestContextClass (required): A class (extending StructLike) that is to be prepended to outgoing requests.
-* ResponseContextClass (optional): A class (extending StructLike) that is prepended to incoming responses. Defaults to nothing.
-* transportType (optional): The type of transport to use. Currently only 'buffered'.
-* protocolType (optional): The type of protocol to use, either 'binary' or 'compact'.
-
-#### TTwitterClientFilter
-
-This plugin can be used in conjuction with Twitter's open source [Finagle](https://github.com/twitter/finagle) project to add and receive the headers that project expects.
-
-```typescript
-import {
-    createTcpClient,
-    TTwitterClientFilter,
-} from '@creditkarma/thrift-client'
-
-import {
-    Calculator,
-} from './codegen/calculator'
-
-const thriftClient: Calculator.Client<RequestContext> =
-    createTcpClient(Calculator.Client, {
-        hostName: 'localhost',
-        port: 8080,
-        register: [ TTwitterClientFilter({
-            localServiceName: 'calculator-client',
-            remoteServiceName: 'calculator-service',
-            destHeader: 'calculator-service',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate: 1,
-        }) ]
-    })
-
-thriftClient.add(5, 6).then((response: number) => {
-    // Do stuff...
-})
-```
-
-*Note: The Twitter types are generated and exported under the name `TTwitter`*
-
-##### Options
-
-Available options for TTwitterClientFilter:
-
-* localServiceName (required): The name of your local service/application.
-* remoteServiceName (required): The name of the remote service you are calling.
-* destHeader (optional): A name for the destination added to the RequestHeader object Finagle expects. Defaults to the value of `remoteServiceName`.
-* isUpgraded (optional): Is the service using TTwitter context. Defaults to true.
-* clientId (optional): A unique identifier for the client. Defaults to undefined.
-* debug (optional): Zipkin debug mode. Defaults to false.
-* endpoint (optional): Zipkin endpoint. Defaults to ''.
-* sampleRate (optional): Zipkin samplerate. Defaults to 0.1.
-* httpInterval (optional): Rate (in milliseconds) at which to send traces to Zipkin collector. Defaults to 1000.
-* transportType (optional): The type of transport to use. Currently only 'buffered'.
-* protocolType (optional): The type of protocol to use. Currently only 'binary'.
-
-### Observability
-
-Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/openzipkin/zipkin-js). Distributed tracing allows you to track a request across multiple service calls to see where latency is in your system or to see where a particular request is failing. Also, just to get a complete picture of how many services a request of a particular kind touch.
-
-Zipkin tracing is added to your Thrift client through filters.
-
-```typescript
-import {
-    createHttpClient,
-    ZipkinClientFilter,
-} from '@creditkaram/thrift-client'
-
-import { Calculator } from './codegen/calculator'
-
-const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
-    createHttpClient(Calculator.Client, {
-        hostName: 'localhost',
-        port: 8080,
-        register: [ ZipkinClientFilter({
-            localServiceName: 'calculator-client',
-            remoteServiceName: 'calculator-service',
-            endpoint: 'http://localhost:9411/api/v1/spans',
-            sampleRate: 0.1,
-        }) ]
-    })
-```
-
-In order for tracing to be useful the services you are communicating with will also need to be setup with Zipkin tracing. Plugins are available for `thrift-server-hapi` and `thrift-server-express`. The provided plugins in Thrift Server only support HTTP transport at the moment.
-
-#### Options
-
-* localServiceName (required): The name of your service.
-* remoteServiceName (optional): The name of the service you are calling.
-* debug (optional): In debug mode all requests are sampled.
-* endpoint (optional): URL of your collector (where to send traces).
-* sampleRate (optional): Percentage (from 0 to 1) of requests to sample. Defaults to 0.1.
-* httpInterval (optional): Sampling data is batched to reduce network load. This is the rate (in milliseconds) at which to empty the sample queue. Defaults to 1000.
-
-If the endpoint is set then the plugin will send sampling data to the given endpoint over HTTP. If the endpoint is not set then sampling data will just be logged to the console.
-
-#### Tracing Non-Thrift Endpoints
-
-Sometimes, as part of completing your service request, you may need to gather data from both Thrift and non-Thrift endpoints. To get a complete picture you need to trace all of these calls. You can add Zipkin to other requests with instrumentation provided by the [OpenZipkin](https://github.com/openzipkin/zipkin-js) project.
-
-When constructing instrumentation provided by another library you need to use the same `Tracer` in order to maintain the correct trace context. You can import this shared `Tracer` through a call to `getTracerForService`. This assumes a `Tracer` has already been created for your service by usage of one of the Thrift Zipkin plugins.
-
-```typescript
-import { getTracerForService } from '@creditkarma/thrift-server-core'
-import * as wrapRequest from 'zipkin-instrumentation-request'
-import * as request from 'request'
-
-const tracer = getTracerForService('calculator-client')
-const zipkinRequest = wrapRequest(request, { tracer, remoteServiceName: 'calculator-service' })
-zipkinRequest.get(url, (err, resp, body) => {
-    // Do something
-})
-```
-
-## Running the Sample Application
-
-Included in this repo is a sample application that uses `thrift-client` and `thrift-server-hapi`. To get the sample application up and running you need to do a few things.
-
-First, clone the `thrift-server` repo:
-
-```sh
-$ git clone https://github.com/creditkarma/thrift-server.git
-```
-
-Then, `cd` into the `thrift-server` directory and run `npm install` and `npm run build`.
-
-```sh
-$ cd thrift-server
-$ npm install
-$ npm run build
-```
-
-The `thrift-server` project uses [lerna](https://lernajs.io/) to manage inter-library dependencies. The `npm install` command will obviously install all your dependencies, but it will also perform a `lerna bootstrap` that will set up sym-links between all the libraries within the mono-repo.
-
-Now that everything is linked and built we can go to the `thrift-client` package and start the example application:
-
-```sh
-$ cd packages/thrift-client
-$ npm start
-```
-
-This will start a web server on localhost:8080. The sample app has a UI you can visit from a web browser.
-
-### Running Zipkin
-
-The example app is configured to emit Zipkin traces. To view these traces run the Zipkin Docker image:
-
-```sh
-$ docker run -d -p 9411:9411 openzipkin/zipkin
-```
-
 ## Contributing
 
-For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
+For more information about contributing new features and bug fixes, see our [Contribution Guidelines](../../CONTRIBUTING.md).
 External contributors must sign Contributor License Agreement (CLA)
 
 ## License

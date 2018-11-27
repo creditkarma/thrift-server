@@ -1,5 +1,5 @@
 {
-    "name": "@creditkarma/thrift-server-example",
+    "name": "@creditkarma/thrift-server-ecosystem",
     "scripts": {
         "clean": "npm run clean-dist && npm run clean-gen",
         "clean-dist": "rimraf ./dist",
@@ -9,7 +9,7 @@
         "codegen": "thrift-typescript --target thrift-server --rootDir . --sourceDir ./thrift --outDir ./src/generated",
         "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
         "build": "tsc",
-        "test": "echo 'No tests for example service'; exit 0;"
+        "test": "echo 'No tests for thrift ecosystem'; exit 0;"
     },
     "dependencies": {
         "@types/node": "^8.10.38"

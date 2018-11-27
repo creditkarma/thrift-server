@@ -1,4 +1,6 @@
-# Thrift Zipkin Core
+# Thrift Integration Tests
+
+Integration test package for the thrift-server ecosystem.
 
 ## Contributing
 
