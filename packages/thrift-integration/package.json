@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-integration",
-    "version": "0.8.4",
+    "version": "0.8.5",
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
@@ -13,10 +13,10 @@
         "test": "lab --timeout 60000 --verbose -l -S -P spec dist"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.8.4",
-        "@creditkarma/thrift-server-core": "^0.8.4",
-        "@creditkarma/thrift-server-express": "^0.8.4",
-        "@creditkarma/thrift-server-hapi": "^0.8.4",
+        "@creditkarma/thrift-client": "^0.8.5",
+        "@creditkarma/thrift-server-core": "^0.8.5",
+        "@creditkarma/thrift-server-express": "^0.8.5",
+        "@creditkarma/thrift-server-hapi": "^0.8.5",
         "@creditkarma/thrift-typescript": "^2.0.11",
         "@types/body-parser": "^1.16.5",
         "@types/code": "^4.0.4",
