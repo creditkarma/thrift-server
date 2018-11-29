@@ -172,7 +172,7 @@ describe('TcpConnection', () => {
                             thrift.MessageType.CALL,
                             20,
                         )
-                        const args: Calculator.AddWithContextArgs = new Calculator.AddWithContextArgs(
+                        const args: Calculator.AddWithContext__Args = new Calculator.AddWithContext__Args(
                             { num1: 20, num2: 60 },
                         )
                         args.write(output)
@@ -265,7 +265,7 @@ describe('TcpConnection', () => {
                                 thrift.MessageType.CALL,
                                 1,
                             )
-                            const result = new Calculator.AddResult({
+                            const result = new Calculator.Add__Result({
                                 success: 89,
                             })
                             result.write(output)
@@ -326,10 +326,10 @@ describe('TcpConnection', () => {
                                 thrift.MessageType.CALL,
                                 1,
                             )
-                            const result: Calculator.IAddResult = {
+                            const result: Calculator.IAdd__Result = {
                                 success: 102,
                             }
-                            Calculator.AddResultCodec.encode(result, output)
+                            Calculator.Add__ResultCodec.encode(result, output)
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()
 
@@ -440,7 +440,7 @@ describe('TcpConnection', () => {
                                     thrift.MessageType.CALL,
                                     1,
                                 )
-                                const result = new Calculator.AddResult({
+                                const result = new Calculator.Add__Result({
                                     success: 61,
                                 })
                                 result.write(output)

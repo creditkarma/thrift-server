@@ -31,8 +31,8 @@ describe('Plugins', () => {
             const writer: TTransport = new BufferedTransport()
             const output: TProtocol = new BinaryProtocol(writer)
             output.writeMessageBegin('ping', MessageType.CALL, 1)
-            const args: Calculator.IPingArgs = {}
-            Calculator.PingArgsCodec.encode(args, output)
+            const args: Calculator.IPing__Args = {}
+            Calculator.Ping__ArgsCodec.encode(args, output)
             output.writeMessageEnd()
             const data: Buffer = writer.flush()
             const totalLength: number =

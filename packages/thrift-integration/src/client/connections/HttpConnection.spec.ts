@@ -537,7 +537,7 @@ describe('HttpConnection', () => {
                                 thrift.MessageType.CALL,
                                 1,
                             )
-                            const result = new Calculator.AddResult({
+                            const result = new Calculator.Add__Result({
                                 success: 61,
                             })
                             result.write(output)
