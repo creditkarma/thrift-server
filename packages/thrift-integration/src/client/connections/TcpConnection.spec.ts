@@ -150,7 +150,7 @@ describe('TcpConnection', () => {
                     const writer: thrift.TTransport = new thrift.BufferedTransport()
                     const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                     output.writeMessageBegin('addWithContext', thrift.MessageType.CALL, 20)
-                    const args: Calculator.AddWithContextArgs = new Calculator.AddWithContextArgs({ num1: 20, num2: 60 })
+                    const args: Calculator.AddWithContext__Args = new Calculator.AddWithContext__Args({ num1: 20, num2: 60 })
                     args.write(output)
                     output.writeMessageEnd()
                     return next(writer.flush())
@@ -228,7 +228,7 @@ describe('TcpConnection', () => {
                         const writer: thrift.TTransport = new thrift.BufferedTransport()
                         const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                         output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result = new Calculator.AddResult({ success: 89 })
+                        const result = new Calculator.Add__Result({ success: 89 })
                         result.write(output)
                         output.writeMessageEnd()
                         const data: Buffer = writer.flush()
@@ -274,8 +274,8 @@ describe('TcpConnection', () => {
                         const writer: thrift.TTransport = new thrift.BufferedTransport()
                         const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                         output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result: Calculator.IAddResult = { success: 102 }
-                        Calculator.AddResultCodec.encode(result, output)
+                        const result: Calculator.IAdd__Result = { success: 102 }
+                        Calculator.Add__ResultCodec.encode(result, output)
                         output.writeMessageEnd()
                         const data: Buffer = writer.flush()
 
@@ -363,7 +363,7 @@ describe('TcpConnection', () => {
                             const writer: thrift.TTransport = new thrift.BufferedTransport()
                             const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                             output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                            const result = new Calculator.AddResult({ success: 61 })
+                            const result = new Calculator.Add__Result({ success: 61 })
                             result.write(output)
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()

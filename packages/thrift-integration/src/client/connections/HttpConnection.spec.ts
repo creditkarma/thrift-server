@@ -470,7 +470,7 @@ describe('HttpConnection', () => {
                         const writer: thrift.TTransport = new thrift.BufferedTransport()
                         const output: thrift.TProtocol = new thrift.BinaryProtocol(writer)
                         output.writeMessageBegin('add', thrift.MessageType.CALL, 1)
-                        const result = new Calculator.AddResult({ success: 61 })
+                        const result = new Calculator.Add__Result({ success: 61 })
                         result.write(output)
                         output.writeMessageEnd()
                         const data: Buffer = writer.flush()
