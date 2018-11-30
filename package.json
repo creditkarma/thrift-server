@@ -19,9 +19,9 @@
     "release:premajor": "lerna version --cd-version premajor --no-push --skip-npm --yes --force-publish=*",
     "release:prerelease": "lerna version --cd-version prerelease --no-push --skip-npm --yes --force-publish=*",
     "release:push": "git push --follow-tags",
-    "release:publish": "lerna exec --ignore '@creditkarma/thrift-{integration,server-example}' 'npm publish --access public'",
-    "release:publish-fix": "lerna exec --ignore '@creditkarma/thrift-{integration,server-example}' 'npm publish --tag fix --access public'",
-    "release:publish-next": "lerna exec --ignore '@creditkarma/thrift-{integration,server-example}' 'npm publish --tag next --access public'"
+    "release:publish": "lerna exec --ignore '@creditkarma/thrift-{integration,server-ecosystem}' 'npm publish --access public'",
+    "release:publish-fix": "lerna exec --ignore '@creditkarma/thrift-{integration,server-ecosystem}' 'npm publish --tag fix --access public'",
+    "release:publish-next": "lerna exec --ignore '@creditkarma/thrift-{integration,server-ecosystem}' 'npm publish --tag next --access public'"
   },
   "keywords": [
     "thrift",
