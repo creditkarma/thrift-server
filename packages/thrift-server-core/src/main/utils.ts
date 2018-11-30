@@ -7,6 +7,7 @@ import {
     JSONProtocol,
     TProtocol,
 } from './protocols'
+
 import { BufferedTransport, TTransport } from './transports'
 
 import {
@@ -32,7 +33,7 @@ export function readThriftMetadata(
         return input.readMessageBegin()
     } catch (err) {
         logger(
-            ['error', 'thrift-server-core'],
+            ['warn', 'thrift-server-core'],
             `Unable to read Thrift message. ${err.message}`,
         )
         throw err
@@ -55,7 +56,7 @@ export function readThriftMethod(
         return fieldName
     } catch (err) {
         logger(
-            ['error', 'thrift-server-core'],
+            ['warn', 'thrift-server-core'],
             `Unable to read Thrift method name. ${err.message}`,
         )
         return ''
@@ -78,7 +79,7 @@ export function readRequestId(
         return requestId
     } catch (err) {
         logger(
-            ['error', 'thrift-server-core'],
+            ['warn', 'thrift-server-core'],
             `Unable to read Thrift requestId. ${err.message}`,
         )
         return 0
