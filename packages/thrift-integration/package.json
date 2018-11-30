@@ -1,6 +1,7 @@
 {
     "name": "@creditkarma/thrift-integration",
     "version": "0.11.0-alpha.0",
+    "description": "Integration tests for thrift-server packages",
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",

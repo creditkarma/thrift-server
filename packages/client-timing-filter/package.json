@@ -1,7 +1,7 @@
 {
     "name": "@creditkarma/client-timing-filter",
     "version": "0.11.0-alpha.0",
-    "description": "Express server middleware for the Apache Thrift protocol",
+    "description": "Timing filter for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
     "files": [
@@ -12,8 +12,7 @@
         "clean": "rimraf ./dist ./src/tests/generated",
         "lint": "tslint --fix './src/**/*.ts'",
         "format": "prettier --write 'src/**/*.ts'",
-        "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
-        "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
+        "prebuild": "npm run clean && npm run lint && npm run format",
         "build": "tsc",
         "test": "npm run test:only",
         "test:only": "echo 'No tests for client-timing-filter'; exit 0;"

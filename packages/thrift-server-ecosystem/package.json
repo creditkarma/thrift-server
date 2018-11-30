@@ -1,6 +1,7 @@
 {
     "name": "@creditkarma/thrift-server-ecosystem",
     "version": "0.11.0-alpha.0",
+    "description": "Example services built on thrift-server",
     "scripts": {
         "clean": "npm run clean-dist && npm run clean-gen",
         "clean-dist": "rimraf ./dist",

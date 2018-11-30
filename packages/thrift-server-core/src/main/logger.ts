@@ -2,7 +2,6 @@ import { LogFunction } from './types'
 
 export const makeLogger = (name: string): LogFunction => {
     return (tags: Array<string>, data?: string | object): void => {
-        console.log('DEBUG: ', process.env.DEBUG)
         if (tags.indexOf('error') > -1) {
             if (data !== undefined) {
                 console.error(`[${tags.join()}] `, JSON.stringify(data))

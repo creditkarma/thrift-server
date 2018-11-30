@@ -1,7 +1,7 @@
 {
     "name": "@creditkarma/zipkin-tracing-express",
     "version": "0.11.0-alpha.0",
-    "description": "Express server middleware for the Apache Thrift protocol",
+    "description": "Zipkin tracing for thrift-server-express",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
     "files": [
