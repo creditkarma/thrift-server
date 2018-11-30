@@ -12,10 +12,11 @@
         "build": "tsc",
         "pretest": "npm run build",
         "test": "npm run test:only",
-        "test:only": "lab --timeout 60000 --verbose -l -S -P spec dist"
+        "test:only": "DEBUG=true lab --timeout 60000 --verbose -l -S -P spec dist"
     },
     "devDependencies": {
         "@creditkarma/dynamic-config": "^0.9.2",
+        "@creditkarma/client-timing-filter": "^0.11.0-alpha.0",
         "@creditkarma/thrift-client": "^0.11.0-alpha.0",
         "@creditkarma/thrift-context-filter": "^0.11.0-alpha.0",
         "@creditkarma/thrift-server-core": "^0.11.0-alpha.0",

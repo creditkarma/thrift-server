@@ -8,6 +8,8 @@ import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
 import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
+import { ClientTimingFilter } from '@creditkarma/client-timing-filter'
+
 import { IMappedStruct, ISharedStruct, ISharedUnion } from './generated/shared'
 
 import {
@@ -44,8 +46,9 @@ export function createServer(sampleRate: number = 0): express.Application {
                                   httpInterval: 0,
                               },
                           }),
+                          ClientTimingFilter(),
                       ]
-                    : [],
+                    : [ClientTimingFilter()],
         },
     )
 

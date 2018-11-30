@@ -8,6 +8,8 @@ import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
 import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
+import { ClientTimingFilter } from '@creditkarma/client-timing-filter'
+
 import * as Hapi from 'hapi'
 
 import { IMappedStruct, ISharedStruct, ISharedUnion } from './generated/shared'
@@ -50,8 +52,9 @@ export async function createServer(
                                   httpInterval: 0,
                               },
                           }),
+                          ClientTimingFilter(),
                       ]
-                    : [],
+                    : [ClientTimingFilter()],
         },
     )
 
@@ -227,8 +230,9 @@ export async function createServer(
                               httpInterval: 0,
                           },
                       }),
+                      ClientTimingFilter(),
                   ]
-                : [],
+                : [ClientTimingFilter()],
     })
 
     server.route({

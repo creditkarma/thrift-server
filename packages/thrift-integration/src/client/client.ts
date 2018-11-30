@@ -4,6 +4,8 @@ import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
 import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
 
+import { ClientTimingFilter } from '@creditkarma/client-timing-filter'
+
 import * as express from 'express'
 import * as net from 'net'
 
@@ -62,8 +64,9 @@ export function createClientServer(
                                   httpInterval: 0,
                               },
                           }),
+                          ClientTimingFilter(),
                       ]
-                    : [],
+                    : [ClientTimingFilter()],
         },
     )
 
