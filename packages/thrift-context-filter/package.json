@@ -16,7 +16,8 @@
         "codegen": "thrift-typescript --target thrift-server --rootDir ./src/tests --sourceDir ./thrift --outDir ./generated",
         "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
         "build": "tsc",
-        "test": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
+        "test": "npm run test:only",
+        "test:only": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
     },
     "dependencies": {
 

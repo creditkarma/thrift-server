@@ -19,7 +19,8 @@
         "format": "prettier --write 'src/**/*.ts'",
         "prebuild": "npm run clean && npm run lint && npm run format",
         "build": "tsc",
-        "test": "echo 'No tests for zipkin-client-filter'; exit 0;"
+        "test": "npm run test:only",
+        "test:only": "echo 'No tests for zipkin-client-filter'; exit 0;"
     },
     "dependencies": {
         "@types/request": "^2.48.1",

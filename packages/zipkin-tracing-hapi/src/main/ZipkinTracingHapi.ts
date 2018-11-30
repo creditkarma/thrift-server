@@ -1,11 +1,4 @@
-import {
-    deepMerge,
-    formatUrl,
-    getProtocol,
-    getTransport,
-    IRequestHeaders,
-    readThriftMethod,
-} from '@creditkarma/thrift-server-core'
+import * as Core from '@creditkarma/thrift-server-core'
 
 import { ThriftHapiPlugin } from '@creditkarma/thrift-server-hapi'
 
@@ -68,45 +61,50 @@ export function ZipkinTracingHapi({
                 port,
             })
 
-            server.ext('onPreHandler', (request, reply) => {
-                const requestMethod: string = readThriftMethod(
-                    request.payload as Buffer,
-                    getTransport(transport),
-                    getProtocol(protocol),
-                )
+            server.ext(
+                'onPreHandler',
+                (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
+                    const requestMethod: string = Core.readThriftMethod(
+                        request.payload as Buffer,
+                        Core.getTransport(transport),
+                        Core.getProtocol(protocol),
+                    )
 
-                const normalHeaders: IRequestHeaders = normalizeHeaders(
-                    request.headers,
-                )
+                    const normalHeaders: Core.IRequestHeaders = normalizeHeaders(
+                        request.headers,
+                    )
 
-                return tracer.scoped(() => {
-                    const traceId: TraceId = instrumentation.recordRequest(
-                        requestMethod || request.method,
-                        formatUrl(url.format(request.url)),
-                        (header: string): option.IOption<any> => {
-                            const val = normalHeaders[header.toLowerCase()]
-                            if (val !== null && val !== undefined) {
-                                return new option.Some(val)
-                            } else {
-                                return option.None
+                    return tracer.scoped(() => {
+                        const traceId: TraceId = instrumentation.recordRequest(
+                            requestMethod || request.method,
+                            Core.formatUrl(url.format(request.url)),
+                            (header: string): option.IOption<any> => {
+                                const val = normalHeaders[header.toLowerCase()]
+                                if (val !== null && val !== undefined) {
+                                    return new option.Some(val)
+                                } else {
+                                    return option.None
+                                }
+                            },
+                        )
+
+                        const traceHeaders: Core.IRequestHeaders = headersForTraceId(
+                            traceId,
+                        )
+
+                        // Update headers on request object
+                        for (const key in traceHeaders) {
+                            if (traceHeaders.hasOwnProperty(key)) {
+                                request.headers[key] = traceHeaders[key]
                             }
-                        },
-                    )
+                        }
 
-                    const traceHeaders: IRequestHeaders = headersForTraceId(
-                        traceId,
-                    )
+                        request.plugins.zipkin = { traceId }
 
-                    const updatedHeaders: IRequestHeaders = deepMerge(
-                        normalHeaders,
-                        traceHeaders,
-                    )
-                    ;(request as any).headers = updatedHeaders
-                    request.plugins.zipkin = { traceId }
-
-                    return reply.continue
-                })
-            })
+                        return reply.continue
+                    })
+                },
+            )
 
             server.ext(
                 'onPreResponse',

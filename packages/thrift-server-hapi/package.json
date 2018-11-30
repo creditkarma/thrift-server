@@ -23,7 +23,8 @@
     "prebuild": "npm run clean",
     "build": "npm run lint && npm run format && tsc",
     "watch": "tsc --watch",
-    "test": "echo 'No tests for thrift-server-hapi'; exit 0;"
+    "test": "npm run test:only",
+    "test:only": "echo 'No tests for thrift-server-hapi'; exit 0;"
   },
   "author": "Credit Karma",
   "license": "Apache-2.0",

@@ -21,7 +21,7 @@
     "build": "npm run lint && npm run format && tsc",
     "watch": "tsc --watch",
     "pretest": "npm run build",
-    "test": "npm run test:only --",
+    "test": "npm run test:only",
     "test:watch": "watch 'npm run test:only' ./dist",
     "test:only": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
   },

@@ -9,7 +9,7 @@
     "updated": "lerna updated",
     "postinstall": "lerna bootstrap --no-ci",
     "pretest": "npm run build",
-    "test": "lerna exec -- npm run test",
+    "test": "lerna exec -- npm run test:only",
     "release:default": "lerna version --conventional-commits --no-push --skip-npm --yes --force-publish=* && npm run release:push",
     "release:patch": "lerna version --cd-version patch --no-push --skip-npm --yes --force-publish=* && npm run release:push",
     "release:minor": "lerna version --cd-version minor --no-push --skip-npm --yes --force-publish=* && npm run release:push",
