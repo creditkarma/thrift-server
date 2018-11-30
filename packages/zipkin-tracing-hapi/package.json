@@ -1,14 +1,13 @@
 {
     "name": "@creditkarma/zipkin-tracing-hapi",
-    "version": "0.10.4",
+    "version": "0.11.0-alpha.0",
     "description": "Express server middleware for the Apache Thrift protocol",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
     "files": [
         "dist/main"
     ],
-    "keywords": [
-    ],
+    "keywords": [],
     "scripts": {
         "clean": "rimraf ./dist",
         "lint": "tslint --fix './src/**/*.ts'",
@@ -29,9 +28,9 @@
         "hapi": ">=17.0.0 <18.0.0"
     },
     "devDependencies": {
-        "@creditkarma/thrift-server-core": "^0.10.4",
-        "@creditkarma/thrift-server-hapi": "^0.10.4",
-        "@creditkarma/thrift-zipkin-core": "^0.10.4",
+        "@creditkarma/thrift-server-core": "^0.11.0-alpha.0",
+        "@creditkarma/thrift-server-hapi": "^0.11.0-alpha.0",
+        "@creditkarma/thrift-zipkin-core": "^0.11.0-alpha.0",
         "@types/hapi": "^17.6.4",
         "@types/node": "^8.10.38",
         "lab": "^18.0.0",
