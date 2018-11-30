@@ -28,9 +28,9 @@
         "zipkin": "^0.14.3"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.10.x",
-        "@creditkarma/thrift-server-core": "0.10.x",
-        "@creditkarma/thrift-zipkin-core": "0.10.x"
+        "@creditkarma/thrift-client": "0.11.x",
+        "@creditkarma/thrift-server-core": "0.11.x",
+        "@creditkarma/thrift-zipkin-core": "0.11.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.11.0-alpha.0",

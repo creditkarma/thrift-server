@@ -19,8 +19,8 @@
         "test:only": "lab --timeout 15000 --verbose -l -S -P spec dist/tests/unit"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.10.x",
-        "@creditkarma/thrift-server-core": "0.10.x"
+        "@creditkarma/thrift-client": "0.11.x",
+        "@creditkarma/thrift-server-core": "0.11.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.11.0-alpha.0",
