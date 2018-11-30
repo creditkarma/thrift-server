@@ -46,23 +46,6 @@ jobs:
           name: Publish to NPM
           command: npm run release:publish
 
-  publish_fix:
-    <<: *defaults
-    steps:
-      - checkout
-      - run:
-          name: Create .npmrc
-          command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
-      - run:
-          name: Install NPM Dependencies
-          command: npm install
-      - run:
-          name: Build Publish Assets
-          command: npm run build
-      - run:
-          name: Publish to NPM
-          command: npm run release:publish-fix
-
   publish_next:
     <<: *defaults
     steps:
@@ -101,16 +84,6 @@ workflows:
           filters:
             tags:
               only: /^(v){1}(0){1}(\.10){1}(\.[0-9]+){1}$/
-            branches:
-              ignore: /.*/
-
-      - publish_fix:
-          requires:
-            - test_node_8
-            - test_node_10
-          filters:
-            tags:
-              only: /^(v){1}(0){1}(\.[0-9]){1}(\.[0-9]+){1}$/
             branches:
               ignore: /.*/
 
