@@ -1,5 +1,4 @@
 import {
-    deepMerge,
     getProtocol,
     getTransport,
     IRequestHeaders,
@@ -31,6 +30,7 @@ function formatRequestUrl(req: express.Request): string {
 export function ZipkinTracingExpress({
     localServiceName,
     port = 0,
+    isThrift = true,
     transport = 'buffered',
     protocol = 'binary',
     tracerConfig = {},
@@ -44,18 +44,20 @@ export function ZipkinTracingExpress({
         next: express.NextFunction,
     ): void => {
         tracer.scoped(() => {
-            const requestMethod: string = readThriftMethod(
-                request.body,
-                getTransport(transport),
-                getProtocol(protocol),
-            )
+            const requestMethod: string =
+                isThrift === true
+                    ? readThriftMethod(
+                          request.body,
+                          getTransport(transport),
+                          getProtocol(protocol),
+                      )
+                    : request.method
+
             const normalHeaders: IRequestHeaders = normalizeHeaders(
                 request.headers,
             )
 
-            function readHeader(
-                header: string,
-            ): option.IOption<string | Array<string>> {
+            function readHeader<T>(header: string): option.IOption<T> {
                 const val = normalHeaders[header.toLocaleLowerCase()]
                 if (val !== null && val !== undefined) {
                     return new option.Some(val)
@@ -65,19 +67,19 @@ export function ZipkinTracingExpress({
             }
 
             const traceId: TraceId = instrumentation.recordRequest(
-                requestMethod || request.method,
+                requestMethod,
                 formatRequestUrl(request),
-                readHeader as any,
+                readHeader,
             )
 
             const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
 
-            const updatedHeaders: IRequestHeaders = deepMerge(
-                normalHeaders,
-                traceHeaders,
-            )
-
-            request.headers = updatedHeaders
+            // Update headers on request object
+            for (const key in traceHeaders) {
+                if (traceHeaders.hasOwnProperty(key)) {
+                    request.headers[key] = traceHeaders[key]
+                }
+            }
 
             response.on('finish', () => {
                 tracer.scoped(() => {

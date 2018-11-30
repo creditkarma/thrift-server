@@ -46,6 +46,7 @@ function readStatusCode({ response }: Hapi.Request): number {
 
 export function ZipkinTracingHapi({
     localServiceName,
+    isThrift = true,
     port = 0,
     transport = 'buffered',
     protocol = 'binary',
@@ -64,11 +65,14 @@ export function ZipkinTracingHapi({
             server.ext(
                 'onPreHandler',
                 (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
-                    const requestMethod: string = Core.readThriftMethod(
-                        request.payload as Buffer,
-                        Core.getTransport(transport),
-                        Core.getProtocol(protocol),
-                    )
+                    const requestMethod: string =
+                        isThrift === true
+                            ? Core.readThriftMethod(
+                                  request.payload as Buffer,
+                                  Core.getTransport(transport),
+                                  Core.getProtocol(protocol),
+                              )
+                            : request.method
 
                     const normalHeaders: Core.IRequestHeaders = normalizeHeaders(
                         request.headers,
@@ -76,7 +80,7 @@ export function ZipkinTracingHapi({
 
                     return tracer.scoped(() => {
                         const traceId: TraceId = instrumentation.recordRequest(
-                            requestMethod || request.method,
+                            requestMethod,
                             Core.formatUrl(url.format(request.url)),
                             (header: string): option.IOption<any> => {
                                 const val = normalHeaders[header.toLowerCase()]

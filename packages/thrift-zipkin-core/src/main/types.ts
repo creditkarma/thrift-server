@@ -12,6 +12,7 @@ export type ZipkinVersion = 'v1' | 'v2'
 export interface IZipkinOptions {
     localServiceName: string
     port?: number
+    isThrift?: boolean
     transport?: TransportType
     protocol?: ProtocolType
     tracerConfig?: IZipkinTracerConfig
