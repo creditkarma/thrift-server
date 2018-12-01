@@ -10,6 +10,7 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### BREAKING CHANGES
 
 * Splits plugins/middleware into their own packages ([f5f344](https://github.com/creditkarma/thrift-server/commit/f5f344))
+* Renames `thrift-server-core` to `thrift-core` to more accurately represent its usage ([]())
 
 The APIs for plugins is unchanged. It's just that the plugins are no longer included with their given client/server.
 

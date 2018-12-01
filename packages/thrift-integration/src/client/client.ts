@@ -2,9 +2,9 @@ import { ZipkinTracingExpress } from '@creditkarma/zipkin-tracing-express'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
-import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
+import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
 
-import { ClientTimingFilter } from '@creditkarma/client-timing-filter'
+import { ThriftClientTimingFilter } from '@creditkarma/thrift-client-timing-filter'
 
 import * as express from 'express'
 import * as net from 'net'
@@ -51,7 +51,7 @@ export function createClientServer(
             register:
                 sampleRate > 0
                     ? [
-                          ZipkinClientFilter({
+                          ThriftClientZipkinFilter({
                               localServiceName: 'calculator-client',
                               remoteServiceName: 'calculator-service',
                               tracerConfig: {
@@ -64,9 +64,9 @@ export function createClientServer(
                                   httpInterval: 0,
                               },
                           }),
-                          ClientTimingFilter(),
+                          ThriftClientTimingFilter(),
                       ]
-                    : [ClientTimingFilter()],
+                    : [ThriftClientTimingFilter()],
         },
     )
 

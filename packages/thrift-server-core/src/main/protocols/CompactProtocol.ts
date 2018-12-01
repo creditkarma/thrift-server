@@ -181,8 +181,8 @@ export class CompactProtocol extends TProtocol {
         // Record client seqid to find callback again
         if (this.requestId) {
             this.logger(
-                ['warn', 'thrift-server-core'],
-                `[CompactProtocol] requestId already set: ${name}`,
+                ['warn', 'CompactProtocol'],
+                `requestId already set: ${name}`,
             )
         } else {
             this.requestId = requestId
@@ -193,10 +193,7 @@ export class CompactProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(
-                ['warn', 'thrift-server-core'],
-                '[CompactProtocol] no requestId to unset',
-            )
+            this.logger(['warn', 'CompactProtocol'], 'No requestId to unset')
         }
     }
 
@@ -362,7 +359,7 @@ export class CompactProtocol extends TProtocol {
             this.transport.write(Buffer.from(data, encoding))
         } else if (
             data instanceof Buffer ||
-            Object.prototype.toString.call(data) === '[object Uint8Array]'
+            Object.prototype.toString.call(data) === '[object Buffer]'
         ) {
             // Buffers in Node.js under Browserify may extend UInt8Array instead of
             // defining a new object. We detect them here so we can write them
@@ -841,7 +838,7 @@ export class CompactProtocol extends TProtocol {
                 `Expected Int64 or Number, found: ${i64}`,
             )
         } else {
-            const buf: Buffer = new Buffer(10)
+            const buf: Buffer = Buffer.alloc(10)
             let wsize: number = 0
             let hi: number = i64.buffer.readUInt32BE(0, true)
             let lo: number = i64.buffer.readUInt32BE(4, true)

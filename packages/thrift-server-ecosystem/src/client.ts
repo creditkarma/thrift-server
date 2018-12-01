@@ -3,7 +3,7 @@ import { ZipkinTracingExpress } from '@creditkarma/zipkin-tracing-express'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
-import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
+import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
 
 import * as express from 'express'
 import * as path from 'path'
@@ -36,7 +36,7 @@ async function init(): Promise<void> {
             hostName: SERVER_CONFIG.host,
             port: SERVER_CONFIG.port,
             register: [
-                ZipkinClientFilter({
+                ThriftClientZipkinFilter({
                     localServiceName: 'calculator-client',
                     remoteServiceName: 'calculator-service',
                     tracerConfig: {

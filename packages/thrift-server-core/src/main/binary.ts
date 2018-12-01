@@ -17,39 +17,39 @@ export function readByte(byte: number): number {
     return byte > 127 ? byte - 256 : byte
 }
 
-export function readI16(buf: Buffer, offset: number = 0): number {
+export function readI16(bytes: Buffer, offset: number = 0): number {
     offset = offset || 0
-    let v = buf[offset + 1]
-    v += buf[offset] << 8
-    if (buf[offset] & 128) {
+    let v = bytes[offset + 1]
+    v += bytes[offset] << 8
+    if (bytes[offset] & 128) {
         v -= POW_16
     }
     return v
 }
 
-export function readI32(buf: Buffer, offset: number = 0): number {
-    let result: number = buf[offset + 3]
-    result += buf[offset + 2] << 8
-    result += buf[offset + 1] << 16
-    result += buf[offset] * POW_24
-    if (buf[offset] & 0x80) {
+export function readI32(bytes: Buffer, offset: number = 0): number {
+    let result: number = bytes[offset + 3]
+    result += bytes[offset + 2] << 8
+    result += bytes[offset + 1] << 16
+    result += bytes[offset] * POW_24
+    if (bytes[offset] & 0x80) {
         result -= POW_32
     }
     return result
 }
 
-export function readDouble(buf: Buffer, offset: number = 0): number {
-    const signed: number = buf[offset] & 0x80
-    let e: number = (buf[offset + 1] & 0xf0) >> 4
-    e += (buf[offset] & 0x7f) << 4
+export function readDouble(bytes: Buffer, offset: number = 0): number {
+    const signed: number = bytes[offset] & 0x80
+    let e: number = (bytes[offset + 1] & 0xf0) >> 4
+    e += (bytes[offset] & 0x7f) << 4
 
-    let m: number = buf[offset + 7]
-    m += buf[offset + 6] << 8
-    m += buf[offset + 5] << 16
-    m += buf[offset + 4] * POW_24
-    m += buf[offset + 3] * POW_32
-    m += buf[offset + 2] * POW_40
-    m += (buf[offset + 1] & 0x0f) * POW_48
+    let m: number = bytes[offset + 7]
+    m += bytes[offset + 6] << 8
+    m += bytes[offset + 5] << 16
+    m += bytes[offset + 4] * POW_24
+    m += bytes[offset + 3] * POW_32
+    m += bytes[offset + 2] * POW_40
+    m += (bytes[offset + 1] & 0x0f) * POW_48
 
     switch (e) {
         case 0:
@@ -71,34 +71,34 @@ export function readDouble(buf: Buffer, offset: number = 0): number {
     return m * Math.pow(2, e - 52)
 }
 
-export function writeI16(buf: Buffer, i16: number): Buffer {
-    buf[1] = i16 & 0xff
+export function writeI16(bytes: Buffer, i16: number): Buffer {
+    bytes[1] = i16 & 0xff
     i16 = i16 >> 8
 
-    buf[0] = i16 & 0xff
-    return buf
+    bytes[0] = i16 & 0xff
+    return bytes
 }
 
-export function writeI32(buf: Buffer, i32: number): Buffer {
-    buf[3] = i32 & 0xff
+export function writeI32(bytes: Buffer, i32: number): Buffer {
+    bytes[3] = i32 & 0xff
     i32 = i32 >> 8
 
-    buf[2] = i32 & 0xff
+    bytes[2] = i32 & 0xff
     i32 = i32 >> 8
 
-    buf[1] = i32 & 0xff
+    bytes[1] = i32 & 0xff
     i32 = i32 >> 8
 
-    buf[0] = i32 & 0xff
-    return buf
+    bytes[0] = i32 & 0xff
+    return bytes
 }
 
-export function writeDouble(buf: Buffer, dub: number): Buffer {
+export function writeDouble(bytes: Buffer, dub: number): Buffer {
     let m: number
     let e: number
     let c: number
 
-    buf[0] = dub < 0 ? 0x80 : 0x00
+    bytes[0] = dub < 0 ? 0x80 : 0x00
 
     dub = Math.abs(dub)
     if (dub !== dub) {
@@ -132,22 +132,22 @@ export function writeDouble(buf: Buffer, dub: number): Buffer {
         }
     }
 
-    buf[1] = (e << 4) & 0xf0
-    buf[0] |= (e >> 4) & 0x7f
+    bytes[1] = (e << 4) & 0xf0
+    bytes[0] |= (e >> 4) & 0x7f
 
-    buf[7] = m & 0xff
+    bytes[7] = m & 0xff
     m = Math.floor(m / POW_8)
-    buf[6] = m & 0xff
+    bytes[6] = m & 0xff
     m = Math.floor(m / POW_8)
-    buf[5] = m & 0xff
+    bytes[5] = m & 0xff
     m = Math.floor(m / POW_8)
-    buf[4] = m & 0xff
+    bytes[4] = m & 0xff
     m = m >> 8
-    buf[3] = m & 0xff
+    bytes[3] = m & 0xff
     m = m >> 8
-    buf[2] = m & 0xff
+    bytes[2] = m & 0xff
     m = m >> 8
-    buf[1] |= m & 0x0f
+    bytes[1] |= m & 0x0f
 
-    return buf
+    return bytes
 }

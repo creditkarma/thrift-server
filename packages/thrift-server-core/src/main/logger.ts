@@ -1,22 +1,29 @@
 import { LogFunction } from './types'
 
-export const makeLogger = (name: string): LogFunction => {
+export const makeLogger = (
+    name: string,
+    ...defaultTags: Array<string>
+): LogFunction => {
     return (tags: Array<string>, data?: string | object): void => {
-        if (tags.indexOf('error') > -1) {
+        const completeTags = Array.from(
+            new Set([name, ...tags, ...defaultTags]),
+        )
+
+        if (completeTags.indexOf('error') > -1) {
             if (data !== undefined) {
-                console.error(`[${tags.join()}] `, JSON.stringify(data))
+                console.error(`[${completeTags.join()}] `, JSON.stringify(data))
             } else {
                 console.error(`[${name}:error]`)
             }
-        } else if (tags.indexOf('warn') > -1) {
+        } else if (completeTags.indexOf('warn') > -1) {
             if (data !== undefined) {
-                console.warn(`[${tags.join()}] `, JSON.stringify(data))
+                console.warn(`[${completeTags.join()}] `, JSON.stringify(data))
             } else {
                 console.warn(`[${name}:warn]`)
             }
         } else {
             if (data !== undefined && process.env.DEBUG !== undefined) {
-                console.log(`[${tags.join()}] `, JSON.stringify(data))
+                console.log(`[${completeTags.join()}] `, JSON.stringify(data))
             } else if (process.env.DEBUG !== undefined) {
                 console.log(`[${name}:info]`)
             }

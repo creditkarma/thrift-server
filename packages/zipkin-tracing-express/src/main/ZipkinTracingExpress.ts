@@ -10,7 +10,7 @@ import {
     headersForTraceId,
     IZipkinOptions,
     normalizeHeaders,
-} from '@creditkarma/thrift-zipkin-core'
+} from '@creditkarma/zipkin-core'
 
 import { Instrumentation, option, TraceId, Tracer } from 'zipkin'
 

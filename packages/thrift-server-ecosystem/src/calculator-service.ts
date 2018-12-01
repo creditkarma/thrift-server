@@ -5,7 +5,7 @@ import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
-import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
+import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
 
 import * as Hapi from 'hapi'
 
@@ -24,7 +24,7 @@ async function init(): Promise<void> {
             hostName: ADD_SERVER_CONFIG.host,
             port: ADD_SERVER_CONFIG.port,
             register: [
-                ZipkinClientFilter({
+                ThriftClientZipkinFilter({
                     localServiceName: 'calculator-service',
                     remoteServiceName: 'add-service',
                     tracerConfig: {

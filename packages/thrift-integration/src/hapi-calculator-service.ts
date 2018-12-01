@@ -6,9 +6,9 @@ import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
-import { ZipkinClientFilter } from '@creditkarma/zipkin-client-filter'
+import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
 
-import { ClientTimingFilter } from '@creditkarma/client-timing-filter'
+import { ThriftClientTimingFilter } from '@creditkarma/thrift-client-timing-filter'
 
 import * as Hapi from 'hapi'
 
@@ -39,7 +39,7 @@ export async function createServer(
             register:
                 sampleRate > 0
                     ? [
-                          ZipkinClientFilter({
+                          ThriftClientZipkinFilter({
                               localServiceName: 'calculator-service',
                               remoteServiceName: 'add-service',
                               tracerConfig: {
@@ -52,9 +52,9 @@ export async function createServer(
                                   httpInterval: 0,
                               },
                           }),
-                          ClientTimingFilter(),
+                          ThriftClientTimingFilter(),
                       ]
-                    : [ClientTimingFilter()],
+                    : [ThriftClientTimingFilter()],
         },
     )
 
@@ -217,7 +217,7 @@ export async function createServer(
         register:
             sampleRate > 0
                 ? [
-                      ZipkinClientFilter({
+                      ThriftClientZipkinFilter({
                           localServiceName: 'calculator-client',
                           remoteServiceName: 'calculator-service',
                           tracerConfig: {
@@ -230,9 +230,9 @@ export async function createServer(
                               httpInterval: 0,
                           },
                       }),
-                      ClientTimingFilter(),
+                      ThriftClientTimingFilter(),
                   ]
-                : [ClientTimingFilter()],
+                : [ThriftClientTimingFilter()],
     })
 
     server.route({

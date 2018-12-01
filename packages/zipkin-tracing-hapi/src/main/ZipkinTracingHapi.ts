@@ -7,7 +7,7 @@ import {
     headersForTraceId,
     IZipkinOptions,
     normalizeHeaders,
-} from '@creditkarma/thrift-zipkin-core'
+} from '@creditkarma/zipkin-core'
 
 import * as Hapi from 'hapi'
 import * as url from 'url'

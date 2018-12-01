@@ -11,12 +11,12 @@ import {
     RequestInstance,
 } from '@creditkarma/thrift-client'
 
-import { appendThriftObject } from '@creditkarma/thrift-context-filter'
+import { appendThriftObject } from '@creditkarma/thrift-client-context-filter'
 
 import {
+    ThriftClientTTwitterFilter,
     TTwitter,
-    TTwitterClientFilter,
-} from '@creditkarma/ttwitter-client-filter'
+} from '@creditkarma/thrift-client-ttwitter-filter'
 
 import * as request from 'request'
 import { CoreOptions } from 'request'
@@ -454,7 +454,7 @@ describe('HttpConnection', () => {
         })
     })
 
-    describe('TTwitterClientFilter', () => {
+    describe('ThriftClientTTwitterFilter', () => {
         const PORT: number = 9010
         let connection: HttpConnection
         let client: Calculator.Client
@@ -469,7 +469,7 @@ describe('HttpConnection', () => {
             })
 
             connection.register(
-                TTwitterClientFilter({
+                ThriftClientTTwitterFilter({
                     localServiceName: 'http-calculator-client',
                     remoteServiceName: 'calculator-service',
                     tracerConfig: {

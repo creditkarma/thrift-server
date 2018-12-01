@@ -12,7 +12,7 @@ This middleware for [@creditkarma/thrift-server-express](https://github.com/cred
 npm install --save @types/express express
 npm install --save @creditkarma/thrift-server-core
 npm install --save @creditkarma/thrift-server-express
-npm install --save @creditkarma/thrift-zipkin-core
+npm install --save @creditkarma/zipkin-core
 npm install --save @creditkarma/zipkin-tracing-express
 ```
 

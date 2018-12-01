@@ -23,3 +23,7 @@ We welcome community contribution and help improving Thrift Server. Please keep 
 
 All PRs will be reviewed by a core team who maintains Thrift Server project.
 The core team will decide a PR should be merged to master and released as a patch, minor or major version.
+
+### Testing your PR
+
+Because there are many interdependencies within the `thrift-server` repo there is a `thrift-integration` package for testing integrations between packages to avoid circular dependencies. Once you have completed your work in a given package it may be necessary to add a test to `thrift-integration`.

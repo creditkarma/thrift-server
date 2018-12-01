@@ -12,13 +12,13 @@ import {
 
 import {
     appendThriftObject,
-    ThriftContextFilter,
-} from '@creditkarma/thrift-context-filter'
+    ThriftClientContextFilter,
+} from '@creditkarma/thrift-client-context-filter'
 
 import {
+    ThriftClientTTwitterFilter,
     TTwitter,
-    TTwitterClientFilter,
-} from '@creditkarma/ttwitter-client-filter'
+} from '@creditkarma/thrift-client-ttwitter-filter'
 
 import { createServer } from '../../apache-calculator-service'
 
@@ -243,7 +243,7 @@ describe('TcpConnection', () => {
                 })
 
                 connection.register(
-                    ThriftContextFilter<IMetadata, IMetadata>({
+                    ThriftClientContextFilter<IMetadata, IMetadata>({
                         RequestCodec: MetadataCodec,
                         ResponseCodec: MetadataCodec,
                     }),
@@ -305,7 +305,7 @@ describe('TcpConnection', () => {
                 })
 
                 connection.register(
-                    ThriftContextFilter<IMetadata, IMetadata>({
+                    ThriftClientContextFilter<IMetadata, IMetadata>({
                         RequestCodec: MetadataCodec,
                         ResponseCodec: MetadataCodec,
                     }),
@@ -355,7 +355,7 @@ describe('TcpConnection', () => {
         })
     })
 
-    describe('TTwitterClientFilter', () => {
+    describe('ThriftClientTTwitterFilter', () => {
         const PORT: number = 9010
         let connection: TcpConnection<void>
         let client: Calculator.Client<void>
@@ -369,7 +369,7 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                TTwitterClientFilter({
+                ThriftClientTTwitterFilter({
                     localServiceName: 'tcp-calculator-client',
                     remoteServiceName: 'calculator-service',
                     tracerConfig: {
