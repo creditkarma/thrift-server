@@ -8,7 +8,6 @@ import {
     IRequestResponse,
     IThriftRequest,
     NextFunction,
-    RequestInstance,
 } from '@creditkarma/thrift-client'
 
 import { appendThriftObject } from '@creditkarma/thrift-client-context-filter'
@@ -18,7 +17,6 @@ import {
     TTwitter,
 } from '@creditkarma/thrift-client-ttwitter-filter'
 
-import * as request from 'request'
 import { CoreOptions } from 'request'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../../config'
@@ -71,11 +69,7 @@ describe('HttpConnection', () => {
         let client: Calculator.Client<IRequest>
 
         before(async () => {
-            const requestClient: RequestInstance = request.defaults({})
-            connection = new HttpConnection(
-                requestClient,
-                HAPI_CALC_SERVER_CONFIG,
-            )
+            connection = new HttpConnection(HAPI_CALC_SERVER_CONFIG)
             client = new Calculator.Client(connection)
         })
 
@@ -134,15 +128,11 @@ describe('HttpConnection', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const requestClient: RequestInstance = request.defaults({})
-            const badConnection: HttpConnection = new HttpConnection(
-                requestClient,
-                {
-                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-                    port: HAPI_CALC_SERVER_CONFIG.port,
-                    path: '/return500',
-                },
-            )
+            const badConnection: HttpConnection = new HttpConnection({
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
+                path: '/return500',
+            })
             const badClient: Calculator.Client<
                 IRequest
             > = new Calculator.Client(badConnection)
@@ -158,15 +148,11 @@ describe('HttpConnection', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const requestClient: RequestInstance = request.defaults({})
-            const badConnection: HttpConnection = new HttpConnection(
-                requestClient,
-                {
-                    hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-                    port: HAPI_CALC_SERVER_CONFIG.port,
-                    path: '/return400',
-                },
-            )
+            const badConnection: HttpConnection = new HttpConnection({
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
+                path: '/return400',
+            })
             const badClient: Calculator.Client<
                 IRequest
             > = new Calculator.Client(badConnection)
@@ -182,17 +168,13 @@ describe('HttpConnection', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const requestClient: RequestInstance = request.defaults({
-                timeout: 5000,
-            })
-
-            const badConnection: HttpConnection = new HttpConnection(
-                requestClient,
-                {
-                    hostName: 'fakehost',
-                    port: 8080,
+            const badConnection: HttpConnection = new HttpConnection({
+                hostName: 'fakehost',
+                port: 8080,
+                requestOptions: {
+                    timeout: 5000,
                 },
-            )
+            })
             const badClient: Calculator.Client<
                 IRequest
             > = new Calculator.Client(badConnection)
@@ -210,9 +192,7 @@ describe('HttpConnection', () => {
 
     describe('Incoming Middleware', () => {
         it('should resolve when middleware allows', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -242,9 +222,7 @@ describe('HttpConnection', () => {
         })
 
         it('should resolve when middleware passes method filter', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -275,9 +253,7 @@ describe('HttpConnection', () => {
         })
 
         it('should reject when middleware rejects', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -316,9 +292,7 @@ describe('HttpConnection', () => {
         })
 
         it('should skip handler when middleware fails method filter', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -347,9 +321,7 @@ describe('HttpConnection', () => {
 
     describe('Outgoing Middleware', () => {
         it('should resolve when middleware adds auth token', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -373,9 +345,7 @@ describe('HttpConnection', () => {
         })
 
         it('should resolve when middleware passes method filter', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -400,9 +370,7 @@ describe('HttpConnection', () => {
         })
 
         it('should reject when middleware does not add auth token', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -420,9 +388,7 @@ describe('HttpConnection', () => {
         })
 
         it('should reject when middleware fails method filter', async () => {
-            const requestClient: RequestInstance = request.defaults({})
             const connection: HttpConnection = new HttpConnection(
-                requestClient,
                 HAPI_CALC_SERVER_CONFIG,
             )
             const client = new Calculator.Client<IRequest>(connection)
@@ -462,8 +428,7 @@ describe('HttpConnection', () => {
         let mockServer: http.Server
 
         before(async () => {
-            const requestClient: RequestInstance = request.defaults({})
-            connection = new HttpConnection(requestClient, {
+            connection = new HttpConnection({
                 hostName: 'localhost',
                 port: PORT,
             })

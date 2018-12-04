@@ -55,6 +55,7 @@ export interface IHttpConnectionOptions {
     context?:
         | IThriftRequest<request.CoreOptions>
         | ClientOptionsFunction<request.CoreOptions>
+    requestOptions?: request.CoreOptions
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {

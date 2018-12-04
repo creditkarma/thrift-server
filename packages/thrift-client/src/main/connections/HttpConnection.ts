@@ -1,11 +1,6 @@
-import {
-    deepMerge,
-    getProtocol,
-    getTransport,
-    readThriftMethod,
-    ThriftConnection,
-} from '@creditkarma/thrift-server-core'
+import * as Core from '@creditkarma/thrift-server-core'
 
+import request = require('request')
 import {
     CoreOptions,
     Request,
@@ -30,28 +25,26 @@ export type HttpProtocol = 'http' | 'https'
 
 export type RequestInstance = RequestAPI<Request, CoreOptions, RequiredUriUrl>
 
-export class HttpConnection extends ThriftConnection<CoreOptions> {
+export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
     protected readonly filters: Array<IThriftClientFilter<CoreOptions>>
-    private readonly request: RequestAPI<Request, CoreOptions, RequiredUriUrl>
+    private readonly requestOptions: CoreOptions
 
-    constructor(
-        request: RequestInstance,
-        {
-            hostName,
-            port,
-            path = '/thrift',
-            https = false,
-            transport = 'buffered',
-            protocol = 'binary',
-        }: IHttpConnectionOptions,
-    ) {
-        super(getTransport(transport), getProtocol(protocol))
-        this.request = request
+    constructor({
+        hostName,
+        port,
+        path = '/thrift',
+        https = false,
+        transport = 'buffered',
+        protocol = 'binary',
+        requestOptions = {},
+    }: IHttpConnectionOptions) {
+        super(Core.getTransport(transport), Core.getProtocol(protocol))
+        this.requestOptions = Object.freeze(requestOptions)
         this.port = port
         this.hostName = hostName
         this.path = normalizePath(path || '/thrift')
@@ -77,14 +70,16 @@ export class HttpConnection extends ThriftConnection<CoreOptions> {
         dataToSend: Buffer,
         context: CoreOptions = {},
     ): Promise<Buffer> {
-        const requestMethod: string = readThriftMethod(
+        const requestMethod: string = Core.readThriftMethod(
             dataToSend,
             this.Transport,
             this.Protocol,
         )
+
         const handlers: Array<
             RequestHandler<CoreOptions>
         > = this.handlersForMethod(requestMethod)
+
         const thriftRequest: IThriftRequest<CoreOptions> = {
             data: dataToSend,
             methodName: requestMethod,
@@ -110,7 +105,7 @@ export class HttpConnection extends ThriftConnection<CoreOptions> {
                                 data: nextData || currentRequest.data,
                                 methodName: currentRequest.methodName,
                                 uri: currentRequest.uri,
-                                context: deepMerge(
+                                context: Core.deepMerge(
                                     currentRequest.context,
                                     nextOptions || {},
                                 ),
@@ -134,19 +129,23 @@ export class HttpConnection extends ThriftConnection<CoreOptions> {
         options: CoreOptions = {},
     ): Promise<IRequestResponse> {
         // Merge user options with required options
-        const requestOptions: CoreOptions & UrlOptions = deepMerge(options, {
-            method: 'POST',
-            body: dataToWrite,
-            encoding: null, // Needs to be explicitly set to null to get Buffer in response body
-            url: this.url,
-            headers: {
-                'Content-Length': dataToWrite.length,
-                'Content-Type': 'application/octet-stream',
+        const requestOptions: CoreOptions & UrlOptions = Core.overlayObjects(
+            this.requestOptions,
+            options,
+            {
+                method: 'POST',
+                body: dataToWrite,
+                encoding: null, // Needs to be explicitly set to null to get Buffer in response body
+                url: this.url,
+                headers: {
+                    'Content-Length': dataToWrite.length,
+                    'Content-Type': 'application/octet-stream',
+                },
             },
-        })
+        )
 
         return new Promise((resolve, reject) => {
-            this.request(
+            request(
                 requestOptions,
                 (err: any, response: RequestResponse, body: Buffer) => {
                     if (err !== null) {
