@@ -11,21 +11,30 @@ export const makeLogger = (
 
         if (completeTags.indexOf('error') > -1) {
             if (data !== undefined) {
-                console.error(`[${completeTags.join()}] `, JSON.stringify(data))
+                console.error(
+                    `[${completeTags.join()}] `,
+                    `${JSON.stringify(data)} ${Date.now()}`,
+                )
             } else {
-                console.error(`[${name}:error]`)
+                console.error(`[${completeTags.join()}] `, Date.now())
             }
         } else if (completeTags.indexOf('warn') > -1) {
             if (data !== undefined) {
-                console.warn(`[${completeTags.join()}] `, JSON.stringify(data))
+                console.warn(
+                    `[${completeTags.join()}] `,
+                    `${JSON.stringify(data)} ${Date.now()}`,
+                )
             } else {
-                console.warn(`[${name}:warn]`)
+                console.warn(`[${completeTags.join()}] `, Date.now())
             }
         } else {
             if (data !== undefined && process.env.DEBUG !== undefined) {
-                console.log(`[${completeTags.join()}] `, JSON.stringify(data))
+                console.log(
+                    `[${completeTags.join()}] `,
+                    `${JSON.stringify(data)} ${Date.now()}`,
+                )
             } else if (process.env.DEBUG !== undefined) {
-                console.log(`[${name}:info]`)
+                console.log(`[${completeTags.join()}] `, Date.now())
             }
         }
     }
