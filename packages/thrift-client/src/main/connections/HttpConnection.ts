@@ -2,7 +2,6 @@ import * as Core from '@creditkarma/thrift-server-core'
 
 import request = require('request')
 import {
-    CoreOptions,
     Request,
     RequestAPI,
     RequestResponse,
@@ -17,22 +16,27 @@ import {
     IThriftClientFilterConfig,
     IThriftRequest,
     RequestHandler,
+    RequestOptions,
 } from '../types'
 
 import { filterByMethod, normalizePath } from './utils'
 
 export type HttpProtocol = 'http' | 'https'
 
-export type RequestInstance = RequestAPI<Request, CoreOptions, RequiredUriUrl>
+export type RequestInstance = RequestAPI<
+    Request,
+    RequestOptions,
+    RequiredUriUrl
+>
 
-export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
+export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
-    protected readonly filters: Array<IThriftClientFilter<CoreOptions>>
-    private readonly requestOptions: CoreOptions
+    protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
+    private readonly requestOptions: RequestOptions
 
     constructor({
         hostName,
@@ -56,9 +60,9 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
     }
 
     public register(
-        ...filters: Array<IThriftClientFilterConfig<CoreOptions>>
+        ...filters: Array<IThriftClientFilterConfig<RequestOptions>>
     ): void {
-        filters.forEach((next: IThriftClientFilterConfig<CoreOptions>) => {
+        filters.forEach((next: IThriftClientFilterConfig<RequestOptions>) => {
             this.filters.push({
                 methods: next.methods || [],
                 handler: next.handler,
@@ -68,7 +72,7 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
 
     public send(
         dataToSend: Buffer,
-        context: CoreOptions = {},
+        context: RequestOptions = {},
     ): Promise<Buffer> {
         const requestMethod: string = Core.readThriftMethod(
             dataToSend,
@@ -77,10 +81,10 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
         )
 
         const handlers: Array<
-            RequestHandler<CoreOptions>
+            RequestHandler<RequestOptions>
         > = this.handlersForMethod(requestMethod)
 
-        const thriftRequest: IThriftRequest<CoreOptions> = {
+        const thriftRequest: IThriftRequest<RequestOptions> = {
             data: dataToSend,
             methodName: requestMethod,
             uri: this.url,
@@ -88,8 +92,8 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
         }
 
         const applyHandlers = (
-            currentRequest: IThriftRequest<CoreOptions>,
-            [head, ...tail]: Array<RequestHandler<CoreOptions>>,
+            currentRequest: IThriftRequest<RequestOptions>,
+            [head, ...tail]: Array<RequestHandler<RequestOptions>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
                 return this.write(currentRequest.data, currentRequest.context)
@@ -98,7 +102,7 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
                     thriftRequest,
                     (
                         nextData?: Buffer,
-                        nextOptions?: CoreOptions,
+                        nextOptions?: RequestOptions,
                     ): Promise<IRequestResponse> => {
                         return applyHandlers(
                             {
@@ -126,10 +130,10 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
 
     public write(
         dataToWrite: Buffer,
-        options: CoreOptions = {},
+        options: RequestOptions = {},
     ): Promise<IRequestResponse> {
         // Merge user options with required options
-        const requestOptions: CoreOptions & UrlOptions = Core.overlayObjects(
+        const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
             this.requestOptions,
             options,
             {
@@ -169,9 +173,11 @@ export class HttpConnection extends Core.ThriftConnection<CoreOptions> {
 
     private handlersForMethod(
         name: string,
-    ): Array<RequestHandler<CoreOptions>> {
+    ): Array<RequestHandler<RequestOptions>> {
         return this.filters
-            .filter(filterByMethod<CoreOptions>(name))
-            .map((filter: IThriftClientFilter<CoreOptions>) => filter.handler)
+            .filter(filterByMethod<RequestOptions>(name))
+            .map(
+                (filter: IThriftClientFilter<RequestOptions>) => filter.handler,
+            )
     }
 }

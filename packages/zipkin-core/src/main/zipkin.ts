@@ -65,9 +65,13 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
         if (logger !== undefined) {
             httpLogger.on('error', (err: Error) => {
                 logger(
-                    ['error'],
-                    `An error occurred logging trace: ${err.message}`,
+                    ['error', 'zipkin'],
+                    `An error occurred sending trace: ${err.message}`,
                 )
+            })
+
+            httpLogger.on('success', () => {
+                logger(['info', 'zipkin'], `Zipkin trace sent successfully`)
             })
         }
 

@@ -10,6 +10,8 @@ import * as GenericPool from 'generic-pool'
 import * as request from 'request'
 import * as tls from 'tls'
 
+export type RequestOptions = request.CoreOptions
+
 export interface IRequestResponse {
     statusCode: number
     headers: IRequestHeaders
@@ -25,6 +27,7 @@ export interface IThriftRequest<Context> {
     methodName: string
     uri: string
     context: Context
+    logger?: LogFunction
 }
 
 export type ClientOptionsFunction<Options> = () => IThriftRequest<Options>
@@ -53,15 +56,15 @@ export interface IHttpConnectionOptions {
     transport?: TransportType
     protocol?: ProtocolType
     context?:
-        | IThriftRequest<request.CoreOptions>
-        | ClientOptionsFunction<request.CoreOptions>
-    requestOptions?: request.CoreOptions
+        | IThriftRequest<RequestOptions>
+        | ClientOptionsFunction<RequestOptions>
+    requestOptions?: RequestOptions
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
     serviceName?: string
-    register?: Array<IThriftClientFilterConfig<request.CoreOptions>>
-    requestOptions?: request.CoreOptions
+    register?: Array<IThriftClientFilterConfig<RequestOptions>>
+    requestOptions?: RequestOptions
 }
 
 export type NextFunction<Options> = (
