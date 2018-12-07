@@ -24,22 +24,30 @@ import {
 export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Request>>(
     pluginOptions: IHapiPluginOptions<TProcessor>,
 ): ThriftHapiPlugin {
+    const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
+    const Transport: ITransportConstructor = getTransport(options.transport)
+    const Protocol: IProtocolConstructor = getProtocol(options.protocol)
+    const thriftPath = pluginOptions.path || '/thrift'
+    const handler: any = options.handler
+    const serviceName = handler._serviceName || '<nope>'
+
     const hapiThriftPlugin: ThriftHapiPlugin = {
         register(server: Hapi.Server, nothing: never, next) {
+            // This is a compatibility filter with Finagle that creates an endpoint for each Thrift method.
+            // We do one endpoint per service at this point. It probably makes sense to move to an endpoint
+            // per method in a later release.
+            server.ext('onRequest', (request, reply) => {
+                const path: string = request.url.path || ''
+                if (path.toLocaleLowerCase().indexOf(serviceName.toLocaleLowerCase()) > -1) {
+                    request.setUrl(thriftPath)
+                }
+                return reply.continue()
+            })
+
             server.route({
                 method: 'POST',
-                path: pluginOptions.path || '/thrift',
+                path: thriftPath,
                 handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
-                    const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
-
-                    const Transport: ITransportConstructor = getTransport(
-                        options.transport,
-                    )
-
-                    const Protocol: IProtocolConstructor = getProtocol(
-                        options.protocol,
-                    )
-
                     try {
                         const method: string = readThriftMethod(
                             request.payload,
