@@ -17,12 +17,23 @@ function getTimings(startTime: [number, number]): number {
     return duration[0] * 1e3 + duration[1] * 1e-6 // In ms
 }
 
-function logTimings(
-    logger: LogFunction,
-    methodName: string,
-    duration: number,
-    status?: number | string,
-) {
+interface ITimingOptions {
+    logger: LogFunction
+    methodName: string
+    max
+}
+
+interface IStatusCount {
+    error: number
+    success: number
+}
+
+function logTimings({
+    logger,
+    methodName,
+    duration,
+    status,
+}: ITimingOptions) {
     logger(['metrics', 'RequestDuration', methodName], {
         status,
         milliseconds: duration,
@@ -32,6 +43,13 @@ function logTimings(
 export function ThriftClientTimingFilter<RequestContext>(
     logger: LogFunction = defaultLogger,
 ): IThriftClientFilterConfig<RequestContext> {
+    const maxTime: number = 0
+    let total: number = 0
+    let count: number = 0
+    const status: IStatusCount = {
+        success: 0,
+        error: 0,
+    }
     return {
         handler(
             request: IThriftRequest<RequestContext>,

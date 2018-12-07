@@ -1,14 +1,14 @@
 import * as url from 'url'
 
-import { defaultLogger } from './logger'
+import { defaultLogger } from '../logger'
 import {
     BinaryProtocol,
     CompactProtocol,
     JSONProtocol,
     TProtocol,
-} from './protocols'
+} from '../protocols'
 
-import { BufferedTransport, TTransport } from './transports'
+import { BufferedTransport, TTransport } from '../transports'
 
 import {
     IProtocolConstructor,
@@ -19,7 +19,10 @@ import {
     LogFunction,
     ProtocolType,
     TransportType,
-} from './types'
+} from '../types'
+
+export * from './appendThriftObject'
+export * from './readThriftObject'
 
 export function readThriftMetadata(
     buffer: Buffer,

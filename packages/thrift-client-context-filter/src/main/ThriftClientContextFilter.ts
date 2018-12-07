@@ -3,6 +3,8 @@ import {
     LogFunction,
     ProtocolType,
     TransportType,
+    appendThriftObject,
+    readThriftObject,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -11,10 +13,6 @@ import {
     IThriftRequest,
     NextFunction,
 } from '@creditkarma/thrift-client'
-
-import { appendThriftObject } from './appendThriftObject'
-
-import { readThriftObject } from './readThriftObject'
 
 import { defaultLogger } from './logger'
 
@@ -67,7 +65,7 @@ export function ThriftClientContextFilter<RequestContext, ResponseContext>({
                             },
                             (err: any) => {
                                 logger(
-                                    ['warn'],
+                                    ['warn', 'ThriftClientContextFilter'],
                                     `Error reading context from Thrift response: ${
                                         err.message
                                     }`,
