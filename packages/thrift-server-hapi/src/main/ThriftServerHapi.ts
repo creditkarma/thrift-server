@@ -27,9 +27,9 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
     const options: IThriftServerOptions<TProcessor> = pluginOptions.thriftOptions
     const Transport: ITransportConstructor = getTransport(options.transport)
     const Protocol: IProtocolConstructor = getProtocol(options.protocol)
-    const thriftPath = pluginOptions.path || '/thrift'
+    const thriftPath: string = pluginOptions.path || '/thrift'
     const handler: any = options.handler
-    const serviceName = handler._serviceName || '<nope>'
+    const serviceName: string = handler._serviceName || '<nope>'
 
     const hapiThriftPlugin: ThriftHapiPlugin = {
         register(server: Hapi.Server, nothing: never, next) {
