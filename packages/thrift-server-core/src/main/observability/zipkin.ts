@@ -19,7 +19,7 @@ import { IRequestHeaders } from '../types'
 
 import { ZipkinHeaders } from './constants'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 
 import {
     ErrorLogFunc,
@@ -74,7 +74,7 @@ function applyEventLoggers<T extends EventEmitter>(emitter: T, eventLoggers: IEv
                     break
                 }
                 default: {
-                    logger.warn(`Unknown Zipkin event logger for ${key}.`)
+                    logger(['warn', 'Zipkin', 'applyEventLogger'], `Unknown Zipkin event logger for ${key}.`)
                 }
             }
         }

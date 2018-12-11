@@ -37,7 +37,7 @@ import {
 
 import * as TTwitter from '../../ttwitter/com/twitter/finagle/thrift/thrift/tracing'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 
 // Exported generated Twitter types...
 export { TTwitter }
@@ -119,7 +119,7 @@ export function TTwitterClientFilter<T>({
         async handler(dataToSend: Buffer, context: T, next: NextFunction<T>): Promise<IRequestResponse> {
             if (isUpgraded) {
                 function sendUpgradedRequest(): Promise<IRequestResponse> {
-                    logger.log('TTwitter upgraded')
+                    logger(['info', 'TTwitterClientFilter'], 'TTwitter upgraded')
                     const tracer: Tracer = getTracerForService(localServiceName, { debug, endpoint, sampleRate, httpInterval, eventLoggers })
                     const instrumentation = new Instrumentation.HttpClient({ tracer, serviceName: localServiceName, remoteServiceName })
                     const requestContext: IRequestContext = readRequestContext(context, tracer)
@@ -154,7 +154,7 @@ export function TTwitterClientFilter<T>({
                                         body: result[1],
                                     }
                                 }, (err: any) => {
-                                    logger.warn(`Error reading context from Thrift response: `, err)
+                                    logger(['warn', 'TTwitterClientFilter'], `Error reading context from Thrift response: ${err.message}`)
                                     return res
                                 })
                             })
@@ -169,14 +169,14 @@ export function TTwitterClientFilter<T>({
                     return next(dataToSend, context)
 
                 } else {
-                    logger.log('Requesting TTwitter upgrade')
+                    logger(['info', 'TTwitterClientFilter'], 'Requesting TTwitter upgrade')
                     upgradeRequested = true
                     return next(upgradeRequest(), context).then((upgradeResponse: IRequestResponse) => {
                         hasUpgraded = true
                         return sendUpgradedRequest()
 
                     }, (err: any) => {
-                        logger.log('Downgrading TTwitter request: ', err)
+                        logger(['info', 'TTwitterClientFilter'], `Downgrading TTwitter request: ${err.message}`)
                         return next(dataToSend, context)
                    })
                 }

@@ -20,7 +20,7 @@ import {
     readThriftObject,
 } from './readThriftObject'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 
 export interface IThriftContextOptions<RequestContext extends StructLike, ResponseContext extends StructLike> {
     RequestContextClass: IStructConstructor<RequestContext>
@@ -65,7 +65,7 @@ export function ThriftContextPlugin<RequestContext extends StructLike, ResponseC
                             body: result[1],
                         }
                     }, (err: any) => {
-                        logger.warn(`Error reading context from Thrift response: `, err)
+                        logger(['warn', 'ThriftContextPlugin'], `Error reading context from Thrift response: ${err.message}`)
                         return res
                     })
                 })

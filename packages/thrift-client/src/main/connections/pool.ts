@@ -1,5 +1,5 @@
 import * as GenericPool from 'generic-pool'
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 import {
     Connection,
     createConnection,
@@ -19,11 +19,11 @@ export const createPool = (config: IConnectionConfig, options?: GenericPool.Opti
     const resolvedOptions = Object.assign(defaultOptions, options)
     const factory: GenericPool.Factory<Connection> = {
         create: async () => {
-            logger.log('Creating new client connection')
+            logger(['info', 'createPool'], 'Creating new client connection')
             return await createConnection(config)
         },
         destroy: async (connection) => {
-            logger.log('Destroying client connection')
+            logger(['info', 'createPool'], 'Destroying client connection')
             return connection.destroy().then(() => undefined)
         },
         validate: async (connection) => {

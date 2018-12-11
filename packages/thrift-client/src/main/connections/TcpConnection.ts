@@ -23,7 +23,7 @@ import {
     createPool,
 } from './pool'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 
 import {
     filterByMethod,
@@ -99,7 +99,7 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
     }
 
     public destory(): Promise<void> {
-        logger.warn('Destroying TCP connection')
+        logger(['warn', 'TcpConnection', 'destroy'], 'Destroying TCP connection')
         return this.pool.drain().then(() => {
             return this.pool.clear()
         }) as any as Promise<void>
@@ -115,12 +115,12 @@ export class TcpConnection<T = void> extends ThriftConnection<TcpContext<T>> {
                     body: response,
                 }
             }, (err: any) => {
-                logger.error('Error sending Thrift request: ', err)
+                logger(['error', 'TcpConnection', 'write'], `Error sending Thrift request: ${err.message}`)
                 this.pool.release(connection)
                 return Promise.reject(err)
             })
         }, (err: any) => {
-            logger.error(`Unable to acquire connection for client: `, err)
+            logger(['error', 'TcpConnection', 'write'], `Unable to acquire connection for client: ${err.message}`)
             throw new Error(`Unable to acquire connection for thrift client`)
         }) as any
     }

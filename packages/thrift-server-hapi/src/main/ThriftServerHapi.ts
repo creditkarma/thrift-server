@@ -16,6 +16,8 @@ import {
     ThriftHapiPlugin,
 } from './types'
 
+import { defaultLogger as logger } from './logger'
+
 /**
  * Create the thrift plugin for Hapi
  *
@@ -39,6 +41,7 @@ export function ThriftServerHapi<TProcessor extends IThriftProcessor<Hapi.Reques
             server.ext('onRequest', (request, reply) => {
                 const path: string = request.url.path || ''
                 if (path.toLocaleLowerCase().indexOf(serviceName.toLocaleLowerCase()) > -1) {
+                    logger(['info', 'ThriftServerHapi'], `Request path rewritten: '${path}' to '${thriftPath}'`)
                     request.setUrl(thriftPath)
                 }
                 return reply.continue()

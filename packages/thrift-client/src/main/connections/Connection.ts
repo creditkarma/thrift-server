@@ -11,7 +11,7 @@ import {
 
 import * as net from 'net'
 import * as tls from 'tls'
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 
 export interface IConnectionConfig {
     port: number
@@ -57,18 +57,18 @@ const createSocket = (config: IConnectionConfig): Promise<tls.TLSSocket | net.So
             socket.removeAllListeners()
         }
         const connectHandler = (): void => {
-            logger.log(`Connected to: ${config.hostName}:${config.port}`)
+            logger(['info', 'Connection', 'createSocket'], `Connected to: ${config.hostName}:${config.port}`)
             removeHandlers()
             resolve(socket)
         }
         const timeoutHandler = (): void => {
-            logger.error(`Timed out connecting: ${config.hostName}:${config.port}`)
+            logger(['error', 'Connection', 'createSocket'], `Timed out connecting: ${config.hostName}:${config.port}`)
             removeHandlers()
             socket.destroy()
             reject(new Error('Timed out connecting'))
         }
         const errorHandler = (): void => {
-            logger.error(`Error connecting: ${config.hostName}:${config.port}`)
+            logger(['error', 'Connection', 'createSocket'], `Error connecting: ${config.hostName}:${config.port}`)
             removeHandlers()
             socket.destroy()
             reject(new Error('Error connecting'))
@@ -128,7 +128,7 @@ export class Connection {
                 reject(new Error('Thrift connection ended'))
             }
             const errorHandler = (err: Error) => {
-                logger.error('Error sending data to thrift service: ', err)
+                logger(['info', 'Connection', 'send'], `Error sending data to thrift service: ${err.message}`)
                 removeHandlers()
                 reject(new Error('Thrift connection error'))
             }
@@ -154,7 +154,7 @@ export class Connection {
                     }
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
-                        logger.error('Error reading data from connection: ', err)
+                        logger(['info', 'Connection', 'send'], `Error reading data from connection: ${err.message}`)
                         removeHandlers()
                         reject(err)
                     }

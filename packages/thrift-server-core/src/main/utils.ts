@@ -10,7 +10,7 @@ import {
     TransportType,
 } from './types'
 
-import * as logger from './logger'
+import { defaultLogger as logger } from './logger'
 
 export function readThriftMethod(
     buffer: Buffer,
@@ -24,7 +24,7 @@ export function readThriftMethod(
 
         return metadata.fieldName
     } catch (err) {
-        logger.log(`Unable to read Thrift method name. ${err.message}`)
+        logger(['info', 'readThriftMethod'], `Unable to read Thrift method name. ${err.message}`)
         return ''
     }
 }

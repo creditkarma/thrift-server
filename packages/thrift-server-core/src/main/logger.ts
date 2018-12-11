@@ -1,23 +1,28 @@
-export const log = (msg: string, data?: any) => {
-    if (data !== undefined && process.env.DUBUG !== undefined) {
-        console.log(`[thrift-server-core:info] ${msg}`, data)
-    } else if (process.env.DUBUG !== undefined) {
-        console.log(`[thrift-server-core:info] ${msg}`)
+import { LogFunction } from './types'
+
+export const makeLogger = (name: string): LogFunction => {
+    return (tags: Array<string>, data?: string | object): void => {
+        const allTags: Array<string> = Array.from(new Set([ name, ...tags ]))
+        if (allTags.indexOf('error') > -1) {
+            if (data !== undefined) {
+                console.error(`[${allTags.join(',')}] `, data)
+            } else {
+                console.error(`[${allTags.join(',')}]`)
+            }
+        } else if (allTags.indexOf('warn') > -1) {
+            if (data !== undefined) {
+                console.warn(`[${allTags.join(',')}] `, data)
+            } else {
+                console.warn(`[${allTags.join(',')}]`)
+            }
+        } else {
+            if (data !== undefined && process.env.DEBUG !== undefined) {
+                console.log(`[${allTags.join(',')}] `, data)
+            } else if (process.env.DEBUG !== undefined) {
+                console.log(`[${allTags.join(',')}]`)
+            }
+        }
     }
 }
 
-export const warn = (msg: string, data?: any) => {
-    if (data !== undefined) {
-        console.warn(`[thrift-server-core:warn] ${msg}`, data)
-    } else {
-        console.warn(`[thrift-server-core:warn] ${msg}`)
-    }
-}
-
-export const error = (msg: string, data?: any) => {
-    if (data !== undefined) {
-        console.error(`[thrift-server-core:error] ${msg}`, data)
-    } else {
-        console.error(`[thrift-server-core:error] ${msg}`)
-    }
-}
+export const defaultLogger: LogFunction = makeLogger('thrift-server-core')

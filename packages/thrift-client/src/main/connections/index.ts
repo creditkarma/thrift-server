@@ -12,7 +12,7 @@ import {
     ThriftContext,
 } from '../types'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 import { TcpConnection } from './TcpConnection'
 
 export * from './HttpConnection'
@@ -22,7 +22,7 @@ export function createClient<TClient>(
     ServiceClient: IClientConstructor<TClient, ThriftContext<request.CoreOptions>>,
     options: ICreateHttpClientOptions<request.CoreOptions>,
 ): TClient {
-    logger.log(`[Deprecated]: Please use 'createHttpClient' instead`)
+    logger(['info', 'createClient', 'Deprecated'], `Please use 'createHttpClient' instead`)
     return createHttpClient<TClient>(ServiceClient, options)
 }
 

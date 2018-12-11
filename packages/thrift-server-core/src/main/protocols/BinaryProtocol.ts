@@ -11,7 +11,7 @@ import {
     TProtocolExceptionType,
 } from '../errors'
 
-import * as logger from '../logger'
+import { defaultLogger as logger } from '../logger'
 import { TTransport } from '../transports'
 
 import {
@@ -47,7 +47,7 @@ export class BinaryProtocol extends TProtocol {
         this.writeI32(requestId)
 
         if (this.requestId) {
-            logger.warn('RequestId already set', { name })
+            logger(['warn', 'BinaryProtocol', 'writeMessageBegin'], `RequestId already set for ${name}`)
         } else {
             this.requestId = requestId
         }
@@ -57,7 +57,7 @@ export class BinaryProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            logger.warn('No requestId to unset')
+            logger(['warn', 'BinaryProtocol', 'writeMessageEnd'], 'No requestId to unset')
         }
     }
 
@@ -150,7 +150,7 @@ export class BinaryProtocol extends TProtocol {
         if (size < 0) {
             const version = size & VERSION_MASK
             if (version !== VERSION_1) {
-                logger.error(`BAD: ${version}`)
+                logger(['error', 'BinaryProtocol', 'readMessageBegin'], `BAD: ${version}`)
                 throw new TProtocolException(
                     TProtocolExceptionType.BAD_VERSION, `Bad version in readMessageBegin: ${size}`,
                 )

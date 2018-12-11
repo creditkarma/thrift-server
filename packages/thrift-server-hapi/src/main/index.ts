@@ -9,7 +9,7 @@ import {
     ICreateHapiServerOptions,
 } from './types'
 
-import * as logger from './logger'
+import { defaultLogger as logger } from './logger'
 
 export * from './observability'
 export * from './ThriftServerHapi'
@@ -33,7 +33,7 @@ export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Requ
         }),
         (err: any) => {
             if (err) {
-                logger.error('There was an error registering thrift plugin: ', err)
+                logger(['error', 'createThriftServer'], `There was an error registering thrift plugin: ${err.message}`)
                 throw err
             }
         },
