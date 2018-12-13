@@ -2,23 +2,24 @@ import { LogFunction } from './types'
 
 export const makeLogger = (name: string): LogFunction => {
     return (tags: Array<string>, data?: string | object): void => {
-        if (tags.indexOf('error') > -1) {
+        const allTags: Array<string> = Array.from(new Set([name, ...tags]))
+        if (allTags.indexOf('error') > -1) {
             if (data !== undefined) {
-                console.error(`[${name}:error] `, data)
+                console.error(`[${allTags.join(',')}] `, data)
             } else {
-                console.error(`[${name}:error]`)
+                console.error(`[${allTags.join(',')}]`)
             }
-        } else if (tags.indexOf('warn') > -1) {
+        } else if (allTags.indexOf('warn') > -1) {
             if (data !== undefined) {
-                console.warn(`[${name}:warn] `, data)
+                console.warn(`[${allTags.join(',')}] `, data)
             } else {
-                console.warn(`[${name}:warn]`)
+                console.warn(`[${allTags.join(',')}]`)
             }
         } else {
             if (data !== undefined && process.env.DUBUG !== undefined) {
-                console.log(`[${name}:info] `, data)
+                console.log(`[${allTags.join(',')}] `, data)
             } else if (process.env.DUBUG !== undefined) {
-                console.log(`[${name}:info]`)
+                console.log(`[${allTags.join(',')}]`)
             }
         }
     }
