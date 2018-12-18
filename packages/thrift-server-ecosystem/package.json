@@ -1,0 +1,43 @@
+{
+    "name": "@creditkarma/thrift-server-ecosystem",
+    "version": "0.11.0-alpha.2",
+    "description": "Example services built on thrift-server",
+    "scripts": {
+        "clean": "npm run clean-dist && npm run clean-gen",
+        "clean-dist": "rimraf ./dist",
+        "clean-gen": "rimraf ./src/generated",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "codegen": "thrift-typescript --target thrift-server --rootDir . --sourceDir ./thrift --outDir ./src/generated",
+        "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
+        "build": "tsc",
+        "test": "npm run test:only",
+        "test:only": "echo 'No tests for thrift ecosystem'; exit 0;"
+    },
+    "dependencies": {
+        "@types/node": "^8.10.38"
+    },
+    "devDependencies": {
+        "@creditkarma/dynamic-config": "^0.9.3",
+        "@creditkarma/thrift-client": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-client-zipkin-filter": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-core": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-express": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-hapi": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-typescript": "^3.0.3",
+        "@creditkarma/zipkin-tracing-express": "^0.11.0-alpha.2",
+        "@creditkarma/zipkin-tracing-hapi": "^0.11.0-alpha.2",
+        "@types/express": "^4.16.0",
+        "@types/hapi": "^17.6.4",
+        "express": "^4.16.4",
+        "hapi": "^17.8.1",
+        "prettier": "^1.15.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.2.x"
+    },
+    "publishConfig": {
+        "access": "private"
+    }
+}

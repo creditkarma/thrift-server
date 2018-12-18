@@ -1,6 +1,7 @@
 {
     "name": "@creditkarma/thrift-integration",
-    "version": "0.10.4",
+    "version": "0.11.0-alpha.2",
+    "description": "Integration tests for thrift-server packages",
     "scripts": {
         "clean": "rimraf dist",
         "lint": "tslint --fix './src/**/*.ts'",
@@ -11,21 +12,28 @@
         "prebuild": "npm run clean && npm run lint && npm run format && npm run codegen",
         "build": "tsc",
         "pretest": "npm run build",
-        "test": "lab --timeout 60000 --verbose -l -S -P spec dist"
+        "test": "npm run test:only",
+        "test:only": "DEBUG=true lab --timeout 60000 --verbose -l -S -P spec dist"
     },
     "devDependencies": {
         "@creditkarma/dynamic-config": "^0.9.2",
-        "@creditkarma/thrift-client": "^0.10.4",
-        "@creditkarma/thrift-server-core": "^0.10.4",
-        "@creditkarma/thrift-server-express": "^0.10.4",
-        "@creditkarma/thrift-server-hapi": "^0.10.4",
-        "@creditkarma/thrift-typescript": "^3.0.1",
+        "@creditkarma/thrift-client": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-client-context-filter": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-client-timing-filter": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-client-ttwitter-filter": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-client-zipkin-filter": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-core": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-express": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-server-hapi": "^0.11.0-alpha.2",
+        "@creditkarma/thrift-typescript": "^3.0.3",
+        "@creditkarma/zipkin-core": "^0.11.0-alpha.2",
+        "@creditkarma/zipkin-tracing-express": "^0.11.0-alpha.2",
+        "@creditkarma/zipkin-tracing-hapi": "^0.11.0-alpha.2",
         "@types/body-parser": "^1.16.5",
         "@types/code": "^4.0.4",
         "@types/express": "^4.16.0",
         "@types/hapi": "^17.0.18",
-        "@types/lab": "^11.1.0",
-        "@types/node": "^8.0.31",
+        "@types/node": "^8.10.38",
         "@types/request": "^2.48.1",
         "@types/request-promise-native": "^1.0.15",
         "@types/thrift": "^0.10.7",
@@ -42,7 +50,7 @@
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-plugin-prettier": "^2.0.0",
-        "typescript": "3.1.x"
+        "typescript": "3.2.x"
     },
     "publishConfig": {
         "access": "private"

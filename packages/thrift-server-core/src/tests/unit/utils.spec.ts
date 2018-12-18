@@ -1,7 +1,24 @@
 import { expect } from 'code'
 import * as Lab from 'lab'
 
+import {
+    appendThriftObject,
+    BinaryProtocol,
+    BufferedTransport,
+    encode,
+    MessageType,
+    readThriftObject,
+    TProtocol,
+    TTransport,
+} from '../../main'
+
 import * as Utils from '../../main/utils'
+
+import { IMetadata, MetadataCodec } from '../generated/common'
+
+import { ISharedStruct, SharedStructCodec } from '../generated/shared'
+
+import { Calculator } from '../generated/calculator-service'
 
 export const lab = Lab.script()
 
@@ -11,6 +28,62 @@ const it = lab.it
 // const after = lab.after
 
 describe('Utils', () => {
+    describe('appendThriftObject', () => {
+        it('should append thrift object to head of byte array', async () => {
+            const meta: IMetadata = { traceId: 6 }
+            const writer: TTransport = new BufferedTransport()
+            const output: TProtocol = new BinaryProtocol(writer)
+            output.writeMessageBegin('ping', MessageType.CALL, 1)
+            const args: Calculator.IPing__Args = {}
+            Calculator.Ping__ArgsCodec.encode(args, output)
+            output.writeMessageEnd()
+            const data: Buffer = writer.flush()
+            const totalLength: number =
+                (await encode(meta, MetadataCodec)).length + data.length
+
+            return appendThriftObject(meta, data, MetadataCodec).then(
+                (val: Buffer) => {
+                    expect(val.length).to.equal(totalLength)
+
+                    return readThriftObject<IMetadata>(val, MetadataCodec).then(
+                        (result: [IMetadata, Buffer]) => {
+                            expect(result[1].length).to.equal(data.length)
+                        },
+                    )
+                },
+            )
+        })
+    })
+
+    describe('readThriftObject', () => {
+        it('should reject when unable to read thrift object from Buffer', async () => {
+            const meta: IMetadata = { traceId: 7 }
+            const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
+            const totalLength: number =
+                (await encode(meta, MetadataCodec)).length + data.length
+
+            return appendThriftObject(meta, data, MetadataCodec).then(
+                (val: Buffer) => {
+                    expect(val.length).to.equal(totalLength)
+
+                    return readThriftObject<ISharedStruct>(
+                        val,
+                        SharedStructCodec,
+                    ).then(
+                        (result: [ISharedStruct, Buffer]) => {
+                            throw new Error('Should reject')
+                        },
+                        (err: any) => {
+                            expect(err.message).to.equal(
+                                'Unable to read SharedStruct from input',
+                            )
+                        },
+                    )
+                },
+            )
+        })
+    })
+
     describe('deepMerge', () => {
         it('should merge two objects into new object', async () => {
             const obj1: any = {

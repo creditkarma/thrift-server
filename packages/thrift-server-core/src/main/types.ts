@@ -1,4 +1,3 @@
-import { TraceId } from 'zipkin'
 import { TProtocol } from './protocols'
 import { TTransport } from './transports'
 
@@ -10,9 +9,18 @@ export interface IRequestHeaders {
     [name: string]: any
 }
 
+export interface ITraceId {
+    readonly spanId: string
+    readonly parentId: string
+    readonly traceId: string
+    readonly sampled?: boolean
+    readonly traceIdHigh?: boolean
+}
+
 export interface IRequestContext {
-    traceId: TraceId
     headers: IRequestHeaders
+    traceId?: ITraceId
+    logger?: LogFunction
 }
 
 /**
@@ -66,14 +74,14 @@ export interface IMethodAnnotations {
 }
 
 export interface IStructLike {
-    readonly _annotations?: IThriftAnnotations
-    readonly _fieldAnnotations?: IFieldAnnotations
+    readonly _annotations: IThriftAnnotations
+    readonly _fieldAnnotations: IFieldAnnotations
     write(output: TProtocol): void
 }
 
 export abstract class StructLike implements IStructLike {
-    public readonly _annotations?: IThriftAnnotations = {}
-    public readonly _fieldAnnotations?: IFieldAnnotations = {}
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _fieldAnnotations: IFieldAnnotations = {}
     public abstract write(output: TProtocol): void
 }
 
@@ -92,9 +100,10 @@ export interface IStructCodec<LooseType, StrictType> {
     decode(input: TProtocol): StrictType
 }
 
-export interface IProtocolConstructor {
-    new (trans: TTransport, logger?: LogFunction): TProtocol
-}
+export type IProtocolConstructor = new (
+    trans: TTransport,
+    logger?: LogFunction,
+) => TProtocol
 
 export interface ITransportConstructor {
     new (buffer?: Buffer): TTransport
@@ -102,15 +111,17 @@ export interface ITransportConstructor {
 }
 
 export interface IThriftClient {
-    readonly _serviceName?: string
-    readonly _annotations?: IThriftAnnotations
-    readonly _fieldAnnotations?: IFieldAnnotations
-    readonly _methodNames?: Array<string>
+    readonly _serviceName: string
+    readonly _annotations: IThriftAnnotations
+    readonly _fieldAnnotations: IFieldAnnotations
+    readonly _methodNames: Array<string>
 }
 
 export abstract class ThriftClient<Context = any> implements IThriftClient {
-    public readonly _annotations?: IThriftAnnotations = {}
-    public readonly _fieldAnnotatons?: IFieldAnnotations = {}
+    public readonly _serviceName: string = ''
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _fieldAnnotations: IFieldAnnotations = {}
+    public readonly _methodNames: Array<string> = []
 
     protected _requestId: number
     protected transport: ITransportConstructor
@@ -129,15 +140,16 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
     }
 }
 
-export interface IClientConstructor<TClient, Context> {
-    new (connection: ThriftConnection<Context>): TClient
-}
+export type IClientConstructor<TClient, Context> = new (
+    connection: ThriftConnection<Context>,
+) => TClient
 
 export interface IThriftProcessor<Context> {
-    readonly _serviceName?: string
-    readonly _annotations?: IThriftAnnotations
-    readonly _methodAnnotations?: IMethodAnnotations
-    readonly _methodNames?: Array<string>
+    readonly _serviceName: string
+    readonly _annotations: IThriftAnnotations
+    readonly _methodAnnotations: IMethodAnnotations
+    readonly _methodNames: Array<string>
+
     process(
         input: TProtocol,
         output: TProtocol,
@@ -147,10 +159,10 @@ export interface IThriftProcessor<Context> {
 
 export abstract class ThriftProcessor<Context, IHandler>
     implements IThriftProcessor<Context> {
-    public readonly _serviceName?: string
-    public readonly _annotations?: IThriftAnnotations = {}
-    public readonly _methodAnnotations?: IMethodAnnotations = {}
-    public readonly _methodNames?: Array<string> = []
+    public readonly _serviceName: string = ''
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _methodAnnotations: IMethodAnnotations = {}
+    public readonly _methodNames: Array<string> = []
 
     public abstract process(
         input: TProtocol,
@@ -159,9 +171,9 @@ export abstract class ThriftProcessor<Context, IHandler>
     ): Promise<Buffer>
 }
 
-export interface IProcessorConstructor<TProcessor, THandler> {
-    new (handler: THandler): TProcessor
-}
+export type IProcessorConstructor<TProcessor, THandler> = new (
+    handler: THandler,
+) => TProcessor
 
 export type ProtocolType = 'binary' | 'compact' | 'json'
 

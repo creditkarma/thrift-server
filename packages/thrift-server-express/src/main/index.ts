@@ -6,7 +6,6 @@ import { ThriftServerExpress } from './ThriftServerExpress'
 
 import { ICreateExpressServerOptions } from './types'
 
-export * from './observability'
 export * from './ThriftServerExpress'
 export * from './types'
 

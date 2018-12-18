@@ -4,15 +4,18 @@ import * as Lab from 'lab'
 import * as net from 'net'
 
 import {
-    appendThriftObject,
     IRequestResponse,
     IThriftRequest,
     NextFunction,
     TcpConnection,
-    ThriftContextFilter,
-    TTwitter,
-    TTwitterClientFilter,
 } from '@creditkarma/thrift-client'
+
+import { ThriftClientContextFilter } from '@creditkarma/thrift-client-context-filter'
+
+import {
+    ThriftClientTTwitterFilter,
+    TTwitter,
+} from '@creditkarma/thrift-client-ttwitter-filter'
 
 import { createServer } from '../../apache-calculator-service'
 
@@ -166,7 +169,7 @@ describe('TcpConnection', () => {
                             thrift.MessageType.CALL,
                             20,
                         )
-                        const args: Calculator.AddWithContextArgs = new Calculator.AddWithContextArgs(
+                        const args: Calculator.AddWithContext__Args = new Calculator.AddWithContext__Args(
                             { num1: 20, num2: 60 },
                         )
                         args.write(output)
@@ -237,7 +240,7 @@ describe('TcpConnection', () => {
                 })
 
                 connection.register(
-                    ThriftContextFilter<IMetadata, IMetadata>({
+                    ThriftClientContextFilter<IMetadata, IMetadata>({
                         RequestCodec: MetadataCodec,
                         ResponseCodec: MetadataCodec,
                     }),
@@ -259,18 +262,18 @@ describe('TcpConnection', () => {
                                 thrift.MessageType.CALL,
                                 1,
                             )
-                            const result = new Calculator.AddResult({
+                            const result = new Calculator.Add__Result({
                                 success: 89,
                             })
                             result.write(output)
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()
 
-                            appendThriftObject(meta, data, MetadataCodec).then(
-                                (extended: Buffer) => {
+                            thrift
+                                .appendThriftObject(meta, data, MetadataCodec)
+                                .then((extended: Buffer) => {
                                     socket.write(frameCodec.encode(extended))
-                                },
-                            )
+                                })
                         })
                     },
                 )
@@ -299,7 +302,7 @@ describe('TcpConnection', () => {
                 })
 
                 connection.register(
-                    ThriftContextFilter<IMetadata, IMetadata>({
+                    ThriftClientContextFilter<IMetadata, IMetadata>({
                         RequestCodec: MetadataCodec,
                         ResponseCodec: MetadataCodec,
                     }),
@@ -320,10 +323,10 @@ describe('TcpConnection', () => {
                                 thrift.MessageType.CALL,
                                 1,
                             )
-                            const result: Calculator.IAddResult = {
+                            const result: Calculator.IAdd__Result = {
                                 success: 102,
                             }
-                            Calculator.AddResultCodec.encode(result, output)
+                            Calculator.Add__ResultCodec.encode(result, output)
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()
 
@@ -349,7 +352,7 @@ describe('TcpConnection', () => {
         })
     })
 
-    describe('TTwitterClientFilter', () => {
+    describe('ThriftClientTTwitterFilter', () => {
         const PORT: number = 9010
         let connection: TcpConnection<void>
         let client: Calculator.Client<void>
@@ -363,7 +366,7 @@ describe('TcpConnection', () => {
             })
 
             connection.register(
-                TTwitterClientFilter({
+                ThriftClientTTwitterFilter({
                     localServiceName: 'tcp-calculator-client',
                     remoteServiceName: 'calculator-service',
                     tracerConfig: {
@@ -434,20 +437,24 @@ describe('TcpConnection', () => {
                                     thrift.MessageType.CALL,
                                     1,
                                 )
-                                const result = new Calculator.AddResult({
+                                const result = new Calculator.Add__Result({
                                     success: 61,
                                 })
                                 result.write(output)
                                 output.writeMessageEnd()
                                 const data: Buffer = writer.flush()
 
-                                appendThriftObject(
-                                    responseHeader,
-                                    data,
-                                    TTwitter.ResponseHeaderCodec,
-                                ).then((extended: Buffer) => {
-                                    socket.write(frameCodec.encode(extended))
-                                })
+                                thrift
+                                    .appendThriftObject(
+                                        responseHeader,
+                                        data,
+                                        TTwitter.ResponseHeaderCodec,
+                                    )
+                                    .then((extended: Buffer) => {
+                                        socket.write(
+                                            frameCodec.encode(extended),
+                                        )
+                                    })
                             }
                         })
                     },

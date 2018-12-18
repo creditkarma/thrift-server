@@ -1,9 +1,8 @@
 import { Int64 } from '@creditkarma/thrift-server-core'
 
-import {
-    createThriftServer,
-    ZipkinTracingHapi,
-} from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+
+import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
 import * as Hapi from 'hapi'
 

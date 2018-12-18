@@ -3,7 +3,7 @@ import {
     randomTraceId,
     serializeLinkerdHeader,
     traceIdFromTraceId,
-} from '@creditkarma/thrift-server-core'
+} from '@creditkarma/zipkin-core'
 
 import { expect } from 'code'
 import * as Hapi from 'hapi'

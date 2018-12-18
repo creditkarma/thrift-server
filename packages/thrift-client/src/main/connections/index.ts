@@ -1,9 +1,12 @@
 import { IClientConstructor } from '@creditkarma/thrift-server-core'
-import * as request from 'request'
 
-import { HttpConnection, RequestInstance } from './HttpConnection'
+import { HttpConnection } from './HttpConnection'
 
-import { ICreateHttpClientOptions, ICreateTcpClientOptions } from '../types'
+import {
+    ICreateHttpClientOptions,
+    ICreateTcpClientOptions,
+    RequestOptions,
+} from '../types'
 
 import { TcpConnection } from './TcpConnection'
 
@@ -11,7 +14,7 @@ export * from './HttpConnection'
 export * from './TcpConnection'
 
 export function createClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, RequestOptions>,
     options: ICreateHttpClientOptions,
 ): TClient {
     console.warn(`[Deprecated]: Please use 'createHttpClient' instead`)
@@ -30,17 +33,10 @@ export function createTcpClient<TClient>(
 }
 
 export function createHttpClient<TClient>(
-    ServiceClient: IClientConstructor<TClient, request.CoreOptions>,
+    ServiceClient: IClientConstructor<TClient, RequestOptions>,
     options: ICreateHttpClientOptions,
 ): TClient {
-    const requestClient: RequestInstance = request.defaults(
-        options.requestOptions || {},
-    )
-
-    const connection: HttpConnection = new HttpConnection(
-        requestClient,
-        options,
-    )
+    const connection: HttpConnection = new HttpConnection(options)
 
     // Register optional middleware
     connection.register(...(options.register || []))

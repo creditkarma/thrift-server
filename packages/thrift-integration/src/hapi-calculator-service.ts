@@ -1,15 +1,14 @@
 import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
 
-import {
-    createThriftServer,
-    ZipkinTracingHapi,
-} from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
-import {
-    createHttpClient,
-    IRequest,
-    ZipkinClientFilter,
-} from '@creditkarma/thrift-client'
+import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
+
+import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
+
+import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
+
+import { ThriftClientTimingFilter } from '@creditkarma/thrift-client-timing-filter'
 
 import * as Hapi from 'hapi'
 
@@ -40,7 +39,7 @@ export async function createServer(
             register:
                 sampleRate > 0
                     ? [
-                          ZipkinClientFilter({
+                          ThriftClientZipkinFilter({
                               localServiceName: 'calculator-service',
                               remoteServiceName: 'add-service',
                               tracerConfig: {
@@ -53,8 +52,15 @@ export async function createServer(
                                   httpInterval: 0,
                               },
                           }),
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
                       ]
-                    : [],
+                    : [
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
+                      ],
         },
     )
 
@@ -217,7 +223,7 @@ export async function createServer(
         register:
             sampleRate > 0
                 ? [
-                      ZipkinClientFilter({
+                      ThriftClientZipkinFilter({
                           localServiceName: 'calculator-client',
                           remoteServiceName: 'calculator-service',
                           tracerConfig: {
@@ -230,8 +236,15 @@ export async function createServer(
                               httpInterval: 0,
                           },
                       }),
+                      ThriftClientTimingFilter({
+                          remoteServiceName: 'calculator-service',
+                      }),
                   ]
-                : [],
+                : [
+                      ThriftClientTimingFilter({
+                          remoteServiceName: 'calculator-service',
+                      }),
+                  ],
     })
 
     server.route({

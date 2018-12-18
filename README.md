@@ -5,9 +5,9 @@ A set of libraries for building microservices in Node.js, written in TypeScript.
 As the name would suggest these libraries use [Apache Thrift](https://thrift.apache.org/) for service-to-service communication with RPC. All libraries come ready with distributed tracing through [Zipkin](https://zipkin.io/).
 
 The available libraries:
-* [Thrift Server Hapi](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi): Plugin to add Thrift support to Hapi.
-* [Thrift Server Express](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express): Middleware to add Thrift support to Express.
-* [Thrift Client](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request) and a TCP client build on Node sockets. Both support communicating with services created by the Twitter [Finagle](https://github.com/twitter/finagle) project.
+* [Thrift Server Hapi](./packages/thrift-server-hapi): Plugin to add Thrift support to Hapi.
+* [Thrift Server Express](./packages/thrift-server-express): Middleware to add Thrift support to Express.
+* [Thrift Client](./packages/thrift-client): Thrift HTTP client built on top of [Request](https://github.com/request/request) and a TCP client build on Node sockets. Both support communicating with services created by the Twitter [Finagle](https://github.com/twitter/finagle) project.
 
 *Note: Thrift Server is young and will still be undergoing some breaking changes before v1.0.0. The rule of thumb before 1.0.0 is that minor releases will potentially include breaking changes, but patch versions will not.*
 
@@ -364,7 +364,7 @@ $ curl http://localhost:9000/add/5/6
 
 ## Contributing
 
-For more information about contributing new features and bug fixes, see our [Contribution Guidelines](https://github.com/creditkarma/CONTRIBUTING.md).
+For more information about contributing new features and bug fixes, see our [Contribution Guidelines](./CONTRIBUTING.md).
 External contributors must sign Contributor License Agreement (CLA)
 
 ## License

@@ -275,15 +275,13 @@ export class JSONProtocol extends TProtocol {
         let str = ''
         if (typeof binary === 'string') {
             str = binary
-        } else if (binary instanceof Uint8Array) {
+        } else if (binary instanceof Buffer) {
             const arr = binary
             for (const i of arr) {
                 str += String.fromCharCode(arr[i])
             }
         } else {
-            throw new TypeError(
-                'writeBinary only accepts String or Uint8Array.',
-            )
+            throw new TypeError('writeBinary only accepts String or Buffer.')
         }
         this.tstack.push(`"${Buffer.from(str).toString('base64')}"`)
     }
@@ -482,7 +480,7 @@ export class JSONProtocol extends TProtocol {
     }
 
     public readBinary() {
-        return new Buffer(this.readValue(), 'base64')
+        return Buffer.alloc(this.readValue(), 'base64')
     }
 
     public readString() {

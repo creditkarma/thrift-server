@@ -7,7 +7,6 @@ import { ICreateHapiServerOptions } from './types'
 
 import { defaultLogger } from './logger'
 
-export * from './observability'
 export * from './ThriftServerHapi'
 export * from './types'
 
@@ -37,10 +36,7 @@ export function createThriftServer<
             return server
         })
         .catch((err: any) => {
-            logger(
-                ['error', 'thrift-server-core'],
-                `Unable to create Thrift server. ${err.message}`,
-            )
+            logger(['error'], `Unable to create Thrift server. ${err.message}`)
             throw err
         })
 }
