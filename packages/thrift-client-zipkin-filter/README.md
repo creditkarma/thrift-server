@@ -1,4 +1,4 @@
-# Zipkin Client Filter
+# Thrift Client Zipking Filter
 
 One of the problems that arise in microservice architectures is tracing the life of a request. Where do errors occur? Where are latencies? Just understanding all of the services a request touches can be non-trivial in complex systems.
 

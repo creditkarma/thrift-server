@@ -10,7 +10,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 ### BREAKING CHANGES
 
 * Splits plugins/middleware into their own packages ([f5f344](https://github.com/creditkarma/thrift-server/commit/f5f344))
-* Renames `thrift-server-core` to `thrift-core` to more accurately represent its usage ([]())
 
 The APIs for plugins is unchanged. It's just that the plugins are no longer included with their given client/server.
 
@@ -31,8 +30,8 @@ import {
 } from '@creditkaram/thrift-client'
 
 import {
-    ZipkinClientFilter,
-} from '@creditkarma/zipkin-client-filter'
+    ThriftClientZipkinFilter,
+} from '@creditkarma/thrift-client-zipkin-filter'
 
 import { Calculator } from './codegen/calculator'
 
@@ -40,7 +39,7 @@ const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
     createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
-        register: [ ZipkinClientFilter({
+        register: [ ThriftClientZipkinFilter({
             localServiceName: 'calculator-client',
             remoteServiceName: 'calculator-service',
             tracerConfig: {
@@ -50,6 +49,11 @@ const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
         }) ]
     })
 ```
+
+### Features
+
+* A new filter for client timing metrics ([thrift-client-timing-filter](./packages/thrift-client-timing-filter))
+
 
 <a name="0.10.0"></a>
 ## [0.10.0](https://github.com/creditkarma/thrift-server/compare/v0.9.3...v0.10.0) (2018-11-16)

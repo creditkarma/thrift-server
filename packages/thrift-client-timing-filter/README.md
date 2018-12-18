@@ -1,46 +1,47 @@
 # Thrift Client Timing Filter
 
-When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two filters for helping with this situation.
+The timing filter is for emitting logs about the usage of a specific client. The filter will emit logs at a sepcified interval. The metric event emitted will tell you the longest request duration over the interval, the average duration of request over the interval and how many successes and errors the client recieved.
 
 ## Installation
 
-`ThriftClientContextFilter` has a few `peerDependencies`.
+`ThriftClientTimingFilter` has a few `peerDependencies`.
 
 ```sh
 npm install --save @creditkarma/thrift-server-core
 npm install --save @creditkarma/thrift-client
-npm install --save @creditkarma/thrift-client-context-filter
+npm install --save @creditkarma/thrift-client-timing-filter
 ```
 
 ## Usage
 
-This plugin writes a Thrift struct onto the head of an outgoing payload and reads a struct off of the head of an incoming payload.
-
 ```typescript
 import {
-    createTcpClient,
+    createHttpClient,
 } from '@creditkarma/thrift-client'
 
 import {
-    ThriftClientContextFilter,
+    ThriftClientTimingFilter,
+    ITimingEvent,
 } from '@creditkarma/thrift-client-context-filter'
-
-import {
-    RequestContext,
-    ResponseContext,
-} from './codegen/metadata'
 
 import {
     Calculator,
 } from './codegen/calculator'
 
 const thriftClient: Calculator.Client<RequestContext> =
-    createTcpClient(Calculator.Client, {
+    createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
-        register: [ ThriftClientContextFilter<RequestContext, ResponseContext>({
-            RequestContextClass: RequestContext,
-        }) ]
+        register: [
+            ThriftClientTimingFilter({
+                remoteServiceName: 'calculator-service',
+                interval: 5000,
+                logger: (tags: Array<string>, event: ITimingEvent) {
+                    console.log('client metrics: ', event)
+                },
+                tags: [],
+            })
+        ]
     })
 
 thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response: number) => {
@@ -50,12 +51,12 @@ thriftClient.add(5, 6, new RequestContext({ traceId: 3827293 })).then((response:
 
 ### Options
 
-Available options for ThriftClientContextFilter:
+Available options for `ThriftClientTimingFilter`:
 
-* RequestContextClass (required): A class (extending StructLike) that is to be prepended to outgoing requests.
-* ResponseContextClass (optional): A class (extending StructLike) that is prepended to incoming responses. Defaults to nothing.
-* transportType (optional): The type of transport to use. Currently only 'buffered'.
-* protocolType (optional): The type of protocol to use, either 'binary' or 'compact'.
+* remoteServiceName (required): Name of the remote service this client connects to.
+* interval (optional): How often to emit events in milliseconds. Defaults to 5000.
+* logger (optional): A function to log the events. Defaults to a logger using `console.log`.
+* tags (optional): An array of strings to attach as tags to the emitted event. Defaults to empty array.
 
 ## Contributing
 

@@ -23,7 +23,7 @@ interface ITimingUpdate {
     status: 'error' | 'success'
 }
 
-interface IStatusCount {
+export interface IStatusCount {
     error: number
     success: number
 }
@@ -37,6 +37,13 @@ export interface ITimingFilterOptions {
 
 export interface IRequestsPerMethod {
     [name: string]: number
+}
+
+export interface ITimingEvent {
+    status: IStatusCount
+    maxDuration: number
+    averageDuration: number
+    requestsPerMethod: IRequestsPerMethod
 }
 
 export function ThriftClientTimingFilter<RequestContext>({
@@ -55,12 +62,27 @@ export function ThriftClientTimingFilter<RequestContext>({
     const requestsPerMethod: IRequestsPerMethod = {}
 
     function logTimings(): void {
-        logger(['metrics', 'RequestDuration', remoteServiceName, ...tags], {
+        const timingEvent: ITimingEvent = {
             status: statusCount,
             maxDuration: maxTime,
-            averageTime: totalTime / count,
+            averageDuration: totalTime / count,
             requestsPerMethod,
-        })
+        }
+
+        logger(['metrics', 'RequestDuration', remoteServiceName, ...tags], timingEvent)
+
+        // Reset for next interval
+        statusCount.error = 0
+        statusCount.success = 0
+        maxTime = 0
+        totalTime = 0
+        count = 0
+
+        for (const key in requestsPerMethod) {
+            if (requestsPerMethod.hasOwnProperty(key)) {
+                requestsPerMethod[key] = 0
+            }
+        }
     }
 
     function updateData({ methodName, duration, status }: ITimingUpdate) {
