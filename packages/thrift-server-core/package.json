@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-server-core",
-  "version": "0.11.0-alpha.2",
+  "version": "0.11.0",
   "description": "Thrift core library in TypeScript",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -31,10 +31,10 @@
     "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
   },
   "devDependencies": {
+    "@creditkarma/thrift-typescript": "^3.0.3",
     "@types/code": "^4.0.4",
     "@types/node": "^8.10.38",
     "@types/rimraf": "2.0.2",
-    "@creditkarma/thrift-typescript": "^3.0.3",
     "code": "^5.2.0",
     "lab": "^18.0.0",
     "prettier": "^1.15.1",
