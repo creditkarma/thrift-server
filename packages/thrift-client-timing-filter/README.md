@@ -1,4 +1,4 @@
-# Thrift Context Filter
+# Thrift Client Timing Filter
 
 When using Thrift over HTTP we can use HTTP headers to pass context/metadata between services (tracing, auth). When using TCP we don't have this. Among the options to solve this is to prepend an object onto the head of our TCP payload. `@creditkarma/thrift-client` comes with two filters for helping with this situation.
 
