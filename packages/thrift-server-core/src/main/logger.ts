@@ -1,40 +1,25 @@
 import { LogFunction } from './types'
 
-export const makeLogger = (
-    name: string,
-    ...defaultTags: Array<string>
-): LogFunction => {
+export const makeLogger = (name: string): LogFunction => {
     return (tags: Array<string>, data?: string | object): void => {
-        const allTags = Array.from(
-            new Set([...tags, ...defaultTags]),
-        )
-
+        const allTags: Array<string> = Array.from(new Set([name, ...tags]))
         if (allTags.indexOf('error') > -1) {
             if (data !== undefined) {
-                console.error(
-                    `[${allTags.join()}] `,
-                    `${JSON.stringify(data)} ${Date.now()}`,
-                )
+                console.error(`[${allTags.join(',')}] `, data)
             } else {
-                console.error(`[${allTags.join()}] `, Date.now())
+                console.error(`[${allTags.join(',')}]`)
             }
         } else if (allTags.indexOf('warn') > -1) {
             if (data !== undefined) {
-                console.warn(
-                    `[${allTags.join()}] `,
-                    `${JSON.stringify(data)} ${Date.now()}`,
-                )
+                console.warn(`[${allTags.join(',')}] `, data)
             } else {
-                console.warn(`[${allTags.join()}] `, Date.now())
+                console.warn(`[${allTags.join(',')}]`)
             }
         } else {
-            if (data !== undefined && process.env.DEBUG !== undefined) {
-                console.log(
-                    `[${allTags.join()}] `,
-                    `${JSON.stringify(data)} ${Date.now()}`,
-                )
-            } else if (process.env.DEBUG !== undefined) {
-                console.log(`[${allTags.join()}] `, Date.now())
+            if (data !== undefined && process.env.DUBUG !== undefined) {
+                console.log(`[${allTags.join(',')}] `, data)
+            } else if (process.env.DUBUG !== undefined) {
+                console.log(`[${allTags.join(',')}]`)
             }
         }
     }
