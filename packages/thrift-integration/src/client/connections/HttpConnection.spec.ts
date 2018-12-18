@@ -10,8 +10,6 @@ import {
     NextFunction,
 } from '@creditkarma/thrift-client'
 
-import { appendThriftObject } from '@creditkarma/thrift-client-context-filter'
-
 import {
     ThriftClientTTwitterFilter,
     TTwitter,
@@ -509,14 +507,16 @@ describe('HttpConnection', () => {
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()
 
-                            appendThriftObject(
-                                responseHeader,
-                                data,
-                                TTwitter.ResponseHeaderCodec,
-                            ).then((extended: Buffer) => {
-                                res.writeHead(200)
-                                res.end(extended)
-                            })
+                            thrift
+                                .appendThriftObject(
+                                    responseHeader,
+                                    data,
+                                    TTwitter.ResponseHeaderCodec,
+                                )
+                                .then((extended: Buffer) => {
+                                    res.writeHead(200)
+                                    res.end(extended)
+                                })
                         }
                     },
                 )

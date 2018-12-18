@@ -22,7 +22,7 @@
         "test:only": "echo 'No tests for thrift-client-ttwitter-filter'; exit 0;"
     },
     "dependencies": {
-        "zipkin": "^0.14.3"
+        "zipkin": "^0.15.0"
     },
     "peerDependencies": {
         "@creditkarma/thrift-client": "0.11.x",
@@ -34,7 +34,7 @@
         "@creditkarma/thrift-client": "^0.11.0-alpha.2",
         "@creditkarma/thrift-client-context-filter": "^0.11.0-alpha.2",
         "@creditkarma/thrift-server-core": "^0.11.0-alpha.2",
-        "@creditkarma/thrift-typescript": "^3.0.3-0",
+        "@creditkarma/thrift-typescript": "^3.0.3",
         "@creditkarma/zipkin-core": "^0.11.0-alpha.2",
         "@types/node": "^8.10.38",
         "prettier": "^1.15.1",
@@ -42,6 +42,6 @@
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-plugin-prettier": "^2.0.0",
-        "typescript": "3.1.x"
+        "typescript": "3.2.x"
     }
 }

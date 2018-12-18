@@ -1,10 +1,10 @@
 import {
+    appendThriftObject,
     IStructCodec,
     LogFunction,
     ProtocolType,
-    TransportType,
-    appendThriftObject,
     readThriftObject,
+    TransportType,
 } from '@creditkarma/thrift-server-core'
 
 import {

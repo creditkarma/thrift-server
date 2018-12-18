@@ -9,6 +9,7 @@ generate({
     sourceDir: 'thrift',
     target: 'thrift-server',
     files: [],
+    library: '@creditkarma/thrift-server-core',
 })
 
 const clientProc = fork('./client.ts')

@@ -64,9 +64,15 @@ export function createClientServer(
                                   httpInterval: 0,
                               },
                           }),
-                          ThriftClientTimingFilter(),
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'calculator-service',
+                          }),
                       ]
-                    : [ThriftClientTimingFilter()],
+                    : [
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'calculator-service',
+                          }),
+                      ],
         },
     )
 

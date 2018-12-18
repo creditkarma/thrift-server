@@ -100,9 +100,10 @@ export interface IStructCodec<LooseType, StrictType> {
     decode(input: TProtocol): StrictType
 }
 
-export interface IProtocolConstructor {
-    new (trans: TTransport, logger?: LogFunction): TProtocol
-}
+export type IProtocolConstructor = new (
+    trans: TTransport,
+    logger?: LogFunction,
+) => TProtocol
 
 export interface ITransportConstructor {
     new (buffer?: Buffer): TTransport
@@ -139,9 +140,9 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
     }
 }
 
-export interface IClientConstructor<TClient, Context> {
-    new (connection: ThriftConnection<Context>): TClient
-}
+export type IClientConstructor<TClient, Context> = new (
+    connection: ThriftConnection<Context>,
+) => TClient
 
 export interface IThriftProcessor<Context> {
     readonly _serviceName: string
@@ -170,9 +171,9 @@ export abstract class ThriftProcessor<Context, IHandler>
     ): Promise<Buffer>
 }
 
-export interface IProcessorConstructor<TProcessor, THandler> {
-    new (handler: THandler): TProcessor
-}
+export type IProcessorConstructor<TProcessor, THandler> = new (
+    handler: THandler,
+) => TProcessor
 
 export type ProtocolType = 'binary' | 'compact' | 'json'
 

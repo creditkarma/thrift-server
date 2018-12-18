@@ -10,10 +10,7 @@ import {
     TcpConnection,
 } from '@creditkarma/thrift-client'
 
-import {
-    appendThriftObject,
-    ThriftClientContextFilter,
-} from '@creditkarma/thrift-client-context-filter'
+import { ThriftClientContextFilter } from '@creditkarma/thrift-client-context-filter'
 
 import {
     ThriftClientTTwitterFilter,
@@ -272,11 +269,11 @@ describe('TcpConnection', () => {
                             output.writeMessageEnd()
                             const data: Buffer = writer.flush()
 
-                            appendThriftObject(meta, data, MetadataCodec).then(
-                                (extended: Buffer) => {
+                            thrift
+                                .appendThriftObject(meta, data, MetadataCodec)
+                                .then((extended: Buffer) => {
                                     socket.write(frameCodec.encode(extended))
-                                },
-                            )
+                                })
                         })
                     },
                 )
@@ -447,13 +444,17 @@ describe('TcpConnection', () => {
                                 output.writeMessageEnd()
                                 const data: Buffer = writer.flush()
 
-                                appendThriftObject(
-                                    responseHeader,
-                                    data,
-                                    TTwitter.ResponseHeaderCodec,
-                                ).then((extended: Buffer) => {
-                                    socket.write(frameCodec.encode(extended))
-                                })
+                                thrift
+                                    .appendThriftObject(
+                                        responseHeader,
+                                        data,
+                                        TTwitter.ResponseHeaderCodec,
+                                    )
+                                    .then((extended: Buffer) => {
+                                        socket.write(
+                                            frameCodec.encode(extended),
+                                        )
+                                    })
                             }
                         })
                     },

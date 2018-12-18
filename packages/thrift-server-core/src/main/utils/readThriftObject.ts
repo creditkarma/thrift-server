@@ -1,14 +1,14 @@
 import {
-    getProtocol,
-    getTransport,
     IProtocolConstructor,
     IStructCodec,
     ITransportConstructor,
     ProtocolType,
-    TProtocol,
     TransportType,
-    TTransport,
-} from '@creditkarma/thrift-server-core'
+} from '../types'
+
+import { getProtocol, TProtocol } from '../protocols'
+
+import { getTransport, TTransport } from '../transports'
 
 export function readThriftObject<StrictType>(
     data: Buffer,

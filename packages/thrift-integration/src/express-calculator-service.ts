@@ -46,9 +46,15 @@ export function createServer(sampleRate: number = 0): express.Application {
                                   httpInterval: 0,
                               },
                           }),
-                          ThriftClientTimingFilter(),
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
                       ]
-                    : [ThriftClientTimingFilter()],
+                    : [
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
+                      ],
         },
     )
 

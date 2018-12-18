@@ -52,9 +52,15 @@ export async function createServer(
                                   httpInterval: 0,
                               },
                           }),
-                          ThriftClientTimingFilter(),
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
                       ]
-                    : [ThriftClientTimingFilter()],
+                    : [
+                          ThriftClientTimingFilter({
+                              remoteServiceName: 'add-service',
+                          }),
+                      ],
         },
     )
 
@@ -230,9 +236,15 @@ export async function createServer(
                               httpInterval: 0,
                           },
                       }),
-                      ThriftClientTimingFilter(),
+                      ThriftClientTimingFilter({
+                          remoteServiceName: 'calculator-service',
+                      }),
                   ]
-                : [ThriftClientTimingFilter()],
+                : [
+                      ThriftClientTimingFilter({
+                          remoteServiceName: 'calculator-service',
+                      }),
+                  ],
     })
 
     server.route({

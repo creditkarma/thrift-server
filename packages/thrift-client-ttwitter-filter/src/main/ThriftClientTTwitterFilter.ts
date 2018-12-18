@@ -1,4 +1,5 @@
 import {
+    appendThriftObject,
     formatUrl,
     getProtocol,
     getTransport,
@@ -9,6 +10,7 @@ import {
     LogFunction,
     MessageType,
     ProtocolType,
+    readThriftObject,
     TProtocol,
     TransportType,
     TTransport,
@@ -29,11 +31,6 @@ import {
     IThriftRequest,
     NextFunction,
 } from '@creditkarma/thrift-client'
-
-import {
-    appendThriftObject,
-    readThriftObject,
-} from '@creditkarma/thrift-client-context-filter'
 
 import * as TTwitter from '../ttwitter/com/creditkarma/finagle/thrift'
 

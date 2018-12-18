@@ -1,16 +1,14 @@
 import {
-    BinaryProtocol,
-    BufferedTransport,
-    getProtocol,
-    getTransport,
     IProtocolConstructor,
     IStructCodec,
     ITransportConstructor,
     ProtocolType,
-    TProtocol,
     TransportType,
-    TTransport,
-} from '@creditkarma/thrift-server-core'
+} from '../types'
+
+import { BinaryProtocol, getProtocol, TProtocol } from '../protocols'
+
+import { BufferedTransport, getTransport, TTransport } from '../transports'
 
 export function encode<LooseType>(
     thriftObject: LooseType,
