@@ -44,10 +44,6 @@
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "3.2.x"
   },
-  "dependencies": {
-    "@types/node-int64": "^0.4.29",
-    "node-int64": "^0.4.0"
-  },
   "publishConfig": {
     "access": "public"
   }

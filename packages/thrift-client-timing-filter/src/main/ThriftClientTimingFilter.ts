@@ -69,7 +69,10 @@ export function ThriftClientTimingFilter<RequestContext>({
             requestsPerMethod,
         }
 
-        logger(['metrics', 'RequestDuration', remoteServiceName, ...tags], timingEvent)
+        logger(
+            ['metrics', 'RequestDuration', remoteServiceName, ...tags],
+            timingEvent,
+        )
 
         // Reset for next interval
         statusCount.error = 0

@@ -12,6 +12,13 @@ describe('Int64', () => {
     const TEST_STRING: string = '9837756439'
     const TOO_LARGE: string = '999999999999999999999999999999'
 
+    describe('toNumber', () => {
+        it('should return value as number', async () => {
+            const i64 = new Int64(32)
+            expect(i64.toNumber()).to.equal(32)
+        })
+    })
+
     describe('fromDecimalString', () => {
         it('should correctly create Int64 from string', async () => {
             const i64 = Int64.fromDecimalString(TEST_STRING)
