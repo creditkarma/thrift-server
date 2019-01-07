@@ -41,4 +41,16 @@ describe('Int64', () => {
             expect(i64.toDecimalString()).to.equal('65535')
         })
     })
+
+    describe('static toDecimalString', () => {
+        it('should correctly create a string representation of number', async () => {
+            const i64 = new Int64(54)
+            expect(Int64.toDecimalString(i64)).to.equal('54')
+        })
+
+        it('should correctly create a string representation of a hex number', async () => {
+            const i64 = new Int64('0xffff')
+            expect(Int64.toDecimalString(i64)).to.equal('65535')
+        })
+    })
 })

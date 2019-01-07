@@ -68,6 +68,14 @@ export class Int64 {
     // Min integer value that JS can accurately represent
     public static MIN_INT: number = -Math.pow(2, 53)
 
+    public static toDecimalString(i64: Int64 | number): string {
+        if (typeof i64 === 'number') {
+            return (new Int64(i64)).toDecimalString()
+        } else {
+            return i64.toDecimalString()
+        }
+    }
+
     public static fromDecimalString(text: string): Int64 {
         const negative: boolean = text.charAt(0) === '-'
 
