@@ -70,7 +70,7 @@ export class Int64 {
 
     public static toDecimalString(i64: Int64 | number): string {
         if (typeof i64 === 'number') {
-            return (new Int64(i64)).toDecimalString()
+            return `${i64}`
         } else {
             return i64.toDecimalString()
         }
