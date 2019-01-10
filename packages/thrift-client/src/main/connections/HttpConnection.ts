@@ -19,7 +19,9 @@ import {
     RequestOptions,
 } from '../types'
 
-import { filterByMethod, normalizePath } from './utils'
+import { filterByMethod } from './utils'
+
+export const DEFAULT_PATH: string = '/thrift'
 
 export type HttpProtocol = 'http' | 'https'
 
@@ -29,14 +31,25 @@ export type RequestInstance = RequestAPI<
     RequiredUriUrl
 >
 
+function isErrorResponse(response: RequestResponse): boolean {
+    return (
+        response.statusCode !== null &&
+        response.statusCode !== undefined &&
+        (response.statusCode < 200 || response.statusCode > 299)
+    )
+}
+
 export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
+    protected readonly basePath: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
     protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
     private readonly requestOptions: RequestOptions
+    private readonly serviceName: string | undefined
+    private readonly withEndpointPerMethod: boolean
 
     constructor({
         hostName,
@@ -46,16 +59,19 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         transport = 'buffered',
         protocol = 'binary',
         requestOptions = {},
+        serviceName,
+        withEndpointPerMethod = false,
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
         this.requestOptions = Object.freeze(requestOptions)
         this.port = port
         this.hostName = hostName
-        this.path = normalizePath(path || '/thrift')
+        this.path = Core.normalizePath(path || DEFAULT_PATH)
         this.protocol = https === true ? 'https' : 'http'
-        this.url = `${this.protocol}://${this.hostName}:${this.port}${
-            this.path
-        }`
+        this.serviceName = serviceName
+        this.basePath = `${this.protocol}://${this.hostName}:${this.port}`
+        this.withEndpointPerMethod = withEndpointPerMethod
+        this.url = `${this.basePath}${this.path}`
         this.filters = []
     }
 
@@ -96,7 +112,11 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             [head, ...tail]: Array<RequestHandler<RequestOptions>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
-                return this.write(currentRequest.data, currentRequest.context)
+                return this.write(
+                    currentRequest.data,
+                    currentRequest.methodName,
+                    currentRequest.context,
+                )
             } else {
                 return head(
                     thriftRequest,
@@ -128,10 +148,17 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         )
     }
 
-    public write(
+    private write(
         dataToWrite: Buffer,
+        methodName: string,
         options: RequestOptions = {},
+        retry: boolean = false,
     ): Promise<IRequestResponse> {
+        const requestUrl: string =
+            this.withEndpointPerMethod && retry === false
+                ? `${this.url}/${this.serviceName}/${methodName}`
+                : this.url
+
         // Merge user options with required options
         const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
             this.requestOptions,
@@ -140,7 +167,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
                 method: 'POST',
                 body: dataToWrite,
                 encoding: null, // Needs to be explicitly set to null to get Buffer in response body
-                url: this.url,
+                url: requestUrl,
                 headers: {
                     'Content-Length': dataToWrite.length,
                     'Content-Type': 'application/octet-stream',
@@ -152,19 +179,28 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             request(
                 requestOptions,
                 (err: any, response: RequestResponse, body: Buffer) => {
-                    if (err !== null) {
-                        reject(err)
-                    } else if (
-                        response.statusCode &&
-                        (response.statusCode < 200 || response.statusCode > 299)
+                    if (
+                        this.withEndpointPerMethod &&
+                        response !== undefined &&
+                        response.statusCode !== undefined &&
+                        response.statusCode === 404 &&
+                        retry === false
                     ) {
-                        reject(response)
+                        resolve(
+                            this.write(dataToWrite, methodName, options, true),
+                        )
                     } else {
-                        resolve({
-                            statusCode: response.statusCode,
-                            headers: response.headers,
-                            body,
-                        })
+                        if (err !== null) {
+                            reject(err)
+                        } else if (isErrorResponse(response)) {
+                            reject(response)
+                        } else {
+                            resolve({
+                                statusCode: response.statusCode,
+                                headers: response.headers,
+                                body,
+                            })
+                        }
                     }
                 },
             )

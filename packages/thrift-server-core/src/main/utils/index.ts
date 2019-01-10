@@ -3,6 +3,7 @@ import * as url from 'url'
 export * from './appendThriftObject'
 export * from './readThriftObject'
 export * from './readThriftMetadata'
+export * from './normalizePath'
 
 function isObject(obj: any): boolean {
     return obj !== null && typeof obj === 'object'

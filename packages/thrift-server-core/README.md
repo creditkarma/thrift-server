@@ -37,6 +37,19 @@ const val: string = i64.toDecimalString()
 // val === "89374875"
 ```
 
+##### `toDecimalString` static
+
+For consistency the `toDecimalString` method is also available statically on the `Int64` class. The static method can take a `number` or `Int64` instance.
+
+```typescript
+import { Int64 } from '@creditkarma/thrift-server-core'
+
+const i64: Int64 = new Int64(64)
+const val: string = Int64.toDecimalString(i64)
+
+// val === "64"
+```
+
 ## Roadmap
 
 * Support CompactProtocol, JsonProtocol and FramedTransport

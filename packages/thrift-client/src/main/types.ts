@@ -55,14 +55,15 @@ export interface IHttpConnectionOptions {
     https?: boolean
     transport?: TransportType
     protocol?: ProtocolType
+    serviceName?: string
     context?:
         | IThriftRequest<RequestOptions>
         | ClientOptionsFunction<RequestOptions>
     requestOptions?: RequestOptions
+    withEndpointPerMethod?: boolean
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
-    serviceName?: string
     register?: Array<IThriftClientFilterConfig<RequestOptions>>
     requestOptions?: RequestOptions
 }

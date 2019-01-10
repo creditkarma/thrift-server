@@ -118,6 +118,11 @@ export interface IThriftClient {
 }
 
 export abstract class ThriftClient<Context = any> implements IThriftClient {
+    public static readonly serviceName?: string = undefined
+    public static readonly annotations?: IThriftAnnotations = {}
+    public static readonly fieldAnnotations?: IFieldAnnotations = {}
+    public static readonly methodNames?: Array<string> = []
+
     public readonly _serviceName: string = ''
     public readonly _annotations: IThriftAnnotations = {}
     public readonly _fieldAnnotations: IFieldAnnotations = {}
@@ -140,9 +145,10 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
     }
 }
 
-export type IClientConstructor<TClient, Context> = new (
-    connection: ThriftConnection<Context>,
-) => TClient
+export type IClientConstructor<
+    TClient extends ThriftClient<Context>,
+    Context
+> = new (connection: ThriftConnection<Context>) => TClient
 
 export interface IThriftProcessor<Context> {
     readonly _serviceName: string
@@ -159,6 +165,11 @@ export interface IThriftProcessor<Context> {
 
 export abstract class ThriftProcessor<Context, IHandler>
     implements IThriftProcessor<Context> {
+    public static readonly serviceName?: string = undefined
+    public static readonly annotations?: IThriftAnnotations = {}
+    public static readonly methodAnnotations?: IMethodAnnotations = {}
+    public static readonly methodNames?: Array<string> = []
+
     public readonly _serviceName: string = ''
     public readonly _annotations: IThriftAnnotations = {}
     public readonly _methodAnnotations: IMethodAnnotations = {}
