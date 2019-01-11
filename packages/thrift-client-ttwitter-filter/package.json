@@ -34,7 +34,7 @@
         "@creditkarma/thrift-client": "^0.11.2",
         "@creditkarma/thrift-client-context-filter": "^0.11.2",
         "@creditkarma/thrift-server-core": "^0.11.2",
-        "@creditkarma/thrift-typescript": "^3.0.3",
+        "@creditkarma/thrift-typescript": "^3.1.0",
         "@creditkarma/zipkin-core": "^0.11.2",
         "@types/node": "^8.10.38",
         "prettier": "^1.15.1",
