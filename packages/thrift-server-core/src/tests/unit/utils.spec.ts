@@ -116,4 +116,54 @@ describe('Utils', () => {
             })
         })
     })
+
+    describe('normalizePath', () => {
+        it('should add leading slash to path', async () => {
+            const path: string = 'thrift'
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/thrift'
+
+            expect(actual).to.equal(expected)
+        })
+
+        it('should remove trailing slash from path', async () => {
+            const path: string = '/thrift/'
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/thrift'
+
+            expect(actual).to.equal(expected)
+        })
+
+        it('should add leading slash and remove trailing slash from path', async () => {
+            const path: string = 'thrift/'
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/thrift'
+
+            expect(actual).to.equal(expected)
+        })
+
+        it('should leave path unchanged with leading slash and without trailing slash', async () => {
+            const path: string = '/thrift/my-service'
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/thrift/my-service'
+
+            expect(actual).to.equal(expected)
+        })
+
+        it('should leave empty path unchanged', async () => {
+            const path: string = '/'
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/'
+
+            expect(actual).to.equal(expected)
+        })
+
+        it('should return empty path for empty string', async () => {
+            const path: string = ''
+            const actual: string = Utils.normalizePath(path)
+            const expected: string = '/'
+
+            expect(actual).to.equal(expected)
+        })
+    })
 })

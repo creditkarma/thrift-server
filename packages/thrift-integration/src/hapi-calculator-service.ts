@@ -185,6 +185,9 @@ export async function createServer(
                 value: 'test',
             }
         },
+        broken(): void {
+            throw new Error(`Yeah, this didn't work`)
+        },
     })
 
     /**

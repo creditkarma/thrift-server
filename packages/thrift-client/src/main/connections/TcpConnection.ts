@@ -132,7 +132,7 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
         }) as any) as Promise<void>
     }
 
-    public write(
+    private write(
         dataToWrite: Buffer,
         options?: Context,
     ): Promise<IRequestResponse> {

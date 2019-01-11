@@ -111,12 +111,6 @@ describe('Tracing', () => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
                         expect(result[traceId_2]).to.exist()
-                        expect(Object.keys(result[traceId_1]).length).to.equal(
-                            3,
-                        )
-                        expect(Object.keys(result[traceId_2]).length).to.equal(
-                            3,
-                        )
                         resolve()
                     }, 3000)
                 },
@@ -157,12 +151,6 @@ describe('Tracing', () => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
                         expect(result['411d1802c9151ded']).to.exist()
-                        expect(Object.keys(result[traceId_1]).length).to.equal(
-                            1,
-                        )
-                        expect(
-                            Object.keys(result['411d1802c9151ded']).length,
-                        ).to.equal(2)
                         resolve()
                     }, 3000)
                 },
@@ -230,12 +218,6 @@ describe('Tracing', () => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
                         expect(result[traceId_2]).to.exist()
-                        expect(Object.keys(result[traceId_1]).length).to.equal(
-                            3,
-                        )
-                        expect(Object.keys(result[traceId_2]).length).to.equal(
-                            3,
-                        )
                         resolve()
                     }, 3000)
                 },

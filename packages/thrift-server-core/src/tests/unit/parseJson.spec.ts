@@ -1,7 +1,7 @@
 import { expect } from 'code'
 import * as Lab from 'lab'
 
-import { parseJson } from '../../main/parse_json'
+import { parseJson } from '../../main/parseJson'
 
 export const lab = Lab.script()
 const { describe, it } = lab

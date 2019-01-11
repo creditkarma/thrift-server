@@ -20,7 +20,7 @@ import {
     TType,
 } from '../types'
 
-import { parseJson } from '../parse_json'
+import { parseJson } from '../parseJson'
 import { TProtocol } from './TProtocol'
 
 export class JSONProtocol extends TProtocol {

@@ -172,6 +172,9 @@ export function createServer(sampleRate: number = 0): express.Application {
                 value: 'test',
             }
         },
+        broken(): void {
+            throw new Error(`Yeah, this didn't work`)
+        },
     }
 
     const app: express.Application = createThriftServer({

@@ -114,6 +114,9 @@ export function createServer(): net.Server {
                 value: 'test',
             })
         },
+        broken(): void {
+            throw new Error(`Yeah, this didn't work`)
+        },
     }
 
     return thrift.createServer<Calculator.Processor, Calculator.IHandler>(
