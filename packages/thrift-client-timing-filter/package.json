@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-timing-filter",
-    "version": "0.12.1",
+    "version": "0.12.2",
     "description": "Timing filter for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -22,8 +22,8 @@
         "@creditkarma/thrift-server-core": "0.12.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.12.1",
-        "@creditkarma/thrift-server-core": "^0.12.1",
+        "@creditkarma/thrift-client": "^0.12.2",
+        "@creditkarma/thrift-server-core": "^0.12.2",
         "@types/code": "^4.0.5",
         "@types/node": "^8.10.38",
         "code": "^5.2.4",
