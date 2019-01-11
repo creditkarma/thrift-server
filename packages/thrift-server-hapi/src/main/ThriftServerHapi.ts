@@ -55,6 +55,8 @@ export function ThriftServerHapi<
     const Protocol: Core.IProtocolConstructor = Core.getProtocol(
         thriftOptions.protocol,
     )
+    const processor: Core.IThriftProcessor<Hapi.Request> = thriftOptions.handler
+    const rawServicename: string = processor._serviceName || '<none>'
 
     return {
         name: require('../../package.json').name,
@@ -74,12 +76,15 @@ export function ThriftServerHapi<
                 )
             }
 
+            /**
+             * Save information about how we are handling thrift on this server
+             */
             server.plugins.thrift = {
                 transport: thriftOptions.transport || 'buffered',
                 protocol: thriftOptions.protocol || 'binary',
                 services: {
-                    [pluginOptions.thriftOptions.serviceName]: {
-                        processor: pluginOptions.thriftOptions.handler,
+                    [serviceName]: {
+                        processor,
                     },
                 },
             }
@@ -95,8 +100,8 @@ export function ThriftServerHapi<
                     const path: string = request.url.path || ''
                     if (
                         path
-                            .toLocaleLowerCase()
-                            .indexOf(serviceName.toLocaleLowerCase()) > -1
+                            .toLowerCase()
+                            .indexOf(rawServicename.toLowerCase()) > -1
                     ) {
                         logger(
                             ['info', 'ThriftServerHapi'],
@@ -188,7 +193,7 @@ export function ThriftServerHapi<
                 }
 
                 return Core.process<Hapi.Request>({
-                    processor: thriftOptions.handler,
+                    processor,
                     buffer,
                     Transport,
                     Protocol,
@@ -197,9 +202,7 @@ export function ThriftServerHapi<
             }
 
             thriftOptions.handler._methodNames.forEach((methodName: string) => {
-                const methodPerEndpointPath: string = `${thriftPath}/${
-                    thriftOptions.handler._serviceName
-                }/${methodName}`
+                const methodPerEndpointPath: string = `${thriftPath}/${rawServicename}/${methodName}`
                 server.route({
                     method: 'POST',
                     path: methodPerEndpointPath,
