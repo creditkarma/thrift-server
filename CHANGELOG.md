@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
 
+<a name="0.12.0"></a>
+## [0.12.0](https://github.com/creditkarma/thrift-server/compare/v0.11.0...v0.12.0) (2019-01-11)
+
+### Features
+
+* Add support to `thrift-client` and `thrift-server-hapi` to support endpoint-per-method ([d85c58](https://github.com/creditkarma/thrift-server/commit/d85c58))
+
+
 <a name="0.11.0"></a>
 ## [0.11.0](https://github.com/creditkarma/thrift-server/compare/v0.10.4...v0.11.0) (2018-11-27)
 
