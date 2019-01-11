@@ -31,6 +31,28 @@ export type RequestInstance = RequestAPI<
     RequiredUriUrl
 >
 
+function shouldRetry(
+    response: RequestResponse,
+    retry: boolean,
+    withEndpointPerMethod: boolean,
+): boolean {
+    return (
+        withEndpointPerMethod &&
+        response !== undefined &&
+        response !== null &&
+        response.statusCode !== undefined &&
+        response.statusCode === 404 &&
+        retry === false
+    )
+}
+
+function hasError(err: any): boolean {
+    return (
+        err !== undefined &&
+        err !== null
+    )
+}
+
 function isErrorResponse(response: RequestResponse): boolean {
     return (
         response.statusCode !== null &&
@@ -180,20 +202,18 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
                 requestOptions,
                 (err: any, response: RequestResponse, body: Buffer) => {
                     if (
-                        this.withEndpointPerMethod &&
-                        response !== undefined &&
-                        response.statusCode !== undefined &&
-                        response.statusCode === 404 &&
-                        retry === false
+                        shouldRetry(response, retry, this.withEndpointPerMethod)
                     ) {
                         resolve(
                             this.write(dataToWrite, methodName, options, true),
                         )
                     } else {
-                        if (err !== null) {
+                        if (hasError(err)) {
                             reject(err)
+
                         } else if (isErrorResponse(response)) {
                             reject(response)
+
                         } else {
                             resolve({
                                 statusCode: response.statusCode,
