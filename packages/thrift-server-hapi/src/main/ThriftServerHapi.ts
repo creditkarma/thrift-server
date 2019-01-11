@@ -56,7 +56,7 @@ export function ThriftServerHapi<
         thriftOptions.protocol,
     )
     const processor: Core.IThriftProcessor<Hapi.Request> = thriftOptions.handler
-    const rawServicename: string = processor._serviceName || '<none>'
+    const rawServicename: string = processor._serviceName
 
     return {
         name: require('../../package.json').name,
@@ -88,30 +88,6 @@ export function ThriftServerHapi<
                     },
                 },
             }
-
-            /**
-             * This is a compatibility filter with Finagle that creates an endpoint for each Thrift method.
-             * We do one endpoint per service at this point. It probably makes sense to move to an endpoint
-             * per method in a later release.
-             */
-            server.ext(
-                'onRequest',
-                (request: Hapi.Request, reply: Hapi.ResponseToolkit) => {
-                    const path: string = request.url.path || ''
-                    if (
-                        path
-                            .toLowerCase()
-                            .indexOf(rawServicename.toLowerCase()) > -1
-                    ) {
-                        logger(
-                            ['info', 'ThriftServerHapi'],
-                            `Request path rewritten: '${path}' to '${thriftPath}'`,
-                        )
-                        request.setUrl(thriftPath)
-                    }
-                    return reply.continue
-                },
-            )
 
             /**
              * If an error occurred within the process of handling this request and it was not otherwise
@@ -158,7 +134,7 @@ export function ThriftServerHapi<
                                 )
                                 output.writeMessageEnd()
 
-                                return reply.response(output.flush()).code(200)
+                                return reply.response(output.flush()).code(500)
                             } catch (err) {
                                 logger(
                                     ['error', 'ThriftServerHapi'],

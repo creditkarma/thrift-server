@@ -47,10 +47,7 @@ function shouldRetry(
 }
 
 function hasError(err: any): boolean {
-    return (
-        err !== undefined &&
-        err !== null
-    )
+    return err !== undefined && err !== null
 }
 
 function isErrorResponse(response: RequestResponse): boolean {
@@ -210,10 +207,8 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
                     } else {
                         if (hasError(err)) {
                             reject(err)
-
                         } else if (isErrorResponse(response)) {
                             reject(response)
-
                         } else {
                             resolve({
                                 statusCode: response.statusCode,

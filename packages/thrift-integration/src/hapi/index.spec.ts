@@ -1,6 +1,6 @@
 import { createHttpClient } from '@creditkarma/thrift-client'
 
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { Int64, TApplicationException } from '@creditkarma/thrift-server-core'
 
 import { expect } from 'code'
 import * as Hapi from 'hapi'
@@ -83,6 +83,17 @@ describe('Thrift Server Hapi', () => {
                     expect(err.message).to.equal('Unauthorized')
                 },
             )
+    })
+
+    it('should reject for service call that throws', async () => {
+        return client.broken().then(
+            (response: void) => {
+                throw new Error('Should reject')
+            },
+            (err: any) => {
+                expect(err).to.be.instanceOf(TApplicationException)
+            },
+        )
     })
 
     it('should handle requests not pointed to thrift service', async () => {

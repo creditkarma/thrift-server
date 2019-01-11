@@ -67,6 +67,8 @@ service Calculator extends shared.SharedService {
     */
    oneway void zip()
 
+   void broken()
+
 }
 
 /**
