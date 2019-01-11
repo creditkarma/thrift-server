@@ -265,48 +265,6 @@ describe('HttpConnection', () => {
             )
         })
 
-        it('should reject for a 500 server response', async () => {
-            const badConnection: HttpConnection = new HttpConnection({
-                serviceName: 'Calculator',
-                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-                port: HAPI_CALC_SERVER_CONFIG.port,
-                path: '/return500',
-            })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
-
-            return badClient.add(5, 7).then(
-                (response: number) => {
-                    throw new Error('Should reject with status 500')
-                },
-                (err: any) => {
-                    expect(err.statusCode).to.equal(500)
-                },
-            )
-        })
-
-        it('should reject for a 400 server response', async () => {
-            const badConnection: HttpConnection = new HttpConnection({
-                serviceName: 'Calculator',
-                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-                port: HAPI_CALC_SERVER_CONFIG.port,
-                path: '/return400',
-            })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
-
-            return badClient.add(5, 7).then(
-                (response: number) => {
-                    throw new Error('Should reject with status 400')
-                },
-                (err: any) => {
-                    expect(err.statusCode).to.equal(400)
-                },
-            )
-        })
-
         it('should reject for a request to a missing service', async () => {
             const badConnection: HttpConnection = new HttpConnection({
                 serviceName: 'Calculator',
@@ -315,6 +273,7 @@ describe('HttpConnection', () => {
                 requestOptions: {
                     timeout: 5000,
                 },
+                withEndpointPerMethod: true,
             })
             const badClient: Calculator.Client<
                 IRequest
