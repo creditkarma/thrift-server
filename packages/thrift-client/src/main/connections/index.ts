@@ -43,15 +43,20 @@ export function createHttpClient<TClient extends ThriftClient<RequestOptions>>(
     ServiceClient: IClientConstructor<TClient, RequestOptions>,
     options: ICreateHttpClientOptions,
 ): TClient {
-    const nullConnection: NullConnection = new NullConnection(
-        BufferedTransport,
-        BinaryProtocol,
-    )
-    const nullClient: TClient = new ServiceClient(nullConnection)
+    let serviceName: string = ''
+    if ((ServiceClient as any).serviceName !== 'undefined') {
+        serviceName = (ServiceClient as any).serviceName
+    } else {
+        const nullConnection: NullConnection = new NullConnection(
+            BufferedTransport,
+            BinaryProtocol,
+        )
+        const nullClient: TClient = new ServiceClient(nullConnection)
+        serviceName = nullClient._serviceName
+    }
+
     const connection: HttpConnection = new HttpConnection(
-        deepMerge(options, {
-            serviceName: nullClient._serviceName,
-        }),
+        deepMerge(options, { serviceName }),
     )
 
     // Register optional middleware

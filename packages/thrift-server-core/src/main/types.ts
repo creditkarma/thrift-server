@@ -145,10 +145,16 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
     }
 }
 
-export type IClientConstructor<
+export interface IClientConstructor<
     TClient extends ThriftClient<Context>,
     Context
-> = new (connection: ThriftConnection<Context>) => TClient
+> {
+    readonly serviceName?: string
+    readonly annotations?: IThriftAnnotations
+    readonly fieldAnnotations?: IFieldAnnotations
+    readonly methodNames?: Array<string>
+    new (connection: ThriftConnection<Context>): TClient
+}
 
 export interface IThriftProcessor<Context> {
     readonly _serviceName: string
@@ -182,9 +188,13 @@ export abstract class ThriftProcessor<Context, IHandler>
     ): Promise<Buffer>
 }
 
-export type IProcessorConstructor<TProcessor, THandler> = new (
-    handler: THandler,
-) => TProcessor
+export interface IProcessorConstructor<TProcessor, THandler> {
+    readonly serviceName: string
+    readonly annotations: IThriftAnnotations
+    readonly methodAnnotations: IMethodAnnotations
+    readonly methodNames: Array<string>
+    new (handler: THandler): TProcessor
+}
 
 export type ProtocolType = 'binary' | 'compact' | 'json'
 
