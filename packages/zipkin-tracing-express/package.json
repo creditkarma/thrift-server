@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/zipkin-tracing-express",
-    "version": "0.12.4",
+    "version": "0.12.5",
     "description": "Zipkin tracing for thrift-server-express",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -27,8 +27,8 @@
         "express": ">=4.0.0 <5.0.0"
     },
     "devDependencies": {
-        "@creditkarma/thrift-server-core": "^0.12.4",
-        "@creditkarma/zipkin-core": "^0.12.4",
+        "@creditkarma/thrift-server-core": "^0.12.5",
+        "@creditkarma/zipkin-core": "^0.12.5",
         "@types/express": "^4.16.0",
         "@types/node": "^8.10.38",
         "express": "^4.16.4",
