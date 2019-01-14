@@ -58,7 +58,7 @@ export function ThriftServerHapi<
         thriftOptions.protocol,
     )
     const processor: Core.IThriftProcessor<Hapi.Request> = thriftOptions.handler
-    const rawServicename: string = processor._serviceName
+    const rawServiceName: string = processor._serviceName
 
     return {
         name: require('../../package.json').name,
@@ -182,7 +182,7 @@ export function ThriftServerHapi<
             if (thriftOptions.withEndpointPerMethod === true) {
                 thriftOptions.handler._methodNames.forEach(
                     (methodName: string) => {
-                        const methodPerEndpointPath: string = `${thriftPath}/${rawServicename}/${methodName}`
+                        const methodPerEndpointPath: string = `${thriftPath}/${rawServiceName}/${methodName}`
                         server.route({
                             method: 'POST',
                             path: methodPerEndpointPath,
@@ -211,7 +211,7 @@ export function ThriftServerHapi<
             } else {
                 server.route({
                     method: 'POST',
-                    path: `${thriftPath}`,
+                    path: (thriftPath === '') ? '/' : `${thriftPath}`,
                     handler,
                     options: {
                         payload: {
