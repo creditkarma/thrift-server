@@ -150,18 +150,18 @@ describe('Utils', () => {
             expect(actual).to.equal(expected)
         })
 
-        it('should leave empty path unchanged', async () => {
+        it('should return empty string for empty path', async () => {
             const path: string = '/'
             const actual: string = Utils.normalizePath(path)
-            const expected: string = '/'
+            const expected: string = ''
 
             expect(actual).to.equal(expected)
         })
 
-        it('should return empty path for empty string', async () => {
+        it('should return empty string for empty string', async () => {
             const path: string = ''
             const actual: string = Utils.normalizePath(path)
-            const expected: string = '/'
+            const expected: string = ''
 
             expect(actual).to.equal(expected)
         })

@@ -10,6 +10,8 @@ import {
 
 import { defaultLogger } from './logger'
 
+export const DEFAULT_PATH: string = '/thrift'
+
 // Extend Hapi types with our plugin
 declare module 'hapi' {
     // tslint:disable-next-line:interface-name
@@ -45,7 +47,7 @@ export function ThriftServerHapi<
         pluginOptions.thriftOptions
     const logger: Core.LogFunction = thriftOptions.logger || defaultLogger
     const thriftPath: string = Core.normalizePath(
-        pluginOptions.path || '/thrift',
+        pluginOptions.path || DEFAULT_PATH,
     )
     const serviceName: string = pluginOptions.thriftOptions.serviceName
 
@@ -176,6 +178,8 @@ export function ThriftServerHapi<
                     context: request,
                 })
             }
+
+            console.log('hapi.path: ', thriftPath)
 
             thriftOptions.handler._methodNames.forEach((methodName: string) => {
                 const methodPerEndpointPath: string = `${thriftPath}/${rawServicename}/${methodName}`

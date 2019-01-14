@@ -1,12 +1,8 @@
 export const normalizePath = (path: string = '/'): string => {
     path = path.trim()
 
-    if (path === '/') {
-        return path
-    }
-
-    if (path === '') {
-        return '/'
+    if (path === '/' || path === '') {
+        return ''
     }
 
     if (!path.startsWith('/')) {

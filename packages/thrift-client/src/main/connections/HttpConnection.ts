@@ -1,6 +1,7 @@
 import * as Core from '@creditkarma/thrift-server-core'
 
 import request = require('request')
+
 import {
     Request,
     RequestAPI,
@@ -91,6 +92,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         this.basePath = `${this.protocol}://${this.hostName}:${this.port}`
         this.withEndpointPerMethod = withEndpointPerMethod
         this.url = `${this.basePath}${this.path}`
+        console.log('client url: ', this.url)
         this.filters = []
     }
 
@@ -177,6 +179,8 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             this.withEndpointPerMethod && retry === false
                 ? `${this.url}/${this.serviceName}/${methodName}`
                 : this.url
+
+        console.log('requestUrl: ', requestUrl)
 
         // Merge user options with required options
         const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
