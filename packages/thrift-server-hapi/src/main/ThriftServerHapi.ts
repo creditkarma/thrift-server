@@ -179,13 +179,27 @@ export function ThriftServerHapi<
                 })
             }
 
-            console.log('hapi.path: ', thriftPath)
+            if (thriftOptions.withEndpointPerMethod === true) {
+                thriftOptions.handler._methodNames.forEach(
+                    (methodName: string) => {
+                        const methodPerEndpointPath: string = `${thriftPath}/${rawServicename}/${methodName}`
+                        server.route({
+                            method: 'POST',
+                            path: methodPerEndpointPath,
+                            handler,
+                            options: {
+                                payload: {
+                                    parse: false,
+                                },
+                                auth: pluginOptions.auth,
+                            },
+                        })
+                    },
+                )
 
-            thriftOptions.handler._methodNames.forEach((methodName: string) => {
-                const methodPerEndpointPath: string = `${thriftPath}/${rawServicename}/${methodName}`
                 server.route({
                     method: 'POST',
-                    path: methodPerEndpointPath,
+                    path: `${thriftPath}/{p*}`,
                     handler,
                     options: {
                         payload: {
@@ -194,19 +208,19 @@ export function ThriftServerHapi<
                         auth: pluginOptions.auth,
                     },
                 })
-            })
-
-            server.route({
-                method: 'POST',
-                path: `${thriftPath}/{p*}`,
-                handler,
-                options: {
-                    payload: {
-                        parse: false,
+            } else {
+                server.route({
+                    method: 'POST',
+                    path: `${thriftPath}`,
+                    handler,
+                    options: {
+                        payload: {
+                            parse: false,
+                        },
+                        auth: pluginOptions.auth,
                     },
-                    auth: pluginOptions.auth,
-                },
-            })
+                })
+            }
         },
     }
 }

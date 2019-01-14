@@ -40,6 +40,7 @@ export interface IThriftServerOptions<
     transport?: TransportType
     protocol?: ProtocolType
     logger?: LogFunction
+    withEndpointPerMethod?: boolean
 }
 
 export interface IThriftConnection<Context = void> {
