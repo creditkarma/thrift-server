@@ -31,8 +31,10 @@ export function process<Context>(args: {
         }, (err: any) => {
             if (err instanceof InputBufferUnderrunError) {
                 transportWithData.rollbackPosition()
+                reject(new Error(`Unable to read Thrift payload`))
+            } else {
+                reject(err)
             }
-            reject(err)
         })
     })
 }

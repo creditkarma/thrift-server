@@ -41,7 +41,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
             sampleRate,
             eventLoggers: {
                 success: (res: any) => {
-                    console.log('success: ', res)
+                    console.log('success')
                 },
             },
         }))
@@ -63,7 +63,7 @@ export function createClientServer(sampleRate: number = 0): Promise<net.Server> 
                         httpInterval: 0,
                         eventLoggers: {
                             success: (res: any) => {
-                                console.log('success: ', res)
+                                console.log('success')
                             },
                         },
                     }) ] :

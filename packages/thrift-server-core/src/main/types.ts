@@ -48,24 +48,18 @@ export abstract class ThriftConnection<Context = void> extends EventEmitter impl
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export interface IProtocolConstructor {
-    new(trans: TTransport, strictRead?: boolean, strictWrite?: boolean): TProtocol
-}
+export type IProtocolConstructor = new(trans: TTransport, strictRead?: boolean, strictWrite?: boolean) => TProtocol
 
 export interface ITransportConstructor {
     new(buffer?: Buffer): TTransport
     receiver(data: Buffer): TTransport
 }
 
-export interface IClientConstructor<TClient, Context> {
-    new(
+export type IClientConstructor<TClient, Context> = new(
         connection: ThriftConnection<Context>,
-    ): TClient
-}
+    ) => TClient
 
-export interface IProcessorConstructor<TProcessor, THandler> {
-    new(handler: THandler): TProcessor
-}
+export type IProcessorConstructor<TProcessor, THandler> = new(handler: THandler) => TProcessor
 
 export interface IStructConstructor<T extends StructLike> {
     new(args?: any): T

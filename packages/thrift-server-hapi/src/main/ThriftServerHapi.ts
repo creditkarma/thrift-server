@@ -88,7 +88,7 @@ export function ThriftServerHapi<TProcessor extends Core.IThriftProcessor<Hapi.R
             server.route({
                 method: 'POST',
                 path: thriftPath,
-                handler: (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
+                handler: async (request: Hapi.Request, reply: Hapi.ReplyNoContinue) => {
                     try {
                         const method: string = Core.readThriftMethod(
                             request.payload,
@@ -100,17 +100,17 @@ export function ThriftServerHapi<TProcessor extends Core.IThriftProcessor<Hapi.R
                             request.plugins.thrift,
                             { method },
                         )
-                        reply(
-                            Core.process<Hapi.Request>({
-                                processor: options.handler,
-                                buffer: request.payload,
-                                Transport,
-                                Protocol,
-                                context: request,
-                            }),
-                        )
+                        const result = await Core.process<Hapi.Request>({
+                            processor: options.handler,
+                            buffer: request.payload,
+                            Transport,
+                            Protocol,
+                            context: request,
+                        })
+                        reply(result)
                     } catch (err) {
-                        reply(err)
+                        request.log(['error', 'ThriftServerHapi', 'process'], err.message)
+                        throw err
                     }
                 },
                 config: {

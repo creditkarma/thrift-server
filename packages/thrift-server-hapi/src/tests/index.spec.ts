@@ -2,7 +2,7 @@ import {
     createHttpClient,
 } from '@creditkarma/thrift-client'
 
-import { expect } from 'code'
+import { expect, fail } from 'code'
 import * as Hapi from 'hapi'
 import * as Lab from 'lab'
 import { CoreOptions } from 'request'
@@ -88,6 +88,14 @@ describe('Thrift Server Hapi', () => {
         it('should handle requests not pointed to thrift service', async () => {
             return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/control`).then((val) => {
                 expect(val).to.equal('PASS')
+            })
+        })
+
+        it('should return error for invalid thrift request', async () => {
+            return rp(`http://${SERVER_CONFIG.hostName}:${SERVER_CONFIG.port}/thrift`, { method: 'POST' }).then((val) => {
+                fail(`shouldn't be here`)
+            }, (err: any) => {
+                expect(err.statusCode).to.equal(500)
             })
         })
     })

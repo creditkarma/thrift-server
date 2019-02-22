@@ -64,7 +64,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                         httpInterval: 0,
                         eventLoggers: {
                             success: (res: any) => {
-                                console.log('success: ', res)
+                                console.log('success')
                             },
                         },
                     }) ] :
@@ -185,7 +185,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                 httpInterval: 0,
                 eventLoggers: {
                     success: (res: any) => {
-                        console.log('success: ', res)
+                        console.log('success')
                     },
                 },
             }),
@@ -214,7 +214,7 @@ export function createServer(sampleRate: number = 0): Hapi.Server {
                     httpInterval: 0,
                     eventLoggers: {
                         success: (res: any) => {
-                            console.log('success: ', res)
+                            console.log('success')
                         },
                     },
                 }) ] :

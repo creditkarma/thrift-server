@@ -23,7 +23,7 @@ export * from './types'
 export function createThriftServer<TProcessor extends IThriftProcessor<Hapi.Request>>(
     options: ICreateHapiServerOptions<TProcessor>,
 ): Hapi.Server {
-    const server = new Hapi.Server({ debug: { request: ['error'] } })
+    const server = new Hapi.Server({ debug: { log: ['error'], request: ['error'] } })
     server.connection({ port: options.port })
 
     server.register(
