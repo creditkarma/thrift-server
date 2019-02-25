@@ -99,10 +99,7 @@ const createSocket = (
 
         socket.once('connect', connectHandler)
 
-        socket.connect(
-            config.port,
-            config.hostName,
-        )
+        socket.connect(config.port, config.hostName)
     })
 }
 

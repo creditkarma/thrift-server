@@ -211,7 +211,7 @@ export function ThriftServerHapi<
             } else {
                 server.route({
                     method: 'POST',
-                    path: (thriftPath === '') ? '/' : `${thriftPath}`,
+                    path: thriftPath === '' ? '/' : `${thriftPath}`,
                     handler,
                     options: {
                         payload: {

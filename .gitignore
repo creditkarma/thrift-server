@@ -52,6 +52,7 @@ dist
 
 # Codegen artifacts
 generated
+generated-strict
 generated-apache
 
 # Temp files

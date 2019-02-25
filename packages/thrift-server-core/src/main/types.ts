@@ -101,6 +101,11 @@ export interface IStructCodec<LooseType, StrictType> {
     decode(input: TProtocol): StrictType
 }
 
+export interface IStructToolkit<LooseType, StrictType>
+    extends IStructCodec<LooseType, StrictType> {
+    create(args: LooseType): StrictType
+}
+
 export type IProtocolConstructor = new (
     trans: TTransport,
     logger?: LogFunction,
