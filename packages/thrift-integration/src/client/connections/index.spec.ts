@@ -18,14 +18,14 @@ import { expect } from 'code'
 import * as Lab from 'lab'
 
 import { Calculator, IChoice } from '../../generated/calculator-service'
-import { Calculator as CalculatorStrict, Choice, ChoiceArgs } from '../../generated-strict/calculator-service'
+import { Calculator as CalculatorStrict, ChoiceArgs } from '../../generated-strict/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 
 import { createServer as apacheService } from '../../apache-calculator-service'
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'
-import { createServer as calculatorServiceStrict } from '../../calculator-service-strict'
+import { createServer as calculatorServiceStrict } from '../../calculator-strict-unions'
 
 export const lab = Lab.script()
 
@@ -45,7 +45,7 @@ describe('createHttpClient', () => {
                 CalculatorStrict.Client,
                 HAPI_CALC_SERVER_STRICT_CONFIG,
             )
-            calcServer = await calculatorService()
+            calcServer = await calculatorServiceStrict()
             addServer = await addService()
             return Promise.all([calcServer.start(), addServer.start()]).then(
                 (err) => {
