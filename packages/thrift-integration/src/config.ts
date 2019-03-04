@@ -3,6 +3,12 @@ export const APACHE_SERVER_CONFIG = {
     port: 8888,
 }
 
+export const HAPI_CALC_SERVER_STRICT_CONFIG = {
+    hostName: 'localhost',
+    port: 8092,
+    path: '/thrift',
+}
+
 export const HAPI_CALC_SERVER_CONFIG = {
     hostName: 'localhost',
     port: 8090,

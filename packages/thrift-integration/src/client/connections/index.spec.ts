@@ -12,18 +12,20 @@ import {
 
 import { CoreOptions } from 'request'
 
-import { APACHE_SERVER_CONFIG, HAPI_CALC_SERVER_CONFIG } from '../../config'
+import { APACHE_SERVER_CONFIG, HAPI_CALC_SERVER_CONFIG, HAPI_CALC_SERVER_STRICT_CONFIG } from '../../config'
 
 import { expect } from 'code'
 import * as Lab from 'lab'
 
 import { Calculator, IChoice } from '../../generated/calculator-service'
+import { Calculator as CalculatorStrict, Choice, ChoiceArgs } from '../../generated-strict/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 
 import { createServer as apacheService } from '../../apache-calculator-service'
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'
+import { createServer as calculatorServiceStrict } from '../../calculator-service-strict'
 
 export const lab = Lab.script()
 
@@ -33,6 +35,59 @@ const before = lab.before
 const after = lab.after
 
 describe('createHttpClient', () => {
+    describe('Strict Unions', () => {
+        let client: CalculatorStrict.Client<CoreOptions>
+        let calcServer: Hapi.Server
+        let addServer: Hapi.Server
+
+        before(async () => {
+            client = createHttpClient(
+                CalculatorStrict.Client,
+                HAPI_CALC_SERVER_STRICT_CONFIG,
+            )
+            calcServer = await calculatorService()
+            addServer = await addService()
+            return Promise.all([calcServer.start(), addServer.start()]).then(
+                (err) => {
+                    console.log('Thrift server running')
+                },
+            )
+        })
+
+        after(async () => {
+            return Promise.all([calcServer.stop(), addServer.stop()]).then(
+                (err) => {
+                    console.log('Thrift server stopped')
+                },
+            )
+        })
+
+        it('should corrently handle a service client request', async () => {
+            return client.add(5, 7).then((response: number) => {
+                expect(response).to.equal(12)
+            })
+        })
+
+        it('should corrently handle a void service client request', async () => {
+            return client.ping().then((response: any) => {
+                expect(response).to.equal(undefined)
+            })
+        })
+
+        it('should call an endpoint with union arguments', async () => {
+            const firstName: ChoiceArgs = { firstName: { name: 'Louis' } }
+            const lastName: ChoiceArgs = { lastName: { name: 'Smith' } }
+
+            return Promise.all([
+                client.checkName(firstName),
+                client.checkName(lastName),
+            ]).then((val: Array<string>) => {
+                expect(val[0]).to.equal('FirstName: Louis')
+                expect(val[1]).to.equal('LastName: Smith')
+            })
+        })
+    })
+
     describe('Basic Usage', () => {
         let client: Calculator.Client<CoreOptions>
         let calcServer: Hapi.Server

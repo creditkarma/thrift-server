@@ -19,7 +19,7 @@ import {
     SharedUnionCodec,
 } from './generated-strict/shared'
 
-import { ADD_SERVER_CONFIG, HAPI_CALC_SERVER_CONFIG } from './config'
+import { ADD_SERVER_CONFIG, HAPI_CALC_SERVER_STRICT_CONFIG } from './config'
 
 import {
     Calculator,
@@ -202,8 +202,8 @@ export async function createServer(
      * Creates Hapi server with thrift endpoint.
      */
     const server: Hapi.Server = await createThriftServer({
-        port: HAPI_CALC_SERVER_CONFIG.port,
-        path: HAPI_CALC_SERVER_CONFIG.path,
+        port: HAPI_CALC_SERVER_STRICT_CONFIG.port,
+        path: HAPI_CALC_SERVER_STRICT_CONFIG.path,
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
@@ -228,9 +228,9 @@ export async function createServer(
 
     const client: Calculator.Client = createHttpClient(Calculator.Client, {
         serviceName: 'calculator-service',
-        hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-        port: HAPI_CALC_SERVER_CONFIG.port,
-        path: HAPI_CALC_SERVER_CONFIG.path,
+        hostName: HAPI_CALC_SERVER_STRICT_CONFIG.hostName,
+        port: HAPI_CALC_SERVER_STRICT_CONFIG.port,
+        path: HAPI_CALC_SERVER_STRICT_CONFIG.path,
         register:
             sampleRate > 0
                 ? [
