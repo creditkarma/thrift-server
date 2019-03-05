@@ -291,7 +291,7 @@ export class Int64 {
      * @param radix Just like Number#toString()'s radix
      */
     public toString(radix: number = 10): string {
-        return this.toDecimalString()
+        return this.valueOf().toString(radix)
     }
 
     /**
