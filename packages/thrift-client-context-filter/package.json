@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-context-filter",
-    "version": "0.13.1",
+    "version": "0.13.2",
     "description": "Filter for appending a Thrift object to request payload",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -22,8 +22,8 @@
         "@creditkarma/thrift-server-core": "0.12.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.13.1",
-        "@creditkarma/thrift-server-core": "^0.13.1",
+        "@creditkarma/thrift-client": "^0.13.2",
+        "@creditkarma/thrift-server-core": "^0.13.2",
         "@types/code": "^4.0.5",
         "@types/node": "^8.10.38",
         "code": "^5.2.4",
