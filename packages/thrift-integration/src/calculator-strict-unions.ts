@@ -30,6 +30,8 @@ import {
     Work,
 } from './generated-strict/calculator-service'
 
+import { CommonUnion, CommonUnionCodec } from './generated-strict/common'
+
 import { AddService } from './generated-strict/add-service'
 
 export async function createServer(
@@ -192,6 +194,9 @@ export async function createServer(
                 },
                 value: 'test',
             }
+        },
+        fetchUnion(): CommonUnion {
+            return CommonUnionCodec.create({ option1: 'test' })
         },
         broken(): void {
             throw new Error(`Yeah, this didn't work`)

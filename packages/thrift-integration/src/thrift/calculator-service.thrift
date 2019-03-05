@@ -59,6 +59,8 @@ service Calculator extends shared.SharedService {
 
    common.CommonStruct fetchThing()
 
+   common.CommonUnion fetchUnion()
+
    /**
     * This method has a oneway modifier. That means the client only makes
     * a request and does not listen for any response at all. Oneway methods

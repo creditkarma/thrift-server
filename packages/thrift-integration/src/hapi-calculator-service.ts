@@ -25,6 +25,7 @@ import {
 } from './generated/calculator-service'
 
 import { AddService } from './generated/add-service'
+import { ICommonUnionArgs } from './generated/common'
 
 export async function createServer(
     sampleRate: number = 0,
@@ -184,6 +185,9 @@ export async function createServer(
                 },
                 value: 'test',
             }
+        },
+        fetchUnion(): ICommonUnionArgs {
+            return { option1: 'test' }
         },
         broken(): void {
             throw new Error(`Yeah, this didn't work`)

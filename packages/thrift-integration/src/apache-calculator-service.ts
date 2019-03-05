@@ -16,6 +16,8 @@ import {
     SharedUnion,
 } from './generated-apache/shared'
 
+import { CommonUnion } from './generated-apache/common'
+
 export function createServer(): net.Server {
     const impl: Calculator.IHandler = {
         ping(): void {
@@ -113,6 +115,9 @@ export function createServer(): net.Server {
                 code: new Code({ status: 5 }),
                 value: 'test',
             })
+        },
+        fetchUnion(): CommonUnion {
+            return new CommonUnion({ option1: 'test' })
         },
         broken(): void {
             throw new Error(`Yeah, this didn't work`)

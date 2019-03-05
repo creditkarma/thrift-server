@@ -23,6 +23,7 @@ import {
 import { AddService } from './generated/add-service'
 
 import { ADD_SERVER_CONFIG, EXPRESS_CALC_SERVER_CONFIG } from './config'
+import { ICommonUnion } from './generated/common'
 
 export function createServer(sampleRate: number = 0): express.Application {
     // Create thrift client
@@ -171,6 +172,9 @@ export function createServer(sampleRate: number = 0): express.Application {
                 },
                 value: 'test',
             }
+        },
+        fetchUnion(): ICommonUnion {
+            return { option1: 'test' }
         },
         broken(): void {
             throw new Error(`Yeah, this didn't work`)
