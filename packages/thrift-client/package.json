@@ -1,6 +1,6 @@
 {
   "name": "@creditkarma/thrift-client",
-  "version": "0.12.5",
+  "version": "0.13.0",
   "description": "Thrift client library for NodeJS written in TypeScript.",
   "main": "dist/main/index.js",
   "types": "dist/main/index.d.ts",
@@ -38,7 +38,7 @@
     "@creditkarma/thrift-server-core": "0.12.x"
   },
   "devDependencies": {
-    "@creditkarma/thrift-server-core": "^0.12.5",
+    "@creditkarma/thrift-server-core": "^0.13.0",
     "@types/node": "^8.10.38",
     "prettier": "^1.15.1",
     "rimraf": "^2.6.2",
