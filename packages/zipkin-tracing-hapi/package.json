@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/zipkin-tracing-hapi",
-    "version": "0.13.2",
+    "version": "0.13.3",
     "description": "Zipkin tracing for thrift-server-hapi",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -28,9 +28,9 @@
         "hapi": ">=17.0.0 <18.0.0"
     },
     "devDependencies": {
-        "@creditkarma/thrift-server-core": "^0.13.2",
-        "@creditkarma/thrift-server-hapi": "^0.13.2",
-        "@creditkarma/zipkin-core": "^0.13.2",
+        "@creditkarma/thrift-server-core": "^0.13.3",
+        "@creditkarma/thrift-server-hapi": "^0.13.3",
+        "@creditkarma/zipkin-core": "^0.13.3",
         "@types/hapi": "^17.6.4",
         "@types/node": "^8.10.38",
         "lab": "^18.0.0",
