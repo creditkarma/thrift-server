@@ -18,8 +18,8 @@
         "test:only": "echo 'No tests for thrift-client-timing-filter'; exit 0;"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.12.x",
-        "@creditkarma/thrift-server-core": "0.12.x"
+        "@creditkarma/thrift-client": "0.13.x",
+        "@creditkarma/thrift-server-core": "0.13.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.13.2",

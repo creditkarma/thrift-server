@@ -24,7 +24,7 @@
         "zipkin-transport-http": "^0.14.2"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-server-core": "0.12.x"
+        "@creditkarma/thrift-server-core": "0.13.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-server-core": "^0.13.2",
