@@ -119,19 +119,19 @@ export interface ITransportConstructor {
 export interface IThriftClient {
     readonly _serviceName: string
     readonly _annotations: IThriftAnnotations
-    readonly _fieldAnnotations: IFieldAnnotations
+    readonly _methodAnnotations: IMethodAnnotations
     readonly _methodNames: Array<string>
 }
 
 export abstract class ThriftClient<Context = any> implements IThriftClient {
     public static readonly serviceName?: string = undefined
     public static readonly annotations?: IThriftAnnotations = {}
-    public static readonly fieldAnnotations?: IFieldAnnotations = {}
+    public static readonly methodAnnotations?: IMethodAnnotations = {}
     public static readonly methodNames?: Array<string> = []
 
     public readonly _serviceName: string = ''
     public readonly _annotations: IThriftAnnotations = {}
-    public readonly _fieldAnnotations: IFieldAnnotations = {}
+    public readonly _methodAnnotations: IMethodAnnotations = {}
     public readonly _methodNames: Array<string> = []
 
     protected _requestId: number
@@ -157,7 +157,7 @@ export interface IClientConstructor<
 > {
     readonly serviceName?: string
     readonly annotations?: IThriftAnnotations
-    readonly fieldAnnotations?: IFieldAnnotations
+    readonly methodAnnotations?: IMethodAnnotations
     readonly methodNames?: Array<string>
     new (connection: ThriftConnection<Context>): TClient
 }
