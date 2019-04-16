@@ -59,33 +59,6 @@ export abstract class ThriftConnection<Context = void>
     public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export interface IThriftAnnotations {
-    [name: string]: string
-}
-
-export interface IFieldAnnotations {
-    [fieldName: string]: IThriftAnnotations
-}
-
-export interface IMethodAnnotations {
-    [methodName: string]: {
-        annotations: IThriftAnnotations
-        fieldAnnotations: IFieldAnnotations
-    }
-}
-
-export interface IStructLike {
-    readonly _annotations: IThriftAnnotations
-    readonly _fieldAnnotations: IFieldAnnotations
-    write(output: TProtocol): void
-}
-
-export abstract class StructLike implements IStructLike {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _fieldAnnotations: IFieldAnnotations = {}
-    public abstract write(output: TProtocol): void
-}
-
 export interface IStructConstructor<T extends StructLike> {
     new (args?: any): T
     read(input: TProtocol): T
@@ -116,23 +89,85 @@ export interface ITransportConstructor {
     receiver(data: Buffer): TTransport
 }
 
-export interface IThriftClient {
-    readonly _serviceName: string
+export interface IThriftAnnotations {
+    [name: string]: string
+}
+
+export interface IFieldAnnotations {
+    [fieldName: string]: IThriftAnnotations
+}
+
+export interface IMethodAnnotations {
+    [methodName: string]: {
+        annotations: IThriftAnnotations
+        fieldAnnotations: IFieldAnnotations
+    }
+}
+
+export interface IStructLike {
     readonly _annotations: IThriftAnnotations
-    readonly _methodAnnotations: IMethodAnnotations
-    readonly _methodNames: Array<string>
+    readonly _fieldAnnotations: IFieldAnnotations
+    write(output: TProtocol): void
+}
+
+export abstract class StructLike implements IStructLike {
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _fieldAnnotations: IFieldAnnotations = {}
+    public abstract write(output: TProtocol): void
+}
+
+export const enum FieldMetadataType {
+    STRUCT,
+    PRIMITIVE,
+}
+
+export type FieldMetadata =
+    | IStructMetadata
+    | IPrimitiveMetadata
+
+export interface IFieldMetadata {
+    type: FieldMetadataType
+    name: string
+}
+
+export interface IStructMetadata extends IFieldMetadata {
+    type: FieldMetadataType.STRUCT
+    fields: IFieldMetadata
+}
+
+export interface IPrimitiveMetadata extends IFieldMetadata{
+    type: FieldMetadataType.PRIMITIVE
+}
+
+export interface IMethodMetadata {
+    [methodName: string]: {
+        name: string
+        annotations: IThriftAnnotations
+        fields: IFieldMetadata
+    }
+}
+
+export interface IServiceMetadata {
+    serviceName: string
+    annotations: IThriftAnnotations
+    methods: IMethodMetadata
+}
+
+export interface IThriftClient {
+    readonly _metadata: IServiceMetadata
 }
 
 export abstract class ThriftClient<Context = any> implements IThriftClient {
-    public static readonly serviceName?: string = undefined
-    public static readonly annotations?: IThriftAnnotations = {}
-    public static readonly methodAnnotations?: IMethodAnnotations = {}
-    public static readonly methodNames?: Array<string> = []
-
-    public readonly _serviceName: string = ''
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _methodAnnotations: IMethodAnnotations = {}
-    public readonly _methodNames: Array<string> = []
+    public static readonly metadata: IServiceMetadata = {
+        serviceName: '',
+        annotations: {},
+        methods: {},
+    }
+    public readonly _metadata: IServiceMetadata = {
+        serviceName: '',
+        annotations: {},
+        methods: {},
+    }
 
     protected _requestId: number
     protected transport: ITransportConstructor
@@ -155,18 +190,12 @@ export interface IClientConstructor<
     TClient extends ThriftClient<Context>,
     Context
 > {
-    readonly serviceName?: string
-    readonly annotations?: IThriftAnnotations
-    readonly methodAnnotations?: IMethodAnnotations
-    readonly methodNames?: Array<string>
+    readonly metadata?: IServiceMetadata
     new (connection: ThriftConnection<Context>): TClient
 }
 
 export interface IThriftProcessor<Context> {
-    readonly _serviceName: string
-    readonly _annotations: IThriftAnnotations
-    readonly _methodAnnotations: IMethodAnnotations
-    readonly _methodNames: Array<string>
+    readonly _metadata: IServiceMetadata
 
     process(
         input: TProtocol,
@@ -177,15 +206,17 @@ export interface IThriftProcessor<Context> {
 
 export abstract class ThriftProcessor<Context, IHandler>
     implements IThriftProcessor<Context> {
-    public static readonly serviceName?: string = undefined
-    public static readonly annotations?: IThriftAnnotations = {}
-    public static readonly methodAnnotations?: IMethodAnnotations = {}
-    public static readonly methodNames?: Array<string> = []
+    public static readonly metadata: IServiceMetadata = {
+        serviceName: '',
+        annotations: {},
+        methods: {},
+    }
 
-    public readonly _serviceName: string = ''
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _methodAnnotations: IMethodAnnotations = {}
-    public readonly _methodNames: Array<string> = []
+    public readonly _metadata: IServiceMetadata = {
+        serviceName: '',
+        annotations: {},
+        methods: {},
+    }
 
     public abstract process(
         input: TProtocol,
@@ -195,10 +226,7 @@ export abstract class ThriftProcessor<Context, IHandler>
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
-    readonly serviceName: string
-    readonly annotations: IThriftAnnotations
-    readonly methodAnnotations: IMethodAnnotations
-    readonly methodNames: Array<string>
+    readonly metadata: IServiceMetadata
     new (handler: THandler): TProcessor
 }
 
