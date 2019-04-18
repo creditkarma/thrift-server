@@ -271,7 +271,7 @@ Filters are applied in the order in which they are registered.
 ```typescript
 interface IRequestResponse {
     statusCode: number
-    headers: IRequestHeaders
+    headers: Record<string, any>
     body: Buffer
 }
 

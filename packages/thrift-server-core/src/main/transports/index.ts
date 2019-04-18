@@ -3,7 +3,6 @@ import { ITransportConstructor, ITransportMap, TransportType } from '../types'
 import { BufferedTransport } from './BufferedTransport'
 
 export * from './BufferedTransport'
-// export * from './FramedTransport'
 export * from './TTransport'
 export * from './ThriftFrameCodec'
 
@@ -12,7 +11,9 @@ const transports: ITransportMap = {
     // framed: FramedTransport,
 }
 
-export const supportedTransports: Array<string> = Object.keys(transports)
+export const supportedTransports: Array<keyof ITransportMap> = Object.keys(
+    transports,
+)
 
 export function isTransportSupported(transport: TransportType): boolean {
     return supportedTransports.indexOf(transport) !== -1

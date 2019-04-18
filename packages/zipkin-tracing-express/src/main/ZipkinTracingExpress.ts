@@ -1,7 +1,6 @@
 import {
     getProtocol,
     getTransport,
-    IRequestHeaders,
     readThriftMethod,
 } from '@creditkarma/thrift-server-core'
 
@@ -53,7 +52,7 @@ export function ZipkinTracingExpress({
                       )
                     : request.method
 
-            const normalHeaders: IRequestHeaders = normalizeHeaders(
+            const normalHeaders: Record<string, any> = normalizeHeaders(
                 request.headers,
             )
 
@@ -72,7 +71,7 @@ export function ZipkinTracingExpress({
                 readHeader,
             )
 
-            const traceHeaders: IRequestHeaders = headersForTraceId(traceId)
+            const traceHeaders: Record<string, any> = headersForTraceId(traceId)
 
             // Update headers on request object
             for (const key in traceHeaders) {

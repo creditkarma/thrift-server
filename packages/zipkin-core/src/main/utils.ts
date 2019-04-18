@@ -5,8 +5,6 @@ import { ITraceId } from './types'
 
 import { L5D_TRACE_HDR, ZipkinHeaders } from './constants'
 
-import { IRequestHeaders } from '@creditkarma/thrift-server-core'
-
 function isFlagSet(flags: number, field: number): boolean {
     return (flags & field) === field
 }
@@ -115,7 +113,7 @@ export function traceIdFromTraceId(trace: ITraceId): TraceId {
     })
 }
 
-export function headersForTraceId(traceId: TraceId): IRequestHeaders {
+export function headersForTraceId(traceId: TraceId): Record<string, any> {
     return {
         [ZipkinHeaders.TraceId]: traceId.traceId,
         [ZipkinHeaders.SpanId]: traceId.spanId,
@@ -124,7 +122,7 @@ export function headersForTraceId(traceId: TraceId): IRequestHeaders {
     }
 }
 
-export function containsZipkinHeaders(headers: IRequestHeaders): boolean {
+export function containsZipkinHeaders(headers: Record<string, any>): boolean {
     return (
         headers[L5D_TRACE_HDR] !== undefined ||
         (headers[ZipkinHeaders.TraceId] !== undefined &&
@@ -132,7 +130,7 @@ export function containsZipkinHeaders(headers: IRequestHeaders): boolean {
     )
 }
 
-export function traceIdForHeaders(headers: IRequestHeaders): ITraceId {
+export function traceIdForHeaders(headers: Record<string, any>): ITraceId {
     const normalizedHeaders = normalizeHeaders(headers)
     const traceId: string = normalizedHeaders[ZipkinHeaders.TraceId] as string
     const spanId: string = normalizedHeaders[ZipkinHeaders.SpanId] as string
@@ -146,7 +144,9 @@ export function traceIdForHeaders(headers: IRequestHeaders): ITraceId {
     }
 }
 
-export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
+export function normalizeHeaders(
+    headers: Record<string, any>,
+): Record<string, any> {
     if (headers[L5D_TRACE_HDR] !== undefined) {
         const linkerDTrace = deserializeLinkerdHeader(headers[
             L5D_TRACE_HDR
@@ -168,11 +168,13 @@ export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
     }
 }
 
-export function hasL5DHeader(headers: IRequestHeaders): boolean {
+export function hasL5DHeader(headers: Record<string, any>): boolean {
     return headers[L5D_TRACE_HDR] !== undefined
 }
 
-export function addL5Dheaders(headers: IRequestHeaders): IRequestHeaders {
+export function addL5Dheaders(
+    headers: Record<string, any>,
+): Record<string, any> {
     const newHeaders = Object.keys(headers).reduce((acc: any, next: string) => {
         acc[next.toLowerCase()] = headers[next]
         return acc

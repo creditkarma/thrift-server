@@ -1,5 +1,4 @@
 import {
-    IRequestHeaders,
     LogFunction,
     ProtocolType,
     TransportType,
@@ -26,7 +25,7 @@ export interface IZipkinTracerConfig {
     debug?: boolean
     endpoint?: string
     sampleRate?: number
-    headers?: IRequestHeaders
+    headers?: Record<string, any>
     httpInterval?: number
     httpTimeout?: number
     zipkinVersion?: ZipkinVersion

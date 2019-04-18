@@ -1,4 +1,4 @@
-import { IRequestHeaders, LogFunction } from '@creditkarma/thrift-server-core'
+import { LogFunction } from '@creditkarma/thrift-server-core'
 
 import {
     BatchRecorder,
@@ -36,7 +36,7 @@ interface IHttpLoggerOptions {
     endpoint: string
     httpInterval?: number
     httpTimeout?: number
-    headers?: IRequestHeaders
+    headers?: Record<string, any>
     jsonEncoder?: JsonEncoder
 }
 

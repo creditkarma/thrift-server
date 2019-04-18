@@ -1,5 +1,4 @@
 import {
-    IRequestHeaders,
     LogFunction,
     ProtocolType,
     TransportType,
@@ -14,12 +13,12 @@ export type RequestOptions = request.CoreOptions
 
 export interface IRequestResponse {
     statusCode: number
-    headers: IRequestHeaders
+    headers: Record<string, any>
     body: Buffer
 }
 
 export interface IRequest {
-    headers: IRequestHeaders
+    headers: Record<string, any>
 }
 
 export interface IThriftRequest<Context> {

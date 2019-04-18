@@ -1,43 +1,43 @@
-import {
-    getProtocol,
-    getTransport,
-    IProtocolConstructor,
-    IThriftProcessor,
-    ITransportConstructor,
-    process,
-    readThriftMethod,
-} from '@creditkarma/thrift-server-core'
+import * as Core from '@creditkarma/thrift-server-core'
 
 import * as express from 'express'
 
 import { IExpressServerOptions } from './types'
 
-type ThriftRequest = express.Request & {
-    thrift?: {
-        requestMethod: string
-        processor: IThriftProcessor<express.Request>
-        transport: string
-        protocol: string
+// Extend Express types with our plugin
+declare module 'express' {
+    // tslint:disable-next-line:interface-name
+    export interface Request {
+        thrift?: {
+            requestMethod: string
+            processor: Core.IThriftProcessor<express.Request>
+            transport: Core.TransportType
+            protocol: Core.ProtocolType
+        }
     }
 }
 
 export function ThriftServerExpress<
-    TProcessor extends IThriftProcessor<express.Request>
+    TProcessor extends Core.IThriftProcessor<express.Request>
 >(pluginOptions: IExpressServerOptions<TProcessor>): express.RequestHandler {
     return (
-        request: ThriftRequest,
+        request: express.Request,
         response: express.Response,
         next: express.NextFunction,
     ): void => {
-        const Transport: ITransportConstructor = getTransport(
+        const Transport: Core.ITransportConstructor = Core.getTransport(
             pluginOptions.transport,
         )
-        const Protocol: IProtocolConstructor = getProtocol(
+        const Protocol: Core.IProtocolConstructor = Core.getProtocol(
             pluginOptions.protocol,
         )
         const buffer: Buffer = request.body
 
-        const method: string = readThriftMethod(buffer, Transport, Protocol)
+        const method: string = Core.readThriftMethod(
+            buffer,
+            Transport,
+            Protocol,
+        )
 
         request.thrift = {
             requestMethod: method,
@@ -47,7 +47,7 @@ export function ThriftServerExpress<
         }
 
         try {
-            process({
+            Core.process({
                 processor: pluginOptions.handler,
                 buffer,
                 Transport,

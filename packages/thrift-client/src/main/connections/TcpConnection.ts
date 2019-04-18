@@ -3,9 +3,11 @@ import * as GenericPool from 'generic-pool'
 import {
     getProtocol,
     getTransport,
+    IProtocolConstructor,
+    IThriftConnection,
+    ITransportConstructor,
     LogFunction,
     readThriftMethod,
-    ThriftConnection,
 } from '@creditkarma/thrift-server-core'
 
 import {
@@ -25,9 +27,14 @@ import { defaultLogger } from '../logger'
 
 import { filterByMethod } from './utils'
 
-export class TcpConnection<Context = any> extends ThriftConnection<Context> {
+export class TcpConnection<Context = any>
+    implements IThriftConnection<Context> {
+    public readonly Transport: ITransportConstructor
+    public readonly Protocol: IProtocolConstructor
+
     protected readonly filters: Array<IThriftClientFilter<Context>>
     protected readonly logger: LogFunction
+
     private pool: GenericPool.Pool<Connection>
     private hostName: string
     private port: number
@@ -41,7 +48,8 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
         logger = defaultLogger,
         pool,
     }: IConnectionOptions) {
-        super(getTransport(transport), getProtocol(protocol))
+        this.Transport = getTransport(transport)
+        this.Protocol = getProtocol(protocol)
         this.hostName = hostName
         this.port = port
         this.filters = []

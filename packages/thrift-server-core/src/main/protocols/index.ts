@@ -17,7 +17,9 @@ const protocols: IProtocolMap = {
     json: JSONProtocol,
 }
 
-export const supportedProtocols: Array<string> = Object.keys(protocols)
+export const supportedProtocols: Array<keyof IProtocolMap> = Object.keys(
+    protocols,
+)
 
 export function isProtocolSupported(protocol: ProtocolType): boolean {
     return supportedProtocols.indexOf(protocol) !== -1

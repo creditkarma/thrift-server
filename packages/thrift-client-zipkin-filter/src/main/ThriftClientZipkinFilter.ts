@@ -5,7 +5,6 @@ import { CoreOptions } from 'request'
 import {
     formatUrl,
     IRequestContext,
-    IRequestHeaders,
     LogFunction,
 } from '@creditkarma/thrift-server-core'
 
@@ -28,9 +27,9 @@ import {
 } from '@creditkarma/zipkin-core'
 
 function applyL5DHeaders(
-    requestHeaders: IRequestHeaders,
-    headers: IRequestHeaders,
-): IRequestHeaders {
+    requestHeaders: Record<string, any>,
+    headers: Record<string, any>,
+): Record<string, any> {
     if (hasL5DHeader(requestHeaders)) {
         return addL5Dheaders(headers)
     } else {
@@ -39,7 +38,7 @@ function applyL5DHeaders(
 }
 
 function readRequestContext(
-    requestHeaders: IRequestHeaders,
+    requestHeaders: Record<string, any>,
     tracer: Tracer,
     logger?: LogFunction,
 ): IRequestContext {
@@ -66,7 +65,7 @@ function readRequestContext(
 
 function readRequestHeaders(
     request: IThriftRequest<CoreOptions>,
-): IRequestHeaders {
+): Record<string, any> {
     if (request.context && request.context.headers) {
         return request.context.headers
     } else {
@@ -93,7 +92,9 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
             request: IThriftRequest<CoreOptions>,
             next: NextFunction<CoreOptions>,
         ): Promise<IRequestResponse> {
-            const requestHeaders: IRequestHeaders = readRequestHeaders(request)
+            const requestHeaders: Record<string, any> = readRequestHeaders(
+                request,
+            )
             const requestContext: IRequestContext = readRequestContext(
                 requestHeaders,
                 tracer,
@@ -104,14 +105,17 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
                 tracer.setId(traceIdFromTraceId(requestContext.traceId))
 
                 return tracer.scoped(() => {
-                    const updatedHeaders: IRequestHeaders = instrumentation.recordRequest(
+                    const updatedHeaders: Record<
+                        string,
+                        any
+                    > = instrumentation.recordRequest(
                         { headers: {} },
                         formatUrl(request.uri),
                         request.methodName || '',
                     ).headers
 
                     const traceId: TraceId = tracer.id
-                    const withLD5Headers: IRequestHeaders = applyL5DHeaders(
+                    const withLD5Headers: Record<string, any> = applyL5DHeaders(
                         requestHeaders,
                         updatedHeaders,
                     )

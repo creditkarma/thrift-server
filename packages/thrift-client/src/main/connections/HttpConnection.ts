@@ -1,6 +1,6 @@
 import * as Core from '@creditkarma/thrift-server-core'
 
-import request = require('request')
+import * as request from 'request'
 
 import {
     Request,
@@ -59,7 +59,10 @@ function isErrorResponse(response: RequestResponse): boolean {
     )
 }
 
-export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
+export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
+    public readonly Transport: Core.ITransportConstructor
+    public readonly Protocol: Core.IProtocolConstructor
+
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
@@ -67,6 +70,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly url: string
     protected readonly protocol: HttpProtocol
     protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
+
     private readonly requestOptions: RequestOptions
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
@@ -82,7 +86,8 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         serviceName,
         withEndpointPerMethod = false,
     }: IHttpConnectionOptions) {
-        super(Core.getTransport(transport), Core.getProtocol(protocol))
+        this.Transport = Core.getTransport(transport)
+        this.Protocol = Core.getProtocol(protocol)
         this.requestOptions = Object.freeze(requestOptions)
         this.port = port
         this.hostName = hostName

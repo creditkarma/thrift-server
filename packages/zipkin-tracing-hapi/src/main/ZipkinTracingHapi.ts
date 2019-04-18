@@ -74,7 +74,7 @@ export function ZipkinTracingHapi({
                               )
                             : request.method
 
-                    const normalHeaders: Core.IRequestHeaders = normalizeHeaders(
+                    const normalHeaders: Record<string, any> = normalizeHeaders(
                         request.headers,
                     )
 
@@ -92,9 +92,10 @@ export function ZipkinTracingHapi({
                             },
                         )
 
-                        const traceHeaders: Core.IRequestHeaders = headersForTraceId(
-                            traceId,
-                        )
+                        const traceHeaders: Record<
+                            string,
+                            any
+                        > = headersForTraceId(traceId)
 
                         // Update headers on request object
                         for (const key in traceHeaders) {

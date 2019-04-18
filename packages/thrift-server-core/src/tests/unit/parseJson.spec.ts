@@ -6,7 +6,7 @@ import { parseJson } from '../../main/parseJson'
 export const lab = Lab.script()
 const { describe, it } = lab
 
-describe('parse_json', () => {
+describe('parseJson', () => {
     describe('objects', () => {
         it('parse when empty', () => {
             expect(parseJson('{}')).to.equal({})

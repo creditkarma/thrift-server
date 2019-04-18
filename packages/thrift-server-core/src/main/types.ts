@@ -5,9 +5,7 @@ export * from './Int64'
 
 export type LogFunction = (tags: Array<string>, data?: string | object) => void
 
-export interface IRequestHeaders {
-    [name: string]: any
-}
+export type RequestHeaders = Record<string, any>
 
 export interface ITraceId {
     readonly spanId: string
@@ -18,10 +16,29 @@ export interface ITraceId {
 }
 
 export interface IRequestContext {
-    headers: IRequestHeaders
+    headers: RequestHeaders
     traceId?: ITraceId
-    logger?: LogFunction
+    log?: LogFunction
 }
+
+export interface IThriftContext {
+    headers: RequestHeaders
+    log: LogFunction
+    getClient: ClientFactory
+}
+
+export type ContextFunction<BaseRequest, RequestContext> = (
+    req: BaseRequest,
+) => Promise<RequestContext>
+
+export interface ILogContext {
+    tags: Array<string>
+    data?: string | object
+}
+
+export type LogFormatter = (context: ILogContext) => ILogContext
+
+export type ClientFactory = (clientName: string, args?: object) => IThriftClient
 
 /**
  * Options for any Thrift Server
@@ -32,8 +49,8 @@ export interface IRequestContext {
  * protocol<ProtocolType> - name of the protocol to use
  */
 export interface IThriftServerOptions<
-    Context,
-    TProcessor extends IThriftProcessor<Context>
+    TProcessor extends IThriftProcessor<Context>,
+    Context extends IThriftContext = IThriftContext
 > {
     serviceName: string
     handler: TProcessor
@@ -41,25 +58,28 @@ export interface IThriftServerOptions<
     protocol?: ProtocolType
     logger?: LogFunction
     withEndpointPerMethod?: boolean
+    // formatLog?: LogFormatter
+    mapResponse?: any
+    clientFactory?: ClientFactory
+    // formatContext?: ContextFunction<RequestContext>
 }
 
-export interface IThriftConnection<Context = void> {
+export interface IThriftServiceContext<
+    Context extends IThriftContext = IThriftContext
+> {
+    serviceName: string
+    transport: TransportType
+    protocol: ProtocolType
+    processor: IThriftProcessor<Context>
+}
+
+export interface IThriftConnection<Context extends IThriftContext> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
 }
 
-export abstract class ThriftConnection<Context = void>
-    implements IThriftConnection<Context> {
-    constructor(
-        public Transport: ITransportConstructor,
-        public Protocol: IProtocolConstructor,
-    ) {}
-
-    public abstract send(dataToSend: Buffer, context?: Context): Promise<Buffer>
-}
-
-export interface IStructConstructor<T extends StructLike> {
+export interface IStructConstructor<T extends IStructLike> {
     new (args?: any): T
     read(input: TProtocol): T
     write(data: T, output: TProtocol): void
@@ -80,7 +100,7 @@ export interface IStructToolkit<LooseType, StrictType>
 }
 
 export type IProtocolConstructor = new (
-    trans: TTransport,
+    transport: TTransport,
     logger?: LogFunction,
 ) => TProtocol
 
@@ -90,149 +110,86 @@ export interface ITransportConstructor {
 }
 
 export interface IThriftAnnotations {
-    [name: string]: string
+    readonly [name: string]: string
 }
 
-export interface IFieldAnnotations {
-    [fieldName: string]: IThriftAnnotations
+export const enum DefinitionMetadataType {
+    StructType = 'StructType',
+    BaseType = 'BaseType',
 }
 
-export interface IMethodAnnotations {
-    [methodName: string]: {
-        annotations: IThriftAnnotations
-        fieldAnnotations: IFieldAnnotations
-    }
+export type DefinitionMetadata = IStructMetadata | IBaseMetadata
+
+export interface IStructMetadata {
+    readonly type: DefinitionMetadataType.StructType
+    readonly name: string
+    readonly annotations: IThriftAnnotations
+    readonly fields: IFieldMetadataMap
 }
 
-export interface IStructLike {
-    readonly _annotations: IThriftAnnotations
-    readonly _fieldAnnotations: IFieldAnnotations
-    write(output: TProtocol): void
+export interface IBaseMetadata {
+    readonly type: DefinitionMetadataType.BaseType
 }
 
-export abstract class StructLike implements IStructLike {
-    public readonly _annotations: IThriftAnnotations = {}
-    public readonly _fieldAnnotations: IFieldAnnotations = {}
-    public abstract write(output: TProtocol): void
+export interface IFieldMetadataMap {
+    [fieldName: string]: IFieldMetadata
 }
-
-export const enum FieldMetadataType {
-    STRUCT,
-    PRIMITIVE,
-}
-
-export type FieldMetadata =
-    | IStructMetadata
-    | IPrimitiveMetadata
 
 export interface IFieldMetadata {
-    type: FieldMetadataType
-    name: string
-}
-
-export interface IStructMetadata extends IFieldMetadata {
-    type: FieldMetadataType.STRUCT
-    fields: IFieldMetadata
-}
-
-export interface IPrimitiveMetadata extends IFieldMetadata{
-    type: FieldMetadataType.PRIMITIVE
+    readonly name: string
+    readonly fieldId: number
+    readonly annotations: IThriftAnnotations
+    readonly definitionType: DefinitionMetadata
 }
 
 export interface IMethodMetadata {
     [methodName: string]: {
-        name: string
-        annotations: IThriftAnnotations
-        fields: IFieldMetadata
+        readonly name: string
+        readonly annotations: IThriftAnnotations
+        readonly arguments: Array<IFieldMetadata>
     }
 }
 
 export interface IServiceMetadata {
-    serviceName: string
-    annotations: IThriftAnnotations
-    methods: IMethodMetadata
+    readonly name: string
+    readonly annotations: IThriftAnnotations
+    readonly methods: IMethodMetadata
+}
+
+export interface IStructLike {
+    write(output: TProtocol): void
 }
 
 export interface IThriftClient {
-    readonly _metadata: IServiceMetadata
-}
-
-export abstract class ThriftClient<Context = any> implements IThriftClient {
-    public static readonly metadata: IServiceMetadata = {
-        serviceName: '',
-        annotations: {},
-        methods: {},
-    }
-    public readonly _metadata: IServiceMetadata = {
-        serviceName: '',
-        annotations: {},
-        methods: {},
-    }
-
-    protected _requestId: number
-    protected transport: ITransportConstructor
-    protected protocol: IProtocolConstructor
-    protected connection: IThriftConnection<Context>
-
-    constructor(connection: IThriftConnection<Context>) {
-        this._requestId = 0
-        this.transport = connection.Transport
-        this.protocol = connection.Protocol
-        this.connection = connection
-    }
-
-    protected incrementRequestId(): number {
-        return (this._requestId += 1)
-    }
+    readonly __metadata: IServiceMetadata
 }
 
 export interface IClientConstructor<
-    TClient extends ThriftClient<Context>,
-    Context
+    TClient extends IThriftClient,
+    Context extends IThriftContext = IThriftContext
 > {
-    readonly metadata?: IServiceMetadata
-    new (connection: ThriftConnection<Context>): TClient
+    readonly metadata: IServiceMetadata
+    new (connection: IThriftConnection<Context>): TClient
 }
 
 export interface IThriftProcessor<Context> {
-    readonly _metadata: IServiceMetadata
+    readonly __metadata: IServiceMetadata
 
-    process(
-        input: TProtocol,
-        output: TProtocol,
-        context?: Context,
-    ): Promise<Buffer>
-}
-
-export abstract class ThriftProcessor<Context, IHandler>
-    implements IThriftProcessor<Context> {
-    public static readonly metadata: IServiceMetadata = {
-        serviceName: '',
-        annotations: {},
-        methods: {},
-    }
-
-    public readonly _metadata: IServiceMetadata = {
-        serviceName: '',
-        annotations: {},
-        methods: {},
-    }
-
-    public abstract process(
-        input: TProtocol,
-        output: TProtocol,
-        context?: Context,
-    ): Promise<Buffer>
+    process(data: Buffer, context: Context): Promise<Buffer>
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
     readonly metadata: IServiceMetadata
-    new (handler: THandler): TProcessor
+    new (
+        handler: THandler,
+        transport?: ITransportConstructor,
+        protocol?: IProtocolConstructor,
+    ): TProcessor
 }
 
 export type ProtocolType = 'binary' | 'compact' | 'json'
 
-export type TransportType = 'buffered' // | 'framed'
+export type TransportType = 'buffered'
 
 export interface ITransportMap {
     [name: string]: ITransportConstructor
