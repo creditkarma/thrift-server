@@ -4,6 +4,10 @@
     "description": "Zipkin tracing for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-zipkin-filter"
+    },
     "files": [
         "dist/main"
     ],
