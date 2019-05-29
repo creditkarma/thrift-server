@@ -37,6 +37,6 @@
     "url": "https://github.com/creditkarma/thrift-server"
   },
   "devDependencies": {
-    "lerna": "^3.13.2"
+    "lerna": "^3.14.1"
   }
 }

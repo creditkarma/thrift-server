@@ -1,2 +1,3 @@
 src/generated/**/*.ts
 src/generated-apache/**/*.ts
+src/generated-strict/**/*.ts
