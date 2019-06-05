@@ -7,6 +7,12 @@ export type LogFunction = (tags: Array<string>, data?: string | object) => void
 
 export type RequestHeaders = Record<string, any>
 
+export interface IReadResult {
+    methodName: string
+    requestId: number
+    data: any
+}
+
 export interface ITraceId {
     readonly spanId: string
     readonly parentId: string
@@ -15,8 +21,12 @@ export interface ITraceId {
     readonly traceIdHigh?: boolean
 }
 
-export interface IRequestContext {
+export interface IRequest {
     headers: RequestHeaders
+}
+
+export interface IRequestContext {
+    headers?: RequestHeaders
     traceId?: ITraceId
     log?: LogFunction
 }
@@ -31,14 +41,9 @@ export type ContextFunction<BaseRequest, RequestContext> = (
     req: BaseRequest,
 ) => Promise<RequestContext>
 
-export interface ILogContext {
-    tags: Array<string>
-    data?: string | object
-}
-
-export type LogFormatter = (context: ILogContext) => ILogContext
-
 export type ClientFactory = (clientName: string, args?: object) => IThriftClient
+
+export type LogFactory<RawRequest> = (request: RawRequest) => LogFunction
 
 /**
  * Options for any Thrift Server
@@ -50,16 +55,19 @@ export type ClientFactory = (clientName: string, args?: object) => IThriftClient
  */
 export interface IThriftServerOptions<
     TProcessor extends IThriftProcessor<Context>,
-    Context extends IThriftContext = IThriftContext
+    Context extends IThriftContext = IThriftContext,
+    RawRequest extends IRequest = IRequest
 > {
     serviceName: string
     handler: TProcessor
     transport?: TransportType
     protocol?: ProtocolType
-    logger?: LogFunction
     withEndpointPerMethod?: boolean
-    // formatLog?: LogFormatter
+
     mapResponse?: any
+
+    logFactory?: LogFactory<RawRequest>
+
     clientFactory?: ClientFactory
     // formatContext?: ContextFunction<RequestContext>
 }
@@ -73,7 +81,7 @@ export interface IThriftServiceContext<
     processor: IThriftProcessor<Context>
 }
 
-export interface IThriftConnection<Context extends IThriftContext> {
+export interface IThriftConnection<Context extends IRequestContext> {
     Transport: ITransportConstructor
     Protocol: IProtocolConstructor
     send(dataToSend: Buffer, context?: Context): Promise<Buffer>
@@ -166,16 +174,18 @@ export interface IThriftClient {
 
 export interface IClientConstructor<
     TClient extends IThriftClient,
-    Context extends IThriftContext = IThriftContext
+    Context extends IRequestContext = IRequestContext
 > {
     readonly metadata: IServiceMetadata
     new (connection: IThriftConnection<Context>): TClient
 }
 
-export interface IThriftProcessor<Context> {
+export interface IThriftProcessor<Context extends IThriftContext> {
     readonly __metadata: IServiceMetadata
 
     process(data: Buffer, context: Context): Promise<Buffer>
+
+    readRequest(data: Buffer): IReadResult
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {

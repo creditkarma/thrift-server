@@ -1,14 +1,19 @@
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 
 import {
+    IThriftContext,
     IThriftProcessor,
     IThriftServerOptions,
     ProtocolType,
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
+export interface IHapiContext extends IThriftContext {
+    request: Hapi.Request
+}
+
 export interface IServiceDetails {
-    processor: IThriftProcessor<Hapi.Request>
+    processor: IThriftProcessor<IHapiContext>
 }
 
 export interface IServiceDetailMap {
@@ -25,10 +30,12 @@ export interface IHandlerOptions<TProcessor> {
     service: TProcessor
 }
 
-export type HapiThriftOptions<TProcessor extends IThriftProcessor<Hapi.Request>> = IThriftServerOptions<Hapi.Request, TProcessor>
+export type HapiThriftOptions<
+    TProcessor extends IThriftProcessor<IHapiContext>
+> = IThriftServerOptions<TProcessor, IHapiContext>
 
 export interface IHapiPluginOptions<
-    TProcessor extends IThriftProcessor<Hapi.Request>
+    TProcessor extends IThriftProcessor<IHapiContext>
 > {
     path?: string
     vhost?: string
@@ -37,7 +44,7 @@ export interface IHapiPluginOptions<
 }
 
 export interface ICreateHapiServerOptions<
-    TProcessor extends IThriftProcessor<Hapi.Request>
+    TProcessor extends IThriftProcessor<IHapiContext>
 > extends IHapiPluginOptions<TProcessor> {
     port: number
 }

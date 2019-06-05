@@ -350,7 +350,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        handler(request: IThriftRequest<CoreOptions>, next: NextFunction): Promise<IRequestResponse> {
             return next(request.data, {
                 headers: {
                     'x-fake-token': 'fake-token',
@@ -379,7 +379,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        handler(request: IThriftRequest<CoreOptions>, next: NextFunction): Promise<IRequestResponse> {
             return next().then((res: IRequestResponse) => {
                 if (validateResponse(res.body)) {
                     return res
@@ -404,7 +404,7 @@ const connection: HttpConnection =
     new HttpConnection(requestClient, clientConfig)
 
 connection.register({
-    handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+    handler(request: IThriftRequest<CoreOptions>, next: NextFunction): Promise<IRequestResponse> {
         return next(request.data, {
             headers: {
                 'x-fake-token': 'fake-token',
@@ -422,8 +422,6 @@ The optional `register` option takes an array of filters to apply. Unsurprisingl
 
 These client filters are maintained as part of this repository:
 
-* [ThriftClientContextFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-context-filter) - This is useful for TCP clients. It is a filter for appending Thrift objects onto an existing Thrift payload.
-* [ThriftClientTTwitterFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-ttwitter-filter) - This is for appending a TTwitter context onto an existing Thrift payload. This is for compatibility with Twitter's [Finagle](https://twitter.github.io/finagle/) framework.
 * [ThriftClientZipkinFilter](https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-zipkin-filter) - This is for supporting distributed tracing with [Zipkin](https://github.com/openzipkin/zipkin-js).
 
 ## Contributing

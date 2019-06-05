@@ -9,7 +9,7 @@ import {
     normalizeHeaders,
 } from '@creditkarma/zipkin-core'
 
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 import * as url from 'url'
 import { Instrumentation, option, TraceId } from 'zipkin'
 

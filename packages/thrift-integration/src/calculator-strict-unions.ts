@@ -1,6 +1,9 @@
 import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
 
-import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import {
+    createThriftServer,
+    IHapiContext,
+} from '@creditkarma/thrift-server-hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
@@ -10,7 +13,7 @@ import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filt
 
 import { ThriftClientTimingFilter } from '@creditkarma/thrift-client-timing-filter'
 
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 
 import {
     IMappedStruct,
@@ -79,17 +82,17 @@ export async function createServer(
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const impl = new Calculator.Processor<Hapi.Request>({
+    const impl = new Calculator.Processor<IHapiContext>({
         ping(): void {
             return
         },
-        add(a: number, b: number, context: Hapi.Request): Promise<number> {
+        add(a: number, b: number, context: IHapiContext): Promise<number> {
             return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context: Hapi.Request): Promise<Int64> {
+        addInt64(a: Int64, b: Int64, context: IHapiContext): Promise<Int64> {
             return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context: Hapi.Request): number {
+        addWithContext(a: number, b: number, context: IHapiContext): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -102,7 +105,7 @@ export async function createServer(
         calculate(
             logId: number,
             work: Work,
-            context: Hapi.Request,
+            context: IHapiContext,
         ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:

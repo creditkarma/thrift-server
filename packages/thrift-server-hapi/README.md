@@ -52,7 +52,7 @@ To get things working you need to register the Thrift plugin and define handlers
 The `ThriftServerHapi` function creates a Hapi route at the given path on which to serve this Thrift service.
 
 ```typescript
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 import { ThriftServerHapi } from '@creditkarma/thrift-server-hapi'
 import { Calculator } from './codegen/calculator'
 
@@ -122,7 +122,7 @@ In the event that you will be creating a Hapi server only to serve Thrift, you c
 The factory function takes all of the same configuration options as the plugin with the addition of `port`. What port do you want your server to run on?
 
 ```typescript
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 import { Calculator } from './codegen/calculator'
 

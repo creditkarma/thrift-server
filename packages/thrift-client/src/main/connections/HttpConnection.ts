@@ -1,5 +1,3 @@
-import * as Core from '@creditkarma/thrift-server-core'
-
 import * as request from 'request'
 
 import {
@@ -19,6 +17,20 @@ import {
     RequestHandler,
     RequestOptions,
 } from '../types'
+
+import {
+    deepMerge,
+    getProtocol,
+    getTransport,
+    IProtocolConstructor,
+    IRequestContext,
+    IThriftConnection,
+    ITransportConstructor,
+    normalizePath,
+    overlayObjects,
+    readThriftMethod,
+    RequestHeaders,
+} from '@creditkarma/thrift-server-core'
 
 import { filterByMethod } from './utils'
 
@@ -59,9 +71,9 @@ function isErrorResponse(response: RequestResponse): boolean {
     )
 }
 
-export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
-    public readonly Transport: Core.ITransportConstructor
-    public readonly Protocol: Core.IProtocolConstructor
+export class HttpConnection implements IThriftConnection<IRequestContext> {
+    public readonly Transport: ITransportConstructor
+    public readonly Protocol: IProtocolConstructor
 
     protected readonly port: number
     protected readonly hostName: string
@@ -69,7 +81,7 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
     protected readonly basePath: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
-    protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
+    protected readonly filters: Array<IThriftClientFilter<IRequestContext>>
 
     private readonly requestOptions: RequestOptions
     private readonly serviceName: string | undefined
@@ -86,12 +98,12 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
         serviceName,
         withEndpointPerMethod = false,
     }: IHttpConnectionOptions) {
-        this.Transport = Core.getTransport(transport)
-        this.Protocol = Core.getProtocol(protocol)
+        this.Transport = getTransport(transport)
+        this.Protocol = getProtocol(protocol)
         this.requestOptions = Object.freeze(requestOptions)
         this.port = port
         this.hostName = hostName
-        this.path = Core.normalizePath(path || DEFAULT_PATH)
+        this.path = normalizePath(path || DEFAULT_PATH)
         this.protocol = https === true ? 'https' : 'http'
         this.serviceName = serviceName
         this.basePath = `${this.protocol}://${this.hostName}:${this.port}`
@@ -101,9 +113,9 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
     }
 
     public register(
-        ...filters: Array<IThriftClientFilterConfig<RequestOptions>>
+        ...filters: Array<IThriftClientFilterConfig<IRequestContext>>
     ): void {
-        filters.forEach((next: IThriftClientFilterConfig<RequestOptions>) => {
+        filters.forEach((next: IThriftClientFilterConfig<IRequestContext>) => {
             this.filters.push({
                 methods: next.methods || [],
                 handler: next.handler,
@@ -113,19 +125,19 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
 
     public send(
         dataToSend: Buffer,
-        context: RequestOptions = {},
+        context: IRequestContext = {},
     ): Promise<Buffer> {
-        const requestMethod: string = Core.readThriftMethod(
+        const requestMethod: string = readThriftMethod(
             dataToSend,
             this.Transport,
             this.Protocol,
         )
 
         const handlers: Array<
-            RequestHandler<RequestOptions>
+            RequestHandler<IRequestContext>
         > = this.handlersForMethod(requestMethod)
 
-        const thriftRequest: IThriftRequest<RequestOptions> = {
+        const thriftRequest: IThriftRequest<IRequestContext> = {
             data: dataToSend,
             methodName: requestMethod,
             uri: this.url,
@@ -133,8 +145,8 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
         }
 
         const applyHandlers = (
-            currentRequest: IThriftRequest<RequestOptions>,
-            [head, ...tail]: Array<RequestHandler<RequestOptions>>,
+            currentRequest: IThriftRequest<IRequestContext>,
+            [head, ...tail]: Array<RequestHandler<IRequestContext>>,
         ): Promise<IRequestResponse> => {
             if (head === undefined) {
                 return this.write(
@@ -154,7 +166,7 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
                                 data: nextData || currentRequest.data,
                                 methodName: currentRequest.methodName,
                                 uri: currentRequest.uri,
-                                context: Core.deepMerge(
+                                context: deepMerge(
                                     currentRequest.context,
                                     nextOptions || {},
                                 ),
@@ -176,7 +188,7 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
     private write(
         dataToWrite: Buffer,
         methodName: string,
-        options: RequestOptions = {},
+        context: { headers?: RequestHeaders } = {},
         retry: boolean = false,
     ): Promise<IRequestResponse> {
         const requestUrl: string =
@@ -185,9 +197,9 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
                 : this.url
 
         // Merge user options with required options
-        const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
+        const requestOptions: RequestOptions & UrlOptions = overlayObjects(
             this.requestOptions,
-            options,
+            context,
             {
                 method: 'POST',
                 body: dataToWrite,
@@ -208,7 +220,7 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
                         shouldRetry(response, retry, this.withEndpointPerMethod)
                     ) {
                         resolve(
-                            this.write(dataToWrite, methodName, options, true),
+                            this.write(dataToWrite, methodName, context, true),
                         )
                     } else {
                         if (hasError(err)) {
@@ -230,11 +242,12 @@ export class HttpConnection implements Core.IThriftConnection<RequestOptions> {
 
     private handlersForMethod(
         name: string,
-    ): Array<RequestHandler<RequestOptions>> {
+    ): Array<RequestHandler<IRequestContext>> {
         return this.filters
-            .filter(filterByMethod<RequestOptions>(name))
+            .filter(filterByMethod<IRequestContext>(name))
             .map(
-                (filter: IThriftClientFilter<RequestOptions>) => filter.handler,
+                (filter: IThriftClientFilter<IRequestContext>) =>
+                    filter.handler,
             )
     }
 }

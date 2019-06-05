@@ -1,7 +1,7 @@
 // import { AsyncScope } from '@creditkarma/async-scope'
-// import { expect } from 'code'
-// import * as Hapi from 'hapi'
-// import * as Lab from 'lab'
+// import { expect } from '@hapi/code'
+// import * as Hapi from '@hapi/hapi'
+// import * as Lab from '@hapi/lab'
 // import * as net from 'net'
 // import * as rp from 'request-promise-native'
 

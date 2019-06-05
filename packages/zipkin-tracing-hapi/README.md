@@ -23,7 +23,7 @@ Distributed tracing is provided out-of-the-box with [Zipkin](https://github.com/
 Zipkin tracing is added to your Hapi server with a plugin.
 
 ```typescript
-import * as hapi from 'hapi'
+import * as hapi from '@hapi/hapi'
 
 import {
     createThriftServer,

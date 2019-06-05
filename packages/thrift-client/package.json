@@ -40,17 +40,15 @@
   "devDependencies": {
     "@creditkarma/thrift-server-core": "^0.13.6",
     "@types/node": "^8.10.38",
-    "prettier": "^1.15.1",
+    "prettier": "^1.17.1",
     "rimraf": "^2.6.2",
     "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
+    "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.0",
     "typescript": "3.2.x"
   },
   "dependencies": {
-    "@types/generic-pool": "^3.1.4",
     "@types/request": "^2.48.1",
-    "generic-pool": "^3.4.2",
     "request": "^2.88.0"
   },
   "publishConfig": {

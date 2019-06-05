@@ -1,6 +1,5 @@
 import * as thrift from '@creditkarma/thrift-server-core'
-import * as Hapi from 'hapi'
-import * as http from 'http'
+import * as Hapi from '@hapi/hapi'
 
 import {
     HttpConnection,
@@ -10,24 +9,15 @@ import {
     NextFunction,
 } from '@creditkarma/thrift-client'
 
-import {
-    ThriftClientTTwitterFilter,
-    TTwitter,
-} from '@creditkarma/thrift-client-ttwitter-filter'
-
 import { CoreOptions } from 'request'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../../config'
 
-import { expect } from 'code'
-import * as Lab from 'lab'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'
-import {
-    createServer as mockCollector,
-    IMockCollector,
-} from '../tracing/mock-collector'
 
 import { Calculator, ICommonStruct } from '../../generated/calculator-service'
 
@@ -298,12 +288,13 @@ describe('HttpConnection', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 path: HAPI_CALC_SERVER_CONFIG.path,
             })
+
             const client = new Calculator.Client<IRequest>(connection)
 
             connection.register({
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
@@ -337,8 +328,9 @@ describe('HttpConnection', () => {
                 methods: ['add'],
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
+                    console.log('req: ', req)
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
                     } else {
@@ -370,7 +362,7 @@ describe('HttpConnection', () => {
             connection.register({
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'nope') {
                         return next()
@@ -413,7 +405,7 @@ describe('HttpConnection', () => {
                 methods: ['nope'],
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     return Promise.reject(
                         new Error(
@@ -444,7 +436,7 @@ describe('HttpConnection', () => {
             connection.register({
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
@@ -472,7 +464,7 @@ describe('HttpConnection', () => {
                 methods: ['addWithContext'],
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
@@ -521,7 +513,7 @@ describe('HttpConnection', () => {
                 methods: ['add'],
                 handler(
                     req: IThriftRequest<CoreOptions>,
-                    next: NextFunction<CoreOptions>,
+                    next: NextFunction,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
@@ -541,127 +533,6 @@ describe('HttpConnection', () => {
                     expect(err.message).to.equal('Unauthorized')
                 },
             )
-        })
-    })
-
-    describe('ThriftClientTTwitterFilter', () => {
-        const PORT: number = 9010
-        let connection: HttpConnection
-        let client: Calculator.Client
-        let collectServer: IMockCollector
-        let mockServer: http.Server
-
-        before(async () => {
-            connection = new HttpConnection({
-                serviceName: 'Calculator',
-                hostName: 'localhost',
-                port: PORT,
-            })
-
-            connection.register(
-                ThriftClientTTwitterFilter({
-                    localServiceName: 'http-calculator-client',
-                    remoteServiceName: 'calculator-service',
-                    tracerConfig: {
-                        endpoint: 'http://localhost:9411/api/v1/spans',
-                        sampleRate: 1,
-                        httpInterval: 0,
-                    },
-                }),
-            )
-
-            client = new Calculator.Client(connection)
-            return mockCollector().then((collector: IMockCollector) => {
-                collectServer = collector
-            })
-        })
-
-        after(async () => {
-            return new Promise((resolve, reject) => {
-                collectServer.close().then(() => {
-                    mockServer.close(() => {
-                        console.log('HTTP server closed')
-                        mockServer.unref()
-                        resolve()
-                    })
-                })
-            })
-        })
-
-        it('should handle appending data to payload', async () => {
-            return new Promise((resolve, reject) => {
-                let count: number = 0
-                collectServer.reset()
-                mockServer = http.createServer(
-                    (
-                        req: http.IncomingMessage,
-                        res: http.ServerResponse,
-                    ): void => {
-                        if (count < 1) {
-                            count += 1
-                            const upgradeResponse: TTwitter.IUpgradeReply = {}
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
-                                writer,
-                            )
-                            output.writeMessageBegin(
-                                'add',
-                                thrift.MessageType.CALL,
-                                1,
-                            )
-                            TTwitter.UpgradeReplyCodec.encode(
-                                upgradeResponse,
-                                output,
-                            )
-                            output.writeMessageEnd()
-                            res.writeHead(200)
-                            res.end(writer.flush())
-                        } else {
-                            const responseHeader: TTwitter.IResponseHeader = {}
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
-                                writer,
-                            )
-                            output.writeMessageBegin(
-                                'add',
-                                thrift.MessageType.CALL,
-                                1,
-                            )
-                            const result = new Calculator.Add__Result({
-                                success: 61,
-                            })
-                            result.write(output)
-                            output.writeMessageEnd()
-                            const data: Buffer = writer.flush()
-
-                            thrift
-                                .appendThriftObject(
-                                    responseHeader,
-                                    data,
-                                    TTwitter.ResponseHeaderCodec,
-                                )
-                                .then((extended: Buffer) => {
-                                    res.writeHead(200)
-                                    res.end(extended)
-                                })
-                        }
-                    },
-                )
-
-                mockServer.listen(PORT, () => {
-                    console.log(`HTTP server listening on port: ${PORT}`)
-                    client
-                        .add(2, 3)
-                        .then((response: number) => {
-                            expect(response).to.equal(61)
-                            resolve()
-                        })
-                        .catch((err: any) => {
-                            console.log('err: ', err)
-                            reject(err)
-                        })
-                })
-            })
         })
     })
 })

@@ -2,7 +2,7 @@ import * as Core from '@creditkarma/thrift-server-core'
 
 import * as express from 'express'
 
-import { IExpressServerOptions } from './types'
+import { IExpressContext, IExpressServerOptions } from './types'
 
 // Extend Express types with our plugin
 declare module 'express' {
@@ -10,7 +10,7 @@ declare module 'express' {
     export interface Request {
         thrift?: {
             requestMethod: string
-            processor: Core.IThriftProcessor<express.Request>
+            processor: Core.IThriftProcessor<IExpressContext>
             transport: Core.TransportType
             protocol: Core.ProtocolType
         }
@@ -18,49 +18,54 @@ declare module 'express' {
 }
 
 export function ThriftServerExpress<
-    TProcessor extends Core.IThriftProcessor<express.Request>
+    TProcessor extends Core.IThriftProcessor<IExpressContext>
 >(pluginOptions: IExpressServerOptions<TProcessor>): express.RequestHandler {
     return (
         request: express.Request,
         response: express.Response,
         next: express.NextFunction,
     ): void => {
-        const Transport: Core.ITransportConstructor = Core.getTransport(
-            pluginOptions.transport,
-        )
-        const Protocol: Core.IProtocolConstructor = Core.getProtocol(
-            pluginOptions.protocol,
-        )
-        const buffer: Buffer = request.body
-
-        const method: string = Core.readThriftMethod(
-            buffer,
-            Transport,
-            Protocol,
+        const metadata: Core.IReadResult = pluginOptions.handler.readRequest(
+            request.body,
         )
 
         request.thrift = {
-            requestMethod: method,
+            requestMethod: metadata.methodName,
             processor: pluginOptions.handler,
             transport: pluginOptions.transport || 'buffered',
             protocol: pluginOptions.protocol || 'binary',
         }
 
+        const logFactory: Core.LogFactory<express.Request> =
+            pluginOptions.logFactory ||
+            ((_: any) => {
+                return (tags: Array<string>, data?: any) => {
+                    console.log(`[${tags.join(',')}]: `, data)
+                }
+            })
+
+        const clientFactory: Core.ClientFactory =
+            pluginOptions.clientFactory ||
+            ((name: string, args?: any) => {
+                throw new Error('Not implemented')
+            })
+
         try {
-            Core.process({
-                processor: pluginOptions.handler,
-                buffer,
-                Transport,
-                Protocol,
-                context: request,
-            }).then(
-                (result: any) => {
-                    response.status(200).end(result)
-                },
-                (err: any) => {
-                    next(err)
-                },
-            )
+            pluginOptions.handler
+                .process(request.body, {
+                    headers: request.headers,
+                    log: logFactory(request),
+                    getClient: clientFactory,
+                    request,
+                })
+                .then(
+                    (result: any) => {
+                        response.status(200).end(result)
+                    },
+                    (err: any) => {
+                        next(err)
+                    },
+                )
         } catch (err) {
             next(err)
         }

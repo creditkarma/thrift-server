@@ -1,6 +1,9 @@
 import * as express from 'express'
 
-import { createThriftServer } from '@creditkarma/thrift-server-express'
+import {
+    createThriftServer,
+    IExpressContext,
+} from '@creditkarma/thrift-server-express'
 
 import { Int64 } from '@creditkarma/thrift-server-core'
 
@@ -59,17 +62,17 @@ export function createServer(sampleRate: number = 0): express.Application {
         },
     )
 
-    const serviceHandlers: Calculator.IHandler<express.Request> = {
+    const serviceHandlers: Calculator.IHandler<IExpressContext> = {
         ping(): void {
             return
         },
-        add(a: number, b: number, context: express.Request): Promise<number> {
+        add(a: number, b: number, context: IExpressContext): Promise<number> {
             return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context: express.Request): Promise<Int64> {
+        addInt64(a: Int64, b: Int64, context: IExpressContext): Promise<Int64> {
             return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context: express.Request): number {
+        addWithContext(a: number, b: number, context: IExpressContext): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -82,7 +85,7 @@ export function createServer(sampleRate: number = 0): express.Application {
         calculate(
             logId: number,
             work: Work,
-            context: express.Request,
+            context: IExpressContext,
         ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:

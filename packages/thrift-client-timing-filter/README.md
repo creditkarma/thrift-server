@@ -22,7 +22,7 @@ import {
 import {
     ThriftClientTimingFilter,
     ITimingEvent,
-} from '@creditkarma/thrift-client-context-filter'
+} from '@creditkarma/thrift-client-timing-filter'
 
 import {
     Calculator,

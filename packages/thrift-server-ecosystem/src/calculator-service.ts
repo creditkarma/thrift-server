@@ -1,13 +1,15 @@
 import { config } from '@creditkarma/dynamic-config'
-import { createThriftServer } from '@creditkarma/thrift-server-hapi'
+import {
+    createThriftServer,
+    IHapiContext,
+} from '@creditkarma/thrift-server-hapi'
+import * as Hapi from '@hapi/hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
 import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
-
-import * as Hapi from 'hapi'
 
 import { AddService } from './generated/add-service'
 
@@ -38,7 +40,7 @@ async function init(): Promise<void> {
         },
     )
 
-    const impl = new Calculator.Processor({
+    const impl = new Calculator.Processor<IHapiContext>({
         ping(): void {
             return
         },
@@ -48,7 +50,7 @@ async function init(): Promise<void> {
         calculate(
             logId: number,
             work: IWork,
-            context: Hapi.Request,
+            context: IHapiContext,
         ): Promise<number> | number {
             switch (work.op) {
                 case Operation.ADD:

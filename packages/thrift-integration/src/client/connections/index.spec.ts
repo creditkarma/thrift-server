@@ -1,10 +1,8 @@
 import { Int64, readThriftMethod } from '@creditkarma/thrift-server-core'
-import * as Hapi from 'hapi'
-import * as net from 'net'
+import * as Hapi from '@hapi/hapi'
 
 import {
     createHttpClient,
-    createTcpClient,
     IRequestResponse,
     IThriftRequest,
     NextFunction,
@@ -13,23 +11,22 @@ import {
 import { CoreOptions } from 'request'
 
 import {
-    APACHE_SERVER_CONFIG,
     HAPI_CALC_SERVER_CONFIG,
     HAPI_CALC_SERVER_STRICT_CONFIG,
 } from '../../config'
 
-import { expect } from 'code'
-import * as Lab from 'lab'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 
 import {
     Calculator as CalculatorStrict,
     ChoiceArgs,
 } from '../../generated-strict/calculator-service'
+
 import { Calculator, IChoice } from '../../generated/calculator-service'
 
 import { ISharedStruct } from '../../generated/shared'
 
-import { createServer as apacheService } from '../../apache-calculator-service'
 import { createServer as calculatorServiceStrict } from '../../calculator-strict-unions'
 import { CommonUnion, CommonUnionCodec } from '../../generated-strict/common'
 import { createServer as addService } from '../../hapi-add-service'
@@ -325,8 +322,10 @@ describe('createHttpClient', () => {
                 path: HAPI_CALC_SERVER_CONFIG.path,
                 protocol: 'compact',
             })
+
             calcServer = await calculatorService(0, 'compact')
             addServer = await addService()
+
             return Promise.all([calcServer.start(), addServer.start()]).then(
                 (err) => {
                     console.log('Thrift server running')
@@ -548,7 +547,7 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next().then(
                                 (
@@ -586,7 +585,7 @@ describe('createHttpClient', () => {
                         methods: ['add'],
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next().then((response: IRequestResponse) => {
                                 if (readThriftMethod(response.body) === 'add') {
@@ -619,7 +618,7 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse) => {
                                 if (readThriftMethod(res.body) === 'nope') {
@@ -662,7 +661,7 @@ describe('createHttpClient', () => {
                         methods: ['nope'],
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next().then(() => {
                                 return Promise.reject(
@@ -714,7 +713,7 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
@@ -740,7 +739,7 @@ describe('createHttpClient', () => {
                         methods: ['addWithContext'],
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
@@ -784,7 +783,7 @@ describe('createHttpClient', () => {
                         methods: ['add'],
                         handler(
                             request: IThriftRequest<CoreOptions>,
-                            next: NextFunction<CoreOptions>,
+                            next: NextFunction,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
@@ -804,165 +803,6 @@ describe('createHttpClient', () => {
                 },
                 (err: any) => {
                     expect(err.message).to.equal('Unauthorized')
-                },
-            )
-        })
-    })
-})
-
-describe('createTcpClient', () => {
-    let apacheServer: net.Server
-
-    before(async () => {
-        return new Promise((resolve, reject) => {
-            apacheServer = apacheService()
-            apacheServer.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
-                console.log(
-                    `TCP server running on port[${APACHE_SERVER_CONFIG.port}]`,
-                )
-                resolve()
-            })
-        })
-    })
-
-    after(async () => {
-        return new Promise((resolve, reject) => {
-            apacheServer.close(() => {
-                apacheServer.unref()
-                console.log(`TCP server closed`)
-                resolve()
-            })
-        })
-    })
-
-    describe('Basic Usage', () => {
-        let client: Calculator.Client<void>
-
-        before(async () => {
-            client = createTcpClient<Calculator.Client>(Calculator.Client, {
-                hostName: 'localhost',
-                port: 8888,
-            })
-        })
-
-        it('should corrently handle a service client request', async () => {
-            return client.add(5, 7).then((response: number) => {
-                expect(response).to.equal(12)
-            })
-        })
-
-        it('should corrently handle a void service client request', async () => {
-            return client.ping().then((response: any) => {
-                expect(response).to.equal(undefined)
-            })
-        })
-
-        it('should corrently call endpoint with binary data', async () => {
-            const word: string = 'test_binary'
-            const data: Buffer = Buffer.from(word, 'utf-8')
-            return client.echoBinary(data).then((response: string) => {
-                expect(response).to.equal(word)
-            })
-        })
-
-        it('should corrently call endpoint that string data', async () => {
-            const word: string = 'test_string'
-            return client.echoString(word).then((response: string) => {
-                expect(response).to.equal(word)
-            })
-        })
-
-        it('should correctly call endpoint with lists as parameters', async () => {
-            return client
-                .mapOneList([1, 2, 3, 4])
-                .then((response: Array<number>) => {
-                    expect<Array<number>>(response).to.equal([2, 3, 4, 5])
-                })
-        })
-
-        it('should correctly call endpoint with maps as parameters', async () => {
-            return client
-                .mapValues(new Map([['key1', 6], ['key2', 5]]))
-                .then((response: Array<number>) => {
-                    expect<Array<number>>(response).to.equal([6, 5])
-                })
-        })
-
-        it('should correctly call endpoint that returns a map', async () => {
-            return client
-                .listToMap([['key_1', 'value_1'], ['key_2', 'value_2']])
-                .then((response: Map<string, string>) => {
-                    expect(response).to.equal(
-                        new Map([['key_1', 'value_1'], ['key_2', 'value_2']]),
-                    )
-                })
-        })
-
-        it('should call an endpoint with union arguments', async () => {
-            const firstName: IChoice = {
-                firstName: { name: 'Louis' },
-            }
-
-            const lastName: IChoice = {
-                lastName: { name: 'Smith' },
-            }
-
-            return Promise.all([
-                client.checkName(firstName),
-                client.checkName(lastName),
-            ]).then((val: Array<string>) => {
-                expect(val[0]).to.equal('FirstName: Louis')
-                expect(val[1]).to.equal('LastName: Smith')
-            })
-        })
-
-        it('should call an endpoint with optional parameters', async () => {
-            return Promise.all([
-                client.checkOptional('test_\nfirst'),
-                client.checkOptional(),
-            ]).then((val: Array<string>) => {
-                expect(val[0]).to.equal('test_\nfirst')
-                expect(val[1]).to.equal('undefined')
-            })
-        })
-
-        it('should corrently handle a service client request that returns a struct', async () => {
-            return client.getStruct(5).then((response: ISharedStruct) => {
-                expect(response).to.equal({
-                    code: { status: new Int64(5) },
-                    value: 'test',
-                })
-            })
-        })
-
-        it('should corrently handle a service client request that returns a union', async () => {
-            return client.getUnion(1).then((response: any) => {
-                expect(response).to.equal({ option1: 'foo' })
-            })
-        })
-
-        it('should allow passing of a request context', async () => {
-            return client.addWithContext(5, 7).then((response: number) => {
-                expect(response).to.equal(12)
-            })
-        })
-
-        it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<void> = createTcpClient<
-                Calculator.Client
-            >(Calculator.Client, {
-                hostName: 'fakehost',
-                port: 8888,
-            })
-
-            return badClient.add(5, 7).then(
-                (response: number) => {
-                    console.log('res: ', response)
-                    throw new Error('Should reject with host not found')
-                },
-                (err: any) => {
-                    console.log('err: ', err)
-                    expect(err).to.exist()
                 },
             )
         })

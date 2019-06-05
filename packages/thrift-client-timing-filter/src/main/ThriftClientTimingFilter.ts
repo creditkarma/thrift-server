@@ -5,7 +5,7 @@ import {
     NextFunction,
 } from '@creditkarma/thrift-client'
 
-import { LogFunction } from '@creditkarma/thrift-server-core'
+import { IRequestContext, LogFunction } from '@creditkarma/thrift-server-core'
 import { defaultLogger } from './logger'
 
 function getStartTime(): [number, number] {
@@ -46,12 +46,12 @@ export interface ITimingEvent {
     requestsPerMethod: IRequestsPerMethod
 }
 
-export function ThriftClientTimingFilter<RequestContext>({
+export function ThriftClientTimingFilter<Context extends IRequestContext>({
     remoteServiceName,
     interval = 5000,
     logger = defaultLogger,
     tags = [],
-}: ITimingFilterOptions): IThriftClientFilterConfig<RequestContext> {
+}: ITimingFilterOptions): IThriftClientFilterConfig<Context> {
     let maxTime: number = 0
     let totalTime: number = 0
     let count: number = 0
@@ -117,8 +117,8 @@ export function ThriftClientTimingFilter<RequestContext>({
 
     return {
         handler(
-            request: IThriftRequest<RequestContext>,
-            next: NextFunction<RequestContext>,
+            request: IThriftRequest<Context>,
+            next: NextFunction,
         ): Promise<IRequestResponse> {
             const startTime = getStartTime()
             return next()

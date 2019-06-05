@@ -9,7 +9,6 @@ import {
 } from '@creditkarma/thrift-server-core'
 
 import {
-    IRequest,
     IRequestResponse,
     IThriftClientFilter,
     IThriftRequest,
@@ -46,7 +45,7 @@ function readRequestContext(
         return {
             traceId: traceIdForHeaders(requestHeaders),
             headers: requestHeaders,
-            logger,
+            log: logger,
         }
     } else {
         const rootId = tracer.createRootId()
@@ -58,7 +57,7 @@ function readRequestContext(
                 sampled: rootId.sampled.getOrElse(false),
             },
             headers: {},
-            logger,
+            log: logger,
         }
     }
 }
@@ -73,11 +72,11 @@ function readRequestHeaders(
     }
 }
 
-export function ThriftClientZipkinFilter<Context extends IRequest>({
+export function ThriftClientZipkinFilter<Context extends IRequestContext>({
     localServiceName,
     remoteServiceName,
     tracerConfig = {},
-}: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
+}: IZipkinClientOptions): IThriftClientFilter<Context> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpClient({
@@ -89,8 +88,8 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     return {
         methods: [],
         handler(
-            request: IThriftRequest<CoreOptions>,
-            next: NextFunction<CoreOptions>,
+            request: IThriftRequest<Context>,
+            next: NextFunction,
         ): Promise<IRequestResponse> {
             const requestHeaders: Record<string, any> = readRequestHeaders(
                 request,
@@ -115,6 +114,7 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
                     ).headers
 
                     const traceId: TraceId = tracer.id
+
                     const withLD5Headers: Record<string, any> = applyL5DHeaders(
                         requestHeaders,
                         updatedHeaders,

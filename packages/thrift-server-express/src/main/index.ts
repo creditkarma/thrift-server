@@ -4,13 +4,13 @@ import * as express from 'express'
 
 import { ThriftServerExpress } from './ThriftServerExpress'
 
-import { ICreateExpressServerOptions } from './types'
+import { ICreateExpressServerOptions, IExpressContext } from './types'
 
 export * from './ThriftServerExpress'
 export * from './types'
 
 export function createThriftServer<
-    TProcessor extends IThriftProcessor<express.Request>
+    TProcessor extends IThriftProcessor<IExpressContext>
 >(options: ICreateExpressServerOptions<TProcessor>): express.Application {
     const app: express.Application = express()
 

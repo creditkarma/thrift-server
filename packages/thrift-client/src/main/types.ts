@@ -1,13 +1,12 @@
 import {
+    IRequestContext,
     LogFunction,
     ProtocolType,
+    RequestHeaders,
     TransportType,
 } from '@creditkarma/thrift-server-core'
 
-import * as GenericPool from 'generic-pool'
-
 import * as request from 'request'
-import * as tls from 'tls'
 
 export type RequestOptions = request.CoreOptions
 
@@ -25,7 +24,7 @@ export interface IThriftRequest<Context> {
     data: Buffer
     methodName: string
     uri: string
-    context: Context
+    context?: Context
     logger?: LogFunction
 }
 
@@ -37,14 +36,7 @@ export interface IConnectionOptions {
     timeout?: number
     transport?: TransportType
     protocol?: ProtocolType
-    tls?: tls.TlsOptions
-    pool?: GenericPool.Options
     logger?: LogFunction
-}
-
-export interface ICreateTcpClientOptions extends IConnectionOptions {
-    serviceName?: string
-    register?: Array<IThriftClientFilterConfig<void>>
 }
 
 export interface IHttpConnectionOptions {
@@ -63,26 +55,26 @@ export interface IHttpConnectionOptions {
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
-    register?: Array<IThriftClientFilterConfig<RequestOptions>>
+    register?: Array<IThriftClientFilterConfig<IRequestContext>>
     requestOptions?: RequestOptions
 }
 
-export type NextFunction<Options> = (
+export type NextFunction = (
     data?: Buffer,
-    options?: Options,
+    options?: { headers?: RequestHeaders },
 ) => Promise<IRequestResponse>
 
-export type RequestHandler<Context> = (
+export type RequestHandler<Context extends IRequestContext> = (
     request: IThriftRequest<Context>,
-    next: NextFunction<Context>,
+    next: NextFunction,
 ) => Promise<IRequestResponse>
 
-export interface IThriftClientFilter<Context> {
+export interface IThriftClientFilter<Context extends IRequestContext> {
     methods: Array<string>
     handler: RequestHandler<Context>
 }
 
-export interface IThriftClientFilterConfig<Context> {
+export interface IThriftClientFilterConfig<Context extends IRequestContext> {
     methods?: Array<string>
     handler: RequestHandler<Context>
 }
