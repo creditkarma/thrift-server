@@ -40,7 +40,7 @@ service Calculator {
 ### Install
 
 ```sh
-npm install --save hapi
+npm install --save @hapi/hapi @types/hapi__hapi
 npm install --save thrift
 npm install --save @creditkarma/thrift-server-hapi
 ```

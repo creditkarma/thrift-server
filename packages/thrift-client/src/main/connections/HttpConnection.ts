@@ -167,7 +167,7 @@ export class HttpConnection implements IThriftConnection<IRequestContext> {
                                 methodName: currentRequest.methodName,
                                 uri: currentRequest.uri,
                                 context: deepMerge(
-                                    currentRequest.context,
+                                    currentRequest.context || {},
                                     nextOptions || {},
                                 ),
                             },

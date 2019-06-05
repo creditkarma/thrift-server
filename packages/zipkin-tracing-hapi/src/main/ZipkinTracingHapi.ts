@@ -9,11 +9,12 @@ import {
     normalizeHeaders,
 } from '@creditkarma/zipkin-core'
 
+import * as Boom from '@hapi/boom'
 import * as Hapi from '@hapi/hapi'
-import * as url from 'url'
-import { Instrumentation, option, TraceId } from 'zipkin'
 
-import * as Boom from 'boom'
+import * as url from 'url'
+
+import { Instrumentation, option, TraceId } from 'zipkin'
 
 const pkg: any = require('../../package.json')
 
@@ -21,7 +22,7 @@ function isBoom(obj: any): obj is Boom {
     return obj.isBoom
 }
 
-declare module 'hapi' {
+declare module '@hapi/hapi' {
     // tslint:disable-next-line:interface-name
     export interface PluginsStates {
         zipkin: {

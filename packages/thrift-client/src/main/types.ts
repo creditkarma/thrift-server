@@ -20,7 +20,9 @@ export interface IRequest {
     headers: Record<string, any>
 }
 
-export interface IThriftRequest<Context> {
+export interface IThriftRequest<
+    Context extends IRequestContext = IRequestContext
+> {
     data: Buffer
     methodName: string
     uri: string

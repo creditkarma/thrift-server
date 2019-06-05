@@ -14,7 +14,7 @@ import {
 export const DEFAULT_PATH: string = '/thrift'
 
 // Extend Hapi types with our plugin
-declare module 'hapi' {
+declare module '@hapi/hapi' {
     // tslint:disable-next-line:interface-name
     export interface PluginProperties {
         thrift?: {

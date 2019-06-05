@@ -125,8 +125,8 @@ $ npm install --save @creditkarma/thrift-server-hapi
 $ npm install --save @creditkarma/thrift-client
 $ npm install --save request
 $ npm install --save @types/request
-$ npm install --save hapi
-$ npm install --save @types/hapi
+$ npm install --save @hapi/hapi
+$ npm install --save @types/hapi__hapi
 ```
 
 ### Example Service
