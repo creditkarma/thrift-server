@@ -7,12 +7,6 @@ export type LogFunction = (tags: Array<string>, data?: string | object) => void
 
 export type RequestHeaders = Record<string, any>
 
-export interface IReadResult {
-    methodName: string
-    requestId: number
-    data: any
-}
-
 export interface ITraceId {
     readonly spanId: string
     readonly parentId: string
@@ -41,9 +35,40 @@ export type ContextFunction<BaseRequest, RequestContext> = (
     req: BaseRequest,
 ) => Promise<RequestContext>
 
-export type ClientFactory = (clientName: string, args?: object) => IThriftClient
+export type ClientFactory = (
+    clientName: string,
+    args?: object,
+) => Promise<IThriftClient>
 
 export type LogFactory<RawRequest> = (request: RawRequest) => LogFunction
+
+export type ContextFactory<Request, Context extends object = {}> = (
+    request: Request,
+) => Context
+
+export type ThriftContext<Context extends object = {}> = IThriftContext &
+    Context
+
+export interface IBaseThriftOptions<
+    TProcessor extends IThriftProcessor<Context>,
+    Context extends object = {},
+    Request extends IRequest = IRequest
+> {
+    serviceName: string
+    handler: TProcessor
+    withEndpointPerMethod?: boolean
+
+    logFactory?: LogFactory<Request>
+
+    clientFactory?: ClientFactory
+}
+
+export type IContextFactoryOptions<
+    Context extends object,
+    Request extends IRequest
+> = {} extends Context
+    ? { contextFactory?: undefined }
+    : { contextFactory: ContextFactory<Request, Context> }
 
 /**
  * Options for any Thrift Server
@@ -53,24 +78,12 @@ export type LogFactory<RawRequest> = (request: RawRequest) => LogFunction
  * transport<TransportType> - name of the transport to use
  * protocol<ProtocolType> - name of the protocol to use
  */
-export interface IThriftServerOptions<
+export type IThriftServerOptions<
     TProcessor extends IThriftProcessor<Context>,
-    Context extends IThriftContext = IThriftContext,
-    RawRequest extends IRequest = IRequest
-> {
-    serviceName: string
-    handler: TProcessor
-    transport?: TransportType
-    protocol?: ProtocolType
-    withEndpointPerMethod?: boolean
-
-    mapResponse?: any
-
-    logFactory?: LogFactory<RawRequest>
-
-    clientFactory?: ClientFactory
-    // formatContext?: ContextFunction<RequestContext>
-}
+    Context extends object = {},
+    Request extends IRequest = IRequest
+> = IContextFactoryOptions<Context, Request> &
+    IBaseThriftOptions<TProcessor, Context, Request>
 
 export interface IThriftServiceContext<
     Context extends IThriftContext = IThriftContext
@@ -180,16 +193,31 @@ export interface IClientConstructor<
     new (connection: IThriftConnection<Context>): TClient
 }
 
-export interface IThriftProcessor<Context extends IThriftContext> {
+export interface IReadResult {
+    methodName: string
+    requestId: number
+    data: any
+}
+
+export interface IThriftProcessor<Context extends object = {}> {
     readonly __metadata: IServiceMetadata
 
-    process(data: Buffer, context: Context): Promise<Buffer>
+    readonly Transport: ITransportConstructor
+
+    readonly Protocol: IProtocolConstructor
+
+    process(data: Buffer, context: ThriftContext<Context>): Promise<Buffer>
 
     readRequest(data: Buffer): IReadResult
+
+    writeResponse(methodName: string, data: any, requestId: number): Buffer
+
+    writeError(methodName: string, requestId: number, err: Error): Buffer
 }
 
 export interface IProcessorConstructor<TProcessor, THandler> {
     readonly metadata: IServiceMetadata
+
     new (
         handler: THandler,
         transport?: ITransportConstructor,

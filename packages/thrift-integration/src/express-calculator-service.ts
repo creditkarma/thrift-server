@@ -1,11 +1,8 @@
 import * as express from 'express'
 
-import {
-    createThriftServer,
-    IExpressContext,
-} from '@creditkarma/thrift-server-express'
+import { createThriftServer } from '@creditkarma/thrift-server-express'
 
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { IThriftContext } from '@creditkarma/thrift-server-core'
 
 import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
@@ -62,17 +59,21 @@ export function createServer(sampleRate: number = 0): express.Application {
         },
     )
 
-    const serviceHandlers: Calculator.IHandler<IExpressContext> = {
+    const serviceHandlers: Calculator.IHandler = {
         ping(): void {
             return
         },
-        add(a: number, b: number, context: IExpressContext): Promise<number> {
+        add(a: number, b: number, context: IThriftContext): Promise<number> {
             return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context: IExpressContext): Promise<Int64> {
+        addInt64(
+            a: bigint,
+            b: bigint,
+            context: IThriftContext,
+        ): Promise<bigint> {
             return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context: IExpressContext): number {
+        addWithContext(a: number, b: number, context: IThriftContext): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -85,7 +86,7 @@ export function createServer(sampleRate: number = 0): express.Application {
         calculate(
             logId: number,
             work: Work,
-            context: IExpressContext,
+            context: IThriftContext,
         ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
@@ -106,7 +107,7 @@ export function createServer(sampleRate: number = 0): express.Application {
         getStruct(): ISharedStruct {
             return {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -171,7 +172,7 @@ export function createServer(sampleRate: number = 0): express.Application {
         fetchThing(): ICommonStruct {
             return {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -189,6 +190,10 @@ export function createServer(sampleRate: number = 0): express.Application {
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: new Calculator.Processor(serviceHandlers),
+            contextFactory: (request: express.Request): { name: string } => {
+                console.log('create context: ', request.headers)
+                return { name: 'test this' }
+            },
         },
     })
 

@@ -1,57 +1,57 @@
 {
-  "name": "@creditkarma/thrift-client",
-  "version": "0.13.6",
-  "description": "Thrift client library for NodeJS written in TypeScript.",
-  "main": "dist/main/index.js",
-  "types": "dist/main/index.d.ts",
-  "files": [
-    "dist/main",
-    "dist/ttwitter"
-  ],
-  "directories": {
-    "example": "example"
-  },
-  "keywords": [
-    "thrift",
-    "typescript",
-    "rpc",
-    "microservices",
-    "http client",
-    "framework"
-  ],
-  "scripts": {
-    "clean": "rimraf ./dist",
-    "lint": "tslint --fix './src/**/*.ts'",
-    "format": "prettier --write 'src/**/*.ts'",
-    "prebuild": "npm run clean && npm run lint && npm run format",
-    "build": "tsc",
-    "test": "npm run test:only",
-    "test:only": "echo 'No tests for thrift-client'; exit 0;"
-  },
-  "author": "Credit Karma",
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client"
-  },
-  "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.13.x"
-  },
-  "devDependencies": {
-    "@creditkarma/thrift-server-core": "^0.13.6",
-    "@types/node": "^8.10.38",
-    "prettier": "^1.17.1",
-    "rimraf": "^2.6.2",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "3.5.x"
-  },
-  "dependencies": {
-    "@types/request": "^2.48.1",
-    "request": "^2.88.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+    "name": "@creditkarma/thrift-client",
+    "version": "0.13.6",
+    "description": "Thrift client library for NodeJS written in TypeScript.",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main",
+        "dist/ttwitter"
+    ],
+    "directories": {
+        "example": "example"
+    },
+    "keywords": [
+        "thrift",
+        "typescript",
+        "rpc",
+        "microservices",
+        "http client",
+        "framework"
+    ],
+    "scripts": {
+        "clean": "rimraf ./dist",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "prebuild": "npm run clean && npm run lint && npm run format",
+        "build": "tsc",
+        "test": "npm run test:only",
+        "test:only": "echo 'No tests for thrift-client'; exit 0;"
+    },
+    "author": "Credit Karma",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client"
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-server-core": "0.13.x"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-server-core": "^0.13.6",
+        "@types/node": "^8.10.38",
+        "prettier": "^1.17.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.18.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.5.x"
+    },
+    "dependencies": {
+        "@types/request": "^2.48.1",
+        "request": "^2.88.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

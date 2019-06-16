@@ -1,14 +1,11 @@
 import {
     BufferedTransport,
     getProtocol,
-    Int64,
+    IThriftContext,
     ProtocolType,
 } from '@creditkarma/thrift-server-core'
 
-import {
-    createThriftServer,
-    IHapiContext,
-} from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
@@ -80,25 +77,29 @@ export async function createServer(
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const impl = new Calculator.Processor<IHapiContext>(
+    const impl = new Calculator.Processor(
         {
             ping(): void {
                 return
             },
-            add(a: number, b: number, context: IHapiContext): Promise<number> {
+            add(
+                a: number,
+                b: number,
+                context: IThriftContext,
+            ): Promise<number> {
                 return addServiceClient.add(a, b, { headers: context.headers })
             },
             addInt64(
-                a: Int64,
-                b: Int64,
-                context: IHapiContext,
-            ): Promise<Int64> {
+                a: bigint,
+                b: bigint,
+                context: IThriftContext,
+            ): Promise<bigint> {
                 return addServiceClient.addInt64(a, b, context)
             },
             addWithContext(
                 a: number,
                 b: number,
-                context: IHapiContext,
+                context: IThriftContext,
             ): number {
                 if (
                     context !== undefined &&
@@ -112,7 +113,7 @@ export async function createServer(
             calculate(
                 logId: number,
                 work: Work,
-                context: IHapiContext,
+                context: IThriftContext,
             ): number | Promise<number> {
                 switch (work.op) {
                     case Operation.ADD:
@@ -133,7 +134,7 @@ export async function createServer(
             getStruct(): ISharedStruct {
                 return {
                     code: {
-                        status: new Int64(0),
+                        status: 0n,
                     },
                     value: 'test',
                 }
@@ -198,7 +199,7 @@ export async function createServer(
             fetchThing(): ICommonStruct {
                 return {
                     code: {
-                        status: new Int64(0),
+                        status: 0n,
                     },
                     value: 'test',
                 }

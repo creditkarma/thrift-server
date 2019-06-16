@@ -143,12 +143,10 @@ export class BufferedTransport extends TTransport {
         const msg: Buffer = Buffer.alloc(this.outCount)
         let pos: number = 0
 
-        this.outBuffers.forEach(
-            (buf: Buffer): void => {
-                buf.copy(msg, pos, 0)
-                pos += buf.length
-            },
-        )
+        this.outBuffers.forEach((buf: Buffer): void => {
+            buf.copy(msg, pos, 0)
+            pos += buf.length
+        })
 
         this.outBuffers = []
         this.outCount = 0

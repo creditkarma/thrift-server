@@ -1,6 +1,6 @@
 import { createHttpClient } from '@creditkarma/thrift-client'
 
-import { Int64, TApplicationException } from '@creditkarma/thrift-server-core'
+import { TApplicationException } from '@creditkarma/thrift-server-core'
 
 import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
@@ -56,7 +56,7 @@ describe('Thrift Server Hapi', () => {
         return client.getStruct(1).then((response: ISharedStruct) => {
             const expected = {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -98,9 +98,7 @@ describe('Thrift Server Hapi', () => {
 
     it('should handle requests not pointed to thrift service', async () => {
         return rp(
-            `http://${HAPI_CALC_SERVER_CONFIG.hostName}:${
-                HAPI_CALC_SERVER_CONFIG.port
-            }/control`,
+            `http://${HAPI_CALC_SERVER_CONFIG.hostName}:${HAPI_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
             expect(val).to.equal('PASS')
         })

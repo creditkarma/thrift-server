@@ -9,7 +9,7 @@ import { TProtocolException, TProtocolExceptionType } from '../errors'
 import { TTransport } from '../transports'
 
 import {
-    Int64,
+    // Int64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -109,9 +109,9 @@ export class JSONProtocol extends TProtocol {
         const value = this.tstack.pop()
         const fieldInfo = this.tstack.pop()
 
-        this.tstack[this.tstack.length - 1][fieldInfo.fieldId] = `{${
-            fieldInfo.fieldType
-        }:${value}}`
+        this.tstack[this.tstack.length - 1][
+            fieldInfo.fieldId
+        ] = `{${fieldInfo.fieldType}:${value}}`
         this.tpos.pop()
     }
 
@@ -222,9 +222,9 @@ export class JSONProtocol extends TProtocol {
         this.tstack.push(i32)
     }
 
-    public writeI64(i64: number | Int64) {
-        if (i64 instanceof Int64) {
-            this.tstack.push(i64.toDecimalString())
+    public writeI64(i64: number | bigint) {
+        if (typeof i64 === 'bigint') {
+            this.tstack.push(i64.toString())
         } else {
             this.tstack.push(i64)
         }
@@ -471,8 +471,8 @@ export class JSONProtocol extends TProtocol {
         return parseInt(this.readValue(), 10)
     }
 
-    public readI64(): Int64 {
-        return Int64.fromDecimalString(`${this.readValue()}`)
+    public readI64(): bigint {
+        return BigInt(`${this.readValue()}`)
     }
 
     public readDouble() {

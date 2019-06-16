@@ -2,14 +2,12 @@ import * as Hapi from '@hapi/hapi'
 
 import * as Core from '@creditkarma/thrift-server-core'
 
+import { ThriftContext } from '@creditkarma/thrift-server-core'
 import {
     HapiThriftOptions,
-    IHapiContext,
     IHapiPluginOptions,
     ThriftHapiPlugin,
 } from './types'
-
-// import { defaultLogger } from './logger'
 
 export const DEFAULT_PATH: string = '/thrift'
 
@@ -18,11 +16,11 @@ declare module '@hapi/hapi' {
     // tslint:disable-next-line:interface-name
     export interface PluginProperties {
         thrift?: {
-            transport: Core.TransportType
-            protocol: Core.ProtocolType
+            // transport: Core.TransportType
+            // protocol: Core.ProtocolType
             services: {
                 [name: string]: {
-                    processor: Core.IThriftProcessor<IHapiContext>
+                    processor: Core.IThriftProcessor<any>
                 }
             }
         }
@@ -43,12 +41,11 @@ declare module '@hapi/hapi' {
  * @param pluginOptions
  */
 export function ThriftServerHapi<
-    TProcessor extends Core.IThriftProcessor<IHapiContext>
->(pluginOptions: IHapiPluginOptions<TProcessor>): ThriftHapiPlugin {
-    const thriftOptions: HapiThriftOptions<TProcessor> =
+    TProcessor extends Core.IThriftProcessor<Context>,
+    Context extends object = {}
+>(pluginOptions: IHapiPluginOptions<TProcessor, Context>): ThriftHapiPlugin {
+    const thriftOptions: HapiThriftOptions<TProcessor, Context> =
         pluginOptions.thriftOptions
-
-    // const logger: Core.LogFunction = thriftOptions.logger || defaultLogger
 
     const thriftPath: string = Core.normalizePath(
         pluginOptions.path || DEFAULT_PATH,
@@ -56,14 +53,12 @@ export function ThriftServerHapi<
 
     const serviceName: string = pluginOptions.thriftOptions.serviceName
 
-    const Transport: Core.ITransportConstructor = Core.getTransport(
-        thriftOptions.transport,
-    )
+    const processor: Core.IThriftProcessor<Context> = thriftOptions.handler
 
-    const Protocol: Core.IProtocolConstructor = Core.getProtocol(
-        thriftOptions.protocol,
-    )
-    const processor: Core.IThriftProcessor<IHapiContext> = thriftOptions.handler
+    const Transport: Core.ITransportConstructor = processor.Transport
+
+    const Protocol: Core.IProtocolConstructor = processor.Protocol
+
     const rawServiceName: string = processor.__metadata.name
     const methodNames: Array<string> = Object.keys(processor.__metadata.methods)
 
@@ -72,25 +67,10 @@ export function ThriftServerHapi<
         version: require('../../package.json').version,
         multiple: true,
         async register(server: Hapi.Server): Promise<void> {
-            if (
-                server.plugins.thrift !== undefined &&
-                (server.plugins.thrift.transport !==
-                    (thriftOptions.transport || 'buffered') ||
-                    server.plugins.thrift.protocol !==
-                        (thriftOptions.protocol || 'binary'))
-            ) {
-                server.log(
-                    ['error', 'ThriftServerHapi'],
-                    `You are registering services with different transport/protocol combinations on the same Hapi.Server instance. You may experience unexpected behavior.`,
-                )
-            }
-
             /**
              * Save information about how we are handling thrift on this server.
              */
             server.plugins.thrift = {
-                transport: thriftOptions.transport || 'buffered',
-                protocol: thriftOptions.protocol || 'binary',
                 services: {
                     [serviceName]: {
                         processor,
@@ -117,9 +97,11 @@ export function ThriftServerHapi<
                                 const transportWithData: Core.TTransport = Transport.receiver(
                                     request.payload as Buffer,
                                 )
+
                                 const input: Core.TProtocol = new Protocol(
                                     transportWithData,
                                 )
+
                                 const metadata: Core.IThriftMessage = input.readMessageBegin()
                                 const fieldName: string = metadata.fieldName
                                 const requestId: number = metadata.requestId
@@ -127,6 +109,7 @@ export function ThriftServerHapi<
                                 const output: Core.TProtocol = new Protocol(
                                     new Transport(),
                                 )
+
                                 const exception: Core.TApplicationException = new Core.TApplicationException(
                                     Core.TApplicationExceptionType.INTERNAL_ERROR,
                                     response.message as string, // If we're dealing with an error this is an Error not a Response
@@ -137,19 +120,19 @@ export function ThriftServerHapi<
                                     Core.MessageType.EXCEPTION,
                                     requestId,
                                 )
+
                                 Core.TApplicationExceptionCodec.encode(
                                     exception,
                                     output,
                                 )
+
                                 output.writeMessageEnd()
 
                                 return reply.response(output.flush()).code(500)
                             } catch (err) {
                                 server.log(
                                     ['error', 'ThriftServerHapi'],
-                                    `Unable to build TApplicationException for response error: ${
-                                        err.message
-                                    }`,
+                                    `Unable to build TApplicationException for response error: ${err.message}`,
                                 )
                                 return reply.continue
                             }
@@ -176,16 +159,25 @@ export function ThriftServerHapi<
                     throw new Error('Not implemented')
                 })
 
+            const contextFacotry =
+                thriftOptions.contextFactory || ((_: Hapi.Request) => ({}))
+
             const handler: Hapi.Lifecycle.Method = (
                 request: Hapi.Request,
                 reply: Hapi.ResponseToolkit,
             ) => {
-                return processor.process(request.payload as Buffer, {
-                    headers: request.headers,
-                    log: logFactory(request),
-                    getClient: clientFactory,
-                    request,
-                })
+                const buffer: Buffer = request.payload as Buffer
+                const context: any = contextFacotry(request)
+                const mergedContext: ThriftContext<Context> = Core.deepMerge(
+                    context,
+                    {
+                        headers: request.headers,
+                        log: logFactory(request),
+                        getClient: clientFactory,
+                    },
+                )
+
+                return processor.process(buffer, mergedContext)
             }
 
             if (thriftOptions.withEndpointPerMethod === true) {

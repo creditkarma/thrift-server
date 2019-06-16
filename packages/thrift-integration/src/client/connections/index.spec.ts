@@ -1,4 +1,4 @@
-import { Int64, readThriftMethod } from '@creditkarma/thrift-server-core'
+import { readThriftMethod } from '@creditkarma/thrift-server-core'
 import * as Hapi from '@hapi/hapi'
 
 import {
@@ -197,7 +197,7 @@ describe('createHttpClient', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: ISharedStruct) => {
                 expect(response).to.equal({
-                    code: { status: new Int64(0) },
+                    code: { status: 0n },
                     value: 'test',
                 })
             })
@@ -214,7 +214,7 @@ describe('createHttpClient', () => {
                 const map = new Map<string, ISharedStruct>()
                 map.set('one', {
                     code: {
-                        status: new Int64(5),
+                        status: 5n,
                     },
                     value: 'test',
                 })
@@ -420,7 +420,7 @@ describe('createHttpClient', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: ISharedStruct) => {
                 expect(response).to.equal({
-                    code: { status: new Int64(0) },
+                    code: { status: 0n },
                     value: 'test',
                 })
             })

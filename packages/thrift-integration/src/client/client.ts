@@ -91,20 +91,17 @@ export function createClientServer(
         }
     }
 
-    app.get(
-        '/ping',
-        (req: express.Request, res: express.Response): void => {
-            thriftClient.ping({ headers: req.headers }).then(
-                () => {
-                    res.send('success')
-                },
-                (err: any) => {
-                    console.log('err: ', err)
-                    res.status(500).send(err)
-                },
-            )
-        },
-    )
+    app.get('/ping', (req: express.Request, res: express.Response): void => {
+        thriftClient.ping({ headers: req.headers }).then(
+            () => {
+                res.send('success')
+            },
+            (err: any) => {
+                console.log('err: ', err)
+                res.status(500).send(err)
+            },
+        )
+    })
 
     app.get(
         '/calculate',

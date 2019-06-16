@@ -3,7 +3,7 @@ import * as Lab from '@hapi/lab'
 
 import {
     BufferedTransport,
-    Int64,
+    // Int64,
     JSONProtocol,
     MessageType,
     TType,
@@ -317,7 +317,7 @@ describe('JSONProtocol', () => {
             protocol.writeStructBegin('request')
 
             protocol.writeFieldBegin('lower', TType.I64, 1)
-            protocol.writeI64(Int64.fromDecimalString('-9223372036854775808'))
+            protocol.writeI64(BigInt('-9223372036854775808'))
             protocol.writeFieldEnd()
 
             protocol.writeFieldBegin('mid', TType.I64, 2)
@@ -325,7 +325,7 @@ describe('JSONProtocol', () => {
             protocol.writeFieldEnd()
 
             protocol.writeFieldBegin('upper', TType.I64, 3)
-            protocol.writeI64(Int64.fromDecimalString('9223372036854775807'))
+            protocol.writeI64(BigInt('9223372036854775807'))
             protocol.writeFieldEnd()
 
             protocol.writeFieldStop()
@@ -353,19 +353,15 @@ describe('JSONProtocol', () => {
             protocol.readStructBegin()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(
-                Int64.fromDecimalString('-9223372036854775808'),
-            )
+            expect(protocol.readI64()).to.equal(BigInt('-9223372036854775808'))
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(Int64.fromDecimalString('0'))
+            expect(protocol.readI64()).to.equal(BigInt('0'))
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(
-                Int64.fromDecimalString('9223372036854775807'),
-            )
+            expect(protocol.readI64()).to.equal(BigInt('9223372036854775807'))
             protocol.readFieldEnd()
 
             protocol.readStructEnd()

@@ -1,9 +1,12 @@
-import { Int64, ProtocolType } from '@creditkarma/thrift-server-core'
-
 import {
-    createThriftServer,
-    IHapiContext,
-} from '@creditkarma/thrift-server-hapi'
+    IThriftContext,
+    ProtocolType,
+    // ThriftContext,
+} from '@creditkarma/thrift-server-core'
+
+import { assert } from 'console'
+
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
@@ -82,17 +85,22 @@ export async function createServer(
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const impl = new Calculator.Processor<IHapiContext>({
-        ping(): void {
+    const impl = new Calculator.Processor<{ name: string }>({
+        ping(context): void {
+            assert(context.name === 'test this')
             return
         },
-        add(a: number, b: number, context: IHapiContext): Promise<number> {
+        add(a: number, b: number, context: IThriftContext): Promise<number> {
             return addServiceClient.add(a, b, { headers: context.headers })
         },
-        addInt64(a: Int64, b: Int64, context: IHapiContext): Promise<Int64> {
+        addInt64(
+            a: bigint,
+            b: bigint,
+            context: IThriftContext,
+        ): Promise<bigint> {
             return addServiceClient.addInt64(a, b, context)
         },
-        addWithContext(a: number, b: number, context: IHapiContext): number {
+        addWithContext(a: number, b: number, context: IThriftContext): number {
             if (
                 context !== undefined &&
                 context.headers['x-fake-token'] === 'fake-token'
@@ -105,7 +113,7 @@ export async function createServer(
         calculate(
             logId: number,
             work: Work,
-            context: IHapiContext,
+            context,
         ): number | Promise<number> {
             switch (work.op) {
                 case Operation.ADD:
@@ -126,7 +134,7 @@ export async function createServer(
         getStruct(): ISharedStruct {
             return {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -193,7 +201,7 @@ export async function createServer(
         fetchThing(): ICommonStruct {
             return {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -215,7 +223,10 @@ export async function createServer(
         thriftOptions: {
             serviceName: 'calculator-service',
             handler: impl,
-            protocol: protocolType,
+            contextFactory: (request: Hapi.Request): { name: string } => {
+                console.log('create context: ', request.headers)
+                return { name: 'test this' }
+            },
         },
     })
 

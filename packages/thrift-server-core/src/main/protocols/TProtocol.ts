@@ -2,7 +2,6 @@ import { TTransport } from '../transports'
 
 import { defaultLogger } from '../logger'
 import {
-    Int64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -75,7 +74,7 @@ export abstract class TProtocol {
 
     public abstract writeI32(i32: number): void
 
-    public abstract writeI64(i64: number | Int64): void
+    public abstract writeI64(i64: string | number | bigint): void
 
     public abstract writeDouble(dbl: number): void
 
@@ -115,7 +114,7 @@ export abstract class TProtocol {
 
     public abstract readI32(): number
 
-    public abstract readI64(): Int64
+    public abstract readI64(): bigint
 
     public abstract readDouble(): number
 

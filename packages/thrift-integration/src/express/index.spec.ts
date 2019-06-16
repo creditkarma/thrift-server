@@ -8,8 +8,6 @@ import * as rp from 'request-promise-native'
 
 import { createHttpClient } from '@creditkarma/thrift-client'
 
-import { Int64 } from '@creditkarma/thrift-server-core'
-
 import { EXPRESS_CALC_SERVER_CONFIG } from '../config'
 
 import { Calculator } from '../generated/calculator-service'
@@ -44,9 +42,7 @@ describe('Thrift Server Express', () => {
 
             calcServer = app.listen(EXPRESS_CALC_SERVER_CONFIG.port, () => {
                 console.log(
-                    `Express server listening on port: ${
-                        EXPRESS_CALC_SERVER_CONFIG.port
-                    }`,
+                    `Express server listening on port: ${EXPRESS_CALC_SERVER_CONFIG.port}`,
                 )
                 addServer.start().then(() => resolve())
             })
@@ -71,7 +67,7 @@ describe('Thrift Server Express', () => {
         return client.getStruct(1).then((response: ISharedStruct) => {
             const expected = {
                 code: {
-                    status: new Int64(0),
+                    status: 0n,
                 },
                 value: 'test',
             }
@@ -102,9 +98,7 @@ describe('Thrift Server Express', () => {
 
     it('should handle requests not pointed to thrift service', async () => {
         return rp(
-            `http://${EXPRESS_CALC_SERVER_CONFIG.hostName}:${
-                EXPRESS_CALC_SERVER_CONFIG.port
-            }/control`,
+            `http://${EXPRESS_CALC_SERVER_CONFIG.hostName}:${EXPRESS_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
             expect(val).to.equal('PASS')
         })

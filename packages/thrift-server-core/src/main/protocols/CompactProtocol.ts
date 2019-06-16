@@ -181,7 +181,7 @@ export class CompactProtocol extends TProtocol {
         // Record client seqid to find callback again
         if (this.requestId) {
             this.logger(
-                ['warn', 'CompactProtocol'],
+                ['warn', 'CompactProtocol', 'writeMessageBegin'],
                 `requestId already set: ${name}`,
             )
         } else {
@@ -193,7 +193,10 @@ export class CompactProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(['warn', 'CompactProtocol'], 'No requestId to unset')
+            this.logger(
+                ['warn', 'CompactProtocol', 'writeMessageEnd'],
+                'No requestId to unset',
+            )
         }
     }
 
@@ -285,7 +288,7 @@ export class CompactProtocol extends TProtocol {
         this.writeVarint32(this.i32ToZigzag(i32))
     }
 
-    public writeI64(i64: number): void {
+    public writeI64(i64: string | number | bigint): void {
         this.writeVarint64(this.i64ToZigzag(i64))
     }
 
@@ -552,7 +555,7 @@ export class CompactProtocol extends TProtocol {
         return this.zigzagToI32(this.readVarint32())
     }
 
-    public readI64(): Int64 {
+    public readI64(): bigint {
         return this.zigzagToI64(this.readVarint64())
     }
 
@@ -707,7 +710,7 @@ export class CompactProtocol extends TProtocol {
     /**
      * Convert from zigzag long to long.
      */
-    private zigzagToI64(i64: Int64): Int64 {
+    private zigzagToI64(i64: Int64): bigint {
         let hi = i64.buffer.readUInt32BE(0, true)
         let lo = i64.buffer.readUInt32BE(4, true)
 
@@ -719,7 +722,9 @@ export class CompactProtocol extends TProtocol {
         const hiLo = hi << 31
         hi = (hi >>> 1) ^ hiNeg
         lo = ((lo >>> 1) | hiLo) ^ loNeg
-        return new Int64(hi, lo)
+
+        const int64 = new Int64(hi, lo)
+        return BigInt(int64.toDecimalString())
     }
 
     /**
@@ -867,21 +872,25 @@ export class CompactProtocol extends TProtocol {
      * Convert l into a zigzag long. This allows negative numbers to be
      * represented compactly as a varint.
      */
-    private i64ToZigzag(i64: number | Int64): Int64 {
+    private i64ToZigzag(i64: string | number | bigint): Int64 {
+        let int64: Int64
+
         if (typeof i64 === 'string') {
-            i64 = new Int64(parseInt(i64, 10))
+            int64 = new Int64(parseInt(i64, 10))
         } else if (typeof i64 === 'number') {
-            i64 = new Int64(i64)
+            int64 = new Int64(i64)
+        } else {
+            int64 = Int64.fromDecimalString(i64.toString(10))
         }
 
-        if (!(i64 instanceof Int64)) {
+        if (!(int64 instanceof Int64)) {
             throw new TProtocolException(
                 TProtocolExceptionType.INVALID_DATA,
                 `Expected Int64 or Number, found: ${i64}`,
             )
         } else {
-            let hi: number = i64.buffer.readUInt32BE(0, true)
-            let lo: number = i64.buffer.readUInt32BE(4, true)
+            let hi: number = int64.buffer.readUInt32BE(0, true)
+            let lo: number = int64.buffer.readUInt32BE(4, true)
             const sign: number = hi >>> 31
 
             hi = ((hi << 1) | (lo >>> 31)) ^ (!!sign ? 0xffffffff : 0)

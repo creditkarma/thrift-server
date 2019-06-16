@@ -65,27 +65,21 @@ async function init(): Promise<void> {
         }
     }
 
-    app.get(
-        '/',
-        (req: express.Request, res: express.Response): void => {
-            res.sendFile(path.join(__dirname, './index.html'))
-        },
-    )
+    app.get('/', (req: express.Request, res: express.Response): void => {
+        res.sendFile(path.join(__dirname, './index.html'))
+    })
 
-    app.get(
-        '/ping',
-        (req: express.Request, res: express.Response): void => {
-            thriftClient.ping({ headers: req.headers }).then(
-                () => {
-                    res.send('success')
-                },
-                (err: any) => {
-                    console.log('err: ', err)
-                    res.status(500).send(err)
-                },
-            )
-        },
-    )
+    app.get('/ping', (req: express.Request, res: express.Response): void => {
+        thriftClient.ping({ headers: req.headers }).then(
+            () => {
+                res.send('success')
+            },
+            (err: any) => {
+                console.log('err: ', err)
+                res.status(500).send(err)
+            },
+        )
+    })
 
     app.get(
         '/calculate',
@@ -109,9 +103,7 @@ async function init(): Promise<void> {
 
     app.listen(CLIENT_CONFIG.port, () => {
         console.log(
-            `Web server listening at http://${CLIENT_CONFIG.host}:${
-                CLIENT_CONFIG.port
-            }`,
+            `Web server listening at http://${CLIENT_CONFIG.host}:${CLIENT_CONFIG.port}`,
         )
     })
 }

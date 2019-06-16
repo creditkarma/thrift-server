@@ -87,7 +87,7 @@ describe('HttpConnection', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: ICommonStruct) => {
                 expect(response).to.equal({
-                    code: { status: new thrift.Int64(0) },
+                    code: { status: 0n },
                     value: 'test',
                 })
             })
@@ -222,7 +222,7 @@ describe('HttpConnection', () => {
         it('should corrently handle a service client request that returns a struct', async () => {
             return client.getStruct(5).then((response: ICommonStruct) => {
                 expect(response).to.equal({
-                    code: { status: new thrift.Int64(0) },
+                    code: { status: 0n },
                     value: 'test',
                 })
             })

@@ -11,7 +11,6 @@ import { TProtocolException, TProtocolExceptionType } from '../errors'
 import { TTransport } from '../transports'
 
 import {
-    Int64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -23,6 +22,7 @@ import {
     TType,
 } from '../types'
 
+import { readBigUInt64BE, writeBigInt64BE } from '../bigint'
 import { defaultLogger } from '../logger'
 import { TProtocol } from './TProtocol'
 
@@ -50,7 +50,7 @@ export class BinaryProtocol extends TProtocol {
 
         if (this.requestId) {
             this.logger(
-                ['warn', 'BinaryProtocol'],
+                ['warn', 'BinaryProtocol', 'writeMessageBegin'],
                 `requestId already set: ${name}`,
             )
         } else {
@@ -62,7 +62,10 @@ export class BinaryProtocol extends TProtocol {
         if (this.requestId !== null) {
             this.requestId = null
         } else {
-            this.logger(['warn', 'BinaryProtocol'], 'No requestId to unset')
+            this.logger(
+                ['warn', 'BinaryProtocol', 'writeMessageEnd'],
+                'No requestId to unset',
+            )
         }
     }
 
@@ -123,11 +126,13 @@ export class BinaryProtocol extends TProtocol {
         this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
     }
 
-    public writeI64(i64: number | Int64): void {
-        if (typeof i64 === 'number') {
-            this.transport.write(new Int64(i64).buffer)
+    public writeI64(i64: string | number | bigint): void {
+        if (typeof i64 === 'string') {
+            this.transport.write(writeBigInt64BE(Buffer.alloc(8), BigInt(i64)))
+        } else if (typeof i64 === 'number') {
+            this.transport.write(writeBigInt64BE(Buffer.alloc(8), BigInt(i64)))
         } else {
-            this.transport.write(i64.buffer)
+            this.transport.write(writeBigInt64BE(Buffer.alloc(8), i64))
         }
     }
 
@@ -249,9 +254,9 @@ export class BinaryProtocol extends TProtocol {
         return this.transport.readI32()
     }
 
-    public readI64(): Int64 {
-        const buff = this.transport.read(8)
-        return new Int64(buff)
+    public readI64(): bigint {
+        const buf = this.transport.read(8)
+        return readBigUInt64BE(buf)
     }
 
     public readDouble(): number {

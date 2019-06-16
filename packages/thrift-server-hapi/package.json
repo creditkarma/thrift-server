@@ -1,57 +1,57 @@
 {
-  "name": "@creditkarma/thrift-server-hapi",
-  "version": "0.13.6",
-  "description": "A Hapi server plugin for the Apache Thrift protocol",
-  "main": "dist/main/index.js",
-  "types": "dist/main/index.d.ts",
-  "files": [
-    "dist/main"
-  ],
-  "keywords": [
-    "thrift",
-    "hapi",
-    "typescript",
-    "rpc",
-    "microservices",
-    "server",
-    "framework"
-  ],
-  "scripts": {
-    "clean": "rimraf ./dist ./src/tests/generated",
-    "lint": "tslint --fix './src/**/*.ts'",
-    "format": "prettier --write 'src/**/*.ts'",
-    "prebuild": "npm run clean",
-    "build": "npm run lint && npm run format && tsc",
-    "test": "npm run test:only",
-    "test:only": "echo 'No tests for thrift-server-hapi'; exit 0;"
-  },
-  "author": "Credit Karma",
-  "license": "Apache-2.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
-  },
-  "peerDependencies": {
-    "@creditkarma/thrift-server-core": "0.13.x",
-    "@types/hapi__hapi": ">=17.0.0 <19.0.0",
-    "@hapi/hapi": ">=17.0.0 <19.0.0"
-  },
-  "devDependencies": {
-    "@creditkarma/thrift-server-core": "^0.13.6",
-    "@types/hapi__hapi": "^18.2.3",
-    "@types/node": "^8.10.38",
-    "@hapi/hapi": "^18.3.1",
-    "prettier": "^1.15.1",
-    "rimraf": "^2.6.2",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.15.0",
-    "tslint-plugin-prettier": "^2.0.0",
-    "typescript": "3.5.x"
-  },
-  "dependencies": {
-    "zipkin": "^0.15.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+    "name": "@creditkarma/thrift-server-hapi",
+    "version": "0.13.6",
+    "description": "A Hapi server plugin for the Apache Thrift protocol",
+    "main": "dist/main/index.js",
+    "types": "dist/main/index.d.ts",
+    "files": [
+        "dist/main"
+    ],
+    "keywords": [
+        "thrift",
+        "hapi",
+        "typescript",
+        "rpc",
+        "microservices",
+        "server",
+        "framework"
+    ],
+    "scripts": {
+        "clean": "rimraf ./dist ./src/tests/generated",
+        "lint": "tslint --fix './src/**/*.ts'",
+        "format": "prettier --write 'src/**/*.ts'",
+        "prebuild": "npm run clean",
+        "build": "npm run lint && npm run format && tsc",
+        "test": "npm run test:only",
+        "test:only": "echo 'No tests for thrift-server-hapi'; exit 0;"
+    },
+    "author": "Credit Karma",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
+    },
+    "peerDependencies": {
+        "@creditkarma/thrift-server-core": "0.13.x",
+        "@types/hapi__hapi": ">=17.0.0 <19.0.0",
+        "@hapi/hapi": ">=17.0.0 <19.0.0"
+    },
+    "devDependencies": {
+        "@creditkarma/thrift-server-core": "^0.13.6",
+        "@types/hapi__hapi": "^18.2.3",
+        "@types/node": "^8.10.38",
+        "@hapi/hapi": "^18.3.1",
+        "prettier": "^1.15.1",
+        "rimraf": "^2.6.2",
+        "tslint": "^5.11.0",
+        "tslint-config-prettier": "^1.15.0",
+        "tslint-plugin-prettier": "^2.0.0",
+        "typescript": "3.5.x"
+    },
+    "dependencies": {
+        "zipkin": "^0.15.0"
+    },
+    "publishConfig": {
+        "access": "public"
+    }
 }

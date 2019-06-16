@@ -1,9 +1,6 @@
-import { Int64 } from '@creditkarma/thrift-server-core'
+import { IThriftContext } from '@creditkarma/thrift-server-core'
 
-import {
-    createThriftServer,
-    IHapiContext,
-} from '@creditkarma/thrift-server-hapi'
+import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
@@ -23,15 +20,15 @@ export async function createServer(
      * passed along to our service by the Hapi thrift plugin. Thus, you have access to
      * all HTTP request data from within your service implementation.
      */
-    const impl = new AddService.Processor<IHapiContext>({
+    const impl = new AddService.Processor({
         ping(): void {
             return
         },
-        add(a: number, b: number, context?: IHapiContext): number {
+        add(a: number, b: number, context?: IThriftContext): number {
             return a + b
         },
-        addInt64(a: Int64, b: Int64, context?: IHapiContext): Int64 {
-            return new Int64(a.toNumber() + b.toNumber())
+        addInt64(a: bigint, b: bigint, context?: IThriftContext): bigint {
+            return a + b
         },
     })
 
