@@ -150,7 +150,7 @@ export class Connection {
             }
             const errorHandler = (err: Error) => {
                 this.logger(
-                    ['error', 'Connection'],
+                    ['error', 'Connection', 'send'],
                     `Error sending data to thrift service: ${err.message}`,
                 )
                 removeHandlers()
@@ -179,10 +179,8 @@ export class Connection {
                 } catch (err) {
                     if (!(err instanceof InputBufferUnderrunError)) {
                         this.logger(
-                            ['error', 'Connection'],
-                            `Error reading data from connection: ${
-                                err.message
-                            }`,
+                            ['error', 'Connection', 'send', 'dataHandler'],
+                            `Error reading data from connection: ${err.message}`,
                         )
                         removeHandlers()
                         reject(err)

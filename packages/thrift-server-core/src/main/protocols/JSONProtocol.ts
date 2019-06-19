@@ -109,9 +109,9 @@ export class JSONProtocol extends TProtocol {
         const value = this.tstack.pop()
         const fieldInfo = this.tstack.pop()
 
-        this.tstack[this.tstack.length - 1][fieldInfo.fieldId] = `{${
-            fieldInfo.fieldType
-        }:${value}}`
+        this.tstack[this.tstack.length - 1][
+            fieldInfo.fieldId
+        ] = `{${fieldInfo.fieldType}:${value}}`
         this.tpos.pop()
     }
 

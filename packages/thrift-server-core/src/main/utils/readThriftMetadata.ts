@@ -22,7 +22,7 @@ export function readThriftMetadata(
         const input: TProtocol = new Protocol(transportWithData)
         return input.readMessageBegin()
     } catch (err) {
-        logger(['warn'], `Unable to read Thrift message. ${err.message}`)
+        logger(['warn', 'readThriftMetadata'], `Unable to read Thrift message. ${err.message}`)
         throw err
     }
 }
@@ -42,7 +42,7 @@ export function readThriftMethod(
         )
         return fieldName
     } catch (err) {
-        logger(['warn'], `Unable to read Thrift method name. ${err.message}`)
+        logger(['warn', 'readThrfitMethod'], `Unable to read Thrift method name. ${err.message}`)
         return ''
     }
 }
@@ -62,7 +62,7 @@ export function readRequestId(
         )
         return requestId
     } catch (err) {
-        logger(['warn'], `Unable to read Thrift requestId. ${err.message}`)
+        logger(['warn', 'readRequestId'], `Unable to read Thrift requestId. ${err.message}`)
         return 0
     }
 }

@@ -98,9 +98,7 @@ describe('Thrift Server Hapi', () => {
 
     it('should handle requests not pointed to thrift service', async () => {
         return rp(
-            `http://${HAPI_CALC_SERVER_CONFIG.hostName}:${
-                HAPI_CALC_SERVER_CONFIG.port
-            }/control`,
+            `http://${HAPI_CALC_SERVER_CONFIG.hostName}:${HAPI_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
             expect(val).to.equal('PASS')
         })

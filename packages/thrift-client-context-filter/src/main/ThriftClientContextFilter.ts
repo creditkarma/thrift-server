@@ -66,9 +66,7 @@ export function ThriftClientContextFilter<RequestContext, ResponseContext>({
                             (err: any) => {
                                 logger(
                                     ['warn', 'ThriftClientContextFilter'],
-                                    `Error reading context from Thrift response: ${
-                                        err.message
-                                    }`,
+                                    `Error reading context from Thrift response: ${err.message}`,
                                 )
                                 return response
                             },

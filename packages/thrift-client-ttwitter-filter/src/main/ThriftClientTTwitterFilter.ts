@@ -219,12 +219,7 @@ export function ThriftClientTTwitterFilter<T>({
                                             transportType,
                                             protocolType,
                                         ).then(
-                                            (
-                                                result: [
-                                                    TTwitter.IResponseHeader,
-                                                    Buffer
-                                                ],
-                                            ) => {
+                                            (result) => {
                                                 return {
                                                     statusCode: res.statusCode,
                                                     headers: {
@@ -236,10 +231,11 @@ export function ThriftClientTTwitterFilter<T>({
                                             },
                                             (err: any) => {
                                                 logger(
-                                                    ['warn'],
-                                                    `Error reading context from Thrift response: ${
-                                                        err.message
-                                                    }`,
+                                                    [
+                                                        'warn',
+                                                        'ThriftClientTTwitterFilter',
+                                                    ],
+                                                    `Error reading context from Thrift response: ${err.message}`,
                                                 )
                                                 return res
                                             },

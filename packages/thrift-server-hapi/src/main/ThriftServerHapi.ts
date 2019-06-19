@@ -140,9 +140,7 @@ export function ThriftServerHapi<
                             } catch (err) {
                                 logger(
                                     ['error', 'ThriftServerHapi'],
-                                    `Unable to build TApplicationException for response error: ${
-                                        err.message
-                                    }`,
+                                    `Unable to build TApplicationException for response error: ${err.message}`,
                                 )
                                 return reply.continue
                             }

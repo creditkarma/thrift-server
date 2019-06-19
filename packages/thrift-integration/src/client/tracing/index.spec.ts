@@ -69,9 +69,7 @@ describe('Tracing', () => {
             const traceId_2: string = 'b82ba1422cf1ec6c'
             Promise.all([
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 5,
@@ -87,9 +85,7 @@ describe('Tracing', () => {
                     },
                 ),
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 8,
@@ -127,9 +123,7 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             Promise.all([
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate-overwrite`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite`,
                     {
                         qs: {
                             left: 5,
@@ -168,9 +162,7 @@ describe('Tracing', () => {
             const traceId_2: string = randomTraceId()
             Promise.all([
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 5,
@@ -190,9 +182,7 @@ describe('Tracing', () => {
                     },
                 ),
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 7,
@@ -235,9 +225,7 @@ describe('Tracing', () => {
             const traceId_2: string = randomTraceId()
             Promise.all([
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 5,
@@ -297,9 +285,7 @@ describe('Tracing', () => {
             }
             Promise.all([
                 rp(
-                    `http://${CLIENT_CONFIG.hostName}:${
-                        CLIENT_CONFIG.port
-                    }/calculate`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
                         qs: {
                             left: 5,

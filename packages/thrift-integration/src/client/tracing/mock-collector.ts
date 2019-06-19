@@ -81,9 +81,7 @@ export function createServer(): Promise<IMockCollector> {
                     reject(err)
                 } else {
                     console.log(
-                        `MockCollector listening on port[${
-                            COLLECTOR_CONFIG.port
-                        }]`,
+                        `MockCollector listening on port[${COLLECTOR_CONFIG.port}]`,
                     )
                     resolve({
                         server,

@@ -44,9 +44,7 @@ describe('Thrift Server Express', () => {
 
             calcServer = app.listen(EXPRESS_CALC_SERVER_CONFIG.port, () => {
                 console.log(
-                    `Express server listening on port: ${
-                        EXPRESS_CALC_SERVER_CONFIG.port
-                    }`,
+                    `Express server listening on port: ${EXPRESS_CALC_SERVER_CONFIG.port}`,
                 )
                 addServer.start().then(() => resolve())
             })
@@ -102,9 +100,7 @@ describe('Thrift Server Express', () => {
 
     it('should handle requests not pointed to thrift service', async () => {
         return rp(
-            `http://${EXPRESS_CALC_SERVER_CONFIG.hostName}:${
-                EXPRESS_CALC_SERVER_CONFIG.port
-            }/control`,
+            `http://${EXPRESS_CALC_SERVER_CONFIG.hostName}:${EXPRESS_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
             expect(val).to.equal('PASS')
         })

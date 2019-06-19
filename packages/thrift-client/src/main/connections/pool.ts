@@ -19,11 +19,11 @@ export const createPool = (
     const resolvedOptions = Object.assign(defaultOptions, options)
     const factory: GenericPool.Factory<Connection> = {
         create: async () => {
-            logger(['info'], 'Creating new client connection')
+            logger(['info', 'createPool'], 'Creating new client connection')
             return await createConnection(config)
         },
         destroy: async (connection) => {
-            logger(['info'], 'Destroying client connection')
+            logger(['info', 'createPool'], 'Destroying client connection')
             return connection.destroy().then(() => undefined)
         },
         validate: async (connection) => {
