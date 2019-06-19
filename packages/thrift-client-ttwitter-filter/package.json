@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-ttwitter-filter",
-    "version": "0.13.6",
+    "version": "0.13.7",
     "description": "Filter for appending TTwitter context onto thrift-client payload",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -31,11 +31,11 @@
         "@creditkarma/zipkin-core": "0.13.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.13.6",
-        "@creditkarma/thrift-client-context-filter": "^0.13.6",
-        "@creditkarma/thrift-server-core": "^0.13.6",
+        "@creditkarma/thrift-client": "^0.13.7",
+        "@creditkarma/thrift-client-context-filter": "^0.13.7",
+        "@creditkarma/thrift-server-core": "^0.13.7",
         "@creditkarma/thrift-typescript": "^3.6.2",
-        "@creditkarma/zipkin-core": "^0.13.6",
+        "@creditkarma/zipkin-core": "^0.13.7",
         "@types/node": "^8.10.38",
         "prettier": "^1.15.1",
         "rimraf": "^2.6.2",

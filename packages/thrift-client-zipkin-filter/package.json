@@ -1,12 +1,12 @@
 {
     "name": "@creditkarma/thrift-client-zipkin-filter",
-    "version": "0.13.6",
+    "version": "0.13.7",
     "description": "Zipkin tracing for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-zipkin-filter"
+        "type": "git",
+        "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-client-zipkin-filter"
     },
     "files": [
         "dist/main"
@@ -37,9 +37,9 @@
         "@creditkarma/zipkin-core": "0.13.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.13.6",
-        "@creditkarma/thrift-server-core": "^0.13.6",
-        "@creditkarma/zipkin-core": "^0.13.6",
+        "@creditkarma/thrift-client": "^0.13.7",
+        "@creditkarma/thrift-server-core": "^0.13.7",
+        "@creditkarma/zipkin-core": "^0.13.7",
         "@types/node": "^8.10.38",
         "prettier": "^1.15.1",
         "rimraf": "^2.6.2",
