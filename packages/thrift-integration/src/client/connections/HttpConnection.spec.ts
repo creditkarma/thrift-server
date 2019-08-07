@@ -19,8 +19,8 @@ import { CoreOptions } from 'request'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../../config'
 
-import { expect } from 'code'
-import * as Lab from 'lab'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 
 import { createServer as addService } from '../../hapi-add-service'
 import { createServer as calculatorService } from '../../hapi-calculator-service'

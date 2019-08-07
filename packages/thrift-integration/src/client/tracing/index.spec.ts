@@ -5,9 +5,9 @@ import {
     traceIdFromTraceId,
 } from '@creditkarma/zipkin-core'
 
-import { expect } from 'code'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 import * as Hapi from 'hapi'
-import * as Lab from 'lab'
 import * as net from 'net'
 import * as rp from 'request-promise-native'
 

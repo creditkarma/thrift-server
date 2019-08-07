@@ -1,6 +1,6 @@
 import * as thrift from '@creditkarma/thrift-server-core'
-import { expect } from 'code'
-import * as Lab from 'lab'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 import * as net from 'net'
 
 import {

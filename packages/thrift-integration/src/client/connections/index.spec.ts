@@ -18,8 +18,8 @@ import {
     HAPI_CALC_SERVER_STRICT_CONFIG,
 } from '../../config'
 
-import { expect } from 'code'
-import * as Lab from 'lab'
+import { expect } from '@hapi/code'
+import * as Lab from '@hapi/lab'
 
 import {
     Calculator as CalculatorStrict,

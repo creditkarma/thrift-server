@@ -36,7 +36,10 @@ export function createThriftServer<
             return server
         })
         .catch((err: any) => {
-            logger(['error', 'createThriftServer'], `Unable to create Thrift server. ${err.message}`)
+            logger(
+                ['error', 'createThriftServer'],
+                `Unable to create Thrift server. ${err.message}`,
+            )
             throw err
         })
 }
