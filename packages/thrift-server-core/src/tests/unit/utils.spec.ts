@@ -8,6 +8,7 @@ import {
     encode,
     MessageType,
     readThriftObject,
+    stripStruct,
     TProtocol,
     TTransport,
 } from '../../main'
@@ -81,6 +82,31 @@ describe('Utils', () => {
                     )
                 },
             )
+        })
+    })
+
+    describe('stripStruct', () => {
+        it('should strip struct from message', async () => {
+            const meta: IMetadata = { traceId: 7 }
+            const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
+            const totalLength: number =
+                (await encode(meta, MetadataCodec)).length + data.length
+
+            return appendThriftObject(meta, data, MetadataCodec).then(
+                (val: Buffer) => {
+                    expect(val.length).to.equal(totalLength)
+                    const result: Buffer = stripStruct(val)
+                    expect(result.toString()).to.equal(data.toString())
+                    expect(result.length).to.equal(data.length)
+                },
+            )
+        })
+
+        it('should leave message without struct unaltered', async () => {
+            const data: Buffer = Buffer.from([1, 2, 3, 4, 5])
+            const result: Buffer = stripStruct(data)
+            expect(result.toString()).to.equal(data.toString())
+            expect(result.length).to.equal(data.length)
         })
     })
 

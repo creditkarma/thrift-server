@@ -161,34 +161,25 @@ export function ThriftClientTTwitterFilter<T>({
 
                             const requestHeader: TTwitter.IRequestHeader = {
                                 trace_id: new Int64(
-                                    `0x${
-                                        (normalHeaders as any)[
-                                            ZipkinHeaders.TraceId
-                                        ]
-                                    }`,
+                                    `0x${normalHeaders[ZipkinHeaders.TraceId]}`,
                                 ),
                                 span_id: new Int64(
-                                    `0x${
-                                        (normalHeaders as any)[
-                                            ZipkinHeaders.SpanId
-                                        ]
-                                    }`,
+                                    `0x${normalHeaders[ZipkinHeaders.SpanId]}`,
                                 ),
                                 parent_span_id:
                                     normalHeaders[ZipkinHeaders.ParentId] !==
                                     undefined
                                         ? new Int64(
                                               `0x${
-                                                  (normalHeaders as any)[
+                                                  normalHeaders[
                                                       ZipkinHeaders.ParentId
                                                   ]
                                               }`,
                                           )
                                         : undefined,
                                 sampled:
-                                    (normalHeaders as any)[
-                                        ZipkinHeaders.Sampled
-                                    ] === '1',
+                                    normalHeaders[ZipkinHeaders.Sampled] ===
+                                    '1',
                                 client_id:
                                     clientId !== undefined
                                         ? new TTwitter.ClientId(clientId)

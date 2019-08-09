@@ -157,7 +157,10 @@ export function ThriftServerHapi<
                 request: Hapi.Request,
                 reply: Hapi.ResponseToolkit,
             ) => {
-                const buffer: Buffer = request.payload as Buffer
+                const buffer: Buffer = Core.stripStruct(
+                    request.payload as Buffer,
+                )
+
                 const method: string = Core.readThriftMethod(
                     buffer,
                     Transport,
