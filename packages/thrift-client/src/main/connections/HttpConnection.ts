@@ -139,7 +139,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
                 )
             } else {
                 return head(
-                    thriftRequest,
+                    currentRequest,
                     (
                         nextData?: Buffer,
                         nextOptions?: RequestOptions,
