@@ -126,6 +126,8 @@ export class BinaryProtocol extends TProtocol {
     public writeI64(i64: number | Int64): void {
         if (typeof i64 === 'number') {
             this.transport.write(new Int64(i64).buffer)
+        } else if (typeof i64 === 'string') {
+            this.transport.write(Int64.fromDecimalString(i64).buffer)
         } else {
             this.transport.write(i64.buffer)
         }
@@ -143,9 +145,11 @@ export class BinaryProtocol extends TProtocol {
         if (typeof data === 'string') {
             this.writeI32(Buffer.byteLength(data, encoding))
             this.transport.write(Buffer.from(data, encoding))
-        } else {
+        } else if (data instanceof Buffer) {
             this.writeI32(data.length)
             this.transport.write(data)
+        } else {
+            throw new TypeError(`Argument of type ${typeof data} should be buffer or string`)
         }
     }
 
