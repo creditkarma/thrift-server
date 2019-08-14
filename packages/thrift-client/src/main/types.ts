@@ -61,6 +61,7 @@ export interface IHttpConnectionOptions {
         | ClientOptionsFunction<RequestOptions>
     requestOptions?: RequestOptions
     withEndpointPerMethod?: boolean
+    headerBlacklist?: Array<string>
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {

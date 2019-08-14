@@ -59,6 +59,19 @@ function isErrorResponse(response: RequestResponse): boolean {
     )
 }
 
+function filterHeaders(options: request.CoreOptions, blacklist: Array<string>): request.CoreOptions {
+    options.headers = options.headers || {}
+    blacklist = blacklist.map((next) => next.toLocaleLowerCase())
+    options.headers = Object.keys(options.headers).reduce((acc: request.Headers, next: string) => {
+        if (blacklist.indexOf(next.toLocaleLowerCase()) === -1) {
+            acc[next] = options.headers![next]
+        }
+        return acc
+    }, {})
+
+    return options
+}
+
 export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly port: number
     protected readonly hostName: string
@@ -81,9 +94,10 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         requestOptions = {},
         serviceName,
         withEndpointPerMethod = false,
+        headerBlacklist = [ 'authorization' ]
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
-        this.requestOptions = Object.freeze(requestOptions)
+        this.requestOptions = Object.freeze(filterHeaders(requestOptions, headerBlacklist))
         this.port = port
         this.hostName = hostName
         this.path = Core.normalizePath(path || DEFAULT_PATH)
