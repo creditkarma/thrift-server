@@ -112,15 +112,27 @@ export class BinaryProtocol extends TProtocol {
     }
 
     public writeByte(byte: number): void {
-        this.transport.write(Buffer.from([byte]))
+        if (typeof byte === 'number') {
+            this.transport.write(Buffer.from([byte]))
+        } else {
+            throw new TypeError(`Expected number but found type ${typeof byte}`)
+        }
     }
 
     public writeI16(i16: number): void {
-        this.transport.write(binary.writeI16(Buffer.alloc(2), i16))
+        if (typeof i16 === 'number') {
+            this.transport.write(binary.writeI16(Buffer.alloc(2), i16))
+        } else {
+            throw new TypeError(`Expected number but found type ${typeof i16}`)
+        }
     }
 
     public writeI32(i32: number): void {
-        this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
+        if (typeof i32 === 'number') {
+            this.transport.write(binary.writeI32(Buffer.alloc(4), i32))
+        } else {
+            throw new TypeError(`Expected number but found type ${typeof i32}`)
+        }
     }
 
     public writeI64(i64: number | Int64): void {
@@ -128,13 +140,21 @@ export class BinaryProtocol extends TProtocol {
             this.transport.write(new Int64(i64).buffer)
         } else if (typeof i64 === 'string') {
             this.transport.write(Int64.fromDecimalString(i64).buffer)
-        } else {
+        } else if (i64 instanceof Int64) {
             this.transport.write(i64.buffer)
+        } else {
+            throw new TypeError(
+                `Expected Int64 or number but found type ${typeof i64}`,
+            )
         }
     }
 
     public writeDouble(dub: number): void {
-        this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
+        if (typeof dub === 'number') {
+            this.transport.write(binary.writeDouble(Buffer.alloc(8), dub))
+        } else {
+            throw new TypeError(`Expected number but found type ${typeof dub}`)
+        }
     }
 
     public writeStringOrBinary(
@@ -149,7 +169,9 @@ export class BinaryProtocol extends TProtocol {
             this.writeI32(data.length)
             this.transport.write(data)
         } else {
-            throw new TypeError(`Argument of type ${typeof data} should be buffer or string`)
+            throw new TypeError(
+                `Argument of type ${typeof data} should be buffer or string`,
+            )
         }
     }
 

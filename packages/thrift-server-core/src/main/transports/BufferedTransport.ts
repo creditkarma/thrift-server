@@ -131,8 +131,12 @@ export class BufferedTransport extends TTransport {
     }
 
     public write(buf: Buffer): void {
-        this.outBuffers.push(buf)
-        this.outCount += buf.length
+        if (buf instanceof Buffer) {
+            this.outBuffers.push(buf)
+            this.outCount += buf.length
+        } else {
+            throw new TypeError(`Expected buffer but found type ${typeof buf}`)
+        }
     }
 
     public flush(): Buffer {

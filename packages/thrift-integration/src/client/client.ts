@@ -107,8 +107,8 @@ export function createClientServer(
         '/calculate',
         (req: express.Request, res: express.Response): void => {
             const work: IWorkArgs = {
-                num1: req.query.left,
-                num2: req.query.right,
+                num1: Number(req.query.left),
+                num2: Number(req.query.right),
                 op: symbolToOperation(req.query.op),
             }
 
@@ -127,8 +127,8 @@ export function createClientServer(
         '/calculate-overwrite',
         (req: express.Request, res: express.Response): void => {
             const work: Work = new Work({
-                num1: req.query.left,
-                num2: req.query.right,
+                num1: Number(req.query.left),
+                num2: Number(req.query.right),
                 op: symbolToOperation(req.query.op),
             })
 
