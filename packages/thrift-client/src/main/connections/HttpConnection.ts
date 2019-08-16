@@ -78,6 +78,44 @@ function filterHeaders(
     return options
 }
 
+function applyFilters(
+    currentRequest: IThriftRequest<RequestOptions>,
+    filters: Array<RequestHandler<RequestOptions>>,
+    callback: (
+        finalRequest: IThriftRequest<RequestOptions>,
+    ) => Promise<IRequestResponse>,
+): Promise<IRequestResponse> {
+    const [head, ...tail] = filters
+    if (head === undefined) {
+        return callback(currentRequest)
+    } else {
+        return head(
+            currentRequest,
+            (
+                nextData?: Buffer,
+                nextOptions?: RequestOptions,
+            ): Promise<IRequestResponse> => {
+                const data: Buffer =
+                    nextData !== undefined ? nextData : currentRequest.data
+
+                return applyFilters(
+                    {
+                        data,
+                        methodName: currentRequest.methodName,
+                        uri: currentRequest.uri,
+                        context: Core.deepMerge(
+                            currentRequest.context,
+                            nextOptions || {},
+                        ),
+                    },
+                    tail,
+                    callback,
+                )
+            },
+        )
+    }
+}
+
 export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly port: number
     protected readonly hostName: string
@@ -138,9 +176,9 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             this.Protocol,
         )
 
-        const handlers: Array<
+        const filters: Array<
             RequestHandler<RequestOptions>
-        > = this.handlersForMethod(requestMethod)
+        > = this.filtersForMethod(requestMethod)
 
         const thriftRequest: IThriftRequest<RequestOptions> = {
             data: dataToSend,
@@ -149,42 +187,20 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             context,
         }
 
-        const applyHandlers = (
-            currentRequest: IThriftRequest<RequestOptions>,
-            [head, ...tail]: Array<RequestHandler<RequestOptions>>,
-        ): Promise<IRequestResponse> => {
-            if (head === undefined) {
+        return applyFilters(
+            thriftRequest,
+            filters,
+            (
+                finalRequest: IThriftRequest<RequestOptions>,
+            ): Promise<IRequestResponse> => {
                 return this.write(
-                    currentRequest.data,
-                    currentRequest.methodName,
-                    currentRequest.context,
+                    finalRequest.data,
+                    finalRequest.methodName,
+                    finalRequest.context,
                 )
-            } else {
-                return head(
-                    currentRequest,
-                    (
-                        nextData?: Buffer,
-                        nextOptions?: RequestOptions,
-                    ): Promise<IRequestResponse> => {
-                        return applyHandlers(
-                            {
-                                data: nextData || currentRequest.data,
-                                methodName: currentRequest.methodName,
-                                uri: currentRequest.uri,
-                                context: Core.deepMerge(
-                                    currentRequest.context,
-                                    nextOptions || {},
-                                ),
-                            },
-                            tail,
-                        )
-                    },
-                )
-            }
-        }
-
-        return applyHandlers(thriftRequest, handlers).then(
-            (res: IRequestResponse) => {
+            },
+        ).then(
+            (res: IRequestResponse): Buffer => {
                 return res.body
             },
         )
@@ -245,7 +261,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         })
     }
 
-    private handlersForMethod(
+    private filtersForMethod(
         name: string,
     ): Array<RequestHandler<RequestOptions>> {
         return this.filters
