@@ -59,10 +59,16 @@ function isErrorResponse(response: RequestResponse): boolean {
     )
 }
 
-function filterHeaders(
+export class InvalidHeader extends Error {
+    constructor(name: string) {
+        super(`The header ${name} cannot be set as a default. It must be provided per reqeust.`)
+    }
+}
+
+function validateHeaders(
     options: request.CoreOptions,
     blacklist: Array<string>,
-): request.CoreOptions {
+): void {
     options.headers = options.headers || {}
     blacklist = blacklist.map((next) => next.toLocaleLowerCase())
     options.headers = Object.keys(options.headers).reduce(
@@ -75,7 +81,15 @@ function filterHeaders(
         {},
     )
 
-    return options
+    const headerNames = Object.keys(options.headers)
+
+    for (let i = 0; i < headerNames.length; i++) {
+        const headerName = headerNames[i]
+        const headerToCheck = options.headers[headerName]
+        if (blacklist.indexOf(headerToCheck.toLocaleLowerCase()) > -1) {
+            throw new InvalidHeader(headerToCheck)
+        }
+    }
 }
 
 function applyFilters(
@@ -141,9 +155,8 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         headerBlacklist = ['authorization'],
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
-        this.requestOptions = Object.freeze(
-            filterHeaders(requestOptions, headerBlacklist),
-        )
+        validateHeaders(requestOptions, headerBlacklist)
+        this.requestOptions = requestOptions
         this.port = port
         this.hostName = hostName
         this.path = Core.normalizePath(path || DEFAULT_PATH)
