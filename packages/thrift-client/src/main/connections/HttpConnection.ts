@@ -138,7 +138,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         requestOptions = {},
         serviceName,
         withEndpointPerMethod = false,
-        headerBlacklist = ['authorization'],
+        headerBlacklist = [],
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
         this.requestOptions = Object.freeze(

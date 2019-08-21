@@ -31,7 +31,7 @@
         "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
     },
     "devDependencies": {
-        "@creditkarma/thrift-typescript": "^3.6.2",
+        "@creditkarma/thrift-typescript": "^3.7.5",
         "@hapi/code": "^5.3.0",
         "@hapi/lab": "^19.1.0",
         "@types/hapi__code": "^5.3.0",
