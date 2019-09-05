@@ -26,7 +26,7 @@
         "@creditkarma/thrift-server-core": "^0.14.5",
         "@creditkarma/thrift-server-express": "^0.14.5",
         "@creditkarma/thrift-server-hapi": "^0.14.5",
-        "@creditkarma/thrift-typescript": "^3.7.5",
+        "@creditkarma/thrift-typescript": "^3.7.6",
         "@creditkarma/zipkin-core": "^0.14.5",
         "@creditkarma/zipkin-tracing-express": "^0.14.5",
         "@creditkarma/zipkin-tracing-hapi": "^0.14.5",
