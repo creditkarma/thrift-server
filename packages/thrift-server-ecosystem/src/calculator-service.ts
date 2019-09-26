@@ -7,7 +7,7 @@ import { createHttpClient, IRequest } from '@creditkarma/thrift-client'
 
 import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filter'
 
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 
 import { AddService } from './generated/add-service'
 

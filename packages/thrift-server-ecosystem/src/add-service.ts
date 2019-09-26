@@ -5,7 +5,7 @@ import { createThriftServer } from '@creditkarma/thrift-server-hapi'
 
 import { ZipkinTracingHapi } from '@creditkarma/zipkin-tracing-hapi'
 
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 
 import { AddService } from './generated/add-service'
 

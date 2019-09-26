@@ -12,7 +12,8 @@
         "strict": true,
         "noUnusedLocals": true,
         "pretty": true,
-        "removeComments": true
+        "removeComments": true,
+        "typeRoots": ["./node_modules/@types", "./typings"]
     },
     "exclude": [
         "node_modules",

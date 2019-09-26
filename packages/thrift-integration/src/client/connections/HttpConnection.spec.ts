@@ -1,5 +1,5 @@
 import * as thrift from '@creditkarma/thrift-server-core'
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 import * as http from 'http'
 
 import {

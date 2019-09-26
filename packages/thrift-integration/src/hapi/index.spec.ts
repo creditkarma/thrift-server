@@ -3,8 +3,8 @@ import { createHttpClient } from '@creditkarma/thrift-client'
 import { Int64, TApplicationException } from '@creditkarma/thrift-server-core'
 
 import { expect } from '@hapi/code'
+import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
-import * as Hapi from 'hapi'
 import { CoreOptions } from 'request'
 import * as rp from 'request-promise-native'
 

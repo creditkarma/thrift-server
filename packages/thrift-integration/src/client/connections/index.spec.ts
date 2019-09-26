@@ -1,5 +1,5 @@
 import { Int64, readThriftMethod } from '@creditkarma/thrift-server-core'
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 import * as net from 'net'
 
 import {
