@@ -38,7 +38,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(`[1,"getMessage",1,1,{"1":{"rec":{}}}]`)
+            const buffer = Buffer.from(`[1,"getMessage",1,1,{"1":{"rec":{}}}]`)
             const transport = new BufferedTransport(buffer)
             const protocol = new JSONProtocol(transport)
 
@@ -86,7 +86,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getBool",1,1,{"1":{"rec":{"1":{"tf":1},"2":{"tf":0}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -146,7 +146,7 @@ describe('JSONProtocol', () => {
             )
         })
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getByte",1,1,{"1":{"rec":{"1":{"i8":-128},"2":{"i8":0},"3":{"i8":127}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -211,7 +211,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getI16",1,1,{"1":{"rec":{"1":{"i16":-32768},"2":{"i16":0},"3":{"i16":32767}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -276,7 +276,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getI32",1,1,{"1":{"rec":{"1":{"i32":-2147483648},"2":{"i32":0},"3":{"i32":2147483647}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -341,7 +341,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-9223372036854775808},"2":{"i64":0},"3":{"i64":9223372036854775807}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -410,7 +410,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getDouble",1,1,{"1":{"rec":{"1":{"dbl":4.94e-322},"2":{"dbl":0},"3":{"dbl":1.7976931348623157e+308}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -475,7 +475,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getString",1,1,{"1":{"rec":{"1":{"str":""},"2":{"str":"foo"},"3":{"str":"bar"}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -551,7 +551,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getList",1,1,{"1":{"rec":{"1":{"lst":["tf",2,1,0]},"2":{"lst":["i32",3,-128,0,127]},"3":{"lst":["str",3,"","foo","bar"]}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -647,7 +647,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getSet",1,1,{"1":{"rec":{"1":{"set":["tf",2,1,0]},"2":{"set":["i32",3,-128,0,127]},"3":{"set":["str",3,"","foo","bar"]}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
@@ -740,7 +740,7 @@ describe('JSONProtocol', () => {
         })
 
         it('should deserialize', () => {
-            const buffer = new Buffer(
+            const buffer = Buffer.from(
                 `[1,"getMap",1,1,{"1":{"rec":{"1":{"map":["str","i32",3,{"lower":-128,"mid":0,"upper":127}]},"2":{"map":["i32","tf",2,{"0":0,"1":1}]}}}}]`,
             )
             const transport = new BufferedTransport(buffer)
