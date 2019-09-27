@@ -10,7 +10,7 @@ import { ThriftClientZipkinFilter } from '@creditkarma/thrift-client-zipkin-filt
 
 import { ThriftClientTimingFilter } from '@creditkarma/thrift-client-timing-filter'
 
-import * as Hapi from 'hapi'
+import * as Hapi from '@hapi/hapi'
 
 import {
     IMappedStruct,
