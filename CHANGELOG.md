@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.15.0"></a>
+## [0.15.0](https://github.com/creditkarma/thrift-server/compare/v0.14.6...v0.15.0) (2019-10-02)
+
+### BREAKING CHANGES
+
+* Updated hapi to the latest version to address snyk vulnerability, moving hapi to @hapi/hapi ([fa3543](https://github.com/creditkarma/thrift-server/commit/fa3543bdf84e7a9e2fbf71d04cc7aafa83f5c3a8))
+
+
+<a name="0.14.6"></a>
+## [0.14.6](https://github.com/creditkarma/thrift-server/compare/v0.14.0...v0.14.6) (2019-09-05)
+
+### Features
+
+* Added blacklist to thrift-client ([1cdf0a](https://github.com/creditkarma/thrift-server/commit/1cdf0ad53c40f37727edc9cacbf5922b681d94ec)) ([469af4](https://github.com/creditkarma/thrift-server/commit/469af48f290cc48b87d369faa5b81df0fc5a6b59))
+* Added runtime check for types into binary protocol([9e5c1e](https://github.com/creditkarma/thrift-server/commit/9e5c1e617192a6a46adb87ec37b35a583ff6ad77))
+
+
+<a name="0.14.0"></a>
+## [0.14.0](https://github.com/creditkarma/thrift-server/compare/v0.13.5...v0.14.0) (2019-08-09)
+
+### BREAKING CHANGES
+
+* Support for stripping header structs ([60e84c](https://github.com/creditkarma/thrift-server/commit/60e84c7fcd109a553f855da6af1d98f0aef667c3))
+
+
+<a name="0.13.5"></a>
+## [0.13.5](https://github.com/creditkarma/thrift-server/compare/v0.12.5...v0.13.5) (2019-03-28)
+
+### Bug fixes
+
+* Correct annotation types for thrift client ([14a95a](https://github.com/creditkarma/thrift-server/commit/14a95a0970cd80bfbca87382419fd1151a1c9add))
+
+
+<a name="0.12.5"></a>
+## [0.12.5](https://github.com/creditkarma/thrift-server/compare/v0.12.0...v0.12.5) (2019-01-14)
+
+### Bug fixes
+
+* Correct an issue when path is incorrectly constructed ([0377e1a](https://github.com/creditkarma/thrift-server/commit/0377e1a52d219cc6783f35fd326fa2320e601c12))
+
 
 <a name="0.12.0"></a>
 ## [0.12.0](https://github.com/creditkarma/thrift-server/compare/v0.11.0...v0.12.0) (2019-01-11)
