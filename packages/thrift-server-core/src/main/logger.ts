@@ -15,6 +15,12 @@ export const makeLogger = (name: string): LogFunction => {
             } else {
                 console.warn(`[${allTags.join(',')}]`)
             }
+        } else if (allTags.indexOf('info') > -1) {
+            if (data !== undefined) {
+                console.info(`[${allTags.join(',')}] `, data)
+            } else {
+                console.info(`[${allTags.join(',')}]`)
+            }
         } else {
             if (data !== undefined && process.env.DUBUG !== undefined) {
                 console.log(`[${allTags.join(',')}] `, data)

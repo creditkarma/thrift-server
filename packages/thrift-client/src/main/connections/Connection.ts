@@ -64,7 +64,7 @@ const createSocket = (
         }
         const connectHandler = (): void => {
             logger(
-                ['info', 'Connection'],
+                ['debug', 'Connection'],
                 `Connected to: ${config.hostName}:${config.port}`,
             )
             removeHandlers()

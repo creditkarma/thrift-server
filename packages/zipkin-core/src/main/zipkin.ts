@@ -71,7 +71,7 @@ function recorderForOptions(options: IZipkinTracerConfig): Recorder {
             })
 
             httpLogger.on('success', () => {
-                logger(['info', 'zipkin'], `Zipkin trace sent successfully`)
+                logger(['debug', 'zipkin'], `Zipkin trace sent successfully`)
             })
         }
 

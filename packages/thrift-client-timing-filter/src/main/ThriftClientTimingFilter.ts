@@ -70,7 +70,7 @@ export function ThriftClientTimingFilter<RequestContext>({
         }
 
         logger(
-            ['metrics', 'RequestDuration', remoteServiceName, ...tags],
+            ['info', 'metrics', 'RequestDuration', remoteServiceName, ...tags],
             timingEvent,
         )
 
