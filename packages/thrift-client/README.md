@@ -69,7 +69,7 @@ When creating a client using this method Thrift Client uses the [Request library
 ```typescript
 import {
     createHttpClient
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { CoreOptions } from 'request'
 
@@ -119,7 +119,7 @@ import {
     RequestInstance,
     HttpConnection,
     IHttpConnectionOptions,
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 import * as request from 'request'
 import { CoreOptions } from 'request'
 
@@ -162,7 +162,7 @@ Using the `createTcpClient` function you pass in two arguments, the first is you
 ```typescript
 import {
     createTcpClient
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
@@ -192,7 +192,7 @@ The available options are:
 ```typescript
 import {
     TcpConnection,
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
@@ -219,7 +219,7 @@ Related to context you will notice that our Thrift service client is a generic `
 ```typescript
 import {
     createHttpClient
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { CoreOptions } from 'request'
 import * as express from 'express'
@@ -342,7 +342,7 @@ You could do something like this:
 import {
     createHttpClient,
     IThriftRequest,
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
@@ -371,7 +371,7 @@ To apply filters to the response you would call `.then` on the `next` function. 
 import {
     createHttpClient,
     IThriftRequest
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { Calculator } from './codegen/calculator'
 
