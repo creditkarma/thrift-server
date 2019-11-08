@@ -251,11 +251,11 @@ I'm adding the following code to a file called `src/client.ts`.
 ```typescript
 import {
     createHttpClient
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import { CoreOptions } from 'request'
 
-import { Calculator } from './codegen/calculator'
+import * as Calculator from './codegen/calculator'
 
 // Create Thrift client
 const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
@@ -277,7 +277,7 @@ Because we're already using Hapi, let's add this to our `src/client.ts` file:
 ```typescript
 import {
     createHttpClient
-} from '@creditkaram/thrift-client'
+} from '@creditkarma/thrift-client'
 
 import * as Hapi from 'hapi'
 
