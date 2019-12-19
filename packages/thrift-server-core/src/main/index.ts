@@ -7,6 +7,7 @@ import {
 } from './types'
 
 export * from './types'
+export * from './Int64'
 export * from './protocols'
 export * from './transports'
 export * from './errors'

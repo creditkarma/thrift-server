@@ -158,7 +158,12 @@ describe('createHttpClient', () => {
 
         it('should correctly call endpoint with maps as parameters', async () => {
             return client
-                .mapValues(new Map([['key1', 6], ['key2', 5]]))
+                .mapValues(
+                    new Map([
+                        ['key1', 6],
+                        ['key2', 5],
+                    ]),
+                )
                 .then((response: Array<number>) => {
                     expect<Array<number>>(response).to.equal([6, 5])
                 })
@@ -166,10 +171,16 @@ describe('createHttpClient', () => {
 
         it('should correctly call endpoint that returns a map', async () => {
             return client
-                .listToMap([['key_1', 'value_1'], ['key_2', 'value_2']])
+                .listToMap([
+                    ['key_1', 'value_1'],
+                    ['key_2', 'value_2'],
+                ])
                 .then((response: Map<string, string>) => {
                     expect(response).to.equal(
-                        new Map([['key_1', 'value_1'], ['key_2', 'value_2']]),
+                        new Map([
+                            ['key_1', 'value_1'],
+                            ['key_2', 'value_2'],
+                        ]),
                     )
                 })
         })
@@ -379,7 +390,12 @@ describe('createHttpClient', () => {
 
         it('should correctly call endpoint with maps as parameters', async () => {
             return client
-                .mapValues(new Map([['key1', 6], ['key2', 5]]))
+                .mapValues(
+                    new Map([
+                        ['key1', 6],
+                        ['key2', 5],
+                    ]),
+                )
                 .then((response: Array<number>) => {
                     expect<Array<number>>(response).to.equal([6, 5])
                 })
@@ -387,10 +403,16 @@ describe('createHttpClient', () => {
 
         it('should correctly call endpoint that returns a map', async () => {
             return client
-                .listToMap([['key_1', 'value_1'], ['key_2', 'value_2']])
+                .listToMap([
+                    ['key_1', 'value_1'],
+                    ['key_2', 'value_2'],
+                ])
                 .then((response: Map<string, string>) => {
                     expect(response).to.equal(
-                        new Map([['key_1', 'value_1'], ['key_2', 'value_2']]),
+                        new Map([
+                            ['key_1', 'value_1'],
+                            ['key_2', 'value_2'],
+                        ]),
                     )
                 })
         })
@@ -882,7 +904,12 @@ describe('createTcpClient', () => {
 
         it('should correctly call endpoint with maps as parameters', async () => {
             return client
-                .mapValues(new Map([['key1', 6], ['key2', 5]]))
+                .mapValues(
+                    new Map([
+                        ['key1', 6],
+                        ['key2', 5],
+                    ]),
+                )
                 .then((response: Array<number>) => {
                     expect<Array<number>>(response).to.equal([6, 5])
                 })
@@ -890,10 +917,16 @@ describe('createTcpClient', () => {
 
         it('should correctly call endpoint that returns a map', async () => {
             return client
-                .listToMap([['key_1', 'value_1'], ['key_2', 'value_2']])
+                .listToMap([
+                    ['key_1', 'value_1'],
+                    ['key_2', 'value_2'],
+                ])
                 .then((response: Map<string, string>) => {
                     expect(response).to.equal(
-                        new Map([['key_1', 'value_1'], ['key_2', 'value_2']]),
+                        new Map([
+                            ['key_1', 'value_1'],
+                            ['key_2', 'value_2'],
+                        ]),
                     )
                 })
         })

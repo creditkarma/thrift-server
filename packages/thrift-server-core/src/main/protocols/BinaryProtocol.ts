@@ -11,7 +11,9 @@ import { TProtocolException, TProtocolExceptionType } from '../errors'
 import { TTransport } from '../transports'
 
 import {
+    IInt64,
     Int64,
+    isInt64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -138,12 +140,14 @@ export class BinaryProtocol extends TProtocol {
         }
     }
 
-    public writeI64(i64: number | Int64): void {
+    public writeI64(i64: number | string | IInt64): void {
         if (typeof i64 === 'number') {
-            this.transport.write(new Int64(i64).buffer)
+            i64 = new Int64(i64)
         } else if (typeof i64 === 'string') {
-            this.transport.write(Int64.fromDecimalString(i64).buffer)
-        } else if (i64 instanceof Int64) {
+            i64 = Int64.fromDecimalString(i64)
+        }
+
+        if (isInt64(i64)) {
             this.transport.write(i64.buffer)
         } else {
             throw new TypeError(
