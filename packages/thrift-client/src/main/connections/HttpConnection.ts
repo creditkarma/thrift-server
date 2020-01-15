@@ -176,9 +176,9 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             this.Protocol,
         )
 
-        const filters: Array<
-            RequestHandler<RequestOptions>
-        > = this.filtersForMethod(requestMethod)
+        const filters: Array<RequestHandler<
+            RequestOptions
+        >> = this.filtersForMethod(requestMethod)
 
         const thriftRequest: IThriftRequest<RequestOptions> = {
             data: dataToSend,

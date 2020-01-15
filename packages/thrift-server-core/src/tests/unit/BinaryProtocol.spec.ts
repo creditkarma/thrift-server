@@ -2,9 +2,9 @@ import { expect, fail } from '@hapi/code'
 import * as Lab from '@hapi/lab'
 
 import {
+    BinaryProtocol,
     BufferedTransport,
     Int64,
-    JSONProtocol,
     MessageType,
     TType,
 } from '../../main'
@@ -15,11 +15,11 @@ export const lab = Lab.script()
 const describe = lab.describe
 const it = lab.it
 
-describe('JSONProtocol', () => {
+describe('BinaryProtocol', () => {
     describe('calls', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getMessage', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -33,15 +33,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getMessage",1,1,{"1":{"rec":{}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '800100010000000a6765744d657373616765000000010c000100',
             )
         })
 
         it('should deserialize', () => {
-            const buffer = Buffer.from(`[1,"getMessage",1,1,{"1":{"rec":{}}}]`)
+            const buffer = Buffer.from(
+                '800100010000000a6765744d657373616765000000010c000100',
+                'hex',
+            )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             expect(protocol.readMessageBegin()).to.equal({
                 fieldName: 'getMessage',
@@ -59,7 +62,7 @@ describe('JSONProtocol', () => {
     describe('bools', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getBool', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -81,17 +84,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getBool",1,1,{"1":{"rec":{"1":{"tf":1},"2":{"tf":0}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000007676574426f6f6c000000010c000102000101020002000000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getBool",1,1,{"1":{"rec":{"1":{"tf":1},"2":{"tf":0}}}}]`,
+                '8001000100000007676574426f6f6c000000010c000102000101020002000000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -116,7 +120,7 @@ describe('JSONProtocol', () => {
     describe('bytes', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getByte', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -142,16 +146,17 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getByte",1,1,{"1":{"rec":{"1":{"i8":-128},"2":{"i8":0},"3":{"i8":127}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '800100010000000767657442797465000000010c000103000180030002000300037f0000',
             )
         })
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getByte",1,1,{"1":{"rec":{"1":{"i8":-128},"2":{"i8":0},"3":{"i8":127}}}}]`,
+                '800100010000000767657442797465000000010c000103000180030002000300037f0000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -180,7 +185,7 @@ describe('JSONProtocol', () => {
     describe('i16s', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getI16', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -206,17 +211,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getI16",1,1,{"1":{"rec":{"1":{"i16":-32768},"2":{"i16":0},"3":{"i16":32767}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000006676574493136000000010c0001060001800006000200000600037fff0000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getI16",1,1,{"1":{"rec":{"1":{"i16":-32768},"2":{"i16":0},"3":{"i16":32767}}}}]`,
+                '8001000100000006676574493136000000010c0001060001800006000200000600037fff0000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -245,7 +251,7 @@ describe('JSONProtocol', () => {
     describe('i32s', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getI32', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -271,17 +277,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getI32",1,1,{"1":{"rec":{"1":{"i32":-2147483648},"2":{"i32":0},"3":{"i32":2147483647}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000006676574493332000000010c000108000180000000080002000000000800037fffffff0000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getI32",1,1,{"1":{"rec":{"1":{"i32":-2147483648},"2":{"i32":0},"3":{"i32":2147483647}}}}]`,
+                '8001000100000006676574493332000000010c000108000180000000080002000000000800037fffffff0000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -311,7 +318,7 @@ describe('JSONProtocol', () => {
         // Intentional loss of types for testing.
         const serialize = (lower: any, upper: any): string => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getI64', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -337,24 +344,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            return transport.flush().toString()
+            return transport.flush().toString('hex')
         }
 
-        it('should serialize', () => {
-            const lower = Int64.fromDecimalString('-9223372036854775808')
-            const upper = Int64.fromDecimalString('9223372036854775807')
-
-            expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-9223372036854775808},"2":{"i64":0},"3":{"i64":9223372036854775807}}}}]`,
-            )
-        })
-
-        it('should deserialize', () => {
-            const buffer = Buffer.from(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-9223372036854775808},"2":{"i64":0},"3":{"i64":9223372036854775807}}}}]`,
-            )
+        // Deserialize and check for the expected values.
+        const deserialize = (
+            data: string,
+            lower: string,
+            upper: string,
+        ): void => {
+            const buffer = Buffer.from(data, 'hex')
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -362,25 +363,38 @@ describe('JSONProtocol', () => {
             protocol.readStructBegin()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(
-                Int64.fromDecimalString('-9223372036854775808'),
-            )
+            expect(protocol.readI64().toDecimalString()).to.equal(lower)
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(Int64.fromDecimalString('0'))
+            expect(protocol.readI64().toDecimalString()).to.equal('0')
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64()).to.equal(
-                Int64.fromDecimalString('9223372036854775807'),
-            )
+            expect(protocol.readI64().toDecimalString()).to.equal(upper)
             protocol.readFieldEnd()
 
             protocol.readStructEnd()
             protocol.readFieldEnd()
             protocol.readStructEnd()
             protocol.readMessageEnd()
+        }
+
+        it('should serialize', () => {
+            const lower = Int64.fromDecimalString('-9223372036854775808')
+            const upper = Int64.fromDecimalString('9223372036854775807')
+
+            expect(serialize(lower, upper)).to.equal(
+                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+            )
+        })
+
+        it('should deserialize', () => {
+            deserialize(
+                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                '-9223372036854775808',
+                '9223372036854775807',
+            )
         })
 
         it('should handle Int64 with offset', () => {
@@ -392,9 +406,10 @@ describe('JSONProtocol', () => {
             const lower = new Int64(buffer, 2)
             const upper = new Int64(buffer, 0)
 
-            expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":2},"2":{"i64":0},"3":{"i64":72057594037927936}}}}]`,
-            )
+            const expected =
+                '8001000100000006676574493634000000010c00010a000100000000000000020a000200000000000000000a000301000000000000000000'
+            expect(serialize(lower, upper)).to.equal(expected)
+            deserialize(expected, '2', '72057594037927936')
         })
 
         it('should pad short Int64', () => {
@@ -404,9 +419,10 @@ describe('JSONProtocol', () => {
             const lower = new Int64(buffer, 10)
             const upper = new Int64(buffer)
 
-            expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":0},"2":{"i64":0},"3":{"i64":1099511627776}}}}]`,
-            )
+            const expected =
+                '8001000100000006676574493634000000010c00010a000100000000000000000a000200000000000000000a000300000100000000000000'
+            expect(serialize(lower, upper)).to.equal(expected)
+            deserialize(expected, '0', '1099511627776')
         })
 
         it('should serialize string', () => {
@@ -414,7 +430,7 @@ describe('JSONProtocol', () => {
             const upper = '9223372036854775807'
 
             expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-9223372036854775808},"2":{"i64":0},"3":{"i64":9223372036854775807}}}}]`,
+                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
             )
         })
 
@@ -422,9 +438,10 @@ describe('JSONProtocol', () => {
             const lower = -123
             const upper = 123
 
-            expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-123},"2":{"i64":0},"3":{"i64":123}}}}]`,
-            )
+            const expected =
+                '8001000100000006676574493634000000010c00010a0001ffffffffffffff850a000200000000000000000a0003000000000000007b0000'
+            expect(serialize(lower, upper)).to.equal(expected)
+            deserialize(expected, '-123', '123')
         })
 
         it('should serialize Int64-like object', () => {
@@ -432,7 +449,7 @@ describe('JSONProtocol', () => {
             const upper = new LikeInt64('9223372036854775807')
 
             expect(serialize(lower, upper)).to.equal(
-                `[1,"getI64",1,1,{"1":{"rec":{"1":{"i64":-9223372036854775808},"2":{"i64":0},"3":{"i64":9223372036854775807}}}}]`,
+                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
             )
         })
 
@@ -489,13 +506,11 @@ describe('JSONProtocol', () => {
         })
     })
 
-    // The JSON protocol serializes +/- Infinity and NaN to non-standard JSON.
-    // The JSON protocol cannot deserialize the serialized values for +/- Infinity and NaN.
-    // The JSON protocol serializes -0 as 0.
+    // The binary protocol supports +/- Infinity but validates against NaN.
     describe('doubles', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getDouble', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -521,17 +536,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getDouble",1,1,{"1":{"rec":{"1":{"dbl":4.94e-322},"2":{"dbl":0},"3":{"dbl":1.7976931348623157e+308}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000009676574446f75626c65000000010c0001040001000000000000006404000200000000000000000400037fefffffffffffff0000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getDouble",1,1,{"1":{"rec":{"1":{"dbl":4.94e-322},"2":{"dbl":0},"3":{"dbl":1.7976931348623157e+308}}}}]`,
+                '8001000100000009676574446f75626c65000000010c0001040001000000000000006404000200000000000000000400037fefffffffffffff0000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -555,12 +571,169 @@ describe('JSONProtocol', () => {
             protocol.readStructEnd()
             protocol.readMessageEnd()
         })
+
+        it('should serialize Infinity', () => {
+            const transport = new BufferedTransport()
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.writeMessageBegin('getDouble', MessageType.CALL, 1)
+            protocol.writeStructBegin('args')
+            protocol.writeFieldBegin('rec', TType.STRUCT, 1)
+            protocol.writeStructBegin('request')
+
+            protocol.writeFieldBegin('negative', TType.DOUBLE, 1)
+            protocol.writeDouble(-Infinity)
+            protocol.writeFieldEnd()
+
+            protocol.writeFieldBegin('positive', TType.DOUBLE, 2)
+            protocol.writeDouble(Infinity)
+            protocol.writeFieldEnd()
+
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeFieldEnd()
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeMessageEnd()
+
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000009676574446f75626c65000000010c0001040001fff00000000000000400027ff00000000000000000',
+            )
+        })
+
+        it('should deserialize Infinity', () => {
+            const buffer = Buffer.from(
+                '8001000100000009676574446f75626c65000000010c0001040001fff00000000000000400027ff00000000000000000',
+                'hex',
+            )
+            const transport = new BufferedTransport(buffer)
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.readMessageBegin()
+            protocol.readStructBegin()
+            protocol.readFieldBegin()
+            protocol.readStructBegin()
+
+            protocol.readFieldBegin()
+            expect(protocol.readDouble()).to.equal(-Infinity)
+            protocol.readFieldEnd()
+
+            protocol.readFieldBegin()
+            expect(protocol.readDouble()).to.equal(Infinity)
+            protocol.readFieldEnd()
+
+            protocol.readStructEnd()
+            protocol.readFieldEnd()
+            protocol.readStructEnd()
+            protocol.readMessageEnd()
+        })
+
+        // TODO: Enable this test if the validation is removed.
+        it.skip('should serialize NaN', () => {
+            const transport = new BufferedTransport()
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.writeMessageBegin('getDouble', MessageType.CALL, 1)
+            protocol.writeStructBegin('args')
+            protocol.writeFieldBegin('rec', TType.STRUCT, 1)
+            protocol.writeStructBegin('request')
+
+            protocol.writeFieldBegin('NaN', TType.DOUBLE, 1)
+            protocol.writeDouble(NaN)
+            protocol.writeFieldEnd()
+
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeFieldEnd()
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeMessageEnd()
+
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000009676574446f75626c65000000010c00010400017ff80000000000000000',
+            )
+        })
+
+        it('should deserialize NaN', () => {
+            const buffer = Buffer.from(
+                '8001000100000009676574446f75626c65000000010c00010400017ff80000000000000000',
+                'hex',
+            )
+            const transport = new BufferedTransport(buffer)
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.readMessageBegin()
+            protocol.readStructBegin()
+            protocol.readFieldBegin()
+            protocol.readStructBegin()
+
+            protocol.readFieldBegin()
+            expect(Number.isNaN(protocol.readDouble())).to.be.true()
+            protocol.readFieldEnd()
+
+            protocol.readStructEnd()
+            protocol.readFieldEnd()
+            protocol.readStructEnd()
+            protocol.readMessageEnd()
+        })
+
+        it('should serialize -0', () => {
+            const transport = new BufferedTransport()
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.writeMessageBegin('getDouble', MessageType.CALL, 1)
+            protocol.writeStructBegin('args')
+            protocol.writeFieldBegin('rec', TType.STRUCT, 1)
+            protocol.writeStructBegin('request')
+
+            protocol.writeFieldBegin('zero', TType.DOUBLE, 2)
+            protocol.writeDouble(-0)
+            protocol.writeFieldEnd()
+
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeFieldEnd()
+            protocol.writeFieldStop()
+            protocol.writeStructEnd()
+            protocol.writeMessageEnd()
+
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000009676574446f75626c65000000010c000104000280000000000000000000',
+            )
+        })
+
+        it('should deserialize -0', () => {
+            const buffer = Buffer.from(
+                '8001000100000009676574446f75626c65000000010c000104000280000000000000000000',
+                'hex',
+            )
+            const transport = new BufferedTransport(buffer)
+            const protocol = new BinaryProtocol(transport)
+
+            protocol.readMessageBegin()
+            protocol.readStructBegin()
+            protocol.readFieldBegin()
+            protocol.readStructBegin()
+
+            protocol.readFieldBegin()
+            const zero = protocol.readDouble()
+            // hapi/code appears to differentiate between 0 and -0 when checking equals.
+            expect(zero).to.equal(-0)
+            // Standard check for 0 vs. -0 just in case.
+            expect(1 / zero).to.equal(-Infinity)
+            protocol.readFieldEnd()
+
+            protocol.readStructEnd()
+            protocol.readFieldEnd()
+            protocol.readStructEnd()
+            protocol.readMessageEnd()
+        })
     })
 
     describe('strings', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getString', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -586,17 +759,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getString",1,1,{"1":{"rec":{"1":{"str":""},"2":{"str":"foo"},"3":{"str":"bar"}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000009676574537472696e67000000010c00010b0001000000000b000200000003666f6f0b0003000000036261720000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getString",1,1,{"1":{"rec":{"1":{"str":""},"2":{"str":"foo"},"3":{"str":"bar"}}}}]`,
+                '8001000100000009676574537472696e67000000010c00010b0001000000000b000200000003666f6f0b0003000000036261720000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -625,7 +799,7 @@ describe('JSONProtocol', () => {
     describe('lists', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getList', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -662,17 +836,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getList",1,1,{"1":{"rec":{"1":{"lst":["tf",2,1,0]},"2":{"lst":["i32",3,-128,0,127]},"3":{"lst":["str",3,"","foo","bar"]}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '80010001000000076765744c697374000000010c00010f0001020000000201000f00020800000003ffffff80000000000000007f0f00030b000000030000000000000003666f6f000000036261720000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getList",1,1,{"1":{"rec":{"1":{"lst":["tf",2,1,0]},"2":{"lst":["i32",3,-128,0,127]},"3":{"lst":["str",3,"","foo","bar"]}}}}]`,
+                '80010001000000076765744c697374000000010c00010f0001020000000201000f00020800000003ffffff80000000000000007f0f00030b000000030000000000000003666f6f000000036261720000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -721,7 +896,7 @@ describe('JSONProtocol', () => {
     describe('sets', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getSet', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -758,17 +933,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getSet",1,1,{"1":{"rec":{"1":{"set":["tf",2,1,0]},"2":{"set":["i32",3,-128,0,127]},"3":{"set":["str",3,"","foo","bar"]}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '8001000100000006676574536574000000010c00010e0001020000000201000e00020800000003ffffff80000000000000007f0e00030b000000030000000000000003666f6f000000036261720000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getSet",1,1,{"1":{"rec":{"1":{"set":["tf",2,1,0]},"2":{"set":["i32",3,-128,0,127]},"3":{"set":["str",3,"","foo","bar"]}}}}]`,
+                '8001000100000006676574536574000000010c00010e0001020000000201000e00020800000003ffffff80000000000000007f0e00030b000000030000000000000003666f6f000000036261720000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()
@@ -817,7 +993,7 @@ describe('JSONProtocol', () => {
     describe('maps', () => {
         it('should serialize', () => {
             const transport = new BufferedTransport()
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.writeMessageBegin('getMap', MessageType.CALL, 1)
             protocol.writeStructBegin('args')
@@ -851,17 +1027,18 @@ describe('JSONProtocol', () => {
             protocol.writeStructEnd()
             protocol.writeMessageEnd()
 
-            expect(transport.flush().toString()).to.equal(
-                `[1,"getMap",1,1,{"1":{"rec":{"1":{"map":["str","i32",3,{"lower":-128,"mid":0,"upper":127}]},"2":{"map":["i32","tf",2,{"0":0,"1":1}]}}}}]`,
+            expect(transport.flush().toString('hex')).to.equal(
+                '80010001000000066765744d6170000000010c00010d00010b0800000003000000056c6f776572ffffff80000000036d6964000000000000000575707065720000007f0d0002080200000002000000000000000001010000',
             )
         })
 
         it('should deserialize', () => {
             const buffer = Buffer.from(
-                `[1,"getMap",1,1,{"1":{"rec":{"1":{"map":["str","i32",3,{"lower":-128,"mid":0,"upper":127}]},"2":{"map":["i32","tf",2,{"0":0,"1":1}]}}}}]`,
+                '80010001000000066765744d6170000000010c00010d00010b0800000003000000056c6f776572ffffff80000000036d6964000000000000000575707065720000007f0d0002080200000002000000000000000001010000',
+                'hex',
             )
             const transport = new BufferedTransport(buffer)
-            const protocol = new JSONProtocol(transport)
+            const protocol = new BinaryProtocol(transport)
 
             protocol.readMessageBegin()
             protocol.readStructBegin()

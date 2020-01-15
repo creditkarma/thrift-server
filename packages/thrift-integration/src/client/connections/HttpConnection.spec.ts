@@ -137,9 +137,9 @@ describe('HttpConnection', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 path: '/return500',
             })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
+                badConnection,
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -158,9 +158,9 @@ describe('HttpConnection', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 path: '/return400',
             })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
+                badConnection,
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -181,9 +181,9 @@ describe('HttpConnection', () => {
                     timeout: 5000,
                 },
             })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
+                badConnection,
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -275,9 +275,9 @@ describe('HttpConnection', () => {
                 },
                 withEndpointPerMethod: true,
             })
-            const badClient: Calculator.Client<
-                IRequest
-            > = new Calculator.Client(badConnection)
+            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
+                badConnection,
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
