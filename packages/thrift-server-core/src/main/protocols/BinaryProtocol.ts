@@ -151,7 +151,7 @@ export class BinaryProtocol extends TProtocol {
             this.transport.write(i64.buffer)
         } else {
             throw new TypeError(
-                `Expected Int64 or number but found type ${typeof i64}`,
+                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
             )
         }
     }

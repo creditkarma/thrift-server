@@ -790,7 +790,7 @@ export class CompactProtocol extends TProtocol {
         if (!isInt64(i64)) {
             throw new TProtocolException(
                 TProtocolExceptionType.INVALID_DATA,
-                `Expected Int64 or Number, found: ${i64}`,
+                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
             )
         } else {
             let hi: number = i64.buffer.readUInt32BE(0, true)
