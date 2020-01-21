@@ -30,6 +30,7 @@
         "@hapi/hapi": "^18.4.0",
         "@types/express": "^4.16.0",
         "@types/hapi__hapi": "^18.2.5",
+        "@types/hapi__boom": "^7.4.1",
         "express": "^4.16.4",
         "prettier": "^1.15.2",
         "tslint": "^5.11.0",
