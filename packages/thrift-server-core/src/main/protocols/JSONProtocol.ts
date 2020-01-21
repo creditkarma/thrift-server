@@ -234,7 +234,7 @@ export class JSONProtocol extends TProtocol {
             this.tstack.push(i64.toDecimalString())
         } else {
             throw new TypeError(
-                `Expected Int64 or number but found type ${typeof i64}`,
+                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
             )
         }
     }
