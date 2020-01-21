@@ -32,7 +32,7 @@
         "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-express"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-server-core": "0.15.x",
+        "@creditkarma/thrift-server-core": "0.16.x",
         "@types/express": ">=4.0.0 <5.0.0",
         "express": ">=4.0.0 <5.0.0"
     },
