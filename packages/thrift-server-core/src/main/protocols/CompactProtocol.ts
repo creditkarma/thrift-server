@@ -1,16 +1,20 @@
 /**
  * This implementation is largely taken from the Apache project and reimplemented in TypeScript.
  *
- * The orginal project can be found here:
+ * The original project can be found here:
  * https://github.com/apache/thrift/blob/master/lib/nodejs/lib/thrift/compact_protocol.js
  */
+
 import { TProtocolException, TProtocolExceptionType } from '../errors'
 
+import { readDoubleLE, writeDoubleLE } from '../binary'
 import { defaultLogger } from '../logger'
 import { TTransport } from '../transports'
 
 import {
+    IInt64,
     Int64,
+    isInt64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -23,14 +27,6 @@ import {
 } from '../types'
 
 import { TProtocol } from './TProtocol'
-
-const POW_8 = Math.pow(2, 8)
-const POW_24 = Math.pow(2, 24)
-const POW_32 = Math.pow(2, 32)
-const POW_40 = Math.pow(2, 40)
-const POW_48 = Math.pow(2, 48)
-const POW_52 = Math.pow(2, 52)
-const POW_1022 = Math.pow(2, 1022)
 
 // Compact Protocol ID number.
 const PROTOCOL_ID = -126 // 1000 0010
@@ -285,68 +281,14 @@ export class CompactProtocol extends TProtocol {
         this.writeVarint32(this.i32ToZigzag(i32))
     }
 
-    public writeI64(i64: number): void {
+    public writeI64(i64: number | string | IInt64): void {
         this.writeVarint64(this.i64ToZigzag(i64))
     }
 
     // Little-endian, unlike TBinaryProtocol
     public writeDouble(dub: number): void {
         const buff = Buffer.alloc(8)
-        let m
-        let e
-        let c
-
-        buff[7] = dub < 0 ? 0x80 : 0x00
-
-        dub = Math.abs(dub)
-        if (dub !== dub) {
-            // NaN, use QNaN IEEE format
-            m = 2251799813685248
-            e = 2047
-        } else if (dub === Infinity) {
-            m = 0
-            e = 2047
-        } else {
-            e = Math.floor(Math.log(dub) / Math.LN2)
-            c = Math.pow(2, -e)
-            if (dub * c < 1) {
-                e--
-                c *= 2
-            }
-
-            if (e + 1023 >= 2047) {
-                // Overflow
-                m = 0
-                e = 2047
-            } else if (e + 1023 >= 1) {
-                // Normalized - term order matters, as Math.pow(2, 52-e) and v*Math.pow(2, 52) can overflow
-                m = (dub * c - 1) * POW_52
-                e += 1023
-            } else {
-                // Denormalized - also catches the '0' case, somewhat by chance
-                m = dub * POW_1022 * POW_52
-                e = 0
-            }
-        }
-
-        buff[6] = (e << 4) & 0xf0
-        buff[7] |= (e >> 4) & 0x7f
-
-        buff[0] = m & 0xff
-        m = Math.floor(m / POW_8)
-        buff[1] = m & 0xff
-        m = Math.floor(m / POW_8)
-        buff[2] = m & 0xff
-        m = Math.floor(m / POW_8)
-        buff[3] = m & 0xff
-        m >>= 8
-        buff[4] = m & 0xff
-        m >>= 8
-        buff[5] = m & 0xff
-        m >>= 8
-        buff[6] |= m & 0x0f
-
-        this.transport.write(buff)
+        this.transport.write(writeDoubleLE(buff, dub))
     }
 
     public writeStringOrBinary(
@@ -559,36 +501,7 @@ export class CompactProtocol extends TProtocol {
     // Little-endian, unlike TBinaryProtocol
     public readDouble(): number {
         const buff: Buffer = this.transport.read(8)
-        const off: number = 0
-
-        const signed: number = buff[off + 7] & 0x80
-        let e: number = (buff[off + 6] & 0xf0) >> 4
-        e += (buff[off + 7] & 0x7f) << 4
-
-        let m = buff[off]
-        m += buff[off + 1] << 8
-        m += buff[off + 2] << 16
-        m += buff[off + 3] * POW_24
-        m += buff[off + 4] * POW_32
-        m += buff[off + 5] * POW_40
-        m += (buff[off + 6] & 0x0f) * POW_48
-
-        switch (e) {
-            case 0:
-                e = -1022
-                break
-            case 2047:
-                return m ? NaN : signed ? -Infinity : Infinity
-            default:
-                m += POW_52
-                e -= 1023
-        }
-
-        if (signed) {
-            m *= -1
-        }
-
-        return m * Math.pow(2, e - 52)
+        return readDoubleLE(buff)
     }
 
     public readBinary(): Buffer {
@@ -711,14 +624,14 @@ export class CompactProtocol extends TProtocol {
         let hi = i64.buffer.readUInt32BE(0, true)
         let lo = i64.buffer.readUInt32BE(4, true)
 
-        const neg = new Int64(hi & 0, lo & 1)
-        neg._2scomp()
-        const hiNeg = neg.buffer.readUInt32BE(0, true)
-        const loNeg = neg.buffer.readUInt32BE(4, true)
+        // Gets the 2's compliment hi and lo bytes for i64 & 0x01.
+        // The possible results are 0 or -1.
+        const lowBit = i64.buffer.readUInt8(7, true) & 0x01
+        const mask = lowBit ? 0xffffffff : 0
 
         const hiLo = hi << 31
-        hi = (hi >>> 1) ^ hiNeg
-        lo = ((lo >>> 1) | hiLo) ^ loNeg
+        hi = (hi >>> 1) ^ mask
+        lo = ((lo >>> 1) | hiLo) ^ mask
         return new Int64(hi, lo)
     }
 
@@ -867,17 +780,17 @@ export class CompactProtocol extends TProtocol {
      * Convert l into a zigzag long. This allows negative numbers to be
      * represented compactly as a varint.
      */
-    private i64ToZigzag(i64: number | Int64): Int64 {
+    private i64ToZigzag(i64: number | string | IInt64): Int64 {
         if (typeof i64 === 'string') {
-            i64 = new Int64(parseInt(i64, 10))
+            i64 = Int64.fromDecimalString(i64)
         } else if (typeof i64 === 'number') {
             i64 = new Int64(i64)
         }
 
-        if (!(i64 instanceof Int64)) {
+        if (!isInt64(i64)) {
             throw new TProtocolException(
                 TProtocolExceptionType.INVALID_DATA,
-                `Expected Int64 or Number, found: ${i64}`,
+                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
             )
         } else {
             let hi: number = i64.buffer.readUInt32BE(0, true)

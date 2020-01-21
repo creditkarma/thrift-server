@@ -148,9 +148,9 @@ export function traceIdForHeaders(headers: IRequestHeaders): ITraceId {
 
 export function normalizeHeaders(headers: IRequestHeaders): IRequestHeaders {
     if (headers[L5D_TRACE_HDR] !== undefined) {
-        const linkerDTrace = deserializeLinkerdHeader(headers[
-            L5D_TRACE_HDR
-        ] as string)
+        const linkerDTrace = deserializeLinkerdHeader(
+            headers[L5D_TRACE_HDR] as string,
+        )
         if (
             headers[ZipkinHeaders.TraceId] !== undefined &&
             headers[ZipkinHeaders.TraceId] !== linkerDTrace.traceId

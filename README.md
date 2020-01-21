@@ -26,7 +26,7 @@ Because `thrift-server` is a mono-repo containing multiple libraries, we use [le
 Install dependencies and build libraries:
 
 ```sh
-$ cd thirft-server
+$ cd thrift-server
 $ npm install
 $ npm run build
 ```
@@ -56,7 +56,7 @@ We'll do this step by step:
 We need a place to build things:
 
 ```sh
-$ mkdir thirft-example
+$ mkdir thrift-example
 $ cd thrift-example
 ```
 

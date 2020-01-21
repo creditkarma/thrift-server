@@ -9,7 +9,9 @@ import { TProtocolException, TProtocolExceptionType } from '../errors'
 import { TTransport } from '../transports'
 
 import {
+    IInt64,
     Int64,
+    isInt64,
     IThriftField,
     IThriftList,
     IThriftMap,
@@ -222,11 +224,18 @@ export class JSONProtocol extends TProtocol {
         this.tstack.push(i32)
     }
 
-    public writeI64(i64: number | Int64) {
-        if (i64 instanceof Int64) {
+    public writeI64(i64: number | string | IInt64) {
+        if (typeof i64 === 'number') {
+            this.tstack.push(i64)
+        } else if (typeof i64 === 'string') {
+            // Do not pass through non-numeric strings.
+            this.tstack.push(Int64.fromDecimalString(i64).toDecimalString())
+        } else if (isInt64(i64)) {
             this.tstack.push(i64.toDecimalString())
         } else {
-            this.tstack.push(i64)
+            throw new TypeError(
+                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
+            )
         }
     }
 
