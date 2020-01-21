@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.16.0"></a>
+## [0.16.0](https://github.com/creditkarma/thrift-server/compare/v0.15.3...v0.16.0) (2020-01-21)
+
+### BREAKING CHANGES
+
+* Updated int64 to handle comparision between versions not sharing same prototype ([80a5dd](https://github.com/creditkarma/thrift-server/commit/80a5dddecb7744f3845b5c622a6251fe74c46930)).
+
+
 <a name="0.15.0"></a>
 ## [0.15.0](https://github.com/creditkarma/thrift-server/compare/v0.14.6...v0.15.0) (2019-10-02)
 
