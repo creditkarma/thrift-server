@@ -51,6 +51,9 @@ for (let i = 0; i < 256; i++) {
 // Hex string format.
 const HEX_REGEX = /^(?:0x)?([0-9a-fA-F]+)/
 
+// Decimal string format.
+const DEC_REGEX = /^(?:-)?([0-9]+)/
+
 // 8 bytes
 const BYTE_COUNT = 8
 
@@ -258,32 +261,45 @@ export class Int64 implements IInt64 {
     public static fromDecimalString(text: string): Int64 {
         const negative: boolean = text.charAt(0) === '-'
 
-        if (text.length < (negative ? 17 : 16)) {
-            // The magnitude is smaller than 2^53.
-            return new Int64(+text)
-        } else if (text.length > (negative ? 20 : 19)) {
-            throw new RangeError(`Too many digits for Int64: ${text}`)
-        } else {
-            // Most significant (up to 5) digits
-            const high5 = +text.slice(negative ? 1 : 0, -15)
-            const remainder = +text.slice(-15) + high5 * 2764472320 // The literal is 10^15 % 2^32
-            const hi = Math.floor(remainder / POW2_32) + high5 * 232830 // The literal is 10^15 / 2^&32
-            const lo = remainder % POW2_32
-
-            if (
-                hi >= POW2_31 &&
-                !(negative && hi === POW2_31 && lo === 0) // Allow minimum Int64
-            ) {
-                throw new RangeError('The magnitude is too large for Int64.')
-            }
-
-            if (negative) {
-                const neg = hiLoNeg({ hi, lo })
-                return new Int64(neg.hi, neg.lo)
-            }
-
-            return new Int64(hi, lo)
+        // Short numbers are fast.
+        const numVal = parseInt(text, 10)
+        if (Number.isNaN(numVal)) {
+            // Not a numeric string. Return zero.
+            return new Int64(0)
         }
+        if (Number.isSafeInteger(numVal)) {
+            // Use the number.
+            return new Int64(numVal)
+        }
+
+        // Extract just the number part.
+        const matches = text.match(DEC_REGEX)
+        const numericPart = (matches && matches[1]) || ''
+
+        // Check for too long after getting the numeric part.
+        if (numericPart.length > (negative ? 20 : 19)) {
+            throw new RangeError(`Too many digits for Int64: ${text}`)
+        }
+
+        // Most significant (up to 5) digits
+        const high5 = Number(numericPart.slice(0, -15))
+        const remainder = Number(numericPart.slice(-15)) + high5 * 2764472320 // The literal is 10^15 % 2^32
+        const hi = Math.floor(remainder / POW2_32) + high5 * 232830 // The literal is 10^15 / 2^&32
+        const lo = remainder % POW2_32
+
+        if (
+            hi >= POW2_31 &&
+            !(negative && hi === POW2_31 && lo === 0) // Allow minimum Int64
+        ) {
+            throw new RangeError('The magnitude is too large for Int64.')
+        }
+
+        if (negative) {
+            const neg = hiLoNeg({ hi, lo })
+            return new Int64(neg.hi, neg.lo)
+        }
+
+        return new Int64(hi, lo)
     }
 
     /** @inheritDoc */
