@@ -49,13 +49,57 @@ for (let i = 0; i < 256; i++) {
 }
 
 // Hex string format.
-const HEX_REGEX = /^(?:0x)?([0-9a-fA-F]+)/
+const HEX_REGEX = /^(?:\s*)(?:0x)?([0-9a-fA-F]+)/
 
 // Decimal string format.
-const DEC_REGEX = /^(?:-)?([0-9]+)/
+const DEC_REGEX = /^(?:\s*)([-+])?(\d+)/
 
 // 8 bytes
 const BYTE_COUNT = 8
+
+/**
+ * Result from trying to get the numeric prefix for a string.
+ */
+interface INumericStringParts {
+    /**
+     * True if there was a negative sign.
+     */
+    negative: boolean
+
+    /**
+     * Numeric part of the string.
+     */
+    numeric: string
+}
+
+/**
+ * Get the sign and numeric prefix for a string.
+ *
+ * Ignores leading whitespace.
+ * Digits with or without leading sign.
+ *
+ * @param text Source text
+ */
+function getDecimalNumber(text: string): INumericStringParts | undefined {
+    // Extract just the number part.
+    const matches = text.match(DEC_REGEX)
+    if (matches) {
+        if (matches.length === 2) {
+            return {
+                negative: false,
+                numeric: matches[1],
+            }
+        }
+        if (matches.length === 3) {
+            return {
+                negative: matches[1] === '-',
+                numeric: matches[2],
+            }
+        }
+    }
+
+    return undefined
+}
 
 /**
  * 64-bit integer value as high and low 32-bit integers.
@@ -259,31 +303,31 @@ export class Int64 implements IInt64 {
     }
 
     public static fromDecimalString(text: string): Int64 {
-        const negative: boolean = text.charAt(0) === '-'
-
-        // Short numbers are fast.
-        const numVal = parseInt(text, 10)
-        if (Number.isNaN(numVal)) {
-            // Not a numeric string. Return zero.
-            return new Int64(0)
-        }
-        if (Number.isSafeInteger(numVal)) {
-            // Use the number.
-            return new Int64(numVal)
+        // Small numbers that are text-only are fast.
+        const num = Number(text)
+        // The number may be too large for number
+        // or it may be NaN because of trailing characters that parseInt() would ignore.
+        if (Number.isSafeInteger(Math.trunc(num))) {
+            // Use the number. The Int64 constructor truncates.
+            return new Int64(num)
         }
 
         // Extract just the number part.
-        const matches = text.match(DEC_REGEX)
-        const numericPart = (matches && matches[1]) || ''
+        const parts = getDecimalNumber(text)
+        if (!parts) {
+            // Not a numeric value. Return 0.
+            return new Int64(0)
+        }
+        const { negative, numeric } = parts
 
         // Check for too long after getting the numeric part.
-        if (numericPart.length > (negative ? 20 : 19)) {
+        if (numeric.length > 19) {
             throw new RangeError(`Too many digits for Int64: ${text}`)
         }
 
         // Most significant (up to 5) digits
-        const high5 = Number(numericPart.slice(0, -15))
-        const remainder = Number(numericPart.slice(-15)) + high5 * 2764472320 // The literal is 10^15 % 2^32
+        const high5 = Number(numeric.slice(0, -15))
+        const remainder = Number(numeric.slice(-15)) + high5 * 2764472320 // The literal is 10^15 % 2^32
         const hi = Math.floor(remainder / POW2_32) + high5 * 232830 // The literal is 10^15 / 2^&32
         const lo = remainder % POW2_32
 

@@ -134,6 +134,46 @@ describe('Int64', () => {
             expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
         })
 
+        it('should handle leading + for safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`+${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should handle leading + for unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`+${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should ignore leading whitespace for safe integer', async () => {
+            const i64 = Int64.fromDecimalString(` ${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should ignore leading whitespace for unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(` ${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should ignore leading whitespace for negative safe integer', async () => {
+            const i64 = Int64.fromDecimalString(` -${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
+        })
+
+        it('should ignore leading whitespace for negative unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(` -${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
+        })
+
+        it('should handle default number conversion for decimal string formats', async () => {
+            const i64 = Int64.fromDecimalString('1.5e3')
+            expect(i64.toDecimalString()).to.equal('1500')
+        })
+
+        it('should truncate', async () => {
+            const i64 = Int64.fromDecimalString('1.5')
+            expect(i64.toDecimalString()).to.equal('1')
+        })
+
         it('should handle empty string as zero', async () => {
             const i64 = Int64.fromDecimalString('')
             expect(i64.toDecimalString()).to.equal('0')
@@ -283,6 +323,18 @@ describe('Int64', () => {
                 0x07,
                 0x80,
             ])
+        })
+
+        it('should set hex value ignoring leading whitespace with prefix', async () => {
+            const i64 = new Int64('  0xab')
+            const { data } = i64.buffer.toJSON()
+            expect(data).to.equal([0, 0, 0, 0, 0, 0, 0, 0xab])
+        })
+
+        it('should set hex value ignoring leading whitespace without prefix', async () => {
+            const i64 = new Int64('  ab')
+            const { data } = i64.buffer.toJSON()
+            expect(data).to.equal([0, 0, 0, 0, 0, 0, 0, 0xab])
         })
     })
 
