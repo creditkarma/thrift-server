@@ -145,32 +145,32 @@ describe('Int64', () => {
         })
 
         it('should ignore leading whitespace for safe integer', async () => {
-            const i64 = Int64.fromDecimalString(` ${TEST_STRING}`)
+            const i64 = Int64.fromDecimalString(`  ${TEST_STRING}`)
             expect(i64.toDecimalString()).to.equal(TEST_STRING)
         })
 
         it('should ignore leading whitespace for unsafe integer', async () => {
-            const i64 = Int64.fromDecimalString(` ${TEST_UNSAFE_STRING}`)
+            const i64 = Int64.fromDecimalString(`  ${TEST_UNSAFE_STRING}`)
             expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
         })
 
         it('should ignore leading whitespace for + with safe integer', async () => {
-            const i64 = Int64.fromDecimalString(` +${TEST_STRING}`)
+            const i64 = Int64.fromDecimalString(`  +${TEST_STRING}`)
             expect(i64.toDecimalString()).to.equal(`${TEST_STRING}`)
         })
 
         it('should ignore leading whitespace for + with unsafe integer', async () => {
-            const i64 = Int64.fromDecimalString(` +${TEST_UNSAFE_STRING}`)
+            const i64 = Int64.fromDecimalString(`  +${TEST_UNSAFE_STRING}`)
             expect(i64.toDecimalString()).to.equal(`${TEST_UNSAFE_STRING}`)
         })
 
         it('should ignore leading whitespace for negative safe integer', async () => {
-            const i64 = Int64.fromDecimalString(` -${TEST_STRING}`)
+            const i64 = Int64.fromDecimalString(`  -${TEST_STRING}`)
             expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
         })
 
         it('should ignore leading whitespace for negative unsafe integer', async () => {
-            const i64 = Int64.fromDecimalString(` -${TEST_UNSAFE_STRING}`)
+            const i64 = Int64.fromDecimalString(`  -${TEST_UNSAFE_STRING}`)
             expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
         })
 
