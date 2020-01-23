@@ -154,6 +154,16 @@ describe('Int64', () => {
             expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
         })
 
+        it('should ignore leading whitespace for + with safe integer', async () => {
+            const i64 = Int64.fromDecimalString(` +${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`${TEST_STRING}`)
+        })
+
+        it('should ignore leading whitespace for + with unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(` +${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`${TEST_UNSAFE_STRING}`)
+        })
+
         it('should ignore leading whitespace for negative safe integer', async () => {
             const i64 = Int64.fromDecimalString(` -${TEST_STRING}`)
             expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
@@ -164,12 +174,12 @@ describe('Int64', () => {
             expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
         })
 
-        it('should handle default number conversion for decimal string formats', async () => {
+        it('should handle default number conversion for safe integers', async () => {
             const i64 = Int64.fromDecimalString('1.5e3')
             expect(i64.toDecimalString()).to.equal('1500')
         })
 
-        it('should truncate', async () => {
+        it('should truncate numbers in the safe integer range', async () => {
             const i64 = Int64.fromDecimalString('1.5')
             expect(i64.toDecimalString()).to.equal('1')
         })
