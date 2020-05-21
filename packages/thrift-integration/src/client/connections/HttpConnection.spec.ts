@@ -1,6 +1,8 @@
 import * as thrift from '@creditkarma/thrift-server-core'
 import * as Hapi from '@hapi/hapi'
 import * as http from 'http'
+import * as request from 'request'
+import { CoreOptions } from 'request'
 
 import {
     HttpConnection,
@@ -14,8 +16,6 @@ import {
     ThriftClientTTwitterFilter,
     TTwitter,
 } from '@creditkarma/thrift-client-ttwitter-filter'
-
-import { CoreOptions } from 'request'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../../config'
 
@@ -193,6 +193,30 @@ describe('HttpConnection', () => {
                     expect(err).to.exist()
                 },
             )
+        })
+
+        it('should use request implementation if provided', async () => {
+            let ourRequestWasCalled = false
+            const mockRequest = request.defaults({
+                auth: {
+                    bearer: () => {
+                        ourRequestWasCalled = true
+                        return 'token'
+                    },
+                },
+            })
+
+            const mockedConnection = new HttpConnection({
+                serviceName: 'Calculator',
+                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+                port: HAPI_CALC_SERVER_CONFIG.port,
+                path: HAPI_CALC_SERVER_CONFIG.path,
+                requestImpl: mockRequest,
+            })
+            const mockedClient = new Calculator.Client(mockedConnection)
+            return mockedClient
+                .add(5, 7)
+                .then(() => expect(ourRequestWasCalled).to.be.true())
         })
     })
 

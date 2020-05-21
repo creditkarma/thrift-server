@@ -1,7 +1,6 @@
 import * as Core from '@creditkarma/thrift-server-core'
 
-import request = require('request')
-
+import * as request from 'request'
 import {
     Request,
     RequestAPI,
@@ -127,6 +126,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     private readonly requestOptions: RequestOptions
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
+    private readonly requestImpl: typeof request
 
     constructor({
         hostName,
@@ -139,6 +139,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         serviceName,
         withEndpointPerMethod = false,
         headerBlacklist = [],
+        requestImpl = request,
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
         this.requestOptions = Object.freeze(
@@ -153,6 +154,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         this.withEndpointPerMethod = withEndpointPerMethod
         this.url = `${this.basePath}${this.path}`
         this.filters = []
+        this.requestImpl = requestImpl
     }
 
     public register(
@@ -234,7 +236,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         )
 
         return new Promise((resolve, reject) => {
-            request(
+            this.requestImpl(
                 requestOptions,
                 (err: any, response: RequestResponse, body: Buffer) => {
                     if (
