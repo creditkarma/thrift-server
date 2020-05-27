@@ -97,6 +97,7 @@ The available options are:
 * protocol (optional): Name of the Thrift protocol type to use. Defaults to 'binary'.
 * requestOptions (optional): Options to pass to the underlying [Request library](https://github.com/request/request#requestoptions-callback). Defaults to {}.
 * register (optional): A list of filters to apply to your client. More on this later.
+* requestImpl (optional): Provide a request implementation. Defaults to 'request' module.
 
 Currently `@creditkarma/thrift-server-core"` only supports buffered transport and binary or compact protocols.
 
