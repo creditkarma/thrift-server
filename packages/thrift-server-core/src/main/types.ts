@@ -86,6 +86,22 @@ export abstract class StructLike implements IStructLike {
     public abstract write(output: TProtocol): void
 }
 
+/**
+ * Like `StructLike` but extends `Error`. Exception classes extend this.
+ */
+export abstract class ErrorStructLike extends Error implements IStructLike {
+    public readonly name: string
+    public readonly _annotations: IThriftAnnotations = {}
+    public readonly _fieldAnnotations: IFieldAnnotations = {}
+
+    constructor() {
+        super()
+        this.name = this.constructor.name
+    }
+
+    public abstract write(output: TProtocol): void
+}
+
 export interface IStructConstructor<T extends StructLike> {
     new (args?: any): T
     read(input: TProtocol): T
