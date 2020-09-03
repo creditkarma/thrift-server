@@ -38,7 +38,7 @@
     },
     "devDependencies": {
         "@creditkarma/thrift-server-core": "^0.16.1",
-        "@hapi/hapi": "^18.4.0",
+        "@hapi/hapi": "^19.1.1",
         "@types/hapi__boom": "^7.4.1",
         "@types/hapi__hapi": "^18.2.5",
         "@types/node": "^8.10.38",
