@@ -31,7 +31,7 @@
         "@creditkarma/zipkin-tracing-express": "^0.16.1",
         "@creditkarma/zipkin-tracing-hapi": "^0.16.1",
         "@hapi/code": "^5.3.0",
-        "@hapi/hapi": "^18.4.0",
+        "@hapi/hapi": "^19.1.1",
         "@hapi/lab": "^20.3.2",
         "@types/body-parser": "^1.16.5",
         "@types/express": "^4.16.0",
