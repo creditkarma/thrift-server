@@ -1,5 +1,7 @@
 defaults: &defaults
   working_directory: ~/thrift-server
+  docker:
+    - image: circleci/node:12.9.0
 
 version: 2
 jobs:
