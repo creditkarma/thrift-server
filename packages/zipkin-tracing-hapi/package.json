@@ -24,14 +24,14 @@
         "@creditkarma/thrift-server-core": "0.16.x",
         "@creditkarma/thrift-server-hapi": "0.16.x",
         "@creditkarma/zipkin-core": "0.16.x",
-        "@hapi/hapi": ">=17.0.0 <19.0.0",
-        "@types/hapi": ">=17.0.0 <19.0.0"
+        "@hapi/hapi": ">=17.0.0 <21.0.0",
+        "@types/hapi": ">=17.0.0 <21.0.0"
     },
     "devDependencies": {
         "@creditkarma/thrift-server-core": "^0.16.1",
         "@creditkarma/thrift-server-hapi": "^0.16.1",
         "@creditkarma/zipkin-core": "^0.16.1",
-        "@hapi/hapi": "^18.4.0",
+        "@hapi/hapi": "^20.0.0",
         "@types/hapi__boom": "^7.4.1",
         "@types/hapi__hapi": "^18.2.5",
         "@types/node": "^8.10.38",
