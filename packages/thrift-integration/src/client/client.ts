@@ -109,7 +109,7 @@ export function createClientServer(
             const work: IWorkArgs = {
                 num1: Number(req.query.left),
                 num2: Number(req.query.right),
-                op: symbolToOperation(req.query.op),
+                op: symbolToOperation(req.query.op as string),
             }
 
             thriftClient.calculate(1, work, { headers: req.headers }).then(
@@ -129,7 +129,7 @@ export function createClientServer(
             const work: Work = new Work({
                 num1: Number(req.query.left),
                 num2: Number(req.query.right),
-                op: symbolToOperation(req.query.op),
+                op: symbolToOperation(req.query.op as string),
             })
 
             thriftClient

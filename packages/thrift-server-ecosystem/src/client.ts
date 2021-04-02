@@ -85,9 +85,9 @@ async function init(): Promise<void> {
         '/calculate',
         (req: express.Request, res: express.Response): void => {
             const work: Work = new Work({
-                num1: req.query.left,
-                num2: req.query.right,
-                op: symbolToOperation(req.query.op),
+                num1: Number(req.query.left),
+                num2: Number(req.query.right),
+                op: symbolToOperation(req.query.op as string),
             })
 
             thriftClient.calculate(1, work, { headers: req.headers }).then(
