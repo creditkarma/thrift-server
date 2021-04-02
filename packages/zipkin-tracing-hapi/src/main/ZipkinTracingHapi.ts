@@ -17,7 +17,7 @@ import * as Boom from '@hapi/boom'
 
 const pkg: any = require('../../package.json')
 
-function isBoom(obj: any): obj is Boom {
+function isBoom(obj: any): obj is Boom.Boom {
     return obj.isBoom
 }
 
