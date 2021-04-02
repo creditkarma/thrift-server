@@ -18,8 +18,8 @@
         "test:only": "echo 'No tests for thrift-client-context-filter'; exit 0;"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.16.x",
-        "@creditkarma/thrift-server-core": "0.16.x"
+        "@creditkarma/thrift-client": ">0.16.x",
+        "@creditkarma/thrift-server-core": ">0.16.x"
     },
     "devDependencies": {
         "@creditkarma/thrift-client": "^0.17.0-alpha.0",

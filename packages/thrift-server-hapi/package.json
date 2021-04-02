@@ -32,7 +32,7 @@
         "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-hapi"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-server-core": "0.16.x",
+        "@creditkarma/thrift-server-core": ">0.16.x",
         "@hapi/hapi": ">=17.0.0 <21.0.0",
         "@types/hapi__hapi": ">=17.0.0 <21.0.0"
     },
