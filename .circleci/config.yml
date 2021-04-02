@@ -85,7 +85,7 @@ workflows:
             - test_node_14
           filters:
             tags:
-              only: /^(v){1}(0){1}(\.16){1}(\.[0-9]+){1}$/
+              only: /^(v){1}(0){1}(\.17){1}(\.[0-9]+){1}$/
             branches:
               ignore: /.*/
 
