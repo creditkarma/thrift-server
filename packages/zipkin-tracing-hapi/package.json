@@ -21,9 +21,9 @@
         "zipkin": "^0.15.0"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-server-core": ">0.16.x",
-        "@creditkarma/thrift-server-hapi": ">0.16.x",
-        "@creditkarma/zipkin-core": ">0.16.x",
+        "@creditkarma/thrift-server-core": "0.17.x",
+        "@creditkarma/thrift-server-hapi": "0.17.x",
+        "@creditkarma/zipkin-core": "0.17.x",
         "@hapi/hapi": ">=17.0.0 <21.0.0",
         "@types/hapi": ">=17.0.0 <21.0.0"
     },
