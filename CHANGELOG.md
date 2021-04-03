@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+<a name="0.17.0"></a>
+## [0.17.0](https://github.com/creditkarma/thrift-server/compare/v0.16.1...v0.17.0) (2020-04-02)
+
+### BREAKING CHANGES
+
+* Upgrade to using Hapi v20 ([ad1c86](https://github.com/creditkarma/thrift-server/pull/161)). This requires services to operate on node > v12.
+
+
+<a name="0.16.1"></a>
+## [0.16.1](https://github.com/creditkarma/thrift-server/compare/v0.16.0...v0.16.1) (2020-05-20)
+
+### Features
+* Injectable request object([370a0c](https://github.com/creditkarma/thrift-server/pull/131))
+
+
 <a name="0.16.0"></a>
 ## [0.16.0](https://github.com/creditkarma/thrift-server/compare/v0.15.3...v0.16.0) (2020-01-21)
 
