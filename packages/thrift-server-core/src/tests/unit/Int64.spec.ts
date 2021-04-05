@@ -11,6 +11,9 @@ const it = lab.it
 
 describe('Int64', () => {
     const TEST_STRING: string = '9837756439'
+    // Decimal number larger than the max safe integer.
+    // As a number, this becomes 9007199254741112.
+    const TEST_UNSAFE_STRING = '9007199254741113'
     const TOO_LARGE: string = '999999999999999999999999999999'
     const TEST_BUFFER = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
@@ -67,13 +70,160 @@ describe('Int64', () => {
     })
 
     describe('static fromDecimalString', () => {
-        it('should correctly create Int64 from string', async () => {
+        it('should correctly create Int64 from safe integer', async () => {
             const i64 = Int64.fromDecimalString(TEST_STRING)
             expect(i64.toDecimalString()).to.equal(TEST_STRING)
         })
 
+        it('should correctly create Int64 from unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(TEST_UNSAFE_STRING)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should correctly create Int64 from negative safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
+        })
+
+        it('should correctly create Int64 from negative unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
+        })
+
         it('should throw if the decimal string is too large for Int64', async () => {
             expect(() => Int64.fromDecimalString(TOO_LARGE)).to.throw()
+        })
+
+        it('should stop at space', async () => {
+            const i64 = Int64.fromDecimalString(`${TEST_STRING} 1`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should stop unsafe integer at space', async () => {
+            const i64 = Int64.fromDecimalString(`${TEST_UNSAFE_STRING} 1`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should stop negative integer at space', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_STRING} 1`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
+        })
+
+        it('should stop negative unsafe integer at space', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_UNSAFE_STRING} 1`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
+        })
+
+        it('should stop at non-digit', async () => {
+            const i64 = Int64.fromDecimalString(`${TEST_STRING}a`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should stop unsafe integer at non-digit', async () => {
+            const i64 = Int64.fromDecimalString(`${TEST_UNSAFE_STRING}a`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should stop negative integer at non-digit', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_STRING}a`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
+        })
+
+        it('should stop negative unsafe integer at non-digit', async () => {
+            const i64 = Int64.fromDecimalString(`-${TEST_UNSAFE_STRING}a`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
+        })
+
+        it('should handle leading + for safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`+${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should handle leading + for unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`+${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should ignore leading whitespace for safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  ${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_STRING)
+        })
+
+        it('should ignore leading whitespace for unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  ${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(TEST_UNSAFE_STRING)
+        })
+
+        it('should ignore leading whitespace for + with safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  +${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`${TEST_STRING}`)
+        })
+
+        it('should ignore leading whitespace for + with unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  +${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`${TEST_UNSAFE_STRING}`)
+        })
+
+        it('should ignore leading whitespace for negative safe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  -${TEST_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_STRING}`)
+        })
+
+        it('should ignore leading whitespace for negative unsafe integer', async () => {
+            const i64 = Int64.fromDecimalString(`  -${TEST_UNSAFE_STRING}`)
+            expect(i64.toDecimalString()).to.equal(`-${TEST_UNSAFE_STRING}`)
+        })
+
+        it('should handle default number conversion for safe integers', async () => {
+            const i64 = Int64.fromDecimalString('1.5e3')
+            expect(i64.toDecimalString()).to.equal('1500')
+        })
+
+        it('should truncate numbers in the safe integer range', async () => {
+            const i64 = Int64.fromDecimalString('1.5')
+            expect(i64.toDecimalString()).to.equal('1')
+        })
+
+        it('should handle empty string as zero', async () => {
+            const i64 = Int64.fromDecimalString('')
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle non-numeric string as zero', async () => {
+            const i64 = Int64.fromDecimalString('invalid')
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle long non-numeric string as zero', async () => {
+            // Long and short strings are handled differently. Test a longer string.
+            const i64 = Int64.fromDecimalString('z'.repeat(18))
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle "negative" non-numeric string as zero', async () => {
+            const i64 = Int64.fromDecimalString('-invalid')
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle long "negative" non-numeric string as zero', async () => {
+            // Long and short strings are handled differenlty. Test a longer string.
+            const i64 = Int64.fromDecimalString('-' + 'z'.repeat(18))
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle "Infinity" as an invalid string (zero)', async () => {
+            const i64 = Int64.fromDecimalString('Infinity')
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle "-Infinity" as an invalid string (zero)', async () => {
+            const i64 = Int64.fromDecimalString('-Infinity')
+            expect(i64.toDecimalString()).to.equal('0')
+        })
+
+        it('should handle "-" as an invalid string (zero)', async () => {
+            const i64 = Int64.fromDecimalString('-Infinity')
+            expect(i64.toDecimalString()).to.equal('0')
         })
     })
 
@@ -183,6 +333,18 @@ describe('Int64', () => {
                 0x07,
                 0x80,
             ])
+        })
+
+        it('should set hex value ignoring leading whitespace with prefix', async () => {
+            const i64 = new Int64('  0xab')
+            const { data } = i64.buffer.toJSON()
+            expect(data).to.equal([0, 0, 0, 0, 0, 0, 0, 0xab])
+        })
+
+        it('should set hex value ignoring leading whitespace without prefix', async () => {
+            const i64 = new Int64('  ab')
+            const { data } = i64.buffer.toJSON()
+            expect(data).to.equal([0, 0, 0, 0, 0, 0, 0, 0xab])
         })
     })
 
