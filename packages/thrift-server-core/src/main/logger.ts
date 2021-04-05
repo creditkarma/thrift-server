@@ -22,9 +22,9 @@ export const makeLogger = (name: string): LogFunction => {
                 console.info(`[${allTags.join(',')}]`)
             }
         } else {
-            if (data !== undefined && process.env.DUBUG !== undefined) {
+            if (data !== undefined && process.env.DEBUG !== undefined) {
                 console.log(`[${allTags.join(',')}] `, data)
-            } else if (process.env.DUBUG !== undefined) {
+            } else if (process.env.DEBUG !== undefined) {
                 console.log(`[${allTags.join(',')}]`)
             }
         }
