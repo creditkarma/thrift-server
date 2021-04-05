@@ -15,6 +15,6 @@ exception InvalidOperation {
 }
 
 exception InvalidResult {
-  1: string message
+  1: string msg
   2: shared.Code code
 }
