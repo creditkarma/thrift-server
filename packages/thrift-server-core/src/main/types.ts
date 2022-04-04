@@ -3,7 +3,7 @@ import { TTransport } from './transports'
 
 export * from './Int64'
 
-export type LogFunction = (tags: ReadArray<string>, data?: string | object) => void
+export type LogFunction = (tags: ReadonlyArray<string>, data?: string | object) => void
 
 export interface IRequestHeaders {
     [name: string]: any
