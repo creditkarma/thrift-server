@@ -35,7 +35,8 @@
             "@hapi/catbox": [
                 "hapi__catbox"
             ]
-        }
+        },
+        "useUnknownInCatchVariables": false
     },
     "exclude": [
         "node_modules",

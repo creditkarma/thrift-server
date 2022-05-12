@@ -3,6 +3,7 @@
   "description": "Thrift core library in TypeScript",
   "private": true,
   "scripts": {
+    "updatenode": "lerna exec -- npm i @types/node@16.11.0",
     "build": "lerna exec -- npm run build",
     "clean": "rimraf **/package-lock.json **/node_modules **/dist **/coverage **/generated **/generated-apache",
     "lint": "lerna exec -- npm run lint",
@@ -37,6 +38,6 @@
     "url": "https://github.com/creditkarma/thrift-server"
   },
   "devDependencies": {
-    "lerna": "^3.14.1"
+    "lerna": "^3.22.1"
   }
 }

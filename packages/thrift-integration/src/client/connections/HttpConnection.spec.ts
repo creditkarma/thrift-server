@@ -601,7 +601,7 @@ describe('HttpConnection', () => {
         })
 
         after(async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 collectServer.close().then(() => {
                     mockServer.close(() => {
                         console.log('HTTP server closed')
@@ -613,7 +613,7 @@ describe('HttpConnection', () => {
         })
 
         it('should handle appending data to payload', async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 let count: number = 0
                 collectServer.reset()
                 mockServer = http.createServer(

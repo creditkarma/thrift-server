@@ -35,7 +35,7 @@ describe('Thrift Server Express', () => {
     before(async () => {
         addServer = await createAddServer()
 
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const app: express.Application = createCalcServer()
             client = createHttpClient(
                 Calculator.Client,
@@ -52,7 +52,7 @@ describe('Thrift Server Express', () => {
     })
 
     after(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             calcServer.close(() => {
                 addServer.stop().then(() => resolve())
             })
