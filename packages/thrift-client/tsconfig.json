@@ -13,7 +13,6 @@
         "noUnusedLocals": true,
         "pretty": true,
         "removeComments": true,
-        "useUnknownInCatchVariables": false
     },
     "exclude": [
         "node_modules",
