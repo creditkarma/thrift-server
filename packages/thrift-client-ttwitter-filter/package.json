@@ -36,12 +36,12 @@
         "@creditkarma/thrift-server-core": "^0.17.2",
         "@creditkarma/thrift-typescript": "^3.7.6",
         "@creditkarma/zipkin-core": "^0.17.2",
-        "@types/node": "^8.10.38",
+        "@types/node": "^16.11.0",
         "prettier": "^1.18.2",
         "rimraf": "^2.6.2",
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-plugin-prettier": "^2.0.0",
-        "typescript": "3.5.x"
+        "typescript": "4.6.x"
     }
 }

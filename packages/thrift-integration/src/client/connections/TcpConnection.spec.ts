@@ -46,7 +46,7 @@ describe('TcpConnection', () => {
     let server: net.Server
 
     before(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             server = createServer()
             server.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
                 console.log(
@@ -58,7 +58,7 @@ describe('TcpConnection', () => {
     })
 
     after(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             server.close(() => {
                 server.unref()
                 console.log(`TCP server closed`)
@@ -221,7 +221,7 @@ describe('TcpConnection', () => {
         let mockServer: net.Server
 
         afterEach(async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 mockServer.close(() => {
                     mockServer.unref()
                     connection.destory().then(() => {
@@ -233,7 +233,7 @@ describe('TcpConnection', () => {
         })
 
         it('should handle appending data to payload', async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 connection = new TcpConnection({
                     hostName: 'localhost',
                     port: PORT,
@@ -293,7 +293,7 @@ describe('TcpConnection', () => {
         })
 
         it('should work with only a request context', async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 connection = new TcpConnection({
                     hostName: 'localhost',
                     port: PORT,
@@ -381,7 +381,7 @@ describe('TcpConnection', () => {
         })
 
         after(async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 collectServer.close().then(() => {
                     mockServer.close(() => {
                         console.log('TCP server closed')
@@ -396,7 +396,7 @@ describe('TcpConnection', () => {
         })
 
         it('should handle appending data to payload', async () => {
-            return new Promise((resolve, reject) => {
+            return new Promise<void>((resolve, reject) => {
                 let count: number = 0
                 mockServer = net.createServer((socket: net.Socket): void => {
                     console.log('TCP server created')

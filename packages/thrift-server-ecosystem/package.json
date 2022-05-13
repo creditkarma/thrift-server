@@ -15,7 +15,7 @@
         "test:only": "echo 'No tests for thrift ecosystem'; exit 0;"
     },
     "dependencies": {
-        "@types/node": "^8.10.38"
+        "@types/node": "^16.11.0"
     },
     "devDependencies": {
         "@creditkarma/dynamic-config": "^0.9.8",
@@ -35,7 +35,7 @@
         "tslint": "^5.11.0",
         "tslint-config-prettier": "^1.15.0",
         "tslint-plugin-prettier": "^2.0.0",
-        "typescript": "3.5.x"
+        "typescript": "4.6.x"
     },
     "publishConfig": {
         "access": "private"

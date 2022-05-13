@@ -180,7 +180,11 @@ export class Connection {
                     if (!(err instanceof InputBufferUnderrunError)) {
                         this.logger(
                             ['error', 'Connection', 'send', 'dataHandler'],
-                            `Error reading data from connection: ${err.message}`,
+                            `Error reading data from connection: ${
+                                err instanceof Error
+                                    ? err.message
+                                    : 'Unexpected error thrown'
+                            }`,
                         )
                         removeHandlers()
                         reject(err)

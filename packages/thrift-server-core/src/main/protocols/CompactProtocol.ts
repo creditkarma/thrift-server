@@ -293,7 +293,7 @@ export class CompactProtocol extends TProtocol {
 
     public writeStringOrBinary(
         name: string,
-        encoding: string,
+        encoding: BufferEncoding,
         data: string | Buffer,
     ): void {
         if (typeof data === 'string') {
@@ -621,12 +621,12 @@ export class CompactProtocol extends TProtocol {
      * Convert from zigzag long to long.
      */
     private zigzagToI64(i64: Int64): Int64 {
-        let hi = i64.buffer.readUInt32BE(0, true)
-        let lo = i64.buffer.readUInt32BE(4, true)
+        let hi = i64.buffer.readUInt32BE(0)
+        let lo = i64.buffer.readUInt32BE(4)
 
         // Gets the 2's compliment hi and lo bytes for i64 & 0x01.
         // The possible results are 0 or -1.
-        const lowBit = i64.buffer.readUInt8(7, true) & 0x01
+        const lowBit = i64.buffer.readUInt8(7) & 0x01
         const mask = lowBit ? 0xffffffff : 0
 
         const hiLo = hi << 31
@@ -753,8 +753,8 @@ export class CompactProtocol extends TProtocol {
         } else {
             const buf: Buffer = Buffer.alloc(10)
             let wsize: number = 0
-            let hi: number = i64.buffer.readUInt32BE(0, true)
-            let lo: number = i64.buffer.readUInt32BE(4, true)
+            let hi: number = i64.buffer.readUInt32BE(0)
+            let lo: number = i64.buffer.readUInt32BE(4)
             let mask: number = 0
 
             while (true) {
@@ -793,8 +793,8 @@ export class CompactProtocol extends TProtocol {
                 `Expected Int64, number, or decimal string but found type ${typeof i64}`,
             )
         } else {
-            let hi: number = i64.buffer.readUInt32BE(0, true)
-            let lo: number = i64.buffer.readUInt32BE(4, true)
+            let hi: number = i64.buffer.readUInt32BE(0)
+            let lo: number = i64.buffer.readUInt32BE(4)
             const sign: number = hi >>> 31
 
             hi = ((hi << 1) | (lo >>> 31)) ^ (!!sign ? 0xffffffff : 0)

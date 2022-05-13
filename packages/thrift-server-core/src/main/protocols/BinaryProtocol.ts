@@ -167,7 +167,7 @@ export class BinaryProtocol extends TProtocol {
 
     public writeStringOrBinary(
         name: string,
-        encoding: string,
+        encoding: BufferEncoding,
         data: string | Buffer,
     ): void {
         if (typeof data === 'string') {

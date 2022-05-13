@@ -6,9 +6,6 @@
  * https://github.com/apache/thrift/blob/master/lib/nodejs/lib/thrift/binary.js
  */
 
-// Skip value and offset validation if true.
-const noAssert = true
-
 /**
  * Read a byte as a signed value.
  *
@@ -27,7 +24,7 @@ export function readByte(byte: number): number {
  * @param offset Offset
  */
 export function readI16(bytes: Buffer, offset: number = 0): number {
-    return bytes.readInt16BE(offset, noAssert)
+    return bytes.readInt16BE(offset)
 }
 
 /**
@@ -39,7 +36,7 @@ export function readI16(bytes: Buffer, offset: number = 0): number {
  * @param offset Offset
  */
 export function readI32(bytes: Buffer, offset: number = 0): number {
-    return bytes.readInt32BE(offset, noAssert)
+    return bytes.readInt32BE(offset)
 }
 
 /**
@@ -51,7 +48,7 @@ export function readI32(bytes: Buffer, offset: number = 0): number {
  * @param offset Offset
  */
 export function readDouble(bytes: Buffer, offset: number = 0): number {
-    return bytes.readDoubleBE(offset, noAssert)
+    return bytes.readDoubleBE(offset)
 }
 
 /**
@@ -63,7 +60,7 @@ export function readDouble(bytes: Buffer, offset: number = 0): number {
  * @param i16 16-bit integer
  */
 export function writeI16(bytes: Buffer, i16: number): Buffer {
-    bytes.writeInt16BE(i16, 0, noAssert)
+    bytes.writeInt16BE(i16, 0)
     return bytes
 }
 
@@ -76,7 +73,7 @@ export function writeI16(bytes: Buffer, i16: number): Buffer {
  * @param i32 32-bit integer
  */
 export function writeI32(bytes: Buffer, i32: number): Buffer {
-    bytes.writeInt32BE(i32, 0, noAssert)
+    bytes.writeInt32BE(i32, 0)
     return bytes
 }
 
@@ -89,7 +86,7 @@ export function writeI32(bytes: Buffer, i32: number): Buffer {
  * @param dub Double
  */
 export function writeDouble(bytes: Buffer, dub: number): Buffer {
-    bytes.writeDoubleBE(dub, 0, noAssert)
+    bytes.writeDoubleBE(dub, 0)
     return bytes
 }
 
@@ -102,7 +99,7 @@ export function writeDouble(bytes: Buffer, dub: number): Buffer {
  * @param offset Offset
  */
 export function readDoubleLE(bytes: Buffer, offset: number = 0): number {
-    return bytes.readDoubleLE(offset, noAssert)
+    return bytes.readDoubleLE(offset)
 }
 
 /**
@@ -114,6 +111,6 @@ export function readDoubleLE(bytes: Buffer, offset: number = 0): number {
  * @param dub Double
  */
 export function writeDoubleLE(bytes: Buffer, dub: number): Buffer {
-    bytes.writeDoubleLE(dub, 0, noAssert)
+    bytes.writeDoubleLE(dub, 0)
     return bytes
 }

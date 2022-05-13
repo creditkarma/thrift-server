@@ -47,7 +47,7 @@ describe('Tracing', () => {
     })
 
     after(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             clientServer.close(() => {
                 clientServer.unref()
                 collectServer.close().then(() => {
@@ -63,7 +63,7 @@ describe('Tracing', () => {
     })
 
     it('should correctly trace request using B3 headers', async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             collectServer.reset()
             const traceId_1: string = '4808dde1609f5673'
             const traceId_2: string = 'b82ba1422cf1ec6c'
@@ -119,7 +119,7 @@ describe('Tracing', () => {
     })
 
     it('should allow clients to pass zipkin context to plugin', async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             Promise.all([
                 rp(
@@ -157,7 +157,7 @@ describe('Tracing', () => {
     })
 
     it('should correctly trace request using L5D headers', async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
@@ -220,7 +220,7 @@ describe('Tracing', () => {
     })
 
     it('should use B3 headers if traceIds do not match', async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
@@ -269,7 +269,7 @@ describe('Tracing', () => {
     })
 
     it('should use L5D headers if traceIds do match', async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             const trace_1: ITraceId = {
                 traceId: traceId_1,

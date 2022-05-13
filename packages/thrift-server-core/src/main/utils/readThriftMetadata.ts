@@ -24,7 +24,9 @@ export function readThriftMetadata(
     } catch (err) {
         logger(
             ['warn', 'readThriftMetadata'],
-            `Unable to read Thrift message. ${err.message}`,
+            `Unable to read Thrift message. ${
+                err instanceof Error ? err.message : 'Unexpected error thrown'
+            }`,
         )
         throw err
     }
@@ -47,7 +49,9 @@ export function readThriftMethod(
     } catch (err) {
         logger(
             ['warn', 'readThrfitMethod'],
-            `Unable to read Thrift method name. ${err.message}`,
+            `Unable to read Thrift method name. ${
+                err instanceof Error ? err.message : 'Unexpected error thrown'
+            }`,
         )
         return ''
     }
@@ -70,7 +74,9 @@ export function readRequestId(
     } catch (err) {
         logger(
             ['warn', 'readRequestId'],
-            `Unable to read Thrift requestId. ${err.message}`,
+            `Unable to read Thrift requestId. ${
+                err instanceof Error ? err.message : 'Unexpected error thrown'
+            }`,
         )
         return 0
     }

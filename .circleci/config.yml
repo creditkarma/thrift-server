@@ -1,7 +1,7 @@
 defaults: &defaults
   working_directory: ~/thrift-server
   docker:
-    - image: circleci/node:12.9.0
+    - image: circleci/node:16.11.1
 
 version: 2
 jobs:
@@ -18,10 +18,10 @@ jobs:
           name: Run Test Suite
           command: npm test
 
-  test_node_12:
+  test_node_16:
     <<: *defaults
     docker:
-      - image: circleci/node:12.9.0
+      - image: circleci/node:16.11.1
     steps:
       - checkout
       - run:
@@ -69,7 +69,7 @@ workflows:
   version: 2
   build_test:
     jobs:
-      - test_node_12:
+      - test_node_16:
           filters:
             tags:
               only: /.*/
@@ -81,7 +81,7 @@ workflows:
 
       - publish:
           requires:
-            - test_node_12
+            - test_node_16
             - test_node_14
           filters:
             tags:
@@ -91,7 +91,7 @@ workflows:
 
       - publish_next:
             requires:
-            - test_node_12
+            - test_node_16
             - test_node_14
             filters:
               tags:

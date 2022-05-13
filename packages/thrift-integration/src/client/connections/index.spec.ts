@@ -836,7 +836,7 @@ describe('createTcpClient', () => {
     let apacheServer: net.Server
 
     before(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             apacheServer = apacheService()
             apacheServer.listen(APACHE_SERVER_CONFIG.port, 'localhost', () => {
                 console.log(
@@ -848,7 +848,7 @@ describe('createTcpClient', () => {
     })
 
     after(async () => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
             apacheServer.close(() => {
                 apacheServer.unref()
                 console.log(`TCP server closed`)
