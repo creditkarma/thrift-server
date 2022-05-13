@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-zipkin-filter",
-    "version": "0.17.2",
+    "version": "0.18.0-alpha.0",
     "description": "Zipkin tracing for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -37,9 +37,9 @@
         "@creditkarma/zipkin-core": "0.17.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.17.2",
-        "@creditkarma/thrift-server-core": "^0.17.2",
-        "@creditkarma/zipkin-core": "^0.17.2",
+        "@creditkarma/thrift-client": "^0.18.0-alpha.0",
+        "@creditkarma/thrift-server-core": "^0.18.0-alpha.0",
+        "@creditkarma/zipkin-core": "^0.18.0-alpha.0",
         "@types/node": "^16.11.0",
         "prettier": "^1.18.2",
         "rimraf": "^2.6.2",
