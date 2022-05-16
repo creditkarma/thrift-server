@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-timing-filter",
-    "version": "0.18.0-alpha.3",
+    "version": "0.18.0-alpha.4",
     "description": "Timing filter for thrift-client",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -18,12 +18,12 @@
         "test:only": "echo 'No tests for thrift-client-timing-filter'; exit 0;"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.18.0-alpha.3",
-        "@creditkarma/thrift-server-core": "0.18.0-alpha.3"
+        "@creditkarma/thrift-client": "0.18.0-alpha.4",
+        "@creditkarma/thrift-server-core": "0.18.0-alpha.4"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.18.0-alpha.3",
-        "@creditkarma/thrift-server-core": "^0.18.0-alpha.3",
+        "@creditkarma/thrift-client": "^0.18.0-alpha.4",
+        "@creditkarma/thrift-server-core": "^0.18.0-alpha.4",
         "@hapi/code": "^8.0.7",
         "@hapi/lab": "^25.0.1",
         "@types/hapi__code": "^8.0.1",
