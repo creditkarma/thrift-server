@@ -90,9 +90,9 @@ workflows:
               ignore: /.*/
 
       - publish_next:
-            requires:
-            - test_node_16
-            - test_node_14
+            # requires:
+            # - test_node_16
+            # - test_node_14
             filters:
               tags:
                 only: /^(v){1}(0){1}(\.[0-9]+){1}(\.[0-9]+){1}(-alpha){1}\.[0-9]+$/
