@@ -38,12 +38,12 @@ jobs:
       - run:
           name: Create .npmrc
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
-      - run:
-          name: Install NPM Dependencies
-          command: npm install
-      - run:
-          name: Build Publish Assets
-          command: npm run build
+      # - run:
+      #     name: Install NPM Dependencies
+      #     command: npm install
+      # - run:
+      #     name: Build Publish Assets
+      #     command: npm run build
       - run:
           name: Publish to NPM
           command: npm run release:publish
