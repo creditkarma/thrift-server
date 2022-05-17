@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/thrift-client-context-filter",
-    "version": "0.18.1-alpha.1",
+    "version": "0.18.1-alpha.2",
     "description": "Filter for appending a Thrift object to request payload",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -18,12 +18,12 @@
         "test:only": "echo 'No tests for thrift-client-context-filter'; exit 0;"
     },
     "peerDependencies": {
-        "@creditkarma/thrift-client": "0.18.1-alpha.0",
-        "@creditkarma/thrift-server-core": "0.18.1-alpha.0"
+        "@creditkarma/thrift-client": "0.18.1-alpha.2",
+        "@creditkarma/thrift-server-core": "0.18.1-alpha.2"
     },
     "devDependencies": {
-        "@creditkarma/thrift-client": "^0.18.1-alpha.1",
-        "@creditkarma/thrift-server-core": "^0.18.1-alpha.1",
+        "@creditkarma/thrift-client": "^0.18.1-alpha.2",
+        "@creditkarma/thrift-server-core": "^0.18.1-alpha.2",
         "@hapi/code": "^8.0.7",
         "@hapi/lab": "^25.0.1",
         "@types/hapi__code": "^8.0.1",
