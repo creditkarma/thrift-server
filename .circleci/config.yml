@@ -53,14 +53,17 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Lerna
+          command: npm install lerna
+      - run:
           name: Generate .npmrc File
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
-      - run:
-          name: Install NPM Dependencies
-          command: npm install
-      - run:
-          name: Build Publish Assets
-          command: npm run build
+      # - run:
+      #     name: Install NPM Dependencies
+      #     command: npm install
+      # - run:
+      #     name: Build Publish Assets
+      #     command: npm run build
       - run:
           name: Publish to NPM
           command: npm run release:publish-next
@@ -90,9 +93,9 @@ workflows:
               ignore: /.*/
 
       - publish_next:
-            requires:
-            - test_node_16
-            - test_node_14
+            # requires:
+            # - test_node_16
+            # - test_node_14
             filters:
               tags:
                 only: /^(v){1}(0){1}(\.[0-9]+){1}(\.[0-9]+){1}(-alpha){1}\.[0-9]+$/
