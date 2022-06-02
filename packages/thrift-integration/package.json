@@ -17,7 +17,7 @@
         "test:only": "DEBUG=true lab --timeout 60000 --verbose -l -S -P spec dist"
     },
     "devDependencies": {
-        "@creditkarma/dynamic-config": "^0.9.15-1",
+        "@creditkarma/dynamic-config": "0.9.15-1",
         "@creditkarma/thrift-client": "^0.18.1-alpha.5",
         "@creditkarma/thrift-client-context-filter": "^0.18.1-alpha.5",
         "@creditkarma/thrift-client-timing-filter": "^0.18.1-alpha.5",
