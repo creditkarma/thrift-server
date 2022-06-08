@@ -253,16 +253,16 @@ import {
     createHttpClient
 } from '@creditkaram/thrift-client'
 
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost', // The host of the service to connect to
     port: 8080, // The port of the service to connect to
-    requestOptions: {} // CoreOptions to pass to Request
+    optionsOfBufferResponseBody: {} // OptionsOfBufferResponseBody to pass to Request
 })
 ```
 
@@ -281,16 +281,16 @@ import {
 
 import * as Hapi from 'hapi'
 
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
-    requestOptions: {} // CoreOptions to pass to Request
+    optionsOfBufferResponseBody: {} // OptionsOfBufferResponseBody to pass to Request
 })
 
 const server = new Hapi.Server({ debug: { request: ['error'] } })

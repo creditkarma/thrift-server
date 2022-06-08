@@ -5,8 +5,7 @@ import { Int64, TApplicationException } from '@creditkarma/thrift-server-core'
 import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
-import { CoreOptions } from 'request'
-import * as rp from 'request-promise-native'
+import got, { OptionsOfBufferResponseBody } from 'got'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../config'
 
@@ -28,7 +27,7 @@ const after = lab.after
 describe('Thrift Server Hapi', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
-    let client: Calculator.Client<CoreOptions>
+    let client: Calculator.Client<Partial<OptionsOfBufferResponseBody>>
 
     before(async () => {
         calcServer = await createCalcServer()
@@ -97,10 +96,10 @@ describe('Thrift Server Hapi', () => {
     })
 
     it('should handle requests not pointed to thrift service', async () => {
-        return rp(
+        return got(
             `http://${HAPI_CALC_SERVER_CONFIG.hostName}:${HAPI_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
-            expect(val).to.equal('PASS')
+            expect(val.body).to.equal('PASS')
         })
     })
 })

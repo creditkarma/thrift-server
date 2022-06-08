@@ -1,13 +1,6 @@
 import * as Core from '@creditkarma/thrift-server-core'
 
-import * as request from 'request'
-import {
-    Request,
-    RequestAPI,
-    RequestResponse,
-    RequiredUriUrl,
-    UrlOptions,
-} from 'request'
+import got, { HTTPError, OptionsOfBufferResponseBody, Response } from 'got'
 
 import {
     IHttpConnectionOptions,
@@ -16,7 +9,6 @@ import {
     IThriftClientFilterConfig,
     IThriftRequest,
     RequestHandler,
-    RequestOptions,
 } from '../types'
 
 import { filterByMethod } from './utils'
@@ -25,32 +17,17 @@ export const DEFAULT_PATH: string = '/thrift'
 
 export type HttpProtocol = 'http' | 'https'
 
-export type RequestInstance = RequestAPI<
-    Request,
-    RequestOptions,
-    RequiredUriUrl
->
-
 function shouldRetry(
-    response: RequestResponse,
+    response: Response,
     retry: boolean,
     withEndpointPerMethod: boolean,
 ): boolean {
     return (
-        withEndpointPerMethod &&
-        response !== undefined &&
-        response !== null &&
-        response.statusCode !== undefined &&
-        response.statusCode === 404 &&
-        retry === false
+        withEndpointPerMethod && response?.statusCode === 404 && retry === false
     )
 }
 
-function hasError(err: any): boolean {
-    return err !== undefined && err !== null
-}
-
-function isErrorResponse(response: RequestResponse): boolean {
+function isErrorResponse(response: Response): boolean {
     return (
         response.statusCode !== null &&
         response.statusCode !== undefined &&
@@ -59,13 +36,16 @@ function isErrorResponse(response: RequestResponse): boolean {
 }
 
 function filterHeaders(
-    options: request.CoreOptions,
+    options: OptionsOfBufferResponseBody,
     blacklist: Array<string>,
-): request.CoreOptions {
+): OptionsOfBufferResponseBody {
     options.headers = options.headers || {}
     blacklist = blacklist.map((next) => next.toLocaleLowerCase())
     options.headers = Object.keys(options.headers).reduce(
-        (acc: request.Headers, next: string) => {
+        (
+            acc: NonNullable<OptionsOfBufferResponseBody['headers']>,
+            next: string,
+        ) => {
             if (blacklist.indexOf(next.toLocaleLowerCase()) === -1) {
                 acc[next] = options.headers![next]
             }
@@ -78,10 +58,10 @@ function filterHeaders(
 }
 
 function applyFilters(
-    currentRequest: IThriftRequest<RequestOptions>,
-    filters: Array<RequestHandler<RequestOptions>>,
+    currentRequest: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
+    filters: Array<RequestHandler<Partial<OptionsOfBufferResponseBody>>>,
     callback: (
-        finalRequest: IThriftRequest<RequestOptions>,
+        finalRequest: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
     ) => Promise<IRequestResponse>,
 ): Promise<IRequestResponse> {
     const [head, ...tail] = filters
@@ -92,7 +72,7 @@ function applyFilters(
             currentRequest,
             (
                 nextData?: Buffer,
-                nextOptions?: RequestOptions,
+                nextOptions?: Partial<OptionsOfBufferResponseBody>,
             ): Promise<IRequestResponse> => {
                 const data: Buffer =
                     nextData !== undefined ? nextData : currentRequest.data
@@ -115,18 +95,22 @@ function applyFilters(
     }
 }
 
-export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
+export class HttpConnection extends Core.ThriftConnection<
+    OptionsOfBufferResponseBody
+> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
     protected readonly basePath: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
-    protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
-    private readonly requestOptions: RequestOptions
+    protected readonly filters: Array<
+        IThriftClientFilter<Partial<OptionsOfBufferResponseBody>>
+    >
+    private readonly optionsOfBufferResponseBody: OptionsOfBufferResponseBody
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
-    private readonly requestImpl: typeof request
+    private readonly gotImpl: typeof got
 
     constructor({
         hostName,
@@ -135,15 +119,18 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         https = false,
         transport = 'buffered',
         protocol = 'binary',
-        requestOptions = {},
+        optionsOfBufferResponseBody = {},
         serviceName,
         withEndpointPerMethod = false,
         headerBlacklist = [],
-        requestImpl = request,
+        gotImpl = got,
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
-        this.requestOptions = Object.freeze(
-            filterHeaders(requestOptions, headerBlacklist),
+        this.optionsOfBufferResponseBody = Object.freeze(
+            filterHeaders(
+                { responseType: 'buffer', ...optionsOfBufferResponseBody },
+                headerBlacklist,
+            ),
         )
         this.port = port
         this.hostName = hostName
@@ -154,23 +141,31 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         this.withEndpointPerMethod = withEndpointPerMethod
         this.url = `${this.basePath}${this.path}`
         this.filters = []
-        this.requestImpl = requestImpl
+        this.gotImpl = gotImpl
     }
 
     public register(
-        ...filters: Array<IThriftClientFilterConfig<RequestOptions>>
+        ...filters: Array<
+            IThriftClientFilterConfig<Partial<OptionsOfBufferResponseBody>>
+        >
     ): void {
-        filters.forEach((next: IThriftClientFilterConfig<RequestOptions>) => {
-            this.filters.push({
-                methods: next.methods || [],
-                handler: next.handler,
-            })
-        })
+        filters.forEach(
+            (
+                next: IThriftClientFilterConfig<
+                    Partial<OptionsOfBufferResponseBody>
+                >,
+            ) => {
+                this.filters.push({
+                    methods: next.methods || [],
+                    handler: next.handler,
+                })
+            },
+        )
     }
 
     public send(
         dataToSend: Buffer,
-        context: RequestOptions = {},
+        context: Partial<OptionsOfBufferResponseBody> = {},
     ): Promise<Buffer> {
         const requestMethod: string = Core.readThriftMethod(
             dataToSend,
@@ -179,10 +174,12 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
         )
 
         const filters: Array<RequestHandler<
-            RequestOptions
+            Partial<OptionsOfBufferResponseBody>
         >> = this.filtersForMethod(requestMethod)
 
-        const thriftRequest: IThriftRequest<RequestOptions> = {
+        const thriftRequest: IThriftRequest<Partial<
+            OptionsOfBufferResponseBody
+        >> = {
             data: dataToSend,
             methodName: requestMethod,
             uri: this.url,
@@ -193,7 +190,9 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
             thriftRequest,
             filters,
             (
-                finalRequest: IThriftRequest<RequestOptions>,
+                finalRequest: IThriftRequest<
+                    Partial<OptionsOfBufferResponseBody>
+                >,
             ): Promise<IRequestResponse> => {
                 return this.write(
                     finalRequest.data,
@@ -211,7 +210,7 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     private write(
         dataToWrite: Buffer,
         methodName: string,
-        options: RequestOptions = {},
+        options: Partial<OptionsOfBufferResponseBody> = {},
         retry: boolean = false,
     ): Promise<IRequestResponse> {
         const requestUrl: string =
@@ -220,56 +219,63 @@ export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
                 : this.url
 
         // Merge user options with required options
-        const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
-            this.requestOptions,
+        const optionsOfBufferResponseBody: OptionsOfBufferResponseBody = Core.overlayObjects(
+            this.optionsOfBufferResponseBody,
             options,
             {
                 method: 'POST',
                 body: dataToWrite,
-                encoding: null, // Needs to be explicitly set to null to get Buffer in response body
                 url: requestUrl,
                 headers: {
-                    'Content-Length': dataToWrite.length,
+                    'Content-Length': dataToWrite.length.toString(),
                     'Content-Type': 'application/octet-stream',
                 },
-            },
+            } as Partial<OptionsOfBufferResponseBody>,
         )
 
-        return new Promise((resolve, reject) => {
-            this.requestImpl(
-                requestOptions,
-                (err: any, response: RequestResponse, body: Buffer) => {
+        return this.gotImpl(optionsOfBufferResponseBody)
+            .then((response) => {
+                if (isErrorResponse(response)) {
+                    throw response
+                }
+                return {
+                    statusCode: response.statusCode,
+                    headers: response.headers,
+                    body: response.rawBody,
+                }
+            })
+            .catch((err) => {
+                if (err instanceof HTTPError) {
                     if (
-                        shouldRetry(response, retry, this.withEndpointPerMethod)
-                    ) {
-                        resolve(
-                            this.write(dataToWrite, methodName, options, true),
+                        shouldRetry(
+                            err.response,
+                            retry,
+                            this.withEndpointPerMethod,
                         )
-                    } else {
-                        if (hasError(err)) {
-                            reject(err)
-                        } else if (isErrorResponse(response)) {
-                            reject(response)
-                        } else {
-                            resolve({
-                                statusCode: response.statusCode,
-                                headers: response.headers,
-                                body,
-                            })
-                        }
+                    ) {
+                        return this.write(
+                            dataToWrite,
+                            methodName,
+                            options,
+                            true,
+                        )
                     }
-                },
-            )
-        })
+                }
+                throw err
+            })
     }
 
     private filtersForMethod(
         name: string,
-    ): Array<RequestHandler<RequestOptions>> {
+    ): Array<RequestHandler<Partial<OptionsOfBufferResponseBody>>> {
         return this.filters
-            .filter(filterByMethod<RequestOptions>(name))
+            .filter(filterByMethod<Partial<OptionsOfBufferResponseBody>>(name))
             .map(
-                (filter: IThriftClientFilter<RequestOptions>) => filter.handler,
+                (
+                    filter: IThriftClientFilter<
+                        Partial<OptionsOfBufferResponseBody>
+                    >,
+                ) => filter.handler,
             )
     }
 }

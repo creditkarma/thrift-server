@@ -1,6 +1,6 @@
 import { Instrumentation, TraceId, Tracer } from 'zipkin'
 
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 
 import {
     formatUrl,
@@ -65,7 +65,7 @@ function readRequestContext(
 }
 
 function readRequestHeaders(
-    request: IThriftRequest<CoreOptions>,
+    request: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
 ): IRequestHeaders {
     if (request.context && request.context.headers) {
         return request.context.headers
@@ -78,7 +78,9 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     localServiceName,
     remoteServiceName,
     tracerConfig = {},
-}: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
+}: IZipkinClientOptions): IThriftClientFilter<
+    Partial<OptionsOfBufferResponseBody>
+> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpClient({
@@ -90,8 +92,8 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     return {
         methods: [],
         handler(
-            request: IThriftRequest<CoreOptions>,
-            next: NextFunction<CoreOptions>,
+            request: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
+            next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
         ): Promise<IRequestResponse> {
             const requestHeaders: IRequestHeaders = readRequestHeaders(request)
             const requestContext: IRequestContext = readRequestContext(

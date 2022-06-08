@@ -12,7 +12,7 @@ import { NullConnection } from './NullConnection'
 import {
     ICreateHttpClientOptions,
     ICreateTcpClientOptions,
-    RequestOptions,
+    OptionsOfBufferResponseBody,
 } from '../types'
 
 import { TcpConnection } from './TcpConnection'
@@ -20,8 +20,10 @@ import { TcpConnection } from './TcpConnection'
 export * from './HttpConnection'
 export * from './TcpConnection'
 
-export function createClient<TClient extends ThriftClient<RequestOptions>>(
-    ServiceClient: IClientConstructor<TClient, RequestOptions>,
+export function createClient<
+    TClient extends ThriftClient<OptionsOfBufferResponseBody>
+>(
+    ServiceClient: IClientConstructor<TClient, OptionsOfBufferResponseBody>,
     options: ICreateHttpClientOptions,
 ): TClient {
     console.warn(`[Deprecated]: Please use 'createHttpClient' instead`)
@@ -39,8 +41,13 @@ export function createTcpClient<TClient extends ThriftClient<void>>(
     return new ServiceClient(connection)
 }
 
-export function createHttpClient<TClient extends ThriftClient<RequestOptions>>(
-    ServiceClient: IClientConstructor<TClient, RequestOptions>,
+export function createHttpClient<
+    TClient extends ThriftClient<Partial<OptionsOfBufferResponseBody>>
+>(
+    ServiceClient: IClientConstructor<
+        TClient,
+        Partial<OptionsOfBufferResponseBody>
+    >,
     options: ICreateHttpClientOptions,
 ): TClient {
     let serviceName: string = ''

@@ -18,7 +18,7 @@
         "@types/node": "^16.11.0"
     },
     "devDependencies": {
-        "@creditkarma/dynamic-config": "0.9.15-0",
+        "@creditkarma/dynamic-config": "0.9.15-1",
         "@creditkarma/thrift-client": "^0.18.1-alpha.5",
         "@creditkarma/thrift-client-zipkin-filter": "^0.18.1-alpha.5",
         "@creditkarma/thrift-server-core": "^0.18.1-alpha.5",

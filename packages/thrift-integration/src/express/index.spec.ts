@@ -2,9 +2,8 @@ import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
 import * as express from 'express'
+import got, { OptionsOfBufferResponseBody } from 'got'
 import * as net from 'net'
-import { CoreOptions } from 'request'
-import * as rp from 'request-promise-native'
 
 import { createHttpClient } from '@creditkarma/thrift-client'
 
@@ -30,7 +29,7 @@ const after = lab.after
 describe('Thrift Server Express', () => {
     let calcServer: net.Server
     let addServer: Hapi.Server
-    let client: Calculator.Client<CoreOptions>
+    let client: Calculator.Client<Partial<OptionsOfBufferResponseBody>>
 
     before(async () => {
         addServer = await createAddServer()
@@ -99,10 +98,10 @@ describe('Thrift Server Express', () => {
     })
 
     it('should handle requests not pointed to thrift service', async () => {
-        return rp(
+        return got(
             `http://${EXPRESS_CALC_SERVER_CONFIG.hostName}:${EXPRESS_CALC_SERVER_CONFIG.port}/control`,
         ).then((val) => {
-            expect(val).to.equal('PASS')
+            expect(val.body).to.equal('PASS')
         })
     })
 })

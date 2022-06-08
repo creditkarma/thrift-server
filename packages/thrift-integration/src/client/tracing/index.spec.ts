@@ -8,8 +8,8 @@ import {
 import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
+import got from 'got'
 import * as net from 'net'
-import * as rp from 'request-promise-native'
 
 import { CLIENT_CONFIG } from '../../config'
 
@@ -68,14 +68,9 @@ describe('Tracing', () => {
             const traceId_1: string = '4808dde1609f5673'
             const traceId_2: string = 'b82ba1422cf1ec6c'
             Promise.all([
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
                     {
-                        qs: {
-                            left: 5,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'x-b3-traceid': traceId_1,
                             'x-b3-spanid': traceId_1,
@@ -84,14 +79,9 @@ describe('Tracing', () => {
                         },
                     },
                 ),
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=8&op=add&right=9`,
                     {
-                        qs: {
-                            left: 8,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'x-b3-traceid': traceId_2,
                             'x-b3-spanid': traceId_2,
@@ -101,8 +91,11 @@ describe('Tracing', () => {
                     },
                 ),
             ]).then(
-                (val: any) => {
-                    expect(val).to.equal(['result: 14', 'result: 17'])
+                (val) => {
+                    expect([val[0].body, val[1].body]).to.equal([
+                        'result: 14',
+                        'result: 17',
+                    ])
                     setTimeout(() => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
@@ -122,25 +115,20 @@ describe('Tracing', () => {
         return new Promise<void>((resolve, reject) => {
             const traceId_1: string = randomTraceId()
             Promise.all([
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite?left=5&op=add&right=9`,
                     {
-                        qs: {
-                            left: 5,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'x-b3-traceid': traceId_1,
                             'x-b3-spanid': traceId_1,
                             'x-b3-parentspanid': traceId_1,
-                            'x-b3-sampled': true,
+                            'x-b3-sampled': 'true',
                         },
                     },
                 ),
             ]).then(
-                (val: any) => {
-                    expect(val).to.equal(['result: 14'])
+                (val) => {
+                    expect(val[0].body).to.equal('result: 14')
                     setTimeout(() => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
@@ -161,14 +149,9 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
                     {
-                        qs: {
-                            left: 5,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -181,14 +164,9 @@ describe('Tracing', () => {
                         },
                     },
                 ),
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=7&op=add&right=22`,
                     {
-                        qs: {
-                            left: 7,
-                            op: 'add',
-                            right: 22,
-                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -202,8 +180,11 @@ describe('Tracing', () => {
                     },
                 ),
             ]).then(
-                (val: any) => {
-                    expect(val).to.equal(['result: 14', 'result: 29'])
+                (val) => {
+                    expect([val[0].body, val[1].body]).to.equal([
+                        'result: 14',
+                        'result: 29',
+                    ])
                     setTimeout(() => {
                         const result = collectServer.traces()
                         expect(result[traceId_1]).to.exist()
@@ -224,14 +205,9 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             const traceId_2: string = randomTraceId()
             Promise.all([
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
                     {
-                        qs: {
-                            left: 5,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -249,8 +225,8 @@ describe('Tracing', () => {
                     },
                 ),
             ]).then(
-                (val: any) => {
-                    expect(val).to.equal(['result: 14'])
+                (val) => {
+                    expect(val[0].body).to.equal('result: 14')
                     setTimeout(() => {
                         const result = collectServer.traces()
                         expect(Object.keys(result)[0]).to.equal(traceId_2)
@@ -284,14 +260,9 @@ describe('Tracing', () => {
                 sampled: true,
             }
             Promise.all([
-                rp(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
+                got(
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
                     {
-                        qs: {
-                            left: 5,
-                            op: 'add',
-                            right: 9,
-                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId(trace_1),
@@ -299,13 +270,13 @@ describe('Tracing', () => {
                             'x-b3-traceid': trace_2.traceId,
                             'x-b3-spanid': trace_2.spanId,
                             'x-b3-parentspanid': trace_2.parentId,
-                            'x-b3-sampled': true,
+                            'x-b3-sampled': 'true',
                         },
                     },
                 ),
             ]).then(
-                (val: any) => {
-                    expect(val).to.equal(['result: 14'])
+                (val) => {
+                    expect(val[0].body).to.equal('result: 14')
                     setTimeout(() => {
                         const result = collectServer.traces()
                         const piece = result[trace_1.traceId][trace_1.spanId]

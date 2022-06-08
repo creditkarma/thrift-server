@@ -71,16 +71,16 @@ import {
     createHttpClient
 } from '@creditkarma/thrift-client'
 
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
-    requestOptions: {} // CoreOptions to pass to Request
+    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
 })
 ```
 
@@ -122,7 +122,7 @@ import {
     IHttpConnectionOptions,
 } from '@creditkarma/thrift-client'
 import * as request from 'request'
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 
 import { Calculator } from './codegen/calculator'
 
@@ -140,7 +140,7 @@ const requestClient: RequestInstance = request.defaults({})
 const connection: HttpConnection =
     new HttpConnection(requestClient, clientConfig)
 
-const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = new Calculator.Client(connection)
 ```
 
 Here `HttpConnection` is a class that extends the `ThriftConnection` abstract class. You could create custom connections, for instance TCP, by extending the same class.
@@ -168,7 +168,7 @@ import {
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<CoreOptions> = createTcpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createTcpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
@@ -204,7 +204,7 @@ const connection: TcpConnection = new TcpConnection({
     protocol: 'binary',
 })
 
-const thriftClient: Calculator.Client<CoreOptions> = new Calculator.Client(connection)
+const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = new Calculator.Client(connection)
 ```
 
 Here `TcpConnection` is a class that extends the `ThriftConnection` abstract class. You could create custom connections, for instance TCP, by extending the same class.
@@ -213,16 +213,16 @@ Here `TcpConnection` is a class that extends the `ThriftConnection` abstract cla
 
 However we chose to make our client, we use them in the same way.
 
-Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request library (CoreOptions). These options will be deep merged with any default options (passed in on instantiation) before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
+Notice the optional context parameter. All service client methods can take an optional context parameter. This context refers to the request options for Request library (OptionsOfBufferResponseBody). These options will be deep merged with any default options (passed in on instantiation) before sending a service request. This context can be used to do useful things like tracing or authentication. Usually this will be used for changing headers on a per-request basis.
 
-Related to context you will notice that our Thrift service client is a generic `Calculator.Client<ThriftContext<CoreOptions>>`. This type parameter refers to the type of the context, here the `ThriftContext<CoreOptions>` which extends the options interface from the Request library.
+Related to context you will notice that our Thrift service client is a generic `Calculator.Client<ThriftContext<OptionsOfBufferResponseBody>>`. This type parameter refers to the type of the context, here the `ThriftContext<OptionsOfBufferResponseBody>` which extends the options interface from the Request library.
 
 ```typescript
 import {
     createHttpClient
 } from '@creditkarma/thrift-client'
 
-import { CoreOptions } from 'request'
+import { OptionsOfBufferResponseBody } from 'got'
 import * as express from 'express'
 
 import { Calculator } from './codegen/calculator'
@@ -233,16 +233,16 @@ const serverConfig = {
 }
 
 // Create Thrift client
-const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<ThriftContext<OptionsOfBufferResponseBody>> = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
-    requestOptions: {} // CoreOptions to pass to Request
+    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
 })
 
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
     // Request contexts allow you to do tracing and auth
-    const context: CoreOptions = {
+    const context: OptionsOfBufferResponseBody = {
         headers: {
             'x-trace-id': 'my-trace-id'
         }
@@ -285,7 +285,7 @@ interface IThriftClientFilterConfig<Options> {
 }
 ```
 
-The `handler` function receives as its arguments the `IThriftRequest` object and the next `RequestHandler` in the chain. When you are done applying your filter you `return` the call to `next`. When calling `next` you can optionally pass along a modified Thrift data `Buffer` or new options to apply to the request. `Options` is almost always going to be `CoreOptions` for the underlying request library.
+The `handler` function receives as its arguments the `IThriftRequest` object and the next `RequestHandler` in the chain. When you are done applying your filter you `return` the call to `next`. When calling `next` you can optionally pass along a modified Thrift data `Buffer` or new options to apply to the request. `Options` is almost always going to be `OptionsOfBufferResponseBody` for the underlying request library.
 
 #### IThriftRequest
 
@@ -310,7 +310,7 @@ If we look back at our previous client example we find this:
 // This receives a query like "http://localhost:8080/add?left=5&right=3"
 app.get('/add', (req: express.Request, res: express.Response): void => {
     // Request contexts allow you to do tracing and auth
-    const context: CoreOptions = {
+    const context: OptionsOfBufferResponseBody = {
         headers: {
             'x-trace-id': 'my-trace-id'
         }
@@ -325,7 +325,7 @@ app.get('/add', (req: express.Request, res: express.Response): void => {
 })
 ```
 
-Where the context passed through is an instance of `CoreOptions`. These options are passed through to modify the outgoing request. Any filter in the filter chain can modify this data.
+Where the context passed through is an instance of `OptionsOfBufferResponseBody`. These options are passed through to modify the outgoing request. Any filter in the filter chain can modify this data.
 
 To modify this context one needs to pass the updated context to the `next` function.
 
@@ -351,7 +351,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        handler(request: IThriftRequest<OptionsOfBufferResponseBody>, next: NextFunction<OptionsOfBufferResponseBody>): Promise<IRequestResponse> {
             return next(request.data, {
                 headers: {
                     'x-fake-token': 'fake-token',
@@ -380,7 +380,7 @@ const thriftClient: Calculator.Client = createHttpClient(Calculator.Client, {
     hostName: 'localhost',
     port: 8080,
     register: [ {
-        handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+        handler(request: IThriftRequest<OptionsOfBufferResponseBody>, next: NextFunction<OptionsOfBufferResponseBody>): Promise<IRequestResponse> {
             return next().then((res: IRequestResponse) => {
                 if (validateResponse(res.body)) {
                     return res
@@ -405,7 +405,7 @@ const connection: HttpConnection =
     new HttpConnection(requestClient, clientConfig)
 
 connection.register({
-    handler(request: IThriftRequest<CoreOptions>, next: NextFunction<CoreOptions>): Promise<IRequestResponse> {
+    handler(request: IThriftRequest<OptionsOfBufferResponseBody>, next: NextFunction<OptionsOfBufferResponseBody>): Promise<IRequestResponse> {
         return next(request.data, {
             headers: {
                 'x-fake-token': 'fake-token',

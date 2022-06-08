@@ -30,7 +30,7 @@ import {
 
 import { Calculator } from './codegen/calculator'
 
-const thriftClient: Calculator.Client<ThriftContext<CoreOptions>> =
+const thriftClient: Calculator.Client<ThriftContext<OptionsOfBufferResponseBody>> =
     createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,
