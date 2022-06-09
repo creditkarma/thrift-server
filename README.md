@@ -250,19 +250,18 @@ I'm adding the following code to a file called `src/client.ts`.
 
 ```typescript
 import {
-    createHttpClient
+    createHttpClient,
+    RequestOptions,
 } from '@creditkaram/thrift-client'
-
-import { OptionsOfBufferResponseBody } from 'got'
 
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<RequestOptions> = createHttpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost', // The host of the service to connect to
     port: 8080, // The port of the service to connect to
-    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
+    requestOptions: {} // RequestOptions to pass to got
 })
 ```
 
@@ -276,21 +275,20 @@ Because we're already using Hapi, let's add this to our `src/client.ts` file:
 
 ```typescript
 import {
-    createHttpClient
+    createHttpClient,
+    RequestOptions,
 } from '@creditkaram/thrift-client'
 
 import * as Hapi from 'hapi'
 
-import { OptionsOfBufferResponseBody } from 'got'
-
 import { Calculator } from './codegen/calculator'
 
 // Create Thrift client
-const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(Calculator.Client, {
+const thriftClient: Calculator.Client<RequestOptions> = createHttpClient(Calculator.Client, {
     serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
-    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
+    requestOptions: {} // RequestOptions to pass to got
 })
 
 const server = new Hapi.Server({ debug: { request: ['error'] } })

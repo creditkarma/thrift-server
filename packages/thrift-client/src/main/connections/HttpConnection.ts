@@ -9,6 +9,7 @@ import {
     IThriftClientFilterConfig,
     IThriftRequest,
     RequestHandler,
+    RequestOptions,
 } from '../types'
 
 import { filterByMethod } from './utils'
@@ -104,9 +105,7 @@ export class HttpConnection extends Core.ThriftConnection<
     protected readonly basePath: string
     protected readonly url: string
     protected readonly protocol: HttpProtocol
-    protected readonly filters: Array<
-        IThriftClientFilter<RequestOptions>
-    >
+    protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
     private readonly requestOptions: OptionsOfBufferResponseBody
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
@@ -145,22 +144,14 @@ export class HttpConnection extends Core.ThriftConnection<
     }
 
     public register(
-        ...filters: Array<
-            IThriftClientFilterConfig<RequestOptions>
-        >
+        ...filters: Array<IThriftClientFilterConfig<RequestOptions>>
     ): void {
-        filters.forEach(
-            (
-                next: IThriftClientFilterConfig<
-                    RequestOptions
-                >,
-            ) => {
-                this.filters.push({
-                    methods: next.methods || [],
-                    handler: next.handler,
-                })
-            },
-        )
+        filters.forEach((next: IThriftClientFilterConfig<RequestOptions>) => {
+            this.filters.push({
+                methods: next.methods || [],
+                handler: next.handler,
+            })
+        })
     }
 
     public send(
@@ -177,9 +168,7 @@ export class HttpConnection extends Core.ThriftConnection<
             RequestOptions
         >> = this.filtersForMethod(requestMethod)
 
-        const thriftRequest: IThriftRequest<Partial<
-            OptionsOfBufferResponseBody
-        >> = {
+        const thriftRequest: IThriftRequest<RequestOptions> = {
             data: dataToSend,
             methodName: requestMethod,
             uri: this.url,
@@ -190,9 +179,7 @@ export class HttpConnection extends Core.ThriftConnection<
             thriftRequest,
             filters,
             (
-                finalRequest: IThriftRequest<
-                    RequestOptions
-                >,
+                finalRequest: IThriftRequest<RequestOptions>,
             ): Promise<IRequestResponse> => {
                 return this.write(
                     finalRequest.data,
@@ -271,11 +258,7 @@ export class HttpConnection extends Core.ThriftConnection<
         return this.filters
             .filter(filterByMethod<RequestOptions>(name))
             .map(
-                (
-                    filter: IThriftClientFilter<
-                        RequestOptions
-                    >,
-                ) => filter.handler,
+                (filter: IThriftClientFilter<RequestOptions>) => filter.handler,
             )
     }
 }

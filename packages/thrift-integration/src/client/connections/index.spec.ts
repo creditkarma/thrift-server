@@ -8,9 +8,8 @@ import {
     IRequestResponse,
     IThriftRequest,
     NextFunction,
+    RequestOptions,
 } from '@creditkarma/thrift-client'
-
-import { OptionsOfBufferResponseBody } from 'got'
 
 import {
     APACHE_SERVER_CONFIG,
@@ -44,7 +43,7 @@ const after = lab.after
 
 describe('createHttpClient', () => {
     describe('Strict Unions', () => {
-        let client: CalculatorStrict.Client<OptionsOfBufferResponseBody>
+        let client: CalculatorStrict.Client<RequestOptions>
         let calcServer: Hapi.Server
         let addServer: Hapi.Server
 
@@ -261,7 +260,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
@@ -281,7 +280,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
@@ -301,7 +300,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: 'fakehost',
@@ -477,7 +476,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
@@ -497,7 +496,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
@@ -517,7 +516,7 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpClient(
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
                 Calculator.Client,
                 {
                     hostName: 'fakehost',
@@ -569,12 +568,8 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next().then(
                                 (
@@ -611,12 +606,8 @@ describe('createHttpClient', () => {
                     {
                         methods: ['add'],
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next().then((response: IRequestResponse) => {
                                 if (readThriftMethod(response.body) === 'add') {
@@ -648,12 +639,8 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse) => {
                                 if (readThriftMethod(res.body) === 'nope') {
@@ -695,12 +682,8 @@ describe('createHttpClient', () => {
                     {
                         methods: ['nope'],
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next().then(() => {
                                 return Promise.reject(
@@ -751,12 +734,8 @@ describe('createHttpClient', () => {
                 register: [
                     {
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
@@ -781,12 +760,8 @@ describe('createHttpClient', () => {
                     {
                         methods: ['addWithContext'],
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {
@@ -829,12 +804,8 @@ describe('createHttpClient', () => {
                     {
                         methods: ['add'],
                         handler(
-                            request: IThriftRequest<
-                                RequestOptions
-                            >,
-                            next: NextFunction<
-                                RequestOptions
-                            >,
+                            request: IThriftRequest<RequestOptions>,
+                            next: NextFunction<RequestOptions>,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
                                 headers: {

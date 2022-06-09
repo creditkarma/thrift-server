@@ -1,7 +1,5 @@
 import { Instrumentation, TraceId, Tracer } from 'zipkin'
 
-import { OptionsOfBufferResponseBody } from 'got'
-
 import {
     formatUrl,
     IRequestContext,
@@ -15,6 +13,7 @@ import {
     IThriftClientFilter,
     IThriftRequest,
     NextFunction,
+    RequestOptions,
 } from '@creditkarma/thrift-client'
 
 import {
@@ -78,9 +77,7 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     localServiceName,
     remoteServiceName,
     tracerConfig = {},
-}: IZipkinClientOptions): IThriftClientFilter<
-    RequestOptions
-> {
+}: IZipkinClientOptions): IThriftClientFilter<RequestOptions> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpClient({

@@ -57,8 +57,8 @@ export interface IHttpConnectionOptions {
     protocol?: ProtocolType
     serviceName?: string
     context?:
-        | IThriftRequest<OptionsOfBufferResponseBody>
-        | ClientOptionsFunction<OptionsOfBufferResponseBody>
+        | IThriftRequest<RequestOptions>
+        | ClientOptionsFunction<RequestOptions>
     requestOptions?: RequestOptions
     withEndpointPerMethod?: boolean
     headerBlacklist?: Array<string>
@@ -66,9 +66,7 @@ export interface IHttpConnectionOptions {
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {
-    register?: Array<
-        IThriftClientFilterConfig<RequestOptions>
-    >
+    register?: Array<IThriftClientFilterConfig<RequestOptions>>
 }
 
 export type NextFunction<Options> = (

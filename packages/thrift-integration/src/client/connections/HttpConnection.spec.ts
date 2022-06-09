@@ -1,6 +1,6 @@
 import * as thrift from '@creditkarma/thrift-server-core'
 import * as Hapi from '@hapi/hapi'
-import got, { OptionsOfBufferResponseBody } from 'got'
+import got from 'got'
 import * as http from 'http'
 
 import {
@@ -9,6 +9,7 @@ import {
     IRequestResponse,
     IThriftRequest,
     NextFunction,
+    RequestOptions,
 } from '@creditkarma/thrift-client'
 
 import {

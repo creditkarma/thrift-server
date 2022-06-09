@@ -22,6 +22,7 @@ Zipkin tracing is added to your Thrift client through filters.
 ```typescript
 import {
     createHttpClient,
+    RequestOptions,
 } from '@creditkaram/thrift-client'
 
 import {
@@ -30,7 +31,7 @@ import {
 
 import { Calculator } from './codegen/calculator'
 
-const thriftClient: Calculator.Client<ThriftContext<OptionsOfBufferResponseBody>> =
+const thriftClient: Calculator.Client<ThriftContext<RequestOptions>> =
     createHttpClient(Calculator.Client, {
         hostName: 'localhost',
         port: 8080,

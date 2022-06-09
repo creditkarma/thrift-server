@@ -2,10 +2,10 @@ import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
 import * as express from 'express'
-import got, { OptionsOfBufferResponseBody } from 'got'
+import got from 'got'
 import * as net from 'net'
 
-import { createHttpClient } from '@creditkarma/thrift-client'
+import { createHttpClient, RequestOptions } from '@creditkarma/thrift-client'
 
 import { Int64 } from '@creditkarma/thrift-server-core'
 

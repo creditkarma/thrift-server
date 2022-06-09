@@ -1,11 +1,11 @@
-import { createHttpClient } from '@creditkarma/thrift-client'
+import { createHttpClient, RequestOptions } from '@creditkarma/thrift-client'
 
 import { Int64, TApplicationException } from '@creditkarma/thrift-server-core'
 
 import { expect } from '@hapi/code'
 import * as Hapi from '@hapi/hapi'
 import * as Lab from '@hapi/lab'
-import got, { OptionsOfBufferResponseBody } from 'got'
+import got from 'got'
 
 import { HAPI_CALC_SERVER_CONFIG } from '../config'
 
