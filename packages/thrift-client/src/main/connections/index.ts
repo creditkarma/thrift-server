@@ -42,11 +42,11 @@ export function createTcpClient<TClient extends ThriftClient<void>>(
 }
 
 export function createHttpClient<
-    TClient extends ThriftClient<Partial<OptionsOfBufferResponseBody>>
+    TClient extends ThriftClient<RequestOptions>
 >(
     ServiceClient: IClientConstructor<
         TClient,
-        Partial<OptionsOfBufferResponseBody>
+        RequestOptions
     >,
     options: ICreateHttpClientOptions,
 ): TClient {

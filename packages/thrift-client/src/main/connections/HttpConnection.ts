@@ -58,10 +58,10 @@ function filterHeaders(
 }
 
 function applyFilters(
-    currentRequest: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-    filters: Array<RequestHandler<Partial<OptionsOfBufferResponseBody>>>,
+    currentRequest: IThriftRequest<RequestOptions>,
+    filters: Array<RequestHandler<RequestOptions>>,
     callback: (
-        finalRequest: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
+        finalRequest: IThriftRequest<RequestOptions>,
     ) => Promise<IRequestResponse>,
 ): Promise<IRequestResponse> {
     const [head, ...tail] = filters
@@ -72,7 +72,7 @@ function applyFilters(
             currentRequest,
             (
                 nextData?: Buffer,
-                nextOptions?: Partial<OptionsOfBufferResponseBody>,
+                nextOptions?: RequestOptions,
             ): Promise<IRequestResponse> => {
                 const data: Buffer =
                     nextData !== undefined ? nextData : currentRequest.data
@@ -105,9 +105,9 @@ export class HttpConnection extends Core.ThriftConnection<
     protected readonly url: string
     protected readonly protocol: HttpProtocol
     protected readonly filters: Array<
-        IThriftClientFilter<Partial<OptionsOfBufferResponseBody>>
+        IThriftClientFilter<RequestOptions>
     >
-    private readonly optionsOfBufferResponseBody: OptionsOfBufferResponseBody
+    private readonly requestOptions: OptionsOfBufferResponseBody
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
     private readonly gotImpl: typeof got
@@ -119,16 +119,16 @@ export class HttpConnection extends Core.ThriftConnection<
         https = false,
         transport = 'buffered',
         protocol = 'binary',
-        optionsOfBufferResponseBody = {},
+        requestOptions = {},
         serviceName,
         withEndpointPerMethod = false,
         headerBlacklist = [],
         gotImpl = got,
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
-        this.optionsOfBufferResponseBody = Object.freeze(
+        this.requestOptions = Object.freeze(
             filterHeaders(
-                { responseType: 'buffer', ...optionsOfBufferResponseBody },
+                { responseType: 'buffer', ...requestOptions },
                 headerBlacklist,
             ),
         )
@@ -146,13 +146,13 @@ export class HttpConnection extends Core.ThriftConnection<
 
     public register(
         ...filters: Array<
-            IThriftClientFilterConfig<Partial<OptionsOfBufferResponseBody>>
+            IThriftClientFilterConfig<RequestOptions>
         >
     ): void {
         filters.forEach(
             (
                 next: IThriftClientFilterConfig<
-                    Partial<OptionsOfBufferResponseBody>
+                    RequestOptions
                 >,
             ) => {
                 this.filters.push({
@@ -165,7 +165,7 @@ export class HttpConnection extends Core.ThriftConnection<
 
     public send(
         dataToSend: Buffer,
-        context: Partial<OptionsOfBufferResponseBody> = {},
+        context: RequestOptions = {},
     ): Promise<Buffer> {
         const requestMethod: string = Core.readThriftMethod(
             dataToSend,
@@ -174,7 +174,7 @@ export class HttpConnection extends Core.ThriftConnection<
         )
 
         const filters: Array<RequestHandler<
-            Partial<OptionsOfBufferResponseBody>
+            RequestOptions
         >> = this.filtersForMethod(requestMethod)
 
         const thriftRequest: IThriftRequest<Partial<
@@ -191,7 +191,7 @@ export class HttpConnection extends Core.ThriftConnection<
             filters,
             (
                 finalRequest: IThriftRequest<
-                    Partial<OptionsOfBufferResponseBody>
+                    RequestOptions
                 >,
             ): Promise<IRequestResponse> => {
                 return this.write(
@@ -210,7 +210,7 @@ export class HttpConnection extends Core.ThriftConnection<
     private write(
         dataToWrite: Buffer,
         methodName: string,
-        options: Partial<OptionsOfBufferResponseBody> = {},
+        options: RequestOptions = {},
         retry: boolean = false,
     ): Promise<IRequestResponse> {
         const requestUrl: string =
@@ -219,8 +219,8 @@ export class HttpConnection extends Core.ThriftConnection<
                 : this.url
 
         // Merge user options with required options
-        const optionsOfBufferResponseBody: OptionsOfBufferResponseBody = Core.overlayObjects(
-            this.optionsOfBufferResponseBody,
+        const requestOptions: OptionsOfBufferResponseBody = Core.overlayObjects(
+            this.requestOptions,
             options,
             {
                 method: 'POST',
@@ -230,10 +230,10 @@ export class HttpConnection extends Core.ThriftConnection<
                     'Content-Length': dataToWrite.length.toString(),
                     'Content-Type': 'application/octet-stream',
                 },
-            } as Partial<OptionsOfBufferResponseBody>,
+            } as RequestOptions,
         )
 
-        return this.gotImpl(optionsOfBufferResponseBody)
+        return this.gotImpl(requestOptions)
             .then((response) => {
                 if (isErrorResponse(response)) {
                     throw response
@@ -267,13 +267,13 @@ export class HttpConnection extends Core.ThriftConnection<
 
     private filtersForMethod(
         name: string,
-    ): Array<RequestHandler<Partial<OptionsOfBufferResponseBody>>> {
+    ): Array<RequestHandler<RequestOptions>> {
         return this.filters
-            .filter(filterByMethod<Partial<OptionsOfBufferResponseBody>>(name))
+            .filter(filterByMethod<RequestOptions>(name))
             .map(
                 (
                     filter: IThriftClientFilter<
-                        Partial<OptionsOfBufferResponseBody>
+                        RequestOptions
                     >,
                 ) => filter.handler,
             )

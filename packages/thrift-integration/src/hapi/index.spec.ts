@@ -27,7 +27,7 @@ const after = lab.after
 describe('Thrift Server Hapi', () => {
     let calcServer: Hapi.Server
     let addServer: Hapi.Server
-    let client: Calculator.Client<Partial<OptionsOfBufferResponseBody>>
+    let client: Calculator.Client<RequestOptions>
 
     before(async () => {
         calcServer = await createCalcServer()

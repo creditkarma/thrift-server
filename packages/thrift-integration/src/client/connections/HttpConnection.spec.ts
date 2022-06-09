@@ -176,7 +176,7 @@ describe('HttpConnection', () => {
                 serviceName: 'Calculator',
                 hostName: 'fakehost',
                 port: 8080,
-                optionsOfBufferResponseBody: {
+                requestOptions: {
                     timeout: 5000,
                 },
             })
@@ -289,7 +289,7 @@ describe('HttpConnection', () => {
                 serviceName: 'Calculator',
                 hostName: 'fakehost',
                 port: 8080,
-                optionsOfBufferResponseBody: {
+                requestOptions: {
                     timeout: 5000,
                 },
                 withEndpointPerMethod: true,
@@ -321,8 +321,8 @@ describe('HttpConnection', () => {
 
             connection.register({
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
@@ -355,8 +355,8 @@ describe('HttpConnection', () => {
             connection.register({
                 methods: ['add'],
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'add') {
                         return next()
@@ -388,8 +388,8 @@ describe('HttpConnection', () => {
 
             connection.register({
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     if (thrift.readThriftMethod(req.data) === 'nope') {
                         return next()
@@ -431,8 +431,8 @@ describe('HttpConnection', () => {
             connection.register({
                 methods: ['nope'],
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     return Promise.reject(
                         new Error(
@@ -462,8 +462,8 @@ describe('HttpConnection', () => {
 
             connection.register({
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
@@ -490,8 +490,8 @@ describe('HttpConnection', () => {
             connection.register({
                 methods: ['addWithContext'],
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {
@@ -539,8 +539,8 @@ describe('HttpConnection', () => {
             connection.register({
                 methods: ['add'],
                 handler(
-                    req: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-                    next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+                    req: IThriftRequest<RequestOptions>,
+                    next: NextFunction<RequestOptions>,
                 ): Promise<IRequestResponse> {
                     return next(req.data, {
                         headers: {

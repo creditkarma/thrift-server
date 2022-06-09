@@ -95,7 +95,7 @@ describe('createHttpClient', () => {
     })
 
     describe('Basic Usage', () => {
-        let client: Calculator.Client<Partial<OptionsOfBufferResponseBody>>
+        let client: Calculator.Client<RequestOptions>
         let calcServer: Hapi.Server
         let addServer: Hapi.Server
 
@@ -306,7 +306,7 @@ describe('createHttpClient', () => {
                 {
                     hostName: 'fakehost',
                     port: 8080,
-                    optionsOfBufferResponseBody: {
+                    requestOptions: {
                         timeout: 5000,
                     },
                 },
@@ -325,7 +325,7 @@ describe('createHttpClient', () => {
     })
 
     describe('CompactProtocol', () => {
-        let client: Calculator.Client<Partial<OptionsOfBufferResponseBody>>
+        let client: Calculator.Client<RequestOptions>
         let calcServer: Hapi.Server
         let addServer: Hapi.Server
 
@@ -522,7 +522,7 @@ describe('createHttpClient', () => {
                 {
                     hostName: 'fakehost',
                     port: 8080,
-                    optionsOfBufferResponseBody: {
+                    requestOptions: {
                         timeout: 5000,
                     },
                 },
@@ -570,10 +570,10 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next().then(
@@ -612,10 +612,10 @@ describe('createHttpClient', () => {
                         methods: ['add'],
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next().then((response: IRequestResponse) => {
@@ -649,10 +649,10 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next().then((res: IRequestResponse) => {
@@ -696,10 +696,10 @@ describe('createHttpClient', () => {
                         methods: ['nope'],
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next().then(() => {
@@ -752,10 +752,10 @@ describe('createHttpClient', () => {
                     {
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
@@ -782,10 +782,10 @@ describe('createHttpClient', () => {
                         methods: ['addWithContext'],
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {
@@ -830,10 +830,10 @@ describe('createHttpClient', () => {
                         methods: ['add'],
                         handler(
                             request: IThriftRequest<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                             next: NextFunction<
-                                Partial<OptionsOfBufferResponseBody>
+                                RequestOptions
                             >,
                         ): Promise<IRequestResponse> {
                             return next(request.data, {

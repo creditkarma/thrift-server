@@ -262,7 +262,7 @@ const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpC
     serviceName: 'calculator-service',
     hostName: 'localhost', // The host of the service to connect to
     port: 8080, // The port of the service to connect to
-    optionsOfBufferResponseBody: {} // OptionsOfBufferResponseBody to pass to Request
+    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
 })
 ```
 
@@ -290,7 +290,7 @@ const thriftClient: Calculator.Client<OptionsOfBufferResponseBody> = createHttpC
     serviceName: 'calculator-service',
     hostName: 'localhost',
     port: 8080,
-    optionsOfBufferResponseBody: {} // OptionsOfBufferResponseBody to pass to Request
+    requestOptions: {} // OptionsOfBufferResponseBody to pass to Request
 })
 
 const server = new Hapi.Server({ debug: { request: ['error'] } })

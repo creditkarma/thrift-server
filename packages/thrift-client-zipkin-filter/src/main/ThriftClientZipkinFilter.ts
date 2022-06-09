@@ -65,7 +65,7 @@ function readRequestContext(
 }
 
 function readRequestHeaders(
-    request: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
+    request: IThriftRequest<RequestOptions>,
 ): IRequestHeaders {
     if (request.context && request.context.headers) {
         return request.context.headers
@@ -79,7 +79,7 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     remoteServiceName,
     tracerConfig = {},
 }: IZipkinClientOptions): IThriftClientFilter<
-    Partial<OptionsOfBufferResponseBody>
+    RequestOptions
 > {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
@@ -92,8 +92,8 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     return {
         methods: [],
         handler(
-            request: IThriftRequest<Partial<OptionsOfBufferResponseBody>>,
-            next: NextFunction<Partial<OptionsOfBufferResponseBody>>,
+            request: IThriftRequest<RequestOptions>,
+            next: NextFunction<RequestOptions>,
         ): Promise<IRequestResponse> {
             const requestHeaders: IRequestHeaders = readRequestHeaders(request)
             const requestContext: IRequestContext = readRequestContext(
