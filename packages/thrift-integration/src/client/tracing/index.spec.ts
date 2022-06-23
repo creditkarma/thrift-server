@@ -69,8 +69,13 @@ describe('Tracing', () => {
             const traceId_2: string = 'b82ba1422cf1ec6c'
             Promise.all([
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'x-b3-traceid': traceId_1,
                             'x-b3-spanid': traceId_1,
@@ -80,8 +85,13 @@ describe('Tracing', () => {
                     },
                 ),
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=8&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 8,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'x-b3-traceid': traceId_2,
                             'x-b3-spanid': traceId_2,
@@ -116,8 +126,13 @@ describe('Tracing', () => {
             const traceId_1: string = randomTraceId()
             Promise.all([
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite?left=5&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate-overwrite`,
                     {
+                        searchParams: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'x-b3-traceid': traceId_1,
                             'x-b3-spanid': traceId_1,
@@ -150,8 +165,13 @@ describe('Tracing', () => {
             const traceId_2: string = randomTraceId()
             Promise.all([
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -165,8 +185,13 @@ describe('Tracing', () => {
                     },
                 ),
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=7&op=add&right=22`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 7,
+                            op: 'add',
+                            right: 22,
+                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -206,8 +231,13 @@ describe('Tracing', () => {
             const traceId_2: string = randomTraceId()
             Promise.all([
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId({
@@ -261,8 +291,13 @@ describe('Tracing', () => {
             }
             Promise.all([
                 got(
-                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate?left=5&op=add&right=9`,
+                    `http://${CLIENT_CONFIG.hostName}:${CLIENT_CONFIG.port}/calculate`,
                     {
+                        searchParams: {
+                            left: 5,
+                            op: 'add',
+                            right: 9,
+                        },
                         headers: {
                             'l5d-ctx-trace': serializeLinkerdHeader(
                                 traceIdFromTraceId(trace_1),
