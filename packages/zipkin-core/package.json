@@ -27,7 +27,7 @@
         "@creditkarma/thrift-server-core": "0.17.x"
     },
     "devDependencies": {
-        "@creditkarma/thrift-server-core": "0.17.x",
+        "@creditkarma/thrift-server-core": "^0.17.2",
         "@hapi/code": "^8.0.7",
         "@hapi/lab": "^25.0.1",
         "@types/hapi__code": "^8.0.1",
