@@ -57,9 +57,6 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Install Lerna
-          command: npm install lerna
-      - run:
           name: Generate .npmrc File
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
