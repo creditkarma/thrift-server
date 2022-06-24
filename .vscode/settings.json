@@ -10,6 +10,5 @@
         "coverage": true,
         "coverage.lcov": true
     },
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "window.title": "${activeEditorShort}${separator}${rootName} ${separator} [Branch: node16]"
+    "typescript.tsdk": "node_modules/typescript/lib"
 }
