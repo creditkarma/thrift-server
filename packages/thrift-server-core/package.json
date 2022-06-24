@@ -32,9 +32,9 @@
     },
     "devDependencies": {
         "@creditkarma/thrift-typescript": "^3.7.6",
-        "@hapi/code": "^5.3.0",
-        "@hapi/lab": "^20.3.2",
-        "@types/hapi__code": "^5.3.0",
+        "@hapi/code": "^8.0.7",
+        "@hapi/lab": "^25.0.1",
+        "@types/hapi__code": "^8.0.1",
         "@types/hapi__lab": "^18.1.0",
         "@types/node": "^16.11.0",
         "@types/rimraf": "2.0.2",

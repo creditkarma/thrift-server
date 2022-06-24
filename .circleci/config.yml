@@ -48,6 +48,10 @@ jobs:
           name: Publish to NPM
           command: npm run release:publish
 
+  # With npm8's stricter peerDependencies, a number of steps need to be made
+  # on prerelease, the peerDependencies need to be updated to point to exact versions
+  # Move the tag to the new commit
+  # --legacy-peer-deps is needed here to use them before they are published
   publish_next:
     <<: *defaults
     steps:
@@ -57,7 +61,7 @@ jobs:
           command: 'echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc'
       - run:
           name: Install NPM Dependencies
-          command: npm install
+          command: npm install --legacy-peer-deps
       - run:
           name: Build Publish Assets
           command: npm run build

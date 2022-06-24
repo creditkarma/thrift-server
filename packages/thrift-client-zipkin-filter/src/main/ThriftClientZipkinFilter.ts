@@ -1,7 +1,5 @@
 import { Instrumentation, TraceId, Tracer } from 'zipkin'
 
-import { CoreOptions } from 'request'
-
 import {
     formatUrl,
     IRequestContext,
@@ -15,6 +13,7 @@ import {
     IThriftClientFilter,
     IThriftRequest,
     NextFunction,
+    RequestOptions,
 } from '@creditkarma/thrift-client'
 
 import {
@@ -65,7 +64,7 @@ function readRequestContext(
 }
 
 function readRequestHeaders(
-    request: IThriftRequest<CoreOptions>,
+    request: IThriftRequest<RequestOptions>,
 ): IRequestHeaders {
     if (request.context && request.context.headers) {
         return request.context.headers
@@ -78,7 +77,7 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     localServiceName,
     remoteServiceName,
     tracerConfig = {},
-}: IZipkinClientOptions): IThriftClientFilter<CoreOptions> {
+}: IZipkinClientOptions): IThriftClientFilter<RequestOptions> {
     const serviceName: string = remoteServiceName || localServiceName
     const tracer: Tracer = getTracerForService(serviceName, tracerConfig)
     const instrumentation = new Instrumentation.HttpClient({
@@ -90,8 +89,8 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
     return {
         methods: [],
         handler(
-            request: IThriftRequest<CoreOptions>,
-            next: NextFunction<CoreOptions>,
+            request: IThriftRequest<RequestOptions>,
+            next: NextFunction<RequestOptions>,
         ): Promise<IRequestResponse> {
             const requestHeaders: IRequestHeaders = readRequestHeaders(request)
             const requestContext: IRequestContext = readRequestContext(

@@ -1,7 +1,7 @@
 import { LogFunction } from './types'
 
 export const makeLogger = (name: string): LogFunction => {
-    return (tags: ReadonlyArray<string>, data?: string | object): void => {
+    return (tags: Array<string>, data?: string | object): void => {
         const allTags: Array<string> = Array.from(new Set([name, ...tags]))
         if (allTags.indexOf('error') > -1) {
             if (data !== undefined) {

@@ -49,9 +49,8 @@
     },
     "dependencies": {
         "@types/generic-pool": "^3.1.4",
-        "@types/request": "^2.48.1",
         "generic-pool": "^3.4.2",
-        "request": "^2.88.0"
+        "got": "^11.8.3"
     },
     "publishConfig": {
         "access": "public"
