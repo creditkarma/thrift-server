@@ -13,7 +13,7 @@ jobs:
       - checkout
       - run:
           name: Install NPM Dependencies
-          command: npm install
+          command: npm install --legacy-peer-deps
       - run:
           name: Run Test Suite
           command: npm test
@@ -26,7 +26,7 @@ jobs:
       - checkout
       - run:
           name: Install NPM Dependencies
-          command: npm install
+          command: npm install --legacy-peer-deps
       - run:
           name: Run Test Suite
           command: npm test
