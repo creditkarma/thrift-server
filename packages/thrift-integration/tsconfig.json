@@ -1,46 +1,14 @@
 {
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "target": "es2021",
         "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
+        "outDir": "../../dist",
         "declaration": true,
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "noEmitOnError": true,
-        "strict": true,
-        "noUnusedLocals": true,
-        "pretty": true,
-        "removeComments": true,
-        "baseUrl": "./node_modules/@types/",
-        "paths": {
-            "@hapi/hapi": [
-                "hapi__hapi"
-            ],
-            "@hapi/shot": [
-                "hapi__shot"
-            ],
-            "@hapi/mimos": [
-                "hapi__mimos"
-            ],
-            "@hapi/iron": [
-                "hapi__iron"
-            ],
-            "@hapi/joi": [
-                "hapi__joi"
-            ],
-            "@hapi/podium": [
-                "hapi__podium"
-            ],
-            "@hapi/catbox": [
-                "hapi__catbox"
-            ]
-        },
+        "types": ["node"]
     },
     "exclude": [
         "node_modules",
         "dist",
-        "example",
-        "src/tests"
+        "example"
     ]
 }

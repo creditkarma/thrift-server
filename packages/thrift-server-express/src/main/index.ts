@@ -10,7 +10,7 @@ export * from './ThriftServerExpress'
 export * from './types'
 
 export function createThriftServer<
-    TProcessor extends IThriftProcessor<express.Request>
+    TProcessor extends IThriftProcessor<express.Request>,
 >(options: ICreateExpressServerOptions<TProcessor>): express.Application {
     const app: express.Application = express()
 

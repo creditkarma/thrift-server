@@ -33,7 +33,7 @@ export interface IRequestContext {
  */
 export interface IThriftServerOptions<
     Context,
-    TProcessor extends IThriftProcessor<Context>
+    TProcessor extends IThriftProcessor<Context>,
 > {
     serviceName: string
     handler: TProcessor
@@ -50,7 +50,8 @@ export interface IThriftConnection<Context = void> {
 }
 
 export abstract class ThriftConnection<Context = void>
-    implements IThriftConnection<Context> {
+    implements IThriftConnection<Context>
+{
     constructor(
         public Transport: ITransportConstructor,
         public Protocol: IProtocolConstructor,
@@ -153,7 +154,7 @@ export abstract class ThriftClient<Context = any> implements IThriftClient {
 
 export interface IClientConstructor<
     TClient extends ThriftClient<Context>,
-    Context
+    Context,
 > {
     readonly serviceName?: string
     readonly annotations?: IThriftAnnotations
@@ -176,7 +177,8 @@ export interface IThriftProcessor<Context> {
 }
 
 export abstract class ThriftProcessor<Context, IHandler>
-    implements IThriftProcessor<Context> {
+    implements IThriftProcessor<Context>
+{
     public static readonly serviceName?: string = undefined
     public static readonly annotations?: IThriftAnnotations = {}
     public static readonly methodAnnotations?: IMethodAnnotations = {}

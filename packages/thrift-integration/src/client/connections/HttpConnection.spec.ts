@@ -137,9 +137,8 @@ describe('HttpConnection', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 path: '/return500',
             })
-            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
-                badConnection,
-            )
+            const badClient: Calculator.Client<IRequest> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -158,9 +157,8 @@ describe('HttpConnection', () => {
                 port: HAPI_CALC_SERVER_CONFIG.port,
                 path: '/return400',
             })
-            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
-                badConnection,
-            )
+            const badClient: Calculator.Client<IRequest> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -178,12 +176,13 @@ describe('HttpConnection', () => {
                 hostName: 'fakehost',
                 port: 8080,
                 requestOptions: {
-                    timeout: 5000,
+                    timeout: {
+                        response: 5000,
+                    },
                 },
             })
-            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
-                badConnection,
-            )
+            const badClient: Calculator.Client<IRequest> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -291,13 +290,14 @@ describe('HttpConnection', () => {
                 hostName: 'fakehost',
                 port: 8080,
                 requestOptions: {
-                    timeout: 5000,
+                    timeout: {
+                        response: 5000,
+                    },
                 },
                 withEndpointPerMethod: true,
             })
-            const badClient: Calculator.Client<IRequest> = new Calculator.Client(
-                badConnection,
-            )
+            const badClient: Calculator.Client<IRequest> =
+                new Calculator.Client(badConnection)
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -620,10 +620,10 @@ describe('HttpConnection', () => {
                         if (count < 1) {
                             count += 1
                             const upgradeResponse: TTwitter.IUpgradeReply = {}
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
-                                writer,
-                            )
+                            const writer: thrift.TTransport =
+                                new thrift.BufferedTransport()
+                            const output: thrift.TProtocol =
+                                new thrift.BinaryProtocol(writer)
                             output.writeMessageBegin(
                                 'add',
                                 thrift.MessageType.CALL,
@@ -638,10 +638,10 @@ describe('HttpConnection', () => {
                             res.end(writer.flush())
                         } else {
                             const responseHeader: TTwitter.IResponseHeader = {}
-                            const writer: thrift.TTransport = new thrift.BufferedTransport()
-                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
-                                writer,
-                            )
+                            const writer: thrift.TTransport =
+                                new thrift.BufferedTransport()
+                            const output: thrift.TProtocol =
+                                new thrift.BinaryProtocol(writer)
                             output.writeMessageBegin(
                                 'add',
                                 thrift.MessageType.CALL,

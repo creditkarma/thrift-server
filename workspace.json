@@ -1,0 +1,20 @@
+{
+    "$schema": "./node_modules/nx/schemas/workspace-schema.json",
+    "version": 2,
+    "projects": {
+        "project": "packages/project",
+        "thrift-client": "packages/thrift-client",
+        "thrift-client-context-filter": "packages/thrift-client-context-filter",
+        "thrift-client-timing-filter": "packages/thrift-client-timing-filter",
+        "thrift-client-ttwitter-filter": "packages/thrift-client-ttwitter-filter",
+        "thrift-client-zipkin-filter": "packages/thrift-client-zipkin-filter",
+        "thrift-integration": "packages/thrift-integration",
+        "thrift-server-core": "packages/thrift-server-core",
+        "thrift-server-ecosystem": "packages/thrift-server-ecosystem",
+        "thrift-server-express": "packages/thrift-server-express",
+        "thrift-server-hapi": "packages/thrift-server-hapi",
+        "zipkin-core": "packages/zipkin-core",
+        "zipkin-tracing-express": "packages/zipkin-tracing-express",
+        "zipkin-tracing-hapi": "packages/zipkin-tracing-hapi"
+    }
+}

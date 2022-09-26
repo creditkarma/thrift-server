@@ -1,21 +1,14 @@
 {
+    "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "lib": ["ES2021"],
-        "target": "es2021",
         "module": "commonjs",
-        "moduleResolution": "node",
-        "sourceMap": true,
+        "outDir": "../../dist",
         "declaration": true,
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "noEmitOnError": true,
-        "strict": true,
-        "noUnusedLocals": true,
-        "pretty": true,
-        "removeComments": true,
+        "types": ["node"]
     },
     "exclude": [
         "node_modules",
-        "dist"
+        "dist",
+        "example"
     ]
 }

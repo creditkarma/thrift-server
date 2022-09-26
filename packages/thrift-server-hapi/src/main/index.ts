@@ -16,7 +16,7 @@ export * from './types'
  * @param options
  */
 export function createThriftServer<
-    TProcessor extends IThriftProcessor<Hapi.Request>
+    TProcessor extends IThriftProcessor<Hapi.Request>,
 >(options: ICreateHapiServerOptions<TProcessor>): Promise<Hapi.Server> {
     const server = new Hapi.Server({
         port: options.port,

@@ -30,25 +30,6 @@
         "type": "git",
         "url": "https://github.com/creditkarma/thrift-server/tree/master/packages/thrift-server-core"
     },
-    "devDependencies": {
-        "@creditkarma/thrift-typescript": "^3.7.6",
-        "@hapi/code": "^8.0.7",
-        "@hapi/lab": "^25.0.1",
-        "@types/hapi__code": "^8.0.1",
-        "@types/hapi__lab": "^18.1.0",
-        "@types/node": "^16.11.0",
-        "@types/rimraf": "2.0.2",
-        "prettier": "^1.18.2",
-        "rimraf": "^2.6.2",
-        "tslint": "^5.11.0",
-        "tslint-config-prettier": "^1.15.0",
-        "tslint-plugin-prettier": "^2.0.0",
-        "typescript": "4.6.x"
-    },
-    "dependencies": {
-        "@types/lodash": "^4.14.136",
-        "lodash": "^4.17.15"
-    },
     "publishConfig": {
         "access": "public"
     }

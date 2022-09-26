@@ -126,7 +126,7 @@ export class CompactProtocol extends TProtocol {
         return TTypeToCType[ttype]
     }
 
-    public getTType = function(type: CompactType): TType {
+    public getTType = function (type: CompactType): TType {
         switch (type) {
             case CompactType.STOP:
                 return TType.STOP

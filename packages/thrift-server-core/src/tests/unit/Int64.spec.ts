@@ -159,14 +159,7 @@ describe('Int64', () => {
             const i64 = new Int64('0xa1b2c3d4e5f60780')
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
 
@@ -174,14 +167,7 @@ describe('Int64', () => {
             const i64 = new Int64('0xA1B2C3D4E5F60780')
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
     })
@@ -203,14 +189,7 @@ describe('Int64', () => {
             const i64 = new Int64(-1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -218,14 +197,7 @@ describe('Int64', () => {
             const i64 = new Int64(Number.MAX_SAFE_INTEGER)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x00,
-                0x1f,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -233,14 +205,7 @@ describe('Int64', () => {
             const i64 = new Int64(Number.MIN_SAFE_INTEGER)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xe0,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x01,
+                0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
             ])
         })
 
@@ -248,14 +213,7 @@ describe('Int64', () => {
             const i64 = new Int64(0x7fabcdeffffff800)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x7f,
-                0xab,
-                0xcd,
-                0xef,
-                0xff,
-                0xff,
-                0xf8,
-                0x00,
+                0x7f, 0xab, 0xcd, 0xef, 0xff, 0xff, 0xf8, 0x00,
             ])
         })
     })
@@ -277,14 +235,7 @@ describe('Int64', () => {
             const i64 = new Int64(-1, -1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -292,14 +243,7 @@ describe('Int64', () => {
             const i64 = new Int64(0, -1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -307,14 +251,7 @@ describe('Int64', () => {
             const i64 = new Int64(-1, 0)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
+                0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
             ])
         })
 
@@ -322,14 +259,7 @@ describe('Int64', () => {
             const i64 = new Int64(0xa1b2c3d4, 0xe5f60780)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
     })
@@ -375,14 +305,7 @@ describe('Int64', () => {
             i64.setValue('0xa1b2c3d4e5f60780')
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
 
@@ -391,14 +314,7 @@ describe('Int64', () => {
             i64.setValue('0xA1B2C3D4E5F60780')
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
 
@@ -449,14 +365,7 @@ describe('Int64', () => {
             i64.setValue(-1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -465,14 +374,7 @@ describe('Int64', () => {
             i64.setValue(Number.MAX_SAFE_INTEGER)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x00,
-                0x1f,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0x00, 0x1f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -481,14 +383,7 @@ describe('Int64', () => {
             i64.setValue(Number.MIN_SAFE_INTEGER)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xe0,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0x01,
+                0xff, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
             ])
         })
 
@@ -497,14 +392,7 @@ describe('Int64', () => {
             i64.setValue(0x7fabcdeffffff800)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x7f,
-                0xab,
-                0xcd,
-                0xef,
-                0xff,
-                0xff,
-                0xf8,
-                0x00,
+                0x7f, 0xab, 0xcd, 0xef, 0xff, 0xff, 0xf8, 0x00,
             ])
         })
 
@@ -580,14 +468,7 @@ describe('Int64', () => {
             i64.setValue(-1, -1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -596,14 +477,7 @@ describe('Int64', () => {
             i64.setValue(0, -1)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0x00,
-                0x00,
-                0x00,
-                0x00,
-                0xff,
-                0xff,
-                0xff,
-                0xff,
+                0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff,
             ])
         })
 
@@ -612,14 +486,7 @@ describe('Int64', () => {
             i64.setValue(-1, 0)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xff,
-                0xff,
-                0xff,
-                0xff,
-                0x00,
-                0x00,
-                0x00,
-                0x00,
+                0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00,
             ])
         })
 
@@ -628,14 +495,7 @@ describe('Int64', () => {
             i64.setValue(0xa1b2c3d4, 0xe5f60780)
             const { data } = i64.buffer.toJSON()
             expect(data).to.equal([
-                0xa1,
-                0xb2,
-                0xc3,
-                0xd4,
-                0xe5,
-                0xf6,
-                0x07,
-                0x80,
+                0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
             ])
         })
 
@@ -940,14 +800,7 @@ describe('Int64', () => {
     describe('toOctetString', () => {
         // Mix hex values to test zero padding and letter capitalization.
         const TEST_HEX_BUFFER = Buffer.from([
-            0xa1,
-            0xb2,
-            0xc3,
-            0xd4,
-            0xe5,
-            0xf6,
-            0x07,
-            0x80,
+            0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6, 0x07, 0x80,
         ])
         const i64 = new Int64(TEST_HEX_BUFFER)
 
@@ -1169,21 +1022,21 @@ describe('isInt64', () => {
 
     it('false if no buffer', () => {
         expect(
-            isInt64((new NoBufferInt64('0') as object) as IInt64),
+            isInt64(new NoBufferInt64('0') as object as IInt64),
         ).to.be.false()
     })
 
     it('false if buffer length < 8', () => {
-        expect(isInt64((new Int56('0') as object) as IInt64)).to.be.false()
+        expect(isInt64(new Int56('0') as object as IInt64)).to.be.false()
     })
 
     it('false if buffer length > 8', () => {
-        expect(isInt64((new Int72('0') as object) as IInt64)).to.be.false()
+        expect(isInt64(new Int72('0') as object as IInt64)).to.be.false()
     })
 
     it('false if no toDecimalString()', () => {
         expect(
-            isInt64((new NoStringInt64('0') as object) as IInt64),
+            isInt64(new NoStringInt64('0') as object as IInt64),
         ).to.be.false()
     })
 })
