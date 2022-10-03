@@ -74,8 +74,9 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
             this.Transport,
             this.Protocol,
         )
-        const handlers: Array<RequestHandler<Context>> =
-            this.handlersForMethod(requestMethod)
+        const handlers: Array<RequestHandler<Context>> = this.handlersForMethod(
+            requestMethod,
+        )
         const thriftRequest: IThriftRequest<Context> = {
             data: dataToSend,
             methodName: requestMethod,
@@ -126,9 +127,9 @@ export class TcpConnection<Context = any> extends ThriftConnection<Context> {
 
     public destory(): Promise<void> {
         this.logger(['warn', 'TcpConnection'], 'Destroying TCP connection')
-        return this.pool.drain().then(() => {
+        return (this.pool.drain().then(() => {
             return this.pool.clear()
-        }) as any as Promise<void>
+        }) as any) as Promise<void>
     }
 
     private write(

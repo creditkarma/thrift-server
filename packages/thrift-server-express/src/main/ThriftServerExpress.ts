@@ -22,7 +22,7 @@ type ThriftRequest = express.Request & {
 }
 
 export function ThriftServerExpress<
-    TProcessor extends IThriftProcessor<express.Request>,
+    TProcessor extends IThriftProcessor<express.Request>
 >(pluginOptions: IExpressServerOptions<TProcessor>): express.RequestHandler {
     return (
         request: ThriftRequest,

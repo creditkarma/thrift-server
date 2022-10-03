@@ -74,8 +74,9 @@ export function ZipkinTracingHapi({
                               )
                             : request.method
 
-                    const normalHeaders: Core.IRequestHeaders =
-                        normalizeHeaders(request.headers)
+                    const normalHeaders: Core.IRequestHeaders = normalizeHeaders(
+                        request.headers,
+                    )
 
                     return tracer.scoped(() => {
                         const traceId: TraceId = instrumentation.recordRequest(
@@ -91,8 +92,9 @@ export function ZipkinTracingHapi({
                             },
                         )
 
-                        const traceHeaders: Core.IRequestHeaders =
-                            headersForTraceId(traceId)
+                        const traceHeaders: Core.IRequestHeaders = headersForTraceId(
+                            traceId,
+                        )
 
                         // Update headers on request object
                         for (const key in traceHeaders) {

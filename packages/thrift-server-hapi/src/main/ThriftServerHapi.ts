@@ -1,4 +1,5 @@
 import * as Hapi from '@hapi/hapi'
+
 import * as Core from '@creditkarma/thrift-server-core'
 
 import {
@@ -40,7 +41,7 @@ declare module '@hapi/hapi' {
  * @param pluginOptions
  */
 export function ThriftServerHapi<
-    TProcessor extends Core.IThriftProcessor<Hapi.Request>,
+    TProcessor extends Core.IThriftProcessor<Hapi.Request>
 >(pluginOptions: IHapiPluginOptions<TProcessor>): ThriftHapiPlugin {
     const thriftOptions: IHapiServerOptions<TProcessor> =
         pluginOptions.thriftOptions
@@ -106,26 +107,23 @@ export function ThriftServerHapi<
                             request.plugins.thrift !== undefined
                         ) {
                             try {
-                                const transportWithData: Core.TTransport =
-                                    Transport.receiver(
-                                        request.payload as Buffer,
-                                    )
+                                const transportWithData: Core.TTransport = Transport.receiver(
+                                    request.payload as Buffer,
+                                )
                                 const input: Core.TProtocol = new Protocol(
                                     transportWithData,
                                 )
-                                const metadata: Core.IThriftMessage =
-                                    input.readMessageBegin()
+                                const metadata: Core.IThriftMessage = input.readMessageBegin()
                                 const fieldName: string = metadata.fieldName
                                 const requestId: number = metadata.requestId
 
                                 const output: Core.TProtocol = new Protocol(
                                     new Transport(),
                                 )
-                                const exception: Core.TApplicationException =
-                                    new Core.TApplicationException(
-                                        Core.TApplicationExceptionType.INTERNAL_ERROR,
-                                        response.message as string, // If we're dealing with an error this is an Error not a Response
-                                    )
+                                const exception: Core.TApplicationException = new Core.TApplicationException(
+                                    Core.TApplicationExceptionType.INTERNAL_ERROR,
+                                    response.message as string, // If we're dealing with an error this is an Error not a Response
+                                )
 
                                 output.writeMessageBegin(
                                     fieldName,

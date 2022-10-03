@@ -26,11 +26,11 @@ export interface IHandlerOptions<TProcessor> {
 }
 
 export type IHapiServerOptions<
-    TProcessor extends IThriftProcessor<Hapi.Request>,
+    TProcessor extends IThriftProcessor<Hapi.Request>
 > = IThriftServerOptions<Hapi.Request, TProcessor>
 
 export interface IHapiPluginOptions<
-    TProcessor extends IThriftProcessor<Hapi.Request>,
+    TProcessor extends IThriftProcessor<Hapi.Request>
 > {
     path?: string
     auth?: false | string | Hapi.RouteOptionsAccess
@@ -38,7 +38,7 @@ export interface IHapiPluginOptions<
 }
 
 export interface ICreateHapiServerOptions<
-    TProcessor extends IThriftProcessor<Hapi.Request>,
+    TProcessor extends IThriftProcessor<Hapi.Request>
 > extends IHapiPluginOptions<TProcessor> {
     port: number
 }

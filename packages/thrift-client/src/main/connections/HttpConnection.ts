@@ -96,7 +96,9 @@ function applyFilters(
     }
 }
 
-export class HttpConnection extends Core.ThriftConnection<OptionsOfBufferResponseBody> {
+export class HttpConnection extends Core.ThriftConnection<
+    OptionsOfBufferResponseBody
+> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
@@ -162,8 +164,9 @@ export class HttpConnection extends Core.ThriftConnection<OptionsOfBufferRespons
             this.Protocol,
         )
 
-        const filters: Array<RequestHandler<RequestOptions>> =
-            this.filtersForMethod(requestMethod)
+        const filters: Array<RequestHandler<
+            RequestOptions
+        >> = this.filtersForMethod(requestMethod)
 
         const thriftRequest: IThriftRequest<RequestOptions> = {
             data: dataToSend,
@@ -184,9 +187,11 @@ export class HttpConnection extends Core.ThriftConnection<OptionsOfBufferRespons
                     finalRequest.context,
                 )
             },
-        ).then((res: IRequestResponse): Buffer => {
-            return res.body
-        })
+        ).then(
+            (res: IRequestResponse): Buffer => {
+                return res.body
+            },
+        )
     }
 
     private write(

@@ -160,20 +160,18 @@ describe('TcpConnection', () => {
                         request: IThriftRequest<void>,
                         next: NextFunction<void>,
                     ): Promise<IRequestResponse> {
-                        const writer: thrift.TTransport =
-                            new thrift.BufferedTransport()
-                        const output: thrift.TProtocol =
-                            new thrift.BinaryProtocol(writer)
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                            writer,
+                        )
                         output.writeMessageBegin(
                             'addWithContext',
                             thrift.MessageType.CALL,
                             20,
                         )
-                        const args: Calculator.AddWithContext__Args =
-                            new Calculator.AddWithContext__Args({
-                                num1: 20,
-                                num2: 60,
-                            })
+                        const args: Calculator.AddWithContext__Args = new Calculator.AddWithContext__Args(
+                            { num1: 20, num2: 60 },
+                        )
                         args.write(output)
                         output.writeMessageEnd()
                         return next(writer.flush())
@@ -254,10 +252,10 @@ describe('TcpConnection', () => {
                     console.log('TCP server created')
                     socket.addListener('data', (chunk: Buffer) => {
                         const meta: IMetadata = { traceId: 9 }
-                        const writer: thrift.TTransport =
-                            new thrift.BufferedTransport()
-                        const output: thrift.TProtocol =
-                            new thrift.BinaryProtocol(writer)
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                            writer,
+                        )
                         output.writeMessageBegin(
                             'add',
                             thrift.MessageType.CALL,
@@ -313,10 +311,10 @@ describe('TcpConnection', () => {
                 mockServer = net.createServer((socket: net.Socket): void => {
                     console.log('TCP server created')
                     socket.addListener('data', (chunk: Buffer) => {
-                        const writer: thrift.TTransport =
-                            new thrift.BufferedTransport()
-                        const output: thrift.TProtocol =
-                            new thrift.BinaryProtocol(writer)
+                        const writer: thrift.TTransport = new thrift.BufferedTransport()
+                        const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                            writer,
+                        )
                         output.writeMessageBegin(
                             'add',
                             thrift.MessageType.CALL,
@@ -406,10 +404,10 @@ describe('TcpConnection', () => {
                         if (count < 1) {
                             count += 1
                             const upgradeResponse: TTwitter.IUpgradeReply = {}
-                            const writer: thrift.TTransport =
-                                new thrift.BufferedTransport()
-                            const output: thrift.TProtocol =
-                                new thrift.BinaryProtocol(writer)
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
                             output.writeMessageBegin(
                                 'add',
                                 thrift.MessageType.CALL,
@@ -425,10 +423,10 @@ describe('TcpConnection', () => {
                             const responseHeader = new TTwitter.ResponseHeader(
                                 {},
                             )
-                            const writer: thrift.TTransport =
-                                new thrift.BufferedTransport()
-                            const output: thrift.TProtocol =
-                                new thrift.BinaryProtocol(writer)
+                            const writer: thrift.TTransport = new thrift.BufferedTransport()
+                            const output: thrift.TProtocol = new thrift.BinaryProtocol(
+                                writer,
+                            )
                             output.writeMessageBegin(
                                 'add',
                                 thrift.MessageType.CALL,

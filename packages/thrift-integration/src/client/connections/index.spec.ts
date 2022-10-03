@@ -260,12 +260,14 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
                     port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -278,12 +280,14 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
                     port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -296,16 +300,16 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: 'fakehost',
                     port: 8080,
                     requestOptions: {
-                        timeout: {
-                            response: 5000,
-                        },
+                        timeout: 5000,
                     },
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -472,12 +476,14 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 500 server response', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
                     port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return500',
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -490,12 +496,14 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a 400 server response', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: HAPI_CALC_SERVER_CONFIG.hostName,
                     port: HAPI_CALC_SERVER_CONFIG.port,
                     path: '/return400',
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -508,16 +516,16 @@ describe('createHttpClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<RequestOptions> =
-                createHttpClient(Calculator.Client, {
+            const badClient: Calculator.Client<RequestOptions> = createHttpClient(
+                Calculator.Client,
+                {
                     hostName: 'fakehost',
                     port: 8080,
                     requestOptions: {
-                        timeout: {
-                            response: 5000,
-                        },
+                        timeout: 5000,
                     },
-                })
+                },
+            )
 
             return badClient.add(5, 7).then(
                 (response: number) => {
@@ -972,11 +980,12 @@ describe('createTcpClient', () => {
         })
 
         it('should reject for a request to a missing service', async () => {
-            const badClient: Calculator.Client<void> =
-                createTcpClient<Calculator.Client>(Calculator.Client, {
-                    hostName: 'fakehost',
-                    port: 8888,
-                })
+            const badClient: Calculator.Client<void> = createTcpClient<
+                Calculator.Client
+            >(Calculator.Client, {
+                hostName: 'fakehost',
+                port: 8888,
+            })
 
             return badClient.add(5, 7).then(
                 (response: number) => {
