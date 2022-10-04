@@ -49,10 +49,57 @@ for (let i = 0; i < 256; i++) {
 }
 
 // Hex string format.
-const HEX_REGEX = /^(?:0x)?([0-9a-fA-F]+)/
+const HEX_REGEX = /^(?:\s*)(?:0x)?([0-9a-fA-F]+)/
+
+// Decimal string format.
+const DEC_REGEX = /^(?:\s*)([-+])?(\d+)/
 
 // 8 bytes
 const BYTE_COUNT = 8
+
+/**
+ * Result from trying to get the numeric prefix for a string.
+ */
+interface INumericStringParts {
+    /**
+     * True if there was a negative sign.
+     */
+    negative: boolean
+
+    /**
+     * Numeric part of the string.
+     */
+    numeric: string
+}
+
+/**
+ * Get the sign and numeric prefix for a string.
+ *
+ * Ignores leading whitespace.
+ * Digits with or without leading sign.
+ *
+ * @param text Source text
+ */
+function getDecimalNumber(text: string): INumericStringParts | undefined {
+    // Extract just the number part.
+    const matches = text.match(DEC_REGEX)
+    if (matches) {
+        if (matches.length === 2) {
+            return {
+                negative: false,
+                numeric: matches[1],
+            }
+        }
+        if (matches.length === 3) {
+            return {
+                negative: matches[1] === '-',
+                numeric: matches[2],
+            }
+        }
+    }
+
+    return undefined
+}
 
 /**
  * 64-bit integer value as high and low 32-bit integers.
@@ -256,34 +303,47 @@ export class Int64 implements IInt64 {
     }
 
     public static fromDecimalString(text: string): Int64 {
-        const negative: boolean = text.charAt(0) === '-'
-
-        if (text.length < (negative ? 17 : 16)) {
-            // The magnitude is smaller than 2^53.
-            return new Int64(+text)
-        } else if (text.length > (negative ? 20 : 19)) {
-            throw new RangeError(`Too many digits for Int64: ${text}`)
-        } else {
-            // Most significant (up to 5) digits
-            const high5 = +text.slice(negative ? 1 : 0, -15)
-            const remainder = +text.slice(-15) + high5 * 2764472320 // The literal is 10^15 % 2^32
-            const hi = Math.floor(remainder / POW2_32) + high5 * 232830 // The literal is 10^15 / 2^&32
-            const lo = remainder % POW2_32
-
-            if (
-                hi >= POW2_31 &&
-                !(negative && hi === POW2_31 && lo === 0) // Allow minimum Int64
-            ) {
-                throw new RangeError('The magnitude is too large for Int64.')
-            }
-
-            if (negative) {
-                const neg = hiLoNeg({ hi, lo })
-                return new Int64(neg.hi, neg.lo)
-            }
-
-            return new Int64(hi, lo)
+        // Small numbers that are text-only are fast.
+        const num = Number(text)
+        // The number may be too large for number
+        // or it may be NaN because of trailing characters that parseInt() would ignore.
+        if (Number.isSafeInteger(Math.trunc(num))) {
+            // Use the number. The Int64 constructor truncates.
+            return new Int64(num)
         }
+
+        // Extract just the number part.
+        const parts = getDecimalNumber(text)
+        if (!parts) {
+            // Not a numeric value. Return 0.
+            return new Int64(0)
+        }
+        const { negative, numeric } = parts
+
+        // Check for too long after getting the numeric part.
+        if (numeric.length > 19) {
+            throw new RangeError(`Too many digits for Int64: ${text}`)
+        }
+
+        // Most significant (up to 5) digits
+        const high5 = Number(numeric.slice(0, -15))
+        const remainder = Number(numeric.slice(-15)) + high5 * 2764472320 // The literal is 10^15 % 2^32
+        const hi = Math.floor(remainder / POW2_32) + high5 * 232830 // The literal is 10^15 / 2^&32
+        const lo = remainder % POW2_32
+
+        if (
+            hi >= POW2_31 &&
+            !(negative && hi === POW2_31 && lo === 0) // Allow minimum Int64
+        ) {
+            throw new RangeError('The magnitude is too large for Int64.')
+        }
+
+        if (negative) {
+            const neg = hiLoNeg({ hi, lo })
+            return new Int64(neg.hi, neg.lo)
+        }
+
+        return new Int64(hi, lo)
     }
 
     /** @inheritDoc */
