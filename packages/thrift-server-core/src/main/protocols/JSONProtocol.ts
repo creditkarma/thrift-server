@@ -372,9 +372,8 @@ export class JSONProtocol extends TProtocol {
                 }
 
                 ftype = JSONProtocol.rType[i]
-                this.rstack[this.rstack.length - 1] = this.rstack[
-                    this.rstack.length - 1
-                ][i]
+                this.rstack[this.rstack.length - 1] =
+                    this.rstack[this.rstack.length - 1][i]
             }
         }
 

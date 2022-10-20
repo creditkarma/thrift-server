@@ -1,0 +1,56 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": ".",
+        "rootDir": ".",
+        "sourceMap": true,
+        "declaration": false,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "forceConsistentCasingInFileNames": true,
+        "importHelpers": true,
+        "target": "es2021",
+        "module": "commonjs",
+        "lib": ["es2021"],
+        "skipLibCheck": true,
+        "skipDefaultLibCheck": true,
+        "paths": {
+            "@creditkarma/project": ["packages/project/src/index.ts"],
+            "@creditkarma/thrift-client": [
+                "packages/thrift-client/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-client-context-filter": [
+                "packages/thrift-client-context-filter/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-client-timing-filter": [
+                "packages/thrift-client-timing-filter/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-client-ttwitter-filter": [
+                "packages/thrift-client-ttwitter-filter/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-client-zipkin-filter": [
+                "packages/thrift-client-zipkin-filter/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-server-core": [
+                "packages/thrift-server-core/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-server-express": [
+                "packages/thrift-server-express/src/main/index.ts"
+            ],
+            "@creditkarma/thrift-server-hapi": [
+                "packages/thrift-server-hapi/src/main/index.ts"
+            ],
+            "@creditkarma/zipkin-core": [
+                "packages/zipkin-core/src/main/index.ts"
+            ],
+            "@creditkarma/zipkin-tracing-express": [
+                "packages/zipkin-tracing-express/src/main/index.ts"
+            ],
+            "@creditkarma/zipkin-tracing-hapi": [
+                "packages/zipkin-tracing-hapi/src/main/index.ts"
+            ]
+        }
+    },
+    "exclude": ["node_modules", "tmp"]
+}

@@ -144,13 +144,12 @@ export function ThriftClientTTwitterFilter<T>({
                         tracer.setId(traceIdFromTraceId(requestContext.traceId))
 
                         return tracer.scoped(() => {
-                            const {
-                                headers,
-                            }: any = instrumentation.recordRequest(
-                                { headers: {} },
-                                formatUrl(request.uri),
-                                request.methodName || 'post',
-                            )
+                            const { headers }: any =
+                                instrumentation.recordRequest(
+                                    { headers: {} },
+                                    formatUrl(request.uri),
+                                    request.methodName || 'post',
+                                )
 
                             const normalHeaders: any = Object.keys(
                                 headers,
@@ -189,9 +188,7 @@ export function ThriftClientTTwitterFilter<T>({
                                 delegations: [],
                             }
 
-                            return appendThriftObject<
-                                TTwitter.IResponseHeaderArgs
-                            >(
+                            return appendThriftObject<TTwitter.IResponseHeaderArgs>(
                                 requestHeader,
                                 request.data,
                                 TTwitter.RequestHeaderCodec,
@@ -202,9 +199,7 @@ export function ThriftClientTTwitterFilter<T>({
                                     (
                                         res: IRequestResponse,
                                     ): Promise<IRequestResponse> => {
-                                        return readThriftObject<
-                                            TTwitter.IResponseHeader
-                                        >(
+                                        return readThriftObject<TTwitter.IResponseHeader>(
                                             res.body,
                                             TTwitter.ResponseHeaderCodec,
                                             transportType,

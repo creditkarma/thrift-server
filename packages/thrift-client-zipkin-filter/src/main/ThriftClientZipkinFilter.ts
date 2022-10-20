@@ -103,11 +103,12 @@ export function ThriftClientZipkinFilter<Context extends IRequest>({
                 tracer.setId(traceIdFromTraceId(requestContext.traceId))
 
                 return tracer.scoped(() => {
-                    const updatedHeaders: IRequestHeaders = instrumentation.recordRequest(
-                        { headers: {} },
-                        formatUrl(request.uri),
-                        request.methodName || '',
-                    ).headers
+                    const updatedHeaders: IRequestHeaders =
+                        instrumentation.recordRequest(
+                            { headers: {} },
+                            formatUrl(request.uri),
+                            request.methodName || '',
+                        ).headers
 
                     const traceId: TraceId = tracer.id
                     const withLD5Headers: IRequestHeaders = applyL5DHeaders(

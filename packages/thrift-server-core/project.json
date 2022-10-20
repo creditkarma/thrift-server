@@ -1,0 +1,51 @@
+{
+    "$schema": "../../node_modules/nx/schemas/project-schema.json",
+    "sourceRoot": "packages/thrift-server-core/src",
+    "projectType": "library",
+    "targets": {
+        "lint": {
+            "executor": "nx:run-script",
+            "options": {
+                "script": "lint"
+            }
+        },
+        "format": {
+            "executor": "nx:run-script",
+            "dependsOn": [
+                {
+                    "projects": "self",
+                    "target": "lint"
+                }
+            ],
+            "options": {
+                "script": "format"
+            }
+        },
+        "build": {
+            "executor": "@nrwl/js:tsc",
+            "outputs": ["{options.outputPath}"],
+            "dependsOn": [
+                {
+                    "projects": "self",
+                    "target": "format"
+                }
+            ],
+            "options": {
+                "outputPath": "dist/packages/thrift-server-core",
+                "main": "packages/thrift-server-core/src/main/index.ts",
+                "tsConfig": "packages/thrift-server-core/tsconfig.json",
+                "assets": ["packages/thrift-server-core/*.md"],
+                "buildableProjectDepsInPackageJsonType": "dependencies"
+            }
+        },
+        "publish": {
+            "executor": "@creditkarma/project:publish",
+            "dependsOn": [
+                {
+                    "projects": "self",
+                    "target": "build"
+                }
+            ]
+        }
+    }
+}
