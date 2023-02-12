@@ -27,7 +27,7 @@
         "test:only": "echo 'No tests for thrift-client-zipkin-filter'; exit 0;"
     },
     "dependencies": {
-        "got": "^11.8.3",
+        "got": "^12.5.3",
         "zipkin": "^0.15.0"
     },
     "peerDependencies": {
