@@ -13,7 +13,6 @@
         "noUnusedLocals": true,
         "pretty": true,
         "removeComments": true,
-        "esModuleInterop": true,
     },
     "exclude": [
         "node_modules",

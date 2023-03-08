@@ -1,6 +1,5 @@
 import * as thrift from '@creditkarma/thrift-server-core'
 import * as Hapi from '@hapi/hapi'
-import got from 'got'
 import * as http from 'http'
 
 import {
@@ -146,7 +145,7 @@ describe('HttpConnection', () => {
                     throw new Error('Should reject with status 500')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(500)
+                    expect(err?.statusCode).to.equal(500)
                 },
             )
         })
@@ -167,7 +166,7 @@ describe('HttpConnection', () => {
                     throw new Error('Should reject with status 400')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(400)
+                    expect(err?.statusCode).to.equal(400)
                 },
             )
         })
@@ -195,25 +194,25 @@ describe('HttpConnection', () => {
             )
         })
 
-        it('should use got implementation if provided', async () => {
-            let ourGotWasCalled = false
-            const mockGot: any = (...args: Array<any>) => {
-                ourGotWasCalled = true
-                return (got as any)(...args)
-            }
+        // it('should use got implementation if provided', async () => {
+        //     let ourGotWasCalled = false
+        //     const mockGot: any = (...args: Array<any>) => {
+        //         ourGotWasCalled = true
+        //         return (got as any)(...args)
+        //     }
 
-            const mockedConnection = new HttpConnection({
-                serviceName: 'Calculator',
-                hostName: HAPI_CALC_SERVER_CONFIG.hostName,
-                port: HAPI_CALC_SERVER_CONFIG.port,
-                path: HAPI_CALC_SERVER_CONFIG.path,
-                gotImpl: mockGot,
-            })
-            const mockedClient = new Calculator.Client(mockedConnection)
-            return mockedClient
-                .add(5, 7)
-                .then(() => expect(ourGotWasCalled).to.be.true())
-        })
+        //     const mockedConnection = new HttpConnection({
+        //         serviceName: 'Calculator',
+        //         hostName: HAPI_CALC_SERVER_CONFIG.hostName,
+        //         port: HAPI_CALC_SERVER_CONFIG.port,
+        //         path: HAPI_CALC_SERVER_CONFIG.path,
+        //         gotImpl: mockGot,
+        //     })
+        //     const mockedClient = new Calculator.Client(mockedConnection)
+        //     return mockedClient
+        //         .add(5, 7)
+        //         .then(() => expect(ourGotWasCalled).to.be.true())
+        // })
     })
 
     describe('With endpoint per method', () => {

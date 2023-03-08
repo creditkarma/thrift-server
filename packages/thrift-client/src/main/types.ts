@@ -7,10 +7,10 @@ import {
 
 import * as GenericPool from 'generic-pool'
 
-import got, { OptionsOfBufferResponseBody } from 'got'
+import * as request from 'request'
 import * as tls from 'tls'
 
-export type RequestOptions = Partial<OptionsOfBufferResponseBody>
+export type RequestOptions = request.CoreOptions
 
 export interface IRequestResponse {
     statusCode: number
@@ -62,7 +62,7 @@ export interface IHttpConnectionOptions {
     requestOptions?: RequestOptions
     withEndpointPerMethod?: boolean
     headerBlacklist?: Array<string>
-    gotImpl?: typeof got
+    requestImpl?: typeof request
 }
 
 export interface ICreateHttpClientOptions extends IHttpConnectionOptions {

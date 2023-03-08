@@ -1,6 +1,13 @@
 import * as Core from '@creditkarma/thrift-server-core'
 
-import got, { HTTPError, OptionsOfBufferResponseBody, Response } from 'got'
+import * as request from 'request'
+import {
+    Request,
+    RequestAPI,
+    RequestResponse,
+    RequiredUriUrl,
+    UrlOptions,
+} from 'request'
 
 import {
     IHttpConnectionOptions,
@@ -18,17 +25,32 @@ export const DEFAULT_PATH: string = '/thrift'
 
 export type HttpProtocol = 'http' | 'https'
 
+export type RequestInstance = RequestAPI<
+    Request,
+    RequestOptions,
+    RequiredUriUrl
+>
+
 function shouldRetry(
-    response: Response,
+    response: RequestResponse,
     retry: boolean,
     withEndpointPerMethod: boolean,
 ): boolean {
     return (
-        withEndpointPerMethod && response?.statusCode === 404 && retry === false
+        withEndpointPerMethod &&
+        response !== undefined &&
+        response !== null &&
+        response.statusCode !== undefined &&
+        response.statusCode === 404 &&
+        retry === false
     )
 }
 
-function isErrorResponse(response: Response): boolean {
+function hasError(err: any): boolean {
+    return err !== undefined && err !== null
+}
+
+function isErrorResponse(response: RequestResponse): boolean {
     return (
         response.statusCode !== null &&
         response.statusCode !== undefined &&
@@ -37,16 +59,13 @@ function isErrorResponse(response: Response): boolean {
 }
 
 function filterHeaders(
-    options: OptionsOfBufferResponseBody,
+    options: request.CoreOptions,
     blacklist: Array<string>,
-): OptionsOfBufferResponseBody {
+): request.CoreOptions {
     options.headers = options.headers || {}
     blacklist = blacklist.map((next) => next.toLocaleLowerCase())
     options.headers = Object.keys(options.headers).reduce(
-        (
-            acc: NonNullable<OptionsOfBufferResponseBody['headers']>,
-            next: string,
-        ) => {
+        (acc: request.Headers, next: string) => {
             if (blacklist.indexOf(next.toLocaleLowerCase()) === -1) {
                 acc[next] = options.headers![next]
             }
@@ -96,9 +115,7 @@ function applyFilters(
     }
 }
 
-export class HttpConnection extends Core.ThriftConnection<
-    OptionsOfBufferResponseBody
-> {
+export class HttpConnection extends Core.ThriftConnection<RequestOptions> {
     protected readonly port: number
     protected readonly hostName: string
     protected readonly path: string
@@ -106,10 +123,10 @@ export class HttpConnection extends Core.ThriftConnection<
     protected readonly url: string
     protected readonly protocol: HttpProtocol
     protected readonly filters: Array<IThriftClientFilter<RequestOptions>>
-    private readonly requestOptions: OptionsOfBufferResponseBody
+    private readonly requestOptions: RequestOptions
     private readonly serviceName: string | undefined
     private readonly withEndpointPerMethod: boolean
-    private readonly gotImpl: typeof got
+    private readonly requestImpl: typeof request
 
     constructor({
         hostName,
@@ -122,14 +139,11 @@ export class HttpConnection extends Core.ThriftConnection<
         serviceName,
         withEndpointPerMethod = false,
         headerBlacklist = [],
-        gotImpl = got,
+        requestImpl = request,
     }: IHttpConnectionOptions) {
         super(Core.getTransport(transport), Core.getProtocol(protocol))
         this.requestOptions = Object.freeze(
-            filterHeaders(
-                { responseType: 'buffer', ...requestOptions },
-                headerBlacklist,
-            ),
+            filterHeaders(requestOptions, headerBlacklist),
         )
         this.port = port
         this.hostName = hostName
@@ -140,7 +154,7 @@ export class HttpConnection extends Core.ThriftConnection<
         this.withEndpointPerMethod = withEndpointPerMethod
         this.url = `${this.basePath}${this.path}`
         this.filters = []
-        this.gotImpl = gotImpl
+        this.requestImpl = requestImpl
     }
 
     public register(
@@ -206,50 +220,47 @@ export class HttpConnection extends Core.ThriftConnection<
                 : this.url
 
         // Merge user options with required options
-        const requestOptions: OptionsOfBufferResponseBody = Core.overlayObjects(
+        const requestOptions: RequestOptions & UrlOptions = Core.overlayObjects(
             this.requestOptions,
             options,
             {
                 method: 'POST',
                 body: dataToWrite,
+                encoding: null, // Needs to be explicitly set to null to get Buffer in response body
                 url: requestUrl,
                 headers: {
-                    'Content-Length': dataToWrite.length.toString(),
+                    'Content-Length': dataToWrite.length,
                     'Content-Type': 'application/octet-stream',
                 },
-            } as RequestOptions,
+            },
         )
 
-        return this.gotImpl(requestOptions)
-            .then((response) => {
-                if (isErrorResponse(response)) {
-                    throw response
-                }
-                return {
-                    statusCode: response.statusCode,
-                    headers: response.headers,
-                    body: response.rawBody,
-                }
-            })
-            .catch((err) => {
-                if (err instanceof HTTPError) {
+        return new Promise((resolve, reject) => {
+            this.requestImpl(
+                requestOptions,
+                (err: any, response: RequestResponse, body: Buffer) => {
                     if (
-                        shouldRetry(
-                            err.response,
-                            retry,
-                            this.withEndpointPerMethod,
-                        )
+                        shouldRetry(response, retry, this.withEndpointPerMethod)
                     ) {
-                        return this.write(
-                            dataToWrite,
-                            methodName,
-                            options,
-                            true,
+                        resolve(
+                            this.write(dataToWrite, methodName, options, true),
                         )
+                    } else {
+                        if (hasError(err)) {
+                            reject(err)
+                        } else if (isErrorResponse(response)) {
+                            reject(response)
+                        } else {
+                            resolve({
+                                statusCode: response.statusCode,
+                                headers: response.headers,
+                                body,
+                            })
+                        }
                     }
-                }
-                throw err
-            })
+                },
+            )
+        })
     }
 
     private filtersForMethod(
