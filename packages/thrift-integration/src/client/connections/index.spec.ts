@@ -274,7 +274,7 @@ describe('createHttpClient', () => {
                     throw new Error('Should reject with status 500')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(500)
+                    expect(err?.statusCode).to.equal(500)
                 },
             )
         })
@@ -294,7 +294,7 @@ describe('createHttpClient', () => {
                     throw new Error('Should reject with status 400')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(400)
+                    expect(err?.statusCode).to.equal(400)
                 },
             )
         })
@@ -490,7 +490,7 @@ describe('createHttpClient', () => {
                     throw new Error('Should reject with status 500')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(500)
+                    expect(err?.statusCode).to.equal(500)
                 },
             )
         })
@@ -510,7 +510,7 @@ describe('createHttpClient', () => {
                     throw new Error('Should reject with status 400')
                 },
                 (err: any) => {
-                    expect(err?.response?.statusCode).to.equal(400)
+                    expect(err?.statusCode).to.equal(400)
                 },
             )
         })
