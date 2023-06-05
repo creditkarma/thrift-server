@@ -593,7 +593,7 @@ export class Int64 implements IInt64 {
  *
  * @param i64  64-bit integer
  */
-export function isInt64(i64: number | string | IInt64): i64 is IInt64 {
+export function isInt64(i64: number | string | bigint | IInt64): i64 is IInt64 {
     return (
         i64 instanceof Int64 ||
         (typeof i64 === 'object' &&

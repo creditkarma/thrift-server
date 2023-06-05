@@ -15,6 +15,8 @@ import {
     TType,
 } from '../types'
 
+export type I64Type = 'int64' | 'bigint'
+
 export abstract class TProtocol {
     protected transport: TTransport
     protected logger: LogFunction
@@ -76,7 +78,7 @@ export abstract class TProtocol {
 
     public abstract writeI32(i32: number): void
 
-    public abstract writeI64(i64: number | string | IInt64): void
+    public abstract writeI64(i64: number | string | bigint | IInt64): void
 
     public abstract writeDouble(dbl: number): void
 
@@ -116,7 +118,9 @@ export abstract class TProtocol {
 
     public abstract readI32(): number
 
-    public abstract readI64(): Int64
+    public abstract readI64<T extends I64Type = 'int64'>(
+        type?: T,
+    ): T extends 'bigint' ? bigint : Int64
 
     public abstract readDouble(): number
 

@@ -349,6 +349,7 @@ describe('BinaryProtocol', () => {
 
         // Deserialize and check for the expected values.
         const deserialize = (
+            type: 'int64' | 'bigint',
             data: string,
             lower: string,
             upper: string,
@@ -363,15 +364,27 @@ describe('BinaryProtocol', () => {
             protocol.readStructBegin()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64().toDecimalString()).to.equal(lower)
+            if (type === 'bigint') {
+                expect(protocol.readI64('bigint').toString()).to.equal(lower)
+            } else {
+                expect(protocol.readI64().toDecimalString()).to.equal(lower)
+            }
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64().toDecimalString()).to.equal('0')
+            if (type === 'bigint') {
+                expect(protocol.readI64('bigint').toString()).to.equal('0')
+            } else {
+                expect(protocol.readI64().toDecimalString()).to.equal('0')
+            }
             protocol.readFieldEnd()
 
             protocol.readFieldBegin()
-            expect(protocol.readI64().toDecimalString()).to.equal(upper)
+            if (type === 'bigint') {
+                expect(protocol.readI64('bigint').toString()).to.equal(upper)
+            } else {
+                expect(protocol.readI64().toDecimalString()).to.equal(upper)
+            }
             protocol.readFieldEnd()
 
             protocol.readStructEnd()
@@ -380,129 +393,152 @@ describe('BinaryProtocol', () => {
             protocol.readMessageEnd()
         }
 
-        it('should serialize', () => {
-            const lower = Int64.fromDecimalString('-9223372036854775808')
-            const upper = Int64.fromDecimalString('9223372036854775807')
+        describe('with Int64', () => {
+            it('should serialize', () => {
+                const lower = Int64.fromDecimalString('-9223372036854775808')
+                const upper = Int64.fromDecimalString('9223372036854775807')
 
-            expect(serialize(lower, upper)).to.equal(
-                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
-            )
+                expect(serialize(lower, upper)).to.equal(
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                )
+            })
+
+            it('should deserialize', () => {
+                deserialize(
+                    'int64',
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                    '-9223372036854775808',
+                    '9223372036854775807',
+                )
+            })
+
+            it('should handle Int64 with offset', () => {
+                // Use one buffer but two different offsets.
+                // Also checks that only the expected 8 bytes are used.
+                const buffer = Buffer.alloc(10)
+                buffer.writeUInt8(1, 0)
+                buffer.writeUInt8(2, 9)
+                const lower = new Int64(buffer, 2)
+                const upper = new Int64(buffer, 0)
+
+                const expected =
+                    '8001000100000006676574493634000000010c00010a000100000000000000020a000200000000000000000a000301000000000000000000'
+                expect(serialize(lower, upper)).to.equal(expected)
+                deserialize('int64', expected, '2', '72057594037927936')
+            })
+
+            it('should pad short Int64', () => {
+                // Fewer than 8 bytes. Offset greater than the length.
+                const buffer = Buffer.alloc(6)
+                buffer.writeUInt8(1, 0)
+                const lower = new Int64(buffer, 10)
+                const upper = new Int64(buffer)
+
+                const expected =
+                    '8001000100000006676574493634000000010c00010a000100000000000000000a000200000000000000000a000300000100000000000000'
+                expect(serialize(lower, upper)).to.equal(expected)
+                deserialize('int64', expected, '0', '1099511627776')
+            })
+
+            it('should serialize string', () => {
+                const lower = '-9223372036854775808'
+                const upper = '9223372036854775807'
+
+                expect(serialize(lower, upper)).to.equal(
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                )
+            })
+
+            it('should serialize number', () => {
+                const lower = -123
+                const upper = 123
+
+                const expected =
+                    '8001000100000006676574493634000000010c00010a0001ffffffffffffff850a000200000000000000000a0003000000000000007b0000'
+                expect(serialize(lower, upper)).to.equal(expected)
+                deserialize('int64', expected, '-123', '123')
+            })
+
+            it('should serialize Int64-like object', () => {
+                const lower = new LikeInt64('-9223372036854775808')
+                const upper = new LikeInt64('9223372036854775807')
+
+                expect(serialize(lower, upper)).to.equal(
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                )
+            })
+
+            it('should error if no buffer', () => {
+                const lower = new NoBufferInt64('-9223372036854775808')
+                const upper = new NoBufferInt64('9223372036854775807')
+
+                try {
+                    serialize(lower, upper)
+                } catch (e) {
+                    expect(e).to.be.an.instanceOf(TypeError)
+                    return
+                }
+                fail('Error expected')
+            })
+
+            it('should error if buffer length < 8', () => {
+                const lower = new Int56('-9223372036854775808')
+                const upper = new Int56('9223372036854775807')
+
+                try {
+                    serialize(lower, upper)
+                } catch (e) {
+                    expect(e).to.be.an.instanceOf(TypeError)
+                    return
+                }
+                fail('Error expected')
+            })
+
+            it('should error if buffer length > 8', () => {
+                const lower = new Int72('-9223372036854775808')
+                const upper = new Int72('9223372036854775807')
+
+                try {
+                    serialize(lower, upper)
+                } catch (e) {
+                    expect(e).to.be.an.instanceOf(TypeError)
+                    return
+                }
+                fail('Error expected')
+            })
+
+            it('should error if no toDecimalString()', () => {
+                const lower = new NoStringInt64('-9223372036854775808')
+                const upper = new NoStringInt64('9223372036854775807')
+
+                try {
+                    serialize(lower, upper)
+                } catch (e) {
+                    expect(e).to.be.an.instanceOf(TypeError)
+                    return
+                }
+                fail('Error expected')
+            })
         })
 
-        it('should deserialize', () => {
-            deserialize(
-                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
-                '-9223372036854775808',
-                '9223372036854775807',
-            )
-        })
+        describe('with BigInt', () => {
+            it('should serialize', () => {
+                const lower = BigInt('-9223372036854775808')
+                const upper = BigInt('9223372036854775807')
 
-        it('should handle Int64 with offset', () => {
-            // Use one buffer but two different offsets.
-            // Also checks that only the expected 8 bytes are used.
-            const buffer = Buffer.alloc(10)
-            buffer.writeUInt8(1, 0)
-            buffer.writeUInt8(2, 9)
-            const lower = new Int64(buffer, 2)
-            const upper = new Int64(buffer, 0)
+                expect(serialize(lower, upper)).to.equal(
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                )
+            })
 
-            const expected =
-                '8001000100000006676574493634000000010c00010a000100000000000000020a000200000000000000000a000301000000000000000000'
-            expect(serialize(lower, upper)).to.equal(expected)
-            deserialize(expected, '2', '72057594037927936')
-        })
-
-        it('should pad short Int64', () => {
-            // Fewer than 8 bytes. Offset greater than the length.
-            const buffer = Buffer.alloc(6)
-            buffer.writeUInt8(1, 0)
-            const lower = new Int64(buffer, 10)
-            const upper = new Int64(buffer)
-
-            const expected =
-                '8001000100000006676574493634000000010c00010a000100000000000000000a000200000000000000000a000300000100000000000000'
-            expect(serialize(lower, upper)).to.equal(expected)
-            deserialize(expected, '0', '1099511627776')
-        })
-
-        it('should serialize string', () => {
-            const lower = '-9223372036854775808'
-            const upper = '9223372036854775807'
-
-            expect(serialize(lower, upper)).to.equal(
-                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
-            )
-        })
-
-        it('should serialize number', () => {
-            const lower = -123
-            const upper = 123
-
-            const expected =
-                '8001000100000006676574493634000000010c00010a0001ffffffffffffff850a000200000000000000000a0003000000000000007b0000'
-            expect(serialize(lower, upper)).to.equal(expected)
-            deserialize(expected, '-123', '123')
-        })
-
-        it('should serialize Int64-like object', () => {
-            const lower = new LikeInt64('-9223372036854775808')
-            const upper = new LikeInt64('9223372036854775807')
-
-            expect(serialize(lower, upper)).to.equal(
-                '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
-            )
-        })
-
-        it('should error if no buffer', () => {
-            const lower = new NoBufferInt64('-9223372036854775808')
-            const upper = new NoBufferInt64('9223372036854775807')
-
-            try {
-                serialize(lower, upper)
-            } catch (e) {
-                expect(e).to.be.an.instanceOf(TypeError)
-                return
-            }
-            fail('Error expected')
-        })
-
-        it('should error if buffer length < 8', () => {
-            const lower = new Int56('-9223372036854775808')
-            const upper = new Int56('9223372036854775807')
-
-            try {
-                serialize(lower, upper)
-            } catch (e) {
-                expect(e).to.be.an.instanceOf(TypeError)
-                return
-            }
-            fail('Error expected')
-        })
-
-        it('should error if buffer length > 8', () => {
-            const lower = new Int72('-9223372036854775808')
-            const upper = new Int72('9223372036854775807')
-
-            try {
-                serialize(lower, upper)
-            } catch (e) {
-                expect(e).to.be.an.instanceOf(TypeError)
-                return
-            }
-            fail('Error expected')
-        })
-
-        it('should error if no toDecimalString()', () => {
-            const lower = new NoStringInt64('-9223372036854775808')
-            const upper = new NoStringInt64('9223372036854775807')
-
-            try {
-                serialize(lower, upper)
-            } catch (e) {
-                expect(e).to.be.an.instanceOf(TypeError)
-                return
-            }
-            fail('Error expected')
+            it('should deserialize', () => {
+                deserialize(
+                    'bigint',
+                    '8001000100000006676574493634000000010c00010a000180000000000000000a000200000000000000000a00037fffffffffffffff0000',
+                    '-9223372036854775808',
+                    '9223372036854775807',
+                )
+            })
         })
     })
 
