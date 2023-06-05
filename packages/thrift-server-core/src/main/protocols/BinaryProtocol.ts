@@ -26,7 +26,8 @@ import {
 } from '../types'
 
 import { defaultLogger } from '../logger'
-import { TProtocol } from './TProtocol'
+import { I64Type, TProtocol } from './TProtocol'
+import { assertBigIntRange } from './utils'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
 // The largest integer value which can be represented in JavaScript is +/-2^53.
@@ -148,6 +149,7 @@ export class BinaryProtocol extends TProtocol {
         }
 
         if (typeof i64 === 'bigint') {
+            assertBigIntRange(i64)
             const buf = Buffer.alloc(8)
             buf.writeBigInt64BE(i64)
             this.transport.write(buf)
@@ -289,7 +291,7 @@ export class BinaryProtocol extends TProtocol {
 
     public readI64(type?: 'int64'): Int64
     public readI64(type: 'bigint'): bigint
-    public readI64(type: 'int64' | 'bigint' = 'int64'): bigint | Int64 {
+    public readI64(type?: I64Type): bigint | Int64 {
         const buff = this.transport.read(8)
         if (type === 'int64') {
             return new Int64(buff)

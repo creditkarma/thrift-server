@@ -26,7 +26,8 @@ import {
     TType,
 } from '../types'
 
-import { TProtocol } from './TProtocol'
+import { I64Type, TProtocol } from './TProtocol'
+import { assertBigIntRange } from './utils'
 
 // Compact Protocol ID number.
 const PROTOCOL_ID = -126 // 1000 0010
@@ -496,7 +497,7 @@ export class CompactProtocol extends TProtocol {
 
     public readI64(type?: 'int64'): Int64
     public readI64(type: 'bigint'): bigint
-    public readI64(type?: 'int64' | 'bigint'): bigint | Int64 {
+    public readI64(type: I64Type = 'int64'): bigint | Int64 {
         return this.zigzagToI64(this.readVarint64(type as any))
     }
 
@@ -672,9 +673,9 @@ export class CompactProtocol extends TProtocol {
      * Read an i64 from the wire as a proper varint. The MSB of each byte is set
      * if there is another byte to follow. This can read up to 10 bytes.
      */
-    private readVarint64(type: 'int64'): Int64
+    private readVarint64(type?: 'int64'): Int64
     private readVarint64(type: 'bigint'): bigint
-    private readVarint64(type: 'bigint' | 'int64'): bigint | Int64 {
+    private readVarint64(type: I64Type = 'int64'): bigint | Int64 {
         let rsize: number = 0
         let lo: number = 0
         let hi: number = 0
@@ -814,13 +815,13 @@ export class CompactProtocol extends TProtocol {
      * https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba
      * https://www.educative.io/answers/what-is-the-bufferwritebigint64be-method-in-nodejs
      */
-    private i64ToZigzag(i64: number | string | IInt64 | bigint): Int64 {
+    private i64ToZigzag(i64: number | string | bigint | IInt64): Int64 {
         if (typeof i64 === 'string') {
             i64 = Int64.fromDecimalString(i64)
         } else if (typeof i64 === 'number') {
             i64 = new Int64(i64)
         } else if (typeof i64 === 'bigint') {
-            // TODO: Validate bigint size
+            assertBigIntRange(i64)
             const buf = Buffer.alloc(8)
             buf.writeBigInt64BE(i64)
             i64 = new Int64(buf)
