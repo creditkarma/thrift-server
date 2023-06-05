@@ -293,10 +293,10 @@ export class BinaryProtocol extends TProtocol {
     public readI64(type: 'bigint'): bigint
     public readI64(type?: I64Type): bigint | Int64 {
         const buff = this.transport.read(8)
-        if (type === 'int64') {
-            return new Int64(buff)
-        } else {
+        if (type === 'bigint') {
             return buff.readBigInt64BE()
+        } else {
+            return new Int64(buff)
         }
     }
 
