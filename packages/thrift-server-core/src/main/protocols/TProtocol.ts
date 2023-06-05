@@ -118,9 +118,9 @@ export abstract class TProtocol {
 
     public abstract readI32(): number
 
-    public abstract readI64<T extends I64Type = 'int64'>(
-        type?: T,
-    ): T extends 'bigint' ? bigint : Int64
+    public abstract readI64(type?: 'int64'): Int64
+    public abstract readI64(type: 'bigint'): bigint
+    public abstract readI64(type?: I64Type): bigint | Int64
 
     public abstract readDouble(): number
 
