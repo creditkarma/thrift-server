@@ -26,7 +26,7 @@ import {
 } from '../types'
 
 import { defaultLogger } from '../logger'
-import { TProtocol } from './TProtocol'
+import { I64Type, TProtocol } from './TProtocol'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
 // The largest integer value which can be represented in JavaScript is +/-2^53.
@@ -140,18 +140,23 @@ export class BinaryProtocol extends TProtocol {
         }
     }
 
-    public writeI64(i64: number | string | IInt64): void {
+    public writeI64(i64: number | string | bigint | IInt64): void {
         if (typeof i64 === 'number') {
             i64 = new Int64(i64)
         } else if (typeof i64 === 'string') {
             i64 = Int64.fromDecimalString(i64)
         }
 
-        if (isInt64(i64)) {
+        if (typeof i64 === 'bigint') {
+            Int64.assert64BitRange(i64)
+            const buf = Buffer.alloc(8)
+            buf.writeBigInt64BE(i64)
+            this.transport.write(buf)
+        } else if (isInt64(i64)) {
             this.transport.write(i64.buffer)
         } else {
             throw new TypeError(
-                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
+                `Expected Int64, BigInt, number, or decimal string but found type ${typeof i64}`,
             )
         }
     }
@@ -283,9 +288,15 @@ export class BinaryProtocol extends TProtocol {
         return this.transport.readI32()
     }
 
-    public readI64(): Int64 {
+    public readI64(type?: 'int64'): Int64
+    public readI64(type: 'bigint'): bigint
+    public readI64(type?: I64Type): bigint | Int64 {
         const buff = this.transport.read(8)
-        return new Int64(buff)
+        if (type === 'bigint') {
+            return buff.readBigInt64BE()
+        } else {
+            return new Int64(buff)
+        }
     }
 
     public readDouble(): number {

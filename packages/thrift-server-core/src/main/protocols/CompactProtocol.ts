@@ -26,7 +26,7 @@ import {
     TType,
 } from '../types'
 
-import { TProtocol } from './TProtocol'
+import { I64Type, TProtocol } from './TProtocol'
 
 // Compact Protocol ID number.
 const PROTOCOL_ID = -126 // 1000 0010
@@ -281,7 +281,7 @@ export class CompactProtocol extends TProtocol {
         this.writeVarint32(this.i32ToZigzag(i32))
     }
 
-    public writeI64(i64: number | string | IInt64): void {
+    public writeI64(i64: number | string | bigint | IInt64): void {
         this.writeVarint64(this.i64ToZigzag(i64))
     }
 
@@ -494,8 +494,10 @@ export class CompactProtocol extends TProtocol {
         return this.zigzagToI32(this.readVarint32())
     }
 
-    public readI64(): Int64 {
-        return this.zigzagToI64(this.readVarint64())
+    public readI64(type?: 'int64'): Int64
+    public readI64(type: 'bigint'): bigint
+    public readI64(type: I64Type = 'int64'): bigint | Int64 {
+        return this.zigzagToI64(this.readVarint64(type as any))
     }
 
     // Little-endian, unlike TBinaryProtocol
@@ -617,22 +619,45 @@ export class CompactProtocol extends TProtocol {
         return (i32 >>> 1) ^ (-1 * (i32 & 1))
     }
 
+    private bufferForBigInt(i64: bigint): Buffer {
+        const buf = Buffer.alloc(8)
+        buf.writeBigInt64BE(i64)
+        return buf
+    }
+
+    private bigIntFromLowAndHi(lo: number, hi: number): bigint {
+        const _lo = BigInt.asUintN(32, BigInt(lo))
+        const _hi = BigInt.asUintN(32, BigInt(hi))
+        const combined: bigint = (_hi << 32n) | _lo
+        return BigInt.asIntN(64, combined)
+    }
+
     /**
      * Convert from zigzag long to long.
      */
-    private zigzagToI64(i64: Int64): Int64 {
-        let hi = i64.buffer.readUInt32BE(0)
-        let lo = i64.buffer.readUInt32BE(4)
+    private zigzagToI64(i64: Int64): Int64
+    private zigzagToI64(i64: bigint): bigint
+    private zigzagToI64(i64: Int64 | bigint): Int64 | bigint {
+        const buffer =
+            typeof i64 === 'bigint' ? this.bufferForBigInt(i64) : i64.buffer
+
+        let hi = buffer.readUInt32BE(0)
+        let lo = buffer.readUInt32BE(4)
+        const lowBit = buffer.readUInt8(7) & 0x01
 
         // Gets the 2's compliment hi and lo bytes for i64 & 0x01.
         // The possible results are 0 or -1.
-        const lowBit = i64.buffer.readUInt8(7) & 0x01
         const mask = lowBit ? 0xffffffff : 0
 
         const hiLo = hi << 31
         hi = (hi >>> 1) ^ mask
         lo = ((lo >>> 1) | hiLo) ^ mask
-        return new Int64(hi, lo)
+
+        if (typeof i64 === 'bigint') {
+            return this.bigIntFromLowAndHi(lo, hi)
+        } else {
+            return new Int64(hi, lo)
+        }
     }
 
     /**
@@ -640,14 +665,16 @@ export class CompactProtocol extends TProtocol {
      * if there is another byte to follow. This can read up to 5 bytes.
      */
     private readVarint32(): number {
-        return this.readVarint64().toNumber()
+        return this.readVarint64('int64').toNumber()
     }
 
     /**
      * Read an i64 from the wire as a proper varint. The MSB of each byte is set
      * if there is another byte to follow. This can read up to 10 bytes.
      */
-    private readVarint64(): Int64 {
+    private readVarint64(type?: 'int64'): Int64
+    private readVarint64(type: 'bigint'): bigint
+    private readVarint64(type: I64Type = 'int64'): bigint | Int64 {
         let rsize: number = 0
         let lo: number = 0
         let hi: number = 0
@@ -680,7 +707,11 @@ export class CompactProtocol extends TProtocol {
             }
         }
 
-        return new Int64(hi, lo)
+        if (type === 'bigint') {
+            return this.bigIntFromLowAndHi(lo, hi)
+        } else {
+            return new Int64(hi, lo)
+        }
     }
 
     private writeFieldBeginInternal(
@@ -779,12 +810,20 @@ export class CompactProtocol extends TProtocol {
     /**
      * Convert l into a zigzag long. This allows negative numbers to be
      * represented compactly as a varint.
+     * http://neurocline.github.io/dev/2015/09/17/zig-zag-encoding.html
+     * https://gist.github.com/mfuerstenau/ba870a29e16536fdbaba
+     * https://www.educative.io/answers/what-is-the-bufferwritebigint64be-method-in-nodejs
      */
-    private i64ToZigzag(i64: number | string | IInt64): Int64 {
+    private i64ToZigzag(i64: number | string | bigint | IInt64): Int64 {
         if (typeof i64 === 'string') {
             i64 = Int64.fromDecimalString(i64)
         } else if (typeof i64 === 'number') {
             i64 = new Int64(i64)
+        } else if (typeof i64 === 'bigint') {
+            Int64.assert64BitRange(i64)
+            const buf = Buffer.alloc(8)
+            buf.writeBigInt64BE(i64)
+            i64 = new Int64(buf)
         }
 
         if (!isInt64(i64)) {

@@ -23,7 +23,7 @@ import {
 } from '../types'
 
 import { parseJson } from '../parseJson'
-import { TProtocol } from './TProtocol'
+import { I64Type, TProtocol } from './TProtocol'
 
 export class JSONProtocol extends TProtocol {
     private static readonly version = 1
@@ -224,17 +224,20 @@ export class JSONProtocol extends TProtocol {
         this.tstack.push(i32)
     }
 
-    public writeI64(i64: number | string | IInt64) {
+    public writeI64(i64: number | string | bigint | IInt64) {
         if (typeof i64 === 'number') {
             this.tstack.push(i64)
         } else if (typeof i64 === 'string') {
             // Do not pass through non-numeric strings.
             this.tstack.push(Int64.fromDecimalString(i64).toDecimalString())
+        } else if (typeof i64 === 'bigint') {
+            Int64.assert64BitRange(i64)
+            this.tstack.push(i64.toString())
         } else if (isInt64(i64)) {
             this.tstack.push(i64.toDecimalString())
         } else {
             throw new TypeError(
-                `Expected Int64, number, or decimal string but found type ${typeof i64}`,
+                `Expected Int64, BigInt, number, or decimal string but found type ${typeof i64}`,
             )
         }
     }
@@ -480,8 +483,14 @@ export class JSONProtocol extends TProtocol {
         return parseInt(this.readValue(), 10)
     }
 
-    public readI64(): Int64 {
-        return Int64.fromDecimalString(`${this.readValue()}`)
+    public readI64(type?: 'int64'): Int64
+    public readI64(type: 'bigint'): bigint
+    public readI64(type: I64Type = 'int64'): bigint | Int64 {
+        if (type === 'bigint') {
+            return BigInt(`${this.readValue()}`)
+        } else {
+            return Int64.fromDecimalString(`${this.readValue()}`)
+        }
     }
 
     public readDouble() {

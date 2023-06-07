@@ -1,6 +1,6 @@
 {
     "name": "@creditkarma/zipkin-core",
-    "version": "1.0.4",
+    "version": "1.1.0-alpha.1",
     "description": "Shared utilities for Zipkin support in thrift-server packages",
     "main": "dist/main/index.js",
     "types": "dist/main/index.d.ts",
@@ -27,7 +27,7 @@
         "@creditkarma/thrift-server-core": "^1.0.0"
     },
     "devDependencies": {
-        "@creditkarma/thrift-server-core": "^1.0.4",
+        "@creditkarma/thrift-server-core": "^1.1.0-alpha.1",
         "@hapi/code": "^8.0.7",
         "@hapi/lab": "^25.0.1",
         "@types/hapi__code": "^8.0.1",

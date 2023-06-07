@@ -247,12 +247,29 @@ export class Int64 implements IInt64 {
     // Min integer value that JS can accurately represent
     public static MIN_INT: number = -Math.pow(2, 53)
 
+    public static MAX_64_BIT_INTEGER = 9_223_372_036_854_775_807n
+    public static MIN_64_BIT_INTEGER = -9_223_372_036_854_775_808n
+
+    public static assert64BitRange(num: bigint): void {
+        if (num > Int64.MAX_64_BIT_INTEGER || num < Int64.MIN_64_BIT_INTEGER) {
+            throw new Error(`BigInt is outside the 64 bit range`)
+        }
+    }
+
     public static toDecimalString(i64: Int64 | number): string {
         if (typeof i64 === 'number') {
             return `${i64}`
         } else {
             return i64.toDecimalString()
         }
+    }
+
+    public static fromBigInt(value: bigint): Int64 {
+        // Throws error if `value` outside of 64 bit range
+        Int64.assert64BitRange(value)
+        const buf = Buffer.alloc(8)
+        buf.writeBigInt64BE(value)
+        return new Int64(buf)
     }
 
     public static fromDecimalString(text: string): Int64 {
@@ -339,6 +356,10 @@ export class Int64 implements IInt64 {
         }
 
         this.setHiLo({ hi, lo })
+    }
+
+    public toBigInt(): bigint {
+        return this.buffer.readBigInt64BE()
     }
 
     /** @inheritDoc */
@@ -593,7 +614,7 @@ export class Int64 implements IInt64 {
  *
  * @param i64  64-bit integer
  */
-export function isInt64(i64: number | string | IInt64): i64 is IInt64 {
+export function isInt64(i64: number | string | bigint | IInt64): i64 is IInt64 {
     return (
         i64 instanceof Int64 ||
         (typeof i64 === 'object' &&

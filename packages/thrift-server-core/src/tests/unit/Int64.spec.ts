@@ -11,6 +11,7 @@ const it = lab.it
 
 describe('Int64', () => {
     const TEST_STRING: string = '9837756439'
+    const TEST_BIG_INT: bigint = 9837756439n
     const TOO_LARGE: string = '999999999999999999999999999999'
     const TEST_BUFFER = Buffer.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
@@ -74,6 +75,17 @@ describe('Int64', () => {
 
         it('should throw if the decimal string is too large for Int64', async () => {
             expect(() => Int64.fromDecimalString(TOO_LARGE)).to.throw()
+        })
+    })
+
+    describe('static fromBigInt', () => {
+        it('should correctly create Int64 from bigint', async () => {
+            const i64 = Int64.fromBigInt(TEST_BIG_INT)
+            expect(i64.toDecimalString()).to.equal(TEST_BIG_INT.toString())
+        })
+
+        it('should throw if the bigint is too large for Int64', async () => {
+            expect(() => Int64.fromBigInt(BigInt(TOO_LARGE))).to.throw()
         })
     })
 
@@ -331,6 +343,14 @@ describe('Int64', () => {
                 0x07,
                 0x80,
             ])
+        })
+    })
+
+    describe('toBigInt', () => {
+        it('should correctly create a bigint', () => {
+            const i64 = Int64.fromDecimalString(TEST_STRING)
+            const bi = i64.toBigInt()
+            expect(bi.toString()).to.equal(TEST_STRING)
         })
     })
 
