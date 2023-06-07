@@ -27,7 +27,7 @@ import {
 
 import { defaultLogger } from '../logger'
 import { I64Type, TProtocol } from './TProtocol'
-import { assertBigIntRange } from './utils'
+import { assertBigIntRange } from '../utils'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
 // The largest integer value which can be represented in JavaScript is +/-2^53.

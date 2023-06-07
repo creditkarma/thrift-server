@@ -27,7 +27,7 @@ import {
 } from '../types'
 
 import { I64Type, TProtocol } from './TProtocol'
-import { assertBigIntRange } from './utils'
+import { assertBigIntRange } from '../utils'
 
 // Compact Protocol ID number.
 const PROTOCOL_ID = -126 // 1000 0010

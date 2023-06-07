@@ -24,7 +24,7 @@ import {
 
 import { parseJson } from '../parseJson'
 import { I64Type, TProtocol } from './TProtocol'
-import { assertBigIntRange } from './utils'
+import { assertBigIntRange } from '../utils'
 
 export class JSONProtocol extends TProtocol {
     private static readonly version = 1

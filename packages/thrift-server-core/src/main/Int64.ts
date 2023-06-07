@@ -1,3 +1,5 @@
+import { assertBigIntRange } from "./utils"
+
 /**
  * This implementation is largely taken a combination of two exiting libraries:
  * 1. node-int64
@@ -256,6 +258,8 @@ export class Int64 implements IInt64 {
     }
 
     public static fromBigInt(value: bigint): Int64 {
+        // Throws error if `value` outside of 64 bit range
+        assertBigIntRange(value)
         const buf = Buffer.alloc(8)
         buf.writeBigInt64BE(value)
         return new Int64(buf)
