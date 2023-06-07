@@ -1,4 +1,4 @@
-import { assertBigIntRange } from "./utils"
+import { assertBigIntRange } from './utils'
 
 /**
  * This implementation is largely taken a combination of two exiting libraries:
