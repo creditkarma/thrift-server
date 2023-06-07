@@ -255,6 +255,12 @@ export class Int64 implements IInt64 {
         }
     }
 
+    public static fromBigInt(value: bigint): Int64 {
+        const buf = Buffer.alloc(8)
+        buf.writeBigInt64BE(value)
+        return new Int64(buf)
+    }
+
     public static fromDecimalString(text: string): Int64 {
         const negative: boolean = text.charAt(0) === '-'
 
@@ -339,6 +345,10 @@ export class Int64 implements IInt64 {
         }
 
         this.setHiLo({ hi, lo })
+    }
+
+    public toBigInt(): bigint {
+        return this.buffer.readBigInt64BE()
     }
 
     /** @inheritDoc */
