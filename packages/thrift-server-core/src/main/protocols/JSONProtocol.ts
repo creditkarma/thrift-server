@@ -23,7 +23,6 @@ import {
 } from '../types'
 
 import { parseJson } from '../parseJson'
-import { assertBigIntRange } from '../utils'
 import { I64Type, TProtocol } from './TProtocol'
 
 export class JSONProtocol extends TProtocol {
@@ -232,7 +231,7 @@ export class JSONProtocol extends TProtocol {
             // Do not pass through non-numeric strings.
             this.tstack.push(Int64.fromDecimalString(i64).toDecimalString())
         } else if (typeof i64 === 'bigint') {
-            assertBigIntRange(i64)
+            Int64.assert64BitRange(i64)
             this.tstack.push(i64.toString())
         } else if (isInt64(i64)) {
             this.tstack.push(i64.toDecimalString())

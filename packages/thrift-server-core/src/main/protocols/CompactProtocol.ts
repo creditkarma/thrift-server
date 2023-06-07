@@ -26,7 +26,6 @@ import {
     TType,
 } from '../types'
 
-import { assertBigIntRange } from '../utils'
 import { I64Type, TProtocol } from './TProtocol'
 
 // Compact Protocol ID number.
@@ -821,7 +820,7 @@ export class CompactProtocol extends TProtocol {
         } else if (typeof i64 === 'number') {
             i64 = new Int64(i64)
         } else if (typeof i64 === 'bigint') {
-            assertBigIntRange(i64)
+            Int64.assert64BitRange(i64)
             const buf = Buffer.alloc(8)
             buf.writeBigInt64BE(i64)
             i64 = new Int64(buf)

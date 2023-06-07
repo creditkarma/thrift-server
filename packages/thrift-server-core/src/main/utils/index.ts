@@ -2,7 +2,6 @@ import merge = require('lodash/merge')
 import * as url from 'url'
 
 export * from './appendThriftObject'
-export * from './assertBigIntRange'
 export * from './readThriftObject'
 export * from './readThriftMetadata'
 export * from './normalizePath'

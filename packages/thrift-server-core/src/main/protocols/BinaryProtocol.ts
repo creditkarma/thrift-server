@@ -26,7 +26,6 @@ import {
 } from '../types'
 
 import { defaultLogger } from '../logger'
-import { assertBigIntRange } from '../utils'
 import { I64Type, TProtocol } from './TProtocol'
 
 // JavaScript supports only numeric doubles, therefore even hex values are always signed.
@@ -149,7 +148,7 @@ export class BinaryProtocol extends TProtocol {
         }
 
         if (typeof i64 === 'bigint') {
-            assertBigIntRange(i64)
+            Int64.assert64BitRange(i64)
             const buf = Buffer.alloc(8)
             buf.writeBigInt64BE(i64)
             this.transport.write(buf)

@@ -1,5 +1,3 @@
-import { assertBigIntRange } from './utils'
-
 /**
  * This implementation is largely taken a combination of two exiting libraries:
  * 1. node-int64
@@ -249,6 +247,15 @@ export class Int64 implements IInt64 {
     // Min integer value that JS can accurately represent
     public static MIN_INT: number = -Math.pow(2, 53)
 
+    public static MAX_64_BIT_INTEGER = 9_223_372_036_854_775_807n
+    public static MIN_64_BIT_INTEGER = -9_223_372_036_854_775_808n
+
+    public static assert64BitRange(num: bigint): void {
+        if (num > Int64.MAX_64_BIT_INTEGER || num < Int64.MIN_64_BIT_INTEGER) {
+            throw new Error(`BigInt is outside the 64 bit range`)
+        }
+    }
+
     public static toDecimalString(i64: Int64 | number): string {
         if (typeof i64 === 'number') {
             return `${i64}`
@@ -259,7 +266,7 @@ export class Int64 implements IInt64 {
 
     public static fromBigInt(value: bigint): Int64 {
         // Throws error if `value` outside of 64 bit range
-        assertBigIntRange(value)
+        Int64.assert64BitRange(value)
         const buf = Buffer.alloc(8)
         buf.writeBigInt64BE(value)
         return new Int64(buf)
