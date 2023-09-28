@@ -19,7 +19,7 @@ typedef shared.SHARED_INT COMMON_INT
 
 exception AuthException {
   1: i32 code
-  2: string message
+  2: string msg
 }
 
 struct Metadata {
