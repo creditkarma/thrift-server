@@ -489,7 +489,8 @@ export class JSONProtocol extends TProtocol {
     }
 
     public readBinary() {
-        return Buffer.alloc(this.readValue(), 'base64')
+        const value = this.readValue()
+        return Buffer.alloc(value.length, value, 'base64')
     }
 
     public readString() {
